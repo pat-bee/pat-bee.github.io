@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AIDB</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .search-box {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .radio-buttons {
+            text-align: center;
+        }
+        .radio-buttons label {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AIDB</h1>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search...">
+        </div>
+        <div class="radio-buttons">
+            <label><input type="radio" name="category" value="audio"> Audio</label>
+            <label><input type="radio" name="category" value="automation"> Automation</label>
+            <!-- Add all other categories in a similar fashion -->
+            <!-- ... -->
+            <label><input type="radio" name="category" value="words-toolkit"> Words-Toolkit</label>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code to handle search and integration with Google Sheets will go here
+    </script>
+</body>
+</html>
