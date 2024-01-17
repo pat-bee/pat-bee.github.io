@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello World</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+  .header {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .image-placeholder {
+    width: 200px;
+    height: 200px;
+    background: grey;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: block;
+    background-image: url('BONGODONGO');
+    background-size: cover;
+    background-position: center;
+  }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .nav div {
+    flex: 1 1 30%;
+    margin: 5px;
+    text-align: center;
+    padding: 20px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+  }
+  .nav div:hover {
+    box-shadow: 0px 8px 15px rgba(0,0, 0, 0, 0.1);
+  }
+  .footer {
+    text-align: center;
+    padding: 20px 0;
+    background: #f0f0f0;
+    margin-top: 20px;
+  }
+
+  /* Media Queries for Responsiveness */
+  @media (max-width: 768px) {
+    .nav div {
+      /* Full width on smaller screens */
+      flex: 0 0 100%;
+      margin: 10px 0;
+    }
+    .image-placeholder {
+      width: 150px;
+      height: 150px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 10px;
+    }
+    .header {
+      padding: 10px 0;
+    }
+    .image-placeholder {
+      width: 120px;
+      height: 120px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <h1>Hello World</h1>
+    <p>Pat B. here and I'm glad you found this bit of the WWW</p>
+  </header>
+
+  <div class="image-placeholder">
+    <!-- BONGODONGO: Replace with actual image URL -->
+  </div>
+
+  <nav class="nav">
+    <div id="designs">
+      <h2>Designs</h2>
+      BONGODONGO
+    </div>
+    <div id="projects">
+      <h2>Projects</h2>
+      BONGODONGO
+    </div>
+    <div id="other-stuff">
+      <h2>Other Stuff</h2>
+      BONGODONGO
+    </div>
+  </nav>
+
+  <footer class="footer">
+    BONGODONGO
+  </footer>
+</div>
+
+</body>
+</html>
+    
+    
