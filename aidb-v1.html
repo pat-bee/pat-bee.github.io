@@ -22,7 +22,7 @@
 
         function search() {
             var searchTerm = $('#searchInput').val().trim().toLowerCase();
-            $.get('https://docs.google.com/spreadsheets/d/e/1h8rbA6HuBLn2jmifp3Nh4ashudxIVKs_Bfl5X4XRJ2M/pub?output=csv')
+            $.get('https://docs.google.com/spreadsheets/d/e/{1h8rbA6HuBLn2jmifp3Nh4ashudxIVKs_Bfl5X4XRJ2M}/pub?output=csv')
                 .done(function (data) {
                     var rows = Papa.parse(data, { header: true }).data;
                     var filteredRows = rows.filter(function (row) {
