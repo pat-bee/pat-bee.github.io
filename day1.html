@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monday</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="script.js"></script> <!-- Link to the external JavaScript file handling the logic -->
+</head>
+<body>
+    <header>
+        <h1>Monday</h1>
+    </header>
+    
+    <section>
+        <label for="generalNotes">General Notes:</label>
+        <textarea id="generalNotes" rows="5" cols="33" placeholder="Enter your notes here..."></textarea>
+    </section>
+    
+    <section>
+        <h2>To-Do Items</h2>
+        <ul id="todoList"></ul>
+        <button id="saveButton">Save Changes</button>
+    </section>
+    
+    <section id="categories">
+        <div class="category">
+            <label for="iDid4Me">I Did for ME:</label>
+            <input type="text" id="iDid4Me" placeholder="What did you do for yourself today?">
+            <ul id="iDid4MeList"></ul>
+        </div>
+        
+        <div class="category">
+            <label for="happyFace">Happy Face:</label>
+            <input type="text" id="happyFace" placeholder="What made you happy today?">
+            <ul id="happyFaceList"></ul>
+        </div>
+        
+        <div class="category">
+            <label for="sadFace">Sad Face:</label>
+            <input type="text" id="sadFace" placeholder="What made you sad today?">
+            <ul id="sadFaceList"></ul>
+        </div>
+        
+        <div class="category">
+            <label for="poetry">Poetry:</label>
+            <input type="text" id="poetry" placeholder="Share a line of poetry">
+            <ul id="poetryList"></ul>
+        </div>
+        
+        <div class="category">
+            <label for="therapy">Therapy:</label>
+            <input type="text" id="therapy" placeholder="Therapeutic thoughts or actions today">
+            <ul id="therapyList"></ul>
+        </div>
+        
+        <div class="category">
+            <label for="notes">Notes:</label>
+            <input type="text" id="notes" placeholder="Other notes">
+            <ul id="notesList"></ul>
+        </div>
+    </section>
+
+</body>
+</html>
