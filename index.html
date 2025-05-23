@@ -6,56 +6,56 @@
 <title>My Portfolio</title>
 <style>
     :root{
-        /* Palette */
-        --shade0:#1F2428; /* darkest */
-        --shade1:#454042;
-        --shade2:#675B61;
-        --shade3:#7B6A6E;
-        --shade4:#9A8889; /* lightest */
+        --bg-page:#F7F9FE;
+        --tone0:#ECF1F2; /* lightest */
+        --tone1:#DCE8EB;
+        --tone2:#CBDBE0;
+        --tone3:#BED2D9; /* darkest accent */
+        --text-dark:#2B2B2B;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
         font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-        background:var(--shade0);
-        color:var(--shade4);
+        background:var(--bg-page);
+        color:var(--text-dark);
         line-height:1.6;
     }
-    a{color:var(--shade3);text-decoration:none;}
-    a:hover,a:focus{color:var(--shade4);}
+    a{color:var(--tone3);text-decoration:none;}
+    a:hover,a:focus{color:var(--text-dark);}
 
     /* Header */
     header{
-        background:var(--shade1);
+        background:var(--tone2);
         padding:60px 20px 40px;
         text-align:center;
+        box-shadow:0 1px 8px rgba(0,0,0,.05);
     }
     .profile-pic{
         width:160px;height:160px;border-radius:50%;
         object-fit:cover;
-        border:4px solid var(--shade2);
-        box-shadow:0 4px 10px rgba(0,0,0,.4);
+        border:4px solid var(--tone3);
+        box-shadow:0 4px 10px rgba(0,0,0,.1);
     }
     .bio{max-width:700px;margin:20px auto 0;}
-    .bio h1{color:var(--shade4);margin-bottom:10px;}
+    .bio h1{margin:15px 0;color:var(--text-dark);}
 
-    /* Nav */
+    /* Navigation */
     nav{
-        background:var(--shade0);
+        background:var(--tone0);
         position:sticky;top:0;z-index:100;
-        box-shadow:0 1px 6px rgba(0,0,0,.5);
+        box-shadow:0 1px 6px rgba(0,0,0,.04);
     }
     nav ul{
         list-style:none;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;
-        padding:10px 20px;
+        padding:12px 20px;
     }
-    nav li{ }
     nav a{font-weight:600;}
 
     /* Sections */
     section{padding:60px 20px;}
-    section:nth-of-type(even){background:var(--shade1);}
+    section:nth-of-type(even){background:var(--tone1);}
     section h2{
-        text-align:center;margin-bottom:40px;color:var(--shade4);
+        text-align:center;margin-bottom:40px;color:var(--text-dark);
     }
     .content{
         max-width:1000px;margin:0 auto;
@@ -63,18 +63,17 @@
         grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     }
     .item{
-        background:var(--shade2);
+        background:var(--tone0);
         padding:15px;border-radius:8px;
-        box-shadow:0 1px 4px rgba(0,0,0,.3);
+        box-shadow:0 1px 4px rgba(0,0,0,.05);
         text-align:center;
-        color:var(--shade4);
     }
     .item img{width:100%;border-radius:8px;}
 
     /* Footer */
     footer{
-        background:var(--shade1);
-        color:var(--shade4);
+        background:var(--tone2);
+        color:var(--text-dark);
         text-align:center;
         padding:30px 20px;
     }
@@ -86,7 +85,7 @@
     <img class="profile-pic" src="profile.jpg" alt="Profile Picture">
     <div class="bio">
         <h1>Your Name</h1>
-        <p>Replace this paragraph with your own bio. It will appear in light text on a dark background.</p>
+        <p>Replace this paragraph with your own bio. It will appear with a light, clean background.</p>
     </div>
 </header>
 <nav>
@@ -154,6 +153,6 @@
 <footer>
     &copy; <span id="year"></span> Your Name • All Rights Reserved
 </footer>
-<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
 </body>
 </html>
