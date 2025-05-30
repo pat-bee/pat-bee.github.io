@@ -80,6 +80,24 @@
         padding:30px 20px;
     }
     @media(max-width:500px){.profile-pic{width:120px;height:120px;}}
+    .image-container {
+      display: flex;
+      gap: 10px; /* Space between images */
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .image-container img {
+      width: 303px;
+    }
+
+    @media (max-width: 960px) {
+      .image-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+    
 </style>
 </head>
 <body>
@@ -135,7 +153,11 @@ When I’m not caluclating audience reactions, you’ll find me petting every pe
         <h2>Graphic Design</h2>
         <div class="content">
             <div class="item">
-                <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Design Mockup">
+\                <div class="image-container">
+                  <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Design Mockup 1">
+                  <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Design Mockup 2">
+                  <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Design Mockup 3">
+                </div>
                 <p>Description of the graphic design work.</p>
             </div>
         </div>
