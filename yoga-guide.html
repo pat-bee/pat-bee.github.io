@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Yoga Sequence Guide</title>
+    <style>
+        /* General styling for older iPad readability */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #ffffff;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Main pose list container for scrolling */
+        #pose-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            /* Space for the footer, adjusted for height without buttons */
+            bottom: 180px; 
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* Pose list styling */
+        #pose-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            min-height: 100%;
+            padding-bottom: 50vh; 
+            box-sizing: border-box;
+            will-change: transform;
+        }
+
+        #pose-list li {
+            font-size: 48px;
+            line-height: 1.5;
+            padding: 15px 0;
+            border-bottom: 1px solid #333333;
+            text-align: center;
+        }
+        
+        /* Star styling for skippable poses */
+        .skippable::before {
+            content: "\2605 ";
+            color: yellow;
+        }
+
+
+        /* Fixed Footer for Timer (Simplified) */
+        #footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 180px; /* Reduced height as no buttons are present */
+            background-color: #111;
+            color: white;
+            display: flex;
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 -2px 10px rgba(255, 255, 255, 0.2); 
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Timer display container */
+        #timer-wrapper {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            width: 100%; /* Take full width for centering */
+            line-height: 1; 
+        }
+
+        /* Main Time display (MM:SS) */
+        #timer-main {
+            font-size: 160px;
+            color: red; 
+            font-weight: bold;
+            font-family: monospace;
+            margin: 0;
+            line-height: 1;
+            text-align: right;
+        }
+
+        /* Milliseconds display (.MS) */
+        #timer-ms {
+            font-size: 70px;
+            color: red;
+            font-weight: bold;
+            font-family: monospace;
+            margin-left: 5px;
+            line-height: 1.4;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pose-container">
+        <ul id="pose-list">
+            <li>Easy Crossed Legged Seat</li>
+            <li>Meditation</li>
+            <li>Neck and Shoulder Stretches: To the RIGHT, CENTER, To the LEFT</li>
+            <li>Tabletop into Cat/Cow</li>
+            <li>Sunbird 3x Right Crunch, 3x Left Crunch </li>
+            <li class="skippable">Tabletop</li>
+            <li>Modified Revolved Tabletop Right Arm Up</li>
+            <li>Thread the needle Right Arm Under</li>
+            <li>Modified Revolved Tabletop Left Arm Up</li>
+            <li>Thread the needle Left Arm Under</li>
+            <li class="skippable">Tabletop</li>
+            <li class="skippable">Child’s Pose for a couple breaths</li>
+            <li>Downward Facing Dog</li>
+            <li>Three Legged Dog</li>
+            <li>Warrior One</li>
+            <li>Humble Warrior</li>
+            <li>High Lunge</li>
+            <li>Warrior Three</li>
+            <li>Warrior Two</li>
+            <li>Downward Facing Dog</li>
+            <li>Three Legged Dog</li>
+            <li>Warrior One</li>
+            <li>Humble Warrior</li>
+            <li>High Lunge</li>
+            <li>Warrior Three</li>
+            <li>Warrior Two</li>
+            <li>Downward Facing Dog</li>
+            <li class="skippable">Step Forward</li>
+            <li>Halfway Lift</li>
+            <li>Plank Pose</li>
+            <li>Chaturanga</li>
+            <li>Cobra or Updog</li>
+            <li>Downward Facing Dog</li>
+            <li>Halfway Lift</li>
+            <li>Low Lunge LEFT foot strong RIGHT leg back</li>
+            <li>High Lunge</li>
+            <li>Humble Warrior</li>
+            <li class="skippable">Low Lunge as transition</li>
+            <li>Side Angle RIGHT arm up</li>
+            <li class="skippable">Plank</li>
+            <li>Low Lunge RIGHT foot strong LEFT leg back</li>
+            <li>High Lunge</li>
+            <li>Humble Warrior</li>
+            <li class="skippable">Low Lunge as transition</li>
+            <li>Forward Fold</li>
+            <li>Rag Doll</li>
+            <li>Halfway Lift</li>
+            <li>Extended Mountain</li>
+            <li>Mountain </li>
+            <li>Reverse Warrior RIGHT leg back</li>
+            <li>Triangle Pose</li>
+            <li class="skippable">Come to standing </li>
+            <li>Reverse Warrior LEFT leg back</li>
+            <li>Triangle Pose</li>
+            <li>Mountain</li>
+            <li>Chair Pose</li>
+            <li>Mountain</li>
+            <li>Dancer Pose RIGHT</li>
+            <li class="skippable">Standing Shake</li>
+            <li>Dancer Pose LEFT</li>
+            <li class="skippable">Standing Shake</li>
+            <li>Yogi Squat maybe with blocks or go to staff</li>
+            <li>Staff pose</li>
+            <li>Seated Forward Bend</li>
+            <li>Staff with Raised Arms</li>
+            <li>Boat Pose</li>
+            <li class="skippable">RELEASE</li>
+            <li>Reclined Figure 4 Pose Bent RIGHT knee-leg</li>
+            <li class="skippable">RELEASE</li>
+            <li>Reclined Figure 4 Pose Bent LEFT knee-leg</li>
+            <li class="skippable">RELEASE</li>
+            <li>Fish</li>
+            <li>Camel Pose</li>
+            <li>Heros Pose Pause</li>
+            <li>Hero’s Twist</li>
+            <li class="skippable">RELEASE</li>
+            <li>Supported Bridge Pose</li>
+            <li class="skippable">RELEASE</li>
+            <li>Happy Baby</li>
+            <li class="skippable">RELEASE</li>
+            <li>Reclined Spinal Twist- RIGHT side</li>
+            <li>Reclined Spinal Twist- LEFT side</li>
+            <li class="skippable">RELEASE</li>
+            <li>Savasana</li>
+        </ul>
+    </div>
+
+    <div id="footer">
+        <div id="timer-wrapper">
+            <div id="timer-main">60:00</div>
+            <div id="timer-ms">.00</div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_DURATION_MS = 60 * 60 * 1000; // 60 minutes in ms
+        const poseContainer = document.getElementById('pose-container');
+        const poseList = document.getElementById('pose-list');
+        const timerMainDisplay = document.getElementById('timer-main');
+        const timerMsDisplay = document.getElementById('timer-ms');
+
+        let isRunning = false;
+        let timeRemainingMs = TOTAL_DURATION_MS;
+        let lastUpdateTime = 0;
+        let timerRAF = null;
+        
+        // --- Utility Functions ---
+
+        function formatTime(totalMs) {
+            const totalSeconds = Math.max(0, Math.floor(totalMs / 1000));
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor((totalMs % 1000) / 10); // Get hundredths of a second
+            
+            const mainTime = String(minutes).padStart(2, '0') + `:` + String(seconds).padStart(2, '0');
+            // Ensure milliseconds are always displayed as 00 if time is 0
+            const msTime = totalMs <= 0 ? '.00' : `.` + String(ms).padStart(2, '0');
+            
+            return { main: mainTime, ms: msTime };
+        }
+        
+        function getScrollDistance() {
+            const distance = poseList.scrollHeight - poseContainer.clientHeight;
+            return Math.max(0, distance);
+        }
+
+        // --- Core Logic ---
+
+        function updateTimerAndScroll(timestamp) {
+            if (!isRunning) return;
+
+            if (lastUpdateTime === 0) {
+                lastUpdateTime = timestamp;
+            }
+            
+            const elapsedSinceLast = timestamp - lastUpdateTime;
+            timeRemainingMs = Math.max(0, timeRemainingMs - elapsedSinceLast);
+            lastUpdateTime = timestamp;
+
+            const formattedTime = formatTime(timeRemainingMs);
+            timerMainDisplay.textContent = formattedTime.main;
+            timerMsDisplay.textContent = formattedTime.ms;
+
+            // --- Scroll Update Logic (tied directly to time remaining) ---
+            const scrollDistance = getScrollDistance();
+            
+            if (scrollDistance > 0) {
+                const timeElapsedMs = TOTAL_DURATION_MS - timeRemainingMs;
+                const progress = timeElapsedMs / TOTAL_DURATION_MS;
+                const newScrollY = progress * scrollDistance;
+
+                poseList.style.transform = `translateY(-${newScrollY}px)`;
+            }
+
+            if (timeRemainingMs <= 0) {
+                isRunning = false;
+                cancelAnimationFrame(timerRAF);
+                // Ensure scroll locks at the end
+                if (scrollDistance > 0) {
+                    poseList.style.transform = `translateY(-${scrollDistance}px)`;
+                }
+                return;
+            }
+
+            // Continue the animation loop
+            timerRAF = requestAnimationFrame(updateTimerAndScroll);
+        }
+
+        function startSequence() {
+            isRunning = true;
+            // Clear any old RAF just in case
+            if(timerRAF) {
+                cancelAnimationFrame(timerRAF);
+            }
+            // lastUpdateTime = 0 signals a fresh start for tracking elapsed time
+            lastUpdateTime = 0; 
+            timerRAF = requestAnimationFrame(updateTimerAndScroll);
+        }
+        
+        function initialize() {
+            // 1. Reset everything to start position
+            timeRemainingMs = TOTAL_DURATION_MS;
+            const formattedTime = formatTime(timeRemainingMs);
+            timerMainDisplay.textContent = formattedTime.main;
+            timerMsDisplay.textContent = formattedTime.ms;
+            poseList.style.transform = 'translateY(0)';
+            
+            // 2. Start the sequence automatically
+            startSequence();
+        }
+        
+        // --- Initialization and Event Listeners ---
+        
+        // AUTOSTART on page load/refresh
+        window.addEventListener('load', initialize);
+
+        // Prevent unwanted touch-zoom/scroll on the body
+        document.body.addEventListener('touchstart', (e) => {
+             e.preventDefault(); 
+        }, { passive: false });
+
+    </script>
+</body>
+</html>
