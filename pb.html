@@ -150,7 +150,6 @@
 nav a{
   display: inline-block;
   padding: .4rem .7rem;
-  border-radius: .6rem;
   background: transparent;
   color: inherit;
   transition: background-color .18s ease, color .18s ease;
@@ -159,7 +158,7 @@ nav a{
 /* hover/focus state */
 nav a:hover,
 nav a:focus{
-  background: var(--nav-hover-bg);
+  background: #a8a8aa;
   color: #fff;                  /* readable on #382e38 */
   border-bottom-color: transparent; /* if you had an underline */
 }
@@ -182,13 +181,13 @@ nav a:visited:focus{
       
   </style>
 </head> 
-  /* <script>
+  <script>
   (function(){
     var h = new Date().getHours();
     var isNight = (h < 7 || h >= 19);
     (isNight ? document.documentElement : document.documentElement).classList.toggle('theme-night', isNight);
   })();
-</script> */
+</script> 
 
 <body>
   <div class="wrap">
