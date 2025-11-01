@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,51 +93,49 @@
       outline: none;
     }
 
-    /* ===== Masthead with photo and titles ===== */
+    /* ===== Masthead with circular photo and titles ===== */
     .masthead{
       display: grid;
-      grid-template-columns: minmax(96px, 0.28fr) 1fr;  /* photo ~28% of title column */
-      gap: 0.75rem 1rem;
+      grid-template-columns: minmax(120px, 0.28fr) 1fr;
+      gap: 0.5rem 1rem;
       align-items: center;
     }
     .title-photo{
-      align-self: stretch;          /* match the row height (set by title lines) */
-      justify-self: start;
-      width: 100%;                  /* grid column defines width */
-      max-width: 360px;             /* guardrails */
+      align-self: center;
+      justify-self: end;
+      width: 100%;
+      max-width: 320px;
       position: relative;
     }
-    /* UPDATED: true circle + black ring, no oval */
     .title-photo .ph-box{
-      position: absolute;
-      inset: 0;
-      aspect-ratio: 1 / 1;         /* enforce square */
+      position: relative;
+      width: 180px;
+      height: 180px;
+      aspect-ratio: 1 / 1;
       overflow: hidden;
-      border-radius: 50%;          /* circle */
-      background: transparent;     /* preserve PNG transparency */
+      border-radius: 50%;
+      background: transparent;
       display: grid;
       place-items: center;
-      border: 5px solid #000;      /* black ring */
+      border: 5px solid #000;
     }
-    .title-photo img{
-      width: 100%;
-      height: 100%;
-      object-fit: cover;           /* even scale without distortion */
-    }
-    .title-stack{ display: grid; gap: .25rem; }
-    .title-lines{ display: grid; gap: .25rem; }
+    .title-photo img{ width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-    /* Titles stay single line */
+    .title-stack{ display: grid; gap: .15rem; }
+    .title-lines{ display: grid; gap: .05rem; }         /* tighter gap between title lines */
+
+    /* Tighter line-height for titles */
     .title-line{
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.08;
+      line-height: .98;                                  /* tighter */
       transform-origin: left center;
       will-change: font-size;
+      text-align: left;
     }
-    .title-role{ font-weight: 700; color: var(--ink-strong); font-size: calc(clamp(1.8rem, 6vw, 3.2rem) / 2); letter-spacing: .4px; }
-    .title-name{ font-weight: 300; color: var(--ink-dim);   font-size: calc(clamp(1.4rem, 5vw, 2.2rem) / 2); letter-spacing: .2px; }
+    .title-role{ font-weight: 700; color: var(--ink-strong); font-size: calc(clamp(1.8rem, 6vw, 3.2rem) / 2); letter-spacing: .3px; }
+    .title-name{ font-weight: 300; color: var(--ink-dim);   font-size: calc(clamp(1.4rem, 5vw, 2.2rem) / 2); letter-spacing: .15px; }
     .subtitle  { font-weight: 400; color: var(--muted);     font-size: clamp(1rem, 2.2vw, 1.15rem); }
 
     /* Mobile stacking and centering */
@@ -149,21 +146,41 @@
         text-align: center;
       }
       .title-photo{
+        align-self: center;
+        justify-self: center;
         width: clamp(140px, 45vw, 260px);
         max-width: 60vw;
-        align-self: center;
-        justify-self: center;   /* ensure centered on mobile */
       }
-      .title-photo .ph-box{
-        position: relative;
-        width: 100%;
-        height: auto;
-        aspect-ratio: 1 / 1;
-      }
-      .title-line{ justify-self: center; }
+      .title-photo .ph-box{ width: 100%; height: auto; aspect-ratio: 1 / 1; }
+      .title-line{ justify-self: center; text-align: center; line-height: .98; }
     }
 
     main { display: grid; gap: 1.25rem; }
+
+    /* ---------- NAV: single-line, responsive, scroll-on-overflow ---------- */
+    nav { margin: 0 0 1.25rem 0; }
+    nav ul{
+      display:flex;
+      flex-wrap:nowrap;                /* keep one line */
+      gap: clamp(.25rem, 1.6vw, 1rem);
+      list-style:none;
+      padding: .25rem;
+      margin:0;
+      overflow-x:auto;                 /* allow horizontal scroll if space is tight */
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    nav ul::-webkit-scrollbar{ display:none; }
+    nav a{
+      white-space:nowrap;
+      text-decoration:none;
+      font-weight:700;
+      line-height:1;                   /* tight anchors */
+      border-bottom: 1px solid transparent;
+      font-size: clamp(.82rem, 1.4vw, 1rem);  /* scales down on mobile */
+      padding: .2rem .1rem;
+    }
+    nav a:hover, nav a:focus{ border-bottom-color: currentColor; }
 
     section {
       background: linear-gradient(180deg, var(--panel), var(--panel-2));
@@ -173,7 +190,8 @@
       box-shadow: var(--shadow);
     }
 
-    section > header h2 { font-size: clamp(1.2rem, 2.6vw, 1.6rem); font-weight: 600; margin-bottom: .75rem; color: var(--ink-strong); }
+    section > header h2,
+    section h2 { font-size: clamp(1.2rem, 2.6vw, 1.6rem); font-weight: 600; margin-bottom: .75rem; color: var(--ink-strong); text-align:center; }
 
     p { margin: 0 0 .85rem 0; color: var(--ink); }
     .lede { color: var(--ink-strong); font-weight: 500; }
@@ -187,27 +205,40 @@
     .skills { columns: 2; column-gap: 2rem; }
     @media (max-width: 720px) { .skills { columns: 1; } }
 
-    /* Portfolio 3-across (aspect-ratio squares) */
-    .portfolio { display: grid; gap: 1rem; }
-    .folio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
-    @media (max-width: 900px) { .folio-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px) { .folio-grid { grid-template-columns: 1fr; } }
-    .folio-card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
-    .folio-media { aspect-ratio: 1 / 1; position: relative; overflow: hidden; background: #0a0a0d; }
-    .folio-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .folio-meta { padding: .6rem .75rem .8rem; display: grid; gap: .25rem; }
-    .folio-meta h3 { margin: 0; font-size: 1rem; color: var(--ink-strong); font-weight: 600; }
-    .folio-meta p { margin: 0; color: var(--ink-dim); font-size: .9rem; }
-    .folio-meta a { text-decoration: underline; }
+    /* Section padding rhythm */
+    section{padding:60px 20px;}
 
-    /* Contact + full-width cloud */
+    /* Content wrappers */
+    .content{ max-width:1000px; margin:0 auto; display:block; }
+    .item{ display:block; }
+
+    /* --- THREE-UP image grid on desktop; 2-up tablet; 1-up mobile --- */
+    .image-container{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:.75rem;
+    }
+    @media (max-width: 900px){
+      .image-container{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 560px){
+      .image-container{ grid-template-columns:1fr; }
+    }
+    .image-container img{
+      width:100%;
+      height:auto;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      display:block;
+      border-radius:6px;
+    }
+
+    /* Contact + cloud */
     address { font-style: normal; color: var(--ink); }
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; }
     @media (max-width: 720px) { .contact-grid { grid-template-columns: 1fr; } }
-
     .chip { display: inline-block; background: var(--chip); color: var(--chip-ink);
       border: 1px solid var(--line); border-radius: 999px; padding: .25rem .6rem; font-size: .8rem; margin-right: .35rem; }
-
     .email-btn {
       display: inline-block; margin-top: .75rem; padding: .8rem 1.1rem;
       border-radius: .9rem; border: 1px solid var(--line);
@@ -248,8 +279,7 @@
       <div class="masthead" aria-describedby="aka">
         <div class="title-photo" aria-hidden="true">
           <div class="ph-box">
-            <!-- NEW: RAW GitHub URL for direct image serving -->
-            <img src="https://raw.githubusercontent.com/pat-bee/pat-bee.github.io/main/profile-fall-RND-2025.png" alt="">
+            <img src="https://raw.githubusercontent.com/pat-bee/pat-bee.github.io/main/profile-fall-RND-2025.png" alt="Portrait of Patrick Burritt">
           </div>
         </div>
         <div class="title-stack">
@@ -263,18 +293,26 @@
     </header>
 
     <main id="main" role="main">
-      <!-- Bio -->
+      <nav aria-label="Sections">
+        <ul>
+          <li><a href="#websites">Websites</a></li>
+          <li><a href="#writings">Writings</a></li>
+          <li><a href="#photos">Photos</a></li>
+          <li><a href="#graphic-design">Graphic&nbsp;Design</a></li>
+          <li><a href="#sound-design">Sound&nbsp;Design</a></li>
+        </ul>
+      </nav>
+
       <section aria-labelledby="bio-h">
         <header><h2 id="bio-h">Bio</h2></header>
         <p class="lede">
-        I’m an Information Designer who lives at the intersection of communication, structure, and intuition, where content systems start and data begins, and begins to tell human stories. I translate complexity into clarity: mapping messy information into visual, linguistic, and technical frameworks that help people find what they need (and ideally, what they didn’t know they were looking for). My background blends marketing strategy, semiotics, and digital systems design, which basically means I get to build <i>meaning</i> for a living.
+          I’m an Information Designer who lives at the intersection of communication, structure, and intuition, where content systems start and data begins to tell human stories. I translate complexity into clarity: mapping messy information into visual, linguistic, and technical frameworks that help people find what they need (and ideally, what they didn’t know they were looking for). My background blends marketing strategy, semiotics, and digital systems design, which basically means I get to build <i>meaning</i> for a living.
         </p>
         <p class="fine">
-        I’m most at home in projects that ask for equal parts logic and empathy: accessibility audits that make interfaces actually usable, editorial ecosystems that sync humans and algorithms, AI-enhanced workflows that stay true to the story. I love shaping systems that hum quietly in the background — elegant, maintainable, future-proof. I’m also human: curious, occasionally over-caffeinated, and still chasing that balance between precision and play. If your project needs a translator between design, content, and technology, I’m probably who you were looking for.
+          I’m most at home in projects that ask for equal parts logic and empathy: accessibility audits that make interfaces actually usable, editorial ecosystems that sync humans and algorithms, AI-enhanced workflows that stay true to the story. I love shaping systems that hum quietly in the background — elegant, maintainable, future-proof.
         </p>
       </section>
 
-      <!-- Skills -->
       <section aria-labelledby="skills-h">
         <header><h2 id="skills-h">Skills</h2></header>
         <ul class="skills">
@@ -293,89 +331,86 @@
         </ul>
       </section>
 
-      <!-- Portfolio example section left out for brevity in this snippet -->
-      <section>
-       <nav>
-    <ul>
-        <li><a href="#websites">Websites</a></li>
-        <li><a href="#writings">Writings</a></li>
-        <li><a href="#photos">Photos</a></li>
-        <li><a href="#graphic-design">Graphic&nbsp;Design</a></li>
-        <li><a href="#sound-design">Sound&nbsp;Design</a></li>
-    </ul>
-</nav>
-<main>
-    <section id="websites">
+      <!-- Portfolio sections -->
+      <section id="websites">
         <h2>Websites</h2>
         <div class="content">
-              <div class="item">
-                <div class="image-container">
-                 <a href="https://msb.georgetown.edu"><img src="https://pat-bee.github.io/303_msb.png" alt="msb"></a>
-                 <a href="https://futureofwork.georgetown.edu/">< <img src="https://pat-bee.github.io/303_ai.png" alt="fow"></a>
-                  <a href="https://businessforimpact.georgetown.edu/"><<img src="https://pat-bee.github.io/303_b4i.png" alt="b41"></a>
-                </div>
+          <div class="item">
+            <div class="image-container">
+              <a href="https://msb.georgetown.edu" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303_msb.png" alt="McDonough School of Business website">
+              </a>
+              <a href="https://futureofwork.georgetown.edu/" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303_ai.png" alt="Future of Work website">
+              </a>
+              <a href="https://businessforimpact.georgetown.edu/" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303_b4i.png" alt="Business for Impact website">
+              </a>
+            </div>
+          </div>
         </div>
-    </section>
-    <section id="writings">
+      </section>
+
+      <section id="writings">
         <h2>Writings</h2>
         <div class="content">
-            <div class="item">
-                <h3>Article Title</h3>
-                <p>Brief overview or excerpt of the writing piece.</p>
-                <p><a href="#" target="_blank">Read More</a></p>
-            </div>
+          <div class="item">
+            <h3>Article Title</h3>
+            <p>Brief overview or excerpt of the writing piece.</p>
+            <p><a href="#" target="_blank">Read More</a></p>
+          </div>
         </div>
-    </section>
-    <section id="photos">
+      </section>
+
+      <section id="photos">
         <h2>Photos</h2>
         <div class="content">
-            <div class="item">
-                <div class="image-container">
-                  <img src="https://pat-bee.github.io/303-hustle.png" alt="hustle photo">
-                  <img src="https://pat-bee.github.io/303-mocking-bird.png" alt="bird photo">
-                  <img src="https://pat-bee.github.io/303-red-leaf.png" alt="leaft photo">
-                </div>
-                <br/>
-                <div class="image-container">
-                  <img src="https://pat-bee.github.io/tbt-911-v2.png" alt="tt photo">
-                  <img src="https://pat-bee.github.io/303_service.png" alt="service photo">
-                  <img src="https://pat-bee.github.io/303_heart.png" alt="heart photo">
-                </div>
-                <br/>
-                <p>Pat captures evocative, offbeat moments in everyday life—framing shadow, light, and texture in ways that turn fleeting details into quiet, impactful visual stories.</p>
+          <div class="item">
+            <div class="image-container">
+              <img src="https://pat-bee.github.io/303-hustle.png"        alt="Hustle">
+              <img src="https://pat-bee.github.io/303-mocking-bird.png"  alt="Bird">
+              <img src="https://pat-bee.github.io/303-red-leaf.png"      alt="Leaf">
+              <img src="https://pat-bee.github.io/tbt-911-v2.png"        alt="TBT 9/11">
+              <img src="https://pat-bee.github.io/303_service.png"       alt="Out of service">
+              <img src="https://pat-bee.github.io/303_heart.png"         alt="Heart in concrete">
             </div>
+            <p style="margin-top:.75rem">
+              Pat captures evocative, offbeat moments in everyday life—framing shadow, light, and texture in ways that turn fleeting details into quiet, impactful visual stories.
+            </p>
+          </div>
         </div>
-    </section>
-    <section id="graphic-design">
+      </section>
+
+      <section id="graphic-design">
         <h2>Graphic Design</h2>
         <div class="content">
-            <div class="item">
-\                <div class="image-container">
-                  <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Design Mockup 1">
-                  <img src="https://pat-bee.github.io/303-SG-PATCH.png" alt="Design Mockup 2">
-                  <img src="https://pat-bee.github.io/lb_flyer1_front.jpg" alt="Design Mockup 3">
-                </div>
-                <br/>
-                <p>Pat’s graphic design thrives on strong compositions that balance precision with play—each piece revealing subtle humor, layered meaning, or hidden gems that reward the careful observer.</p>
+          <div class="item">
+            <div class="image-container">
+              <img src="https://pat-bee.github.io/303-ctrl-v2.png"   alt="Design Mockup 1">
+              <img src="https://pat-bee.github.io/303-SG-PATCH.png"  alt="Design Mockup 2">
+              <img src="https://pat-bee.github.io/lb_flyer1_front.jpg" alt="Design Mockup 3">
             </div>
+            <p style="margin-top:.75rem">
+              Pat’s graphic design balances precision with play—subtle humor and layered meaning reward careful observers.
+            </p>
+          </div>
         </div>
-    </section>
-    <section id="sound-design">
+      </section>
+
+      <section id="sound-design">
         <h2>Sound Design</h2>
         <div class="content">
-            <div class="item">
-                <h3>Track Title</h3>
-                <audio controls style="width:100%;">
-                    <source src="sample.mp3" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-                <p>Short description of the sound design piece.</p>
-            </div>
+          <div class="item">
+            <h3>Track Title</h3>
+            <audio controls style="width:100%;">
+              <source src="sample.mp3" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
+            <p>Short description of the sound design piece.</p>
+          </div>
         </div>
-    </section>
-</main>
+      </section>
 
-      <!-- Contact -->
       <section aria-labelledby="contact-h">
         <header><h2 id="contact-h">Contact</h2></header>
         <div class="contact-grid">
@@ -400,7 +435,6 @@
           </div>
         </div>
 
-        <!-- Full-width Other Interests -->
         <div class="cloud-wrap" aria-labelledby="interests-h">
           <h3 id="interests-h" style="margin:0 0 .5rem 0; font-weight:600;">Other interests</h3>
           <div class="cloud" id="wordCloud">
@@ -459,7 +493,7 @@
       if(name) fitOneLine(name, {min:16, max:90, step:1});
     }
 
-    // UPDATED: keep photo a safe, square size on desktop; mobile via CSS
+    // Sync photo to the combined height of the two title lines (desktop only)
     function syncPhotoToTitles(){
       const lines = document.querySelector('.title-lines');
       const photoBox = document.querySelector('.title-photo .ph-box');
@@ -467,17 +501,15 @@
 
       const isMobile = window.matchMedia('(max-width: 720px), (orientation: portrait)').matches;
       if(isMobile){
-        // Let CSS handle centered, responsive square on mobile
-        photoBox.style.removeProperty('width');
-        photoBox.style.removeProperty('height');
+        photoBox.style.height = '';
+        photoBox.style.width = '';
         return;
       }
-
-      // Desktop: square roughly matching the two title lines, clamped to avoid oversizing
       const rect = lines.getBoundingClientRect();
-      const size = Math.max(120, Math.min(Math.round(rect.height), 220)); // clamp 120–220px
-      photoBox.style.width  = size + 'px';
+      const titleHeight = Math.round(rect.height);
+      const size = Math.max(120, Math.min(titleHeight, 220));
       photoBox.style.height = size + 'px';
+      photoBox.style.width  = size + 'px';
     }
 
     function layout(){
@@ -488,7 +520,20 @@
     window.addEventListener('load', layout);
     window.addEventListener('resize', layout);
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(layout); }
+
+    // Word cloud random weights per refresh
+    (function(){
+      const nodes = Array.from(document.querySelectorAll('#wordCloud > *'));
+      const weights = ['w1','w2','w2','w3','w3','w4','w4','w5','w6'];
+      const seed = (Date.now() % 97) + nodes.length;
+      function rand(i){ return Math.abs(Math.sin(seed + i) * 10000) % 1; }
+      nodes.forEach((el, i) => {
+        const w = weights[Math.floor(rand(i) * weights.length)];
+        el.classList.add(w);
+        el.style.transform = 'translateY(' + Math.floor(rand(i+7)*2) + 'px)';
+        el.setAttribute('aria-label', el.textContent + ' tag');
+      });
+    })();
   </script>
 </body>
 </html>
-```
