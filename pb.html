@@ -17,27 +17,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ===== THEME (Dark = default night; Day inverts grays) ===== */
     :root{
-      /* Night (default) */
-      --bg: #0f0f12;            /* deep space */
-      --panel: #16161b;         /* hull */
-      --panel-2: #1a1a20;       /* secondary panels */
-      --ink: #e6e6e9;           /* primary text */
-      --ink-strong: #ffffff;    /* strongest text */
-      --ink-dim: #bcbcc4;       /* secondary text */
-      --line: #2a2a2f;          /* seams */
-      --muted: #8f8f98;         /* muted */
-      --accent: #d9d9df;        /* subtle highlight (still gray) */
-      --focus: #d0d0d5;         /* focus ring */
-      --chip: #202027;          /* chips/pills */
+      --bg: #0f0f12;
+      --panel: #16161b;
+      --panel-2: #1a1a20;
+      --ink: #e6e6e9;
+      --ink-strong: #ffffff;
+      --ink-dim: #bcbcc4;
+      --line: #2a2a2f;
+      --muted: #8f8f98;
+      --accent: #d9d9df;
+      --focus: #d0d0d5;
+      --chip: #202027;
       --chip-ink: #d7d7dd;
       --shadow: 0 10px 30px rgba(0,0,0,.5);
       --radius: 18px;
       --maxw: 1100px;
     }
     .theme-day{
-      /* Day (inverse grayscale) */
       --bg: #f4f4f7;
       --panel: #ffffff;
       --panel-2: #f0f0f4;
@@ -68,7 +65,6 @@
     a:hover, a:focus { text-decoration-color: var(--accent); }
     img { max-width: 100%; height: auto; display: block; }
 
-    /* Layout */
     .wrap {
       max-width: var(--maxw);
       margin: 0 auto;
@@ -85,14 +81,7 @@
       box-shadow: var(--shadow);
     }
 
-    .skip-link {
-      position: absolute;
-      left: -9999px;
-      top: auto;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-    }
+    .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
     .skip-link:focus {
       position: static;
       width: auto;
@@ -104,36 +93,29 @@
       outline: none;
     }
 
-    /* ===== TITLES (force single-line with dynamic fit) ===== */
-    .masthead{
-      display: grid;
-      gap: .25rem;
-    }
+    /* TITLES (single line) */
+    .masthead{ display: grid; gap: .25rem; }
     .title-line{
-      white-space: nowrap;            /* never wrap */
-      overflow: hidden;                /* prevent spill */
-      text-overflow: ellipsis;         /* if fit fails briefly */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       line-height: 1.08;
-      transform-origin: left center;   /* smooth scaling */
+      transform-origin: left center;
       will-change: font-size;
     }
     .title-role{
       font-weight: 700;
       color: var(--ink-strong);
-  font-size: calc(clamp(1.8rem, 6vw, 3.2rem) / 2);
+      font-size: calc(clamp(1.8rem, 6vw, 3.2rem) / 2);
       letter-spacing: .4px;
     }
     .title-name{
       font-weight: 300;
       color: var(--ink-dim);
-  font-size: calc(clamp(1.4rem, 5vw, 2.2rem) / 2);
+      font-size: calc(clamp(1.4rem, 5vw, 2.2rem) / 2);
       letter-spacing: .2px;
     }
-    .subtitle {
-      font-weight: 400;
-      color: var(--muted);
-      font-size: clamp(1rem, 2.2vw, 1.15rem);
-    }
+    .subtitle { font-weight: 400; color: var(--muted); font-size: clamp(1rem, 2.2vw, 1.15rem); }
 
     main { display: grid; gap: 1.25rem; }
 
@@ -158,60 +140,65 @@
 
     ul { margin: 0; padding-left: 1.25rem; }
     li { margin: .35rem 0; }
-    .skills li{
-      padding-left: .25rem;
-    }
+    .skills li{ padding-left: .25rem; }
     .skills li:nth-child(odd){ color: var(--ink); font-weight: 500; }
     .skills li:nth-child(even){ color: var(--ink-dim); font-weight: 400; }
-
-    /* Skills list */
     .skills { columns: 2; column-gap: 2rem; }
     @media (max-width: 720px) { .skills { columns: 1; } }
 
-    /* Gallery grid */
-    .gallery {
+    /* ===== Portfolio 3-across (aspect-ratio squares) ===== */
+    .portfolio {
+      display: grid;
+      gap: 1rem;
+    }
+    .folio-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: .75rem;
     }
-    @media (max-width: 720px) {
-      .gallery { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 900px) {
+      .folio-grid { grid-template-columns: repeat(2, 1fr); }
     }
-    .tile {
-      position: relative;
-      background: radial-gradient(120% 140% at 30% 20%, color-mix(in oklab, var(--panel) 70%, black 30%), var(--panel-2) 60%);
+    @media (max-width: 560px) {
+      .folio-grid { grid-template-columns: 1fr; }
+    }
+    .folio-card {
+      background: var(--panel-2);
       border: 1px solid var(--line);
       border-radius: 14px;
-      min-height: 160px;
       overflow: hidden;
-      display: grid;
-      place-items: center;
-      isolation: isolate;
+      box-shadow: var(--shadow);
     }
-    .tile::after {
-      content: "";
+    .folio-media {
+      aspect-ratio: 1 / 1;        /* presentation ratio logic (square) */
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+    .folio-media img {
       position: absolute;
       inset: 0;
-      background: linear-gradient(120deg, rgba(255,255,255,.06), transparent 40%);
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;          /* cover within the square */
     }
-    .tile svg { width: 44px; height: 44px; opacity: .55; color: var(--ink-dim); }
-    .tile figcaption {
-      position: absolute;
-      bottom: .5rem;
-      left: .75rem;
-      right: .75rem;
-      font-size: .8rem;
+    .folio-meta {
+      padding: .6rem .75rem .8rem;
+      display: grid;
+      gap: .25rem;
+    }
+    .folio-meta h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--ink-strong);
+      font-weight: 600;
+    }
+    .folio-meta p {
+      margin: 0;
       color: var(--ink-dim);
-      z-index: 1;
-      background: color-mix(in oklab, var(--panel-2) 70%, transparent);
-      padding: .25rem .5rem;
-      border-radius: .5rem;
-      border: 1px solid rgba(255,255,255,.06);
-      backdrop-filter: blur(2px);
+      font-size: .9rem;
     }
+    .folio-meta a { text-decoration: underline; }
 
     /* Contact */
     address { font-style: normal; color: var(--ink); }
@@ -220,9 +207,7 @@
       grid-template-columns: 1fr 1fr;
       gap: .75rem 1rem;
     }
-    @media (max-width: 720px) {
-      .contact-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 720px) { .contact-grid { grid-template-columns: 1fr; } }
 
     .chip {
       display: inline-block;
@@ -254,29 +239,14 @@
       outline-offset: 2px;
     }
 
-    /* Word cloud */
     .cloud-wrap { padding: .75rem; border-top: 1px dashed var(--line); margin-top: .75rem; }
-    .cloud {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem .75rem;
-      align-items: baseline;
-    }
+    .cloud { display: flex; flex-wrap: wrap; gap: .5rem .75rem; align-items: baseline; }
     .cloud a, .cloud span {
-      color: var(--accent);
-      text-decoration: none;
-      line-height: 1.1;
-      display: inline-block;
-      padding: .1rem .2rem;
-      border-radius: .3rem;
-      transition: transform .12s ease;
+      color: var(--accent); text-decoration: none; line-height: 1.1;
+      display: inline-block; padding: .1rem .2rem; border-radius: .3rem; transition: transform .12s ease;
     }
-    .cloud a:focus-visible, .cloud span:focus-visible {
-      outline: 2px solid var(--focus);
-      outline-offset: 2px;
-    }
+    .cloud a:focus-visible, .cloud span:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
     .cloud a:hover { transform: translateY(-1px); }
-    /* sizes via class; JS randomizes per refresh */
     .w1{ font-size: clamp(.85rem, 1.2vw, 1rem); font-weight: 300; opacity: .85; }
     .w2{ font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 300; opacity: .9; }
     .w3{ font-size: clamp(1.15rem, 2.1vw, 1.5rem); font-weight: 400; }
@@ -286,17 +256,12 @@
     @media (prefers-reduced-motion: reduce) { .email-btn, .cloud a { transition: none; } }
 
     footer { color: var(--ink-dim); text-align: center; padding: 1.25rem 0 2rem; }
-
-    /* Focus style baseline */
     :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-
-    /* Definition list styling for contact values */
     dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem .75rem; margin: 0; }
     dt { color: var(--ink-dim); font-weight: 500; }
     dd { margin: 0; color: var(--ink); }
   </style>
 
-  <!-- Structured data for AI indexing -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -305,22 +270,8 @@
     "alternateName": "Pat Bɇɇ",
     "jobTitle": "Information Designer",
     "url": "https://example.com/",
-    "worksFor": {
-      "@type": "Organization",
-      "name": "Georgetown University McDonough School of Business"
-    },
-    "knowsAbout": [
-      "Information Architecture",
-      "Data Visualization",
-      "Accessibility (WCAG)",
-      "Content Strategy",
-      "Taxonomy and Ontology",
-      "SEO and AEO",
-      "Structured Data (schema.org/JSON-LD)",
-      "Analytics and Dashboards",
-      "Prototyping",
-      "RAG and AI-assisted content operations"
-    ]
+    "worksFor": { "@type": "Organization", "name": "Georgetown University McDonough School of Business" },
+    "knowsAbout": ["Information Architecture","Data Visualization","Accessibility (WCAG)","Content Strategy","Taxonomy and Ontology","SEO and AEO","Structured Data (schema.org/JSON-LD)","Analytics and Dashboards","Prototyping","RAG and AI-assisted content operations"]
   }
   </script>
 </head>
@@ -337,16 +288,15 @@
     </header>
 
     <main id="main" role="main">
-      <!-- Bio -->
+      <!-- Bio (leave as provided) -->
       <section aria-labelledby="bio-h">
         <header><h2 id="bio-h">Bio</h2></header>
-        <p class="lede"><p>
+        <p class="lede">
         I’m an Information Designer who lives at the intersection of communication, structure, and intuition, where content systems start and data begins, and begins to tell human stories. I translate complexity into clarity: mapping messy information into visual, linguistic, and technical frameworks that help people find what they need (and ideally, what they didn’t know they were looking for). My background blends marketing strategy, semiotics, and digital systems design, which basically means I get to build <i>meaning</i> for a living.
         </p>
         <p class="fine">
-          
-I’m most at home in projects that ask for equal parts logic and empathy: accessibility audits that make interfaces actually usable, editorial ecosystems that sync humans and algorithms, AI-enhanced workflows that stay true to the story. I love shaping systems that hum quietly in the background — elegant, maintainable, future-proof. I’m also human: curious, occasionally over-caffeinated, and still chasing that balance between precision and play. If your project needs a translator between design, content, and technology, I’m probably who you were looking for.
-      </p>
+        I’m most at home in projects that ask for equal parts logic and empathy: accessibility audits that make interfaces actually usable, editorial ecosystems that sync humans and algorithms, AI-enhanced workflows that stay true to the story. I love shaping systems that hum quietly in the background — elegant, maintainable, future-proof. I’m also human: curious, occasionally over-caffeinated, and still chasing that balance between precision and play. If your project needs a translator between design, content, and technology, I’m probably who you were looking for.
+        </p>
       </section>
 
       <!-- Skills -->
@@ -368,47 +318,153 @@ I’m most at home in projects that ask for equal parts logic and empathy: acces
         </ul>
       </section>
 
-      <!-- Gallery -->
-      <section aria-labelledby="gallery-h">
-        <header><h2 id="gallery-h">Selected Work (Gallery)</h2></header>
-        <div class="gallery" role="list">
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zM5 7v10h14V7zM8 15l2.5-3 1.5 2 2-3 3 4z"/></svg>
-            <figcaption>Dashboard concept — KPI grid with accessible color scales</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zM5 7v10h14V7zM7 9h10v2H7zm0 4h6v2H7z"/></svg>
-            <figcaption>IA map — content model for program microsites</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 7h7l-5.5 4.5L19 21l-7-4-7 4 2.5-7.5L2 9h7z"/></svg>
-            <figcaption>Design tokens — grayscale spaceship theme</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16v4H4zM4 10h10v10H4zM16 10h4v10h-4z"/></svg>
-            <figcaption>Schema.org plan — JSON-LD for People &amp; Programs</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 100 18 9 9 0 000-18zm-1 4h2v6h-2zm0 8h2v2h-2z"/></svg>
-            <figcaption>Content governance — roles, workflow, SLAs</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zm2 2v10h14V7zM7 9h10v2H7z"/></svg>
-            <figcaption>UX writing system — patterns &amp; voice</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h18v2H3zm0 4h18v2H3zm0 4h18v2H3zm0 4h12v2H3z"/></svg>
-            <figcaption>Taxonomy — subject &amp; audience facets</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v6H4zM14 15h6v6h-6z"/></svg>
-            <figcaption>Data viz — small multiples for trend clarity</figcaption>
-          </figure>
-          <figure class="tile" role="listitem">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l9 9-9 9-9-9 9-9zm0 4.8L6.8 12 12 17.2 17.2 12 12 6.8z"/></svg>
-            <figcaption>AI ops — RAG pipeline for knowledge retrieval</figcaption>
-          </figure>
-        </div>
+      <!-- ===== Portfolio: 3-across grids with same images/links ===== -->
+      <section class="portfolio" aria-labelledby="folio-h">
+        <header><h2 id="folio-h">Selected Work</h2></header>
+
+        <!-- 1) Graphic Design -->
+        <article aria-labelledby="gd-h">
+          <header><h3 id="gd-h">Graphic Design</h3></header>
+          <div class="folio-grid">
+            <figure class="folio-card">
+              <a class="folio-media" href="https://pat-bee.github.io/303-SG-PATCH.png" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303-SG-PATCH.png" alt="Stargazers patch graphic" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Unit Patch</h3>
+                <p>Emblem design — black &amp; white vector mark.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <a class="folio-media" href="https://pat-bee.github.io/lb_flyer1_front.jpg" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/lb_flyer1_front.jpg" alt="Midatlantic Laptop Battle flyer" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Event Flyer</h3>
+                <p>Photocopy halftone poster for a live show.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <a class="folio-media" href="https://pat-bee.github.io/303-ctrl-v2.png" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Remote CTRL chip graphic" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Remote CTRL</h3>
+                <p>Concept art — board &amp; microchip label design.</p>
+              </figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- 2) Websites -->
+        <article aria-labelledby="web-h">
+          <header><h3 id="web-h">Websites</h3></header>
+          <div class="folio-grid">
+            <figure class="folio-card">
+              <a class="folio-media" href="https://msb.georgetown.edu/" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303_msb.png" alt="Georgetown McDonough School of Business website" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Georgetown MSB</h3>
+                <p>School-wide IA &amp; content systems.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <a class="folio-media" href="https://futureofwork.georgetown.edu/" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303_msb.png" alt="AI, Analytics, and the Future of Work site thumbnail" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>AI &amp; Future of Work</h3>
+                <p>Program microsite strategy &amp; publishing.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <a class="folio-media" href="https://businessforimpact.georgetown.edu/" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303_msb.png" alt="Business for Impact site thumbnail" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Business for Impact</h3>
+                <p>Center site information architecture.</p>
+              </figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- 3) Photos -->
+        <article aria-labelledby="ph-h">
+          <header><h3 id="ph-h">Photos</h3></header>
+          <div class="folio-grid">
+            <figure class="folio-card">
+              <a class="folio-media" href="https://pat-bee.github.io/303-hustle.png" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303-hustle.png" alt="Hustle sign photo" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Hustle</h3>
+                <p>Gold-on-black print in the wild.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <a class="folio-media" href="https://pat-bee.github.io/303-mocking-bird.png" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303-mocking-bird.png" alt="Mockingbird on fence" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Mockingbird</h3>
+                <p>Found moment — light, angle, quiet humor.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <a class="folio-media" href="https://pat-bee.github.io/303-red-leaf.png" target="_blank" rel="noopener">
+                <img src="https://pat-bee.github.io/303-red-leaf.png" alt="Red leaf close-up" loading="lazy" decoding="async">
+              </a>
+              <figcaption class="folio-meta">
+                <h3>Crimson Leaf</h3>
+                <p>Texture study — organic geometry.</p>
+              </figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <!-- 4) Writing -->
+        <article aria-labelledby="wr-h">
+          <header><h3 id="wr-h">Writing</h3></header>
+          <div class="folio-grid">
+            <figure class="folio-card">
+              <div class="folio-media">
+                <img src="https://pat-bee.github.io/303_service.png" alt="Out of service screen" loading="lazy" decoding="async">
+              </div>
+              <figcaption class="folio-meta">
+                <h3>Systems &amp; Signals</h3>
+                <p>Notes on content operations &amp; governance.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <div class="folio-media">
+                <img src="https://pat-bee.github.io/tbt-911-v2.png" alt="Twin Towers through camera screen" loading="lazy" decoding="async">
+              </div>
+              <figcaption class="folio-meta">
+                <h3>Memory &amp; Media</h3>
+                <p>On archives, loss, and meaning-making.</p>
+              </figcaption>
+            </figure>
+
+            <figure class="folio-card">
+              <div class="folio-media">
+                <img src="https://pat-bee.github.io/303_heart.png" alt="Heart in concrete" loading="lazy" decoding="async">
+              </div>
+              <figcaption class="folio-meta">
+                <h3>Signals of Care</h3>
+                <p>Small gestures, big systems.</p>
+              </figcaption>
+            </figure>
+          </div>
+        </article>
       </section>
 
       <!-- Contact -->
@@ -434,32 +490,23 @@ I’m most at home in projects that ask for equal parts logic and empathy: acces
             </div>
             <a class="email-btn" href="mailto:patrick.burritt@example.com?subject=Hello%20Patrick%20%E2%80%94%20From%20your%20bio%20site" aria-label="Send an email">Email me</a>
           </div>
-        </div>
 
-        <!-- Other Interests / Word Cloud -->
-        <div class="cloud-wrap" aria-labelledby="interests-h">
-          <h3 id="interests-h" style="margin:0 0 .5rem 0; font-weight:600;">Other interests</h3>
-          <div class="cloud" id="wordCloud">
-            <a href="https://www.georgetown.edu" target="_blank" rel="noopener">Georgetown</a>
-            <a href="https://msb.georgetown.edu" target="_blank" rel="noopener">McDonough</a>
-            <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener">Accessibility</a>
-            <a href="https://schema.org" target="_blank" rel="noopener">schema.org</a>
-            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noopener">CSS</a>
-            <a href="https://observablehq.com/" target="_blank" rel="noopener">Observable</a>
-            <a href="https://d3js.org/" target="_blank" rel="noopener">D3</a>
-            <a href="https://www.tableau.com/" target="_blank" rel="noopener">Tableau</a>
-            <a href="https://ga-dev-tools.google/ga4/dimensions-metrics-explorer/" target="_blank" rel="noopener">GA4</a>
-            <span>WordPress</span>
-            <span>Design Tokens</span>
-            <span>Semantics</span>
-            <span>Taxonomy</span>
-            <span>Ontologies</span>
-            <span>Metadata</span>
-            <span>Prototyping</span>
-            <span>Information Theory</span>
-            <span>Systems Thinking</span>
+          <div class="cloud-wrap" aria-labelledby="interests-h">
+            <h3 id="interests-h" style="margin:0 0 .5rem 0; font-weight:600;">Other interests</h3>
+            <div class="cloud" id="wordCloud">
+              <a href="https://www.georgetown.edu" target="_blank" rel="noopener">Georgetown</a>
+              <a href="https://msb.georgetown.edu" target="_blank" rel="noopener">McDonough</a>
+              <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener">Accessibility</a>
+              <a href="https://schema.org" target="_blank" rel="noopener">schema.org</a>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noopener">CSS</a>
+              <a href="https://observablehq.com/" target="_blank" rel="noopener">Observable</a>
+              <a href="https://d3js.org/" target="_blank" rel="noopener">D3</a>
+              <a href="https://www.tableau.com/" target="_blank" rel="noopener">Tableau</a>
+              <a href="https://ga-dev-tools.google/ga4/dimensions-metrics-explorer/" target="_blank" rel="noopener">GA4</a>
+              <span>WordPress</span><span>Design Tokens</span><span>Semantics</span><span>Taxonomy</span><span>Ontologies</span><span>Metadata</span><span>Prototyping</span><span>Information Theory</span><span>Systems Thinking</span>
+            </div>
+            <noscript><p class="subtitle">Enable JavaScript to see dynamic word sizes.</p></noscript>
           </div>
-          <noscript><p class="subtitle">Enable JavaScript to see dynamic word sizes.</p></noscript>
         </div>
       </section>
     </main>
@@ -470,40 +517,27 @@ I’m most at home in projects that ask for equal parts logic and empathy: acces
   </div>
 
   <script>
-    // ===== Current year =====
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ===== Time-based theme (day vs night by local browser time) =====
     (function(){
       const hour = new Date().getHours();
-      // Define "day" broadly: 7am–7pm
       const isDay = hour >= 7 && hour < 19;
       const root = document.documentElement;
       const meta = document.getElementById('themeColorMeta');
-      if(isDay){
-        root.classList.add('theme-day');
-        if(meta) meta.setAttribute('content', '#f4f4f7');
-      } else {
-        root.classList.remove('theme-day');
-        if(meta) meta.setAttribute('content', '#0f0f12');
-      }
+      if(isDay){ root.classList.add('theme-day'); meta && meta.setAttribute('content', '#f4f4f7'); }
+      else { root.classList.remove('theme-day'); meta && meta.setAttribute('content', '#0f0f12'); }
     })();
 
-    // ===== Single-line fit logic for titles =====
     function fitOneLine(el, opts){
       const { min=16, max=160, step=1 } = (opts||{});
-      // Start big, shrink until fits
       let size = max;
       el.style.fontSize = size + 'px';
       el.style.whiteSpace = 'nowrap';
       const parent = el.parentElement;
-      // guard to avoid infinite loops on display:none
       const canMeasure = () => el.offsetWidth > 0 && parent.offsetWidth > 0;
       if(!canMeasure()) return;
-      // decrease until it fits
       while ((el.scrollWidth > parent.clientWidth) && size > min){
-        size -= step;
-        el.style.fontSize = size + 'px';
+        size -= step; el.style.fontSize = size + 'px';
       }
     }
     function fitAll(){
@@ -514,13 +548,11 @@ I’m most at home in projects that ask for equal parts logic and empathy: acces
     }
     window.addEventListener('resize', () => { window.requestAnimationFrame(fitAll); });
     window.addEventListener('load', fitAll);
-    // Also refit when fonts are ready
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(fitAll); }
 
-    // ===== Word cloud random weights per refresh (gentle) =====
     (function(){
       const nodes = Array.from(document.querySelectorAll('#wordCloud > *'));
-      const weights = ['w1','w2','w2','w3','w3','w4','w4','w5','w6']; // bias toward mid/large
+      const weights = ['w1','w2','w2','w3','w3','w4','w4','w5','w6'];
       const seed = (Date.now() % 97) + nodes.length;
       function rand(i){ return Math.abs(Math.sin(seed + i) * 10000) % 1; }
       nodes.forEach((el, i) => {
