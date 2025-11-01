@@ -173,7 +173,7 @@ nav a:visited{
 /* visited + hover/focus should still use the hover color */
 nav a:visited:hover,
 nav a:visited:focus{
-  background: var(--nav-hover-bg);
+  background: /*var(--nav-hover-bg);*/ #a8a8aa;
   color: #fff;
 }
   
@@ -181,14 +181,14 @@ nav a:visited:focus{
       
       
   </style>
-</head>
-  <script>
+</head> 
+  /* <script>
   (function(){
     var h = new Date().getHours();
     var isNight = (h < 7 || h >= 19);
     (isNight ? document.documentElement : document.documentElement).classList.toggle('theme-night', isNight);
   })();
-</script>
+</script> */
 
 <body>
   <div class="wrap">
