@@ -158,7 +158,9 @@
     main { display: grid; gap: 1.25rem; }
 
     /* ---------- NAV: single-line, responsive, scroll-on-overflow ---------- */
-    nav { margin: 0 0 1.25rem 0; }
+   
+
+    nav { margin: 0 0 1.25rem 0;  text-align: center; }
     nav ul{
       display:flex;
       flex-wrap:nowrap;                /* keep one line */
@@ -169,6 +171,7 @@
       overflow-x:auto;                 /* allow horizontal scroll if space is tight */
       -webkit-overflow-scrolling:touch;
       scrollbar-width:none;
+      justify-content: center;
     }
     nav ul::-webkit-scrollbar{ display:none; }
     nav a{
