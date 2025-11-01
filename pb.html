@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Information Designer Patrick Burritt — Pat Bɇɇ</title>
+  <meta name="description" content="Information Designer portfolio and bio for Patrick Burritt (Pat Bɇɇ). Accessible, semantic, AI-indexable single-page site." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:title" content="Information Designer Patrick Burritt — Pat Bɇɇ" />
+  <meta property="og:description" content="Accessible, semantic, AI-indexable bio site for an Information Designer." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="theme-color" content="#0f0f12" />
+
+  <!-- Google Font: Comfortaa -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0f0f12;            /* deep space */
+      --panel: #16161b;         /* hull */
+      --panel-2: #1a1a20;       /* secondary panels */
+      --ink: #e6e6e9;           /* primary text */
+      --ink-dim: #bcbcc4;       /* secondary text */
+      --line: #2a2a2f;          /* seams */
+      --muted: #8f8f98;         /* muted */
+      --accent: #d9d9df;        /* subtle highlight (still gray) */
+      --focus: #d0d0d5;         /* focus ring */
+      --shadow: 0 6px 20px rgba(0,0,0/.45);
+      --radius: 18px;
+      --maxw: 1000px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Comfortaa", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: var(--accent); text-decoration-color: var(--muted); }
+    a:hover, a:focus { text-decoration-color: var(--accent); }
+    img { max-width: 100%; height: auto; display: block; }
+
+    /* Layout */
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 1rem clamp(1rem, 2vw, 2rem);
+    }
+
+    header[role="banner"] {
+      position: relative;
+      margin-block: 1rem 1.5rem;
+      padding: clamp(1rem, 2vw, 1.5rem);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: static;
+      width: auto;
+      height: auto;
+      padding: .5rem .75rem;
+      border-radius: .5rem;
+      background: var(--panel-2);
+      border: 2px solid var(--focus);
+      outline: none;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 .5rem 0;
+      letter-spacing: .2px;
+    }
+    h1 {
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.8vw, 3rem);
+    }
+    .subtitle {
+      font-weight: 300;
+      color: var(--ink-dim);
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+    }
+
+    main { display: grid; gap: 1.25rem; }
+
+    section {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(1rem, 2vw, 1.5rem);
+      box-shadow: var(--shadow);
+    }
+
+    section > header h2 {
+      font-size: clamp(1.2rem, 2.6vw, 1.6rem);
+      font-weight: 600;
+      margin-bottom: .75rem;
+    }
+
+    p { margin: 0 0 .85rem 0; color: var(--ink); }
+    ul { margin: 0; padding-left: 1.25rem; }
+    li { margin: .35rem 0; }
+
+    /* Skills list */
+    .skills { columns: 2; column-gap: 2rem; }
+    @media (max-width: 720px) { .skills { columns: 1; } }
+
+    /* Gallery grid */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+    }
+    @media (max-width: 720px) {
+      .gallery { grid-template-columns: repeat(2, 1fr); }
+    }
+    .tile {
+      position: relative;
+      background: radial-gradient(120% 140% at 30% 20%, #23232a, #141419 60%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      min-height: 160px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,.06), transparent 40%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .tile svg { width: 44px; height: 44px; opacity: .55; }
+    .tile figcaption {
+      position: absolute;
+      bottom: .5rem;
+      left: .75rem;
+      right: .75rem;
+      font-size: .8rem;
+      color: var(--ink-dim);
+      z-index: 1;
+      background: rgba(0,0,0,.15);
+      padding: .25rem .5rem;
+      border-radius: .5rem;
+      border: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(2px);
+    }
+
+    /* Contact */
+    address { font-style: normal; color: var(--ink); }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem 1rem;
+    }
+    @media (max-width: 720px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    .email-btn {
+      display: inline-block;
+      margin-top: .75rem;
+      padding: .8rem 1.1rem;
+      border-radius: .9rem;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #1d1d22, #15151a);
+      color: var(--ink);
+      text-decoration: none;
+      box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .08s ease;
+    }
+    .email-btn:hover, .email-btn:focus {
+      transform: translateY(-1px);
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Word cloud */
+    .cloud-wrap { padding: .75rem; border-top: 1px dashed var(--line); margin-top: .75rem; }
+    .cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem .75rem;
+      align-items: baseline;
+    }
+    .cloud a, .cloud span {
+      color: var(--accent);
+      text-decoration: none;
+      line-height: 1.1;
+      display: inline-block;
+      padding: .1rem .2rem;
+      border-radius: .3rem;
+      transition: transform .12s ease;
+    }
+    .cloud a:focus-visible, .cloud span:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .cloud a:hover { transform: translateY(-1px); }
+    /* sizes via class; JS randomizes per refresh */
+    .w1{ font-size: clamp(.85rem, 1.2vw, 1rem); font-weight: 300; }
+    .w2{ font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 300; }
+    .w3{ font-size: clamp(1.15rem, 2.1vw, 1.5rem); font-weight: 400; }
+    .w4{ font-size: clamp(1.3rem, 2.6vw, 1.75rem); font-weight: 500; }
+    .w5{ font-size: clamp(1.5rem, 3.1vw, 2.1rem); font-weight: 600; }
+    .w6{ font-size: clamp(1.8rem, 3.8vw, 2.6rem); font-weight: 700; }
+    @media (prefers-reduced-motion: reduce) { .email-btn, .cloud a { transition: none; } }
+
+    footer { color: var(--ink-dim); text-align: center; padding: 1.25rem 0 2rem; }
+
+    /* Focus style baseline */
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    /* Definition list styling for contact values */
+    dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem .75rem; margin: 0; }
+    dt { color: var(--ink-dim); }
+    dd { margin: 0; }
+  </style>
+
+  <!-- Structured data for AI indexing -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Patrick Burritt",
+    "alternateName": "Pat Bɇɇ",
+    "jobTitle": "Information Designer",
+    "url": "https://example.com/",
+    "worksFor": { "@type": "Organization", "name": "Georgetown University McDonough School of Business" },
+    "knowsAbout": [
+      "Information Architecture",
+      "Data Visualization",
+      "Accessibility (WCAG)",
+      "Content Strategy",
+      "Taxonomy and Ontology",
+      "SEO and AEO",
+      "Structured Data (schema.org/JSON-LD)",
+      "Analytics and Dashboards",
+      "Prototyping",
+      "RAG and AI-assisted content operations"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="wrap">
+    <header role="banner" aria-labelledby="site-title">
+      <h1 id="site-title">Information Designer <span class="visually-hidden">—</span> Patrick Burritt</h1>
+      <p class="subtitle" aria-label="Also known as">Pat Bɇɇ</p>
+    </header>
+
+    <main id="main" role="main">
+      <!-- Bio -->
+      <section aria-labelledby="bio-h">
+        <header><h2 id="bio-h">Bio</h2></header>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer dapibus, arcu nec aliquet tincidunt, nulla risus fermentum arcu, sit amet maximus nisi nisl vitae erat. Phasellus vitae malesuada ipsum. Cras nec tellus nec mi consequat tincidunt.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id tincidunt arcu. Sed feugiat, magna eget consectetur tristique, dolor ipsum sollicitudin arcu, a ultricies lorem justo id arcu. Curabitur in dui sed risus pulvinar mattis.
+        </p>
+      </section>
+
+      <!-- Skills -->
+      <section aria-labelledby="skills-h">
+        <header><h2 id="skills-h">Skills</h2></header>
+        <ul class="skills">
+          <li>Information Architecture &amp; Content Modeling</li>
+          <li>Data Visualization &amp; Dashboard Design</li>
+          <li>Accessibility (WCAG 2.2) &amp; Inclusive Writing</li>
+          <li>UX Writing &amp; Microcopy Systems</li>
+          <li>Taxonomy, Metadata, &amp; Controlled Vocabularies</li>
+          <li>Structured Data (schema.org, JSON-LD, RDF)</li>
+          <li>SEO &amp; AEO for Human + AI Findability</li>
+          <li>Content Strategy &amp; Editorial Operations</li>
+          <li>Analytics (GA4), Experimentation &amp; Measurement</li>
+          <li>Prototyping (HTML/CSS), Design Systems, Tokens</li>
+          <li>RAG &amp; AI-assisted Content Pipelines</li>
+          <li>Stakeholder Workshops &amp; Facilitation</li>
+        </ul>
+      </section>
+
+      <!-- Gallery -->
+      <section aria-labelledby="gallery-h">
+        <header><h2 id="gallery-h">Selected Work (Gallery)</h2></header>
+        <div class="gallery" role="list">
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zM5 7v10h14V7zM8 15l2.5-3 1.5 2 2-3 3 4z"/></svg>
+            <figcaption>Dashboard concept — KPI grid with accessible color scales</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zM5 7v10h14V7zM7 9h10v2H7zm0 4h6v2H7z"/></svg>
+            <figcaption>IA map — content model for program microsites</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 7h7l-5.5 4.5L19 21l-7-4-7 4 2.5-7.5L2 9h7z"/></svg>
+            <figcaption>Design tokens — grayscale spaceship theme</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 4h16v4H4zM4 10h10v10H4zM16 10h4v10h-4z"/></svg>
+            <figcaption>Schema.org plan — JSON-LD for People &amp; Programs</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 100 18 9 9 0 000-18zm-1 4h2v6h-2zm0 8h2v2h-2z"/></svg>
+            <figcaption>Content governance — roles, workflow, SLAs</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zm2 2v10h14V7zM7 9h10v2H7z"/></svg>
+            <figcaption>UX writing system — patterns &amp; voice</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h18v2H3zm0 4h18v2H3zm0 4h18v2H3zm0 4h12v2H3z"/></svg>
+            <figcaption>Taxonomy — subject &amp; audience facets</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v6H4zM14 15h6v6h-6z"/></svg>
+            <figcaption>Data viz — small multiples for trend clarity</figcaption>
+          </figure>
+          <figure class="tile" role="listitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l9 9-9 9-9-9 9-9zm0 4.8L6.8 12 12 17.2 17.2 12 12 6.8z"/></svg>
+            <figcaption>AI ops — RAG pipeline for knowledge retrieval</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section aria-labelledby="contact-h">
+        <header><h2 id="contact-h">Contact</h2></header>
+        <div class="contact-grid">
+          <address aria-label="Contact information">
+            <dl>
+              <dt>Name</dt><dd>Patrick Burritt</dd>
+              <dt>Role</dt><dd>Information Designer</dd>
+              <dt>Location</dt><dd>Washington, DC, USA</dd>
+              <dt>Email</dt><dd><a href="mailto:patrick.burritt@example.com" aria-label="Email Patrick (replace with your address)">patrick.burritt@example.com</a></dd>
+            </dl>
+          </address>
+          <div>
+            <p>Open to collaborations, advisory, and systems design work. For speaking or workshops, please reach out via email.</p>
+            <a class="email-btn" href="mailto:patrick.burritt@example.com?subject=Hello%20Patrick%20%E2%80%94%20From%20your%20bio%20site" aria-label="Send an email">Email me</a>
+          </div>
+        </div>
+
+        <!-- Other Interests / Word Cloud -->
+        <div class="cloud-wrap" aria-labelledby="interests-h">
+          <h3 id="interests-h" style="margin:0 0 .5rem 0; font-weight:600;">Other interests</h3>
+          <div class="cloud" id="wordCloud">
+            <a href="https://www.georgetown.edu" target="_blank" rel="noopener">Georgetown</a>
+            <a href="https://msb.georgetown.edu" target="_blank" rel="noopener">McDonough</a>
+            <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener">Accessibility</a>
+            <a href="https://schema.org" target="_blank" rel="noopener">schema.org</a>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noopener">CSS</a>
+            <a href="https://observablehq.com/" target="_blank" rel="noopener">Observable</a>
+            <a href="https://d3js.org/" target="_blank" rel="noopener">D3</a>
+            <a href="https://www.tableau.com/" target="_blank" rel="noopener">Tableau</a>
+            <a href="https://ga-dev-tools.google/ga4/dimensions-metrics-explorer/" target="_blank" rel="noopener">GA4</a>
+            <span>WordPress</span>
+            <span>Design Tokens</span>
+            <span>Semantics</span>
+            <span>Taxonomy</span>
+            <span>Ontologies</span>
+            <span>Metadata</span>
+            <span>Prototyping</span>
+            <span>Information Theory</span>
+            <span>Systems Thinking</span>
+          </div>
+          <noscript><p class="subtitle">Enable JavaScript to see dynamic word sizes.</p></noscript>
+        </div>
+      </section>
+    </main>
+
+    <footer role="contentinfo">
+      <small>&copy; <span id="year"></span> Patrick Burritt. All rights reserved.</small>
+    </footer>
+  </div>
+
+  <script>
+    // Current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Word cloud random but restrained weights each refresh
+    (function(){
+      const nodes = Array.from(document.querySelectorAll('#wordCloud > *'));
+      const weights = ['w1','w2','w2','w3','w3','w4','w4','w5','w6']; // gentle bias toward mid/large
+      // Deterministic-ish random per refresh without being jarring
+      const seed = (Date.now() % 97) + nodes.length;
+      function rand(i){ return Math.abs(Math.sin(seed + i) * 10000) % 1; }
+      nodes.forEach((el, i) => {
+        const w = weights[Math.floor(rand(i) * weights.length)];
+        el.classList.add(w);
+        // mild jitter for layout variety
+        el.style.transform = 'translateY(' + Math.floor(rand(i+7)*2) + 'px)';
+        el.setAttribute('aria-label', el.textContent + ' tag');
+      });
+    })();
+  </script>
+</body>
+</html>
