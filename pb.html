@@ -104,13 +104,20 @@
       gap: 0.75rem 1rem;
       align-items: center;
     }
-    .title-photo{
-      align-self: stretch;          /* match the row height (set by title lines) */
-      justify-self: start;
-      width: 100%;
-      max-width: 360px;             /* guardrails */
-      position: relative;
-    }
+/* Round, square container + proper image fit */
+.title-photo .ph-box{
+  border-radius: 50%;
+  overflow: hidden;
+  border: 5px solid #000;      /* keep your black ring */
+  background: transparent;     /* preserve PNG transparency */
+}
+
+.title-photo img{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;           /* even scale without distortion */
+}
     .title-photo .ph-box{
       position: absolute;
       inset: 0;
@@ -122,11 +129,7 @@
       place-items: center;
       border: 5px solid #000;       /* 5px black border */
     }
-    .title-photo img{
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+
     .title-stack{
       display: grid;
       gap: .25rem;
@@ -574,21 +577,26 @@
     window.addEventListener('load', fitAll);
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(fitAll); }
 
-    // ===== Sync photo to the exact combined height of the two title lines (desktop only) =====
-    function syncPhotoToTitles(){
-      const lines = document.querySelector('.title-lines');
-      const photoBox = document.querySelector('.title-photo .ph-box');
-      const masthead = document.querySelector('.masthead');
-      if(!lines || !photoBox || !masthead) return;
+    // Inside your existing syncPhotoToTitles()
+function syncPhotoToTitles(){
+  const lines = document.querySelector('.title-lines');
+  const photoBox = document.querySelector('.title-photo .ph-box');
+  if(!lines || !photoBox) return;
 
-      const isMobile = window.matchMedia('(max-width: 720px), (orientation: portrait)').matches;
-      if(isMobile){
-        // Let CSS handle centered square on mobile
-        photoBox.style.height = '';
-        photoBox.style.width = '';
-        return;
-      }
+  const isMobile = window.matchMedia('(max-width: 720px), (orientation: portrait)').matches;
+  if(isMobile){
+    // Let CSS + aspect-ratio handle mobile; clear inline sizes
+    photoBox.style.removeProperty('width');
+    photoBox.style.removeProperty('height');
+    return;
+  }
 
+  // Make the box perfectly square on desktop
+  const rect = lines.getBoundingClientRect();
+  const size = Math.max(80, Math.round(rect.height));  // combined title height
+  photoBox.style.height = size + 'px';
+  photoBox.style.width  = size + 'px';                 // <- force square = perfect circle
+}
       // Measure exact height of the two-line block
       const rect = lines.getBoundingClientRect();
       const height = Math.max(80, Math.round(rect.height));
