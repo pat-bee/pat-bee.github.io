@@ -3,33 +3,54 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Information Designer Patrick Burritt — Pat Bɇɇ</title>
+  <title>Information Designer — Patrick Burritt — Pat Bɇɇ</title>
   <meta name="description" content="Information Designer portfolio and bio for Patrick Burritt (Pat Bɇɇ). Accessible, semantic, AI-indexable single-page site." />
   <meta name="robots" content="index,follow,max-image-preview:large" />
-  <meta property="og:title" content="Information Designer Patrick Burritt — Pat Bɇɇ" />
+  <meta property="og:title" content="Information Designer — Patrick Burritt — Pat Bɇɇ" />
   <meta property="og:description" content="Accessible, semantic, AI-indexable bio site for an Information Designer." />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="en_US" />
-  <meta name="theme-color" content="#0f0f12" />
+  <meta name="theme-color" content="#0f0f12" id="themeColorMeta"/>
 
   <!-- Google Font: Comfortaa -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* ===== THEME (Dark = default night; Day inverts grays) ===== */
     :root{
+      /* Night (default) */
       --bg: #0f0f12;            /* deep space */
       --panel: #16161b;         /* hull */
       --panel-2: #1a1a20;       /* secondary panels */
       --ink: #e6e6e9;           /* primary text */
+      --ink-strong: #ffffff;    /* strongest text */
       --ink-dim: #bcbcc4;       /* secondary text */
       --line: #2a2a2f;          /* seams */
       --muted: #8f8f98;         /* muted */
       --accent: #d9d9df;        /* subtle highlight (still gray) */
       --focus: #d0d0d5;         /* focus ring */
-      --shadow: 0 6px 20px rgba(0,0,0/.45);
+      --chip: #202027;          /* chips/pills */
+      --chip-ink: #d7d7dd;
+      --shadow: 0 10px 30px rgba(0,0,0,.5);
       --radius: 18px;
-      --maxw: 1000px;
+      --maxw: 1100px;
+    }
+    .theme-day{
+      /* Day (inverse grayscale) */
+      --bg: #f4f4f7;
+      --panel: #ffffff;
+      --panel-2: #f0f0f4;
+      --ink: #1a1a1f;
+      --ink-strong: #0b0b0e;
+      --ink-dim: #50505a;
+      --line: #d8d8df;
+      --muted: #9a9aa2;
+      --accent: #34343d;
+      --focus: #2a2a36;
+      --chip: #ececf0;
+      --chip-ink: #2b2b33;
+      --shadow: 0 8px 24px rgba(0,0,0,.12);
     }
 
     * { box-sizing: border-box; }
@@ -83,19 +104,35 @@
       outline: none;
     }
 
-    h1, h2, h3 {
-      line-height: 1.2;
-      margin: 0 0 .5rem 0;
-      letter-spacing: .2px;
+    /* ===== TITLES (force single-line with dynamic fit) ===== */
+    .masthead{
+      display: grid;
+      gap: .25rem;
     }
-    h1 {
+    .title-line{
+      white-space: nowrap;            /* never wrap */
+      overflow: hidden;                /* prevent spill */
+      text-overflow: ellipsis;         /* if fit fails briefly */
+      line-height: 1.08;
+      transform-origin: left center;   /* smooth scaling */
+      will-change: font-size;
+    }
+    .title-role{
       font-weight: 700;
-      font-size: clamp(1.8rem, 3.8vw, 3rem);
+      color: var(--ink-strong);
+      font-size: clamp(1.8rem, 6vw, 3.2rem);
+      letter-spacing: .4px;
     }
-    .subtitle {
+    .title-name{
       font-weight: 300;
       color: var(--ink-dim);
-      font-size: clamp(1rem, 2.2vw, 1.25rem);
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      letter-spacing: .2px;
+    }
+    .subtitle {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
     }
 
     main { display: grid; gap: 1.25rem; }
@@ -112,11 +149,20 @@
       font-size: clamp(1.2rem, 2.6vw, 1.6rem);
       font-weight: 600;
       margin-bottom: .75rem;
+      color: var(--ink-strong);
     }
 
     p { margin: 0 0 .85rem 0; color: var(--ink); }
+    .lede { color: var(--ink-strong); font-weight: 500; }
+    .fine { color: var(--ink-dim); }
+
     ul { margin: 0; padding-left: 1.25rem; }
     li { margin: .35rem 0; }
+    .skills li{
+      padding-left: .25rem;
+    }
+    .skills li:nth-child(odd){ color: var(--ink); font-weight: 500; }
+    .skills li:nth-child(even){ color: var(--ink-dim); font-weight: 400; }
 
     /* Skills list */
     .skills { columns: 2; column-gap: 2rem; }
@@ -133,7 +179,7 @@
     }
     .tile {
       position: relative;
-      background: radial-gradient(120% 140% at 30% 20%, #23232a, #141419 60%);
+      background: radial-gradient(120% 140% at 30% 20%, color-mix(in oklab, var(--panel) 70%, black 30%), var(--panel-2) 60%);
       border: 1px solid var(--line);
       border-radius: 14px;
       min-height: 160px;
@@ -151,7 +197,7 @@
       pointer-events: none;
       z-index: 0;
     }
-    .tile svg { width: 44px; height: 44px; opacity: .55; }
+    .tile svg { width: 44px; height: 44px; opacity: .55; color: var(--ink-dim); }
     .tile figcaption {
       position: absolute;
       bottom: .5rem;
@@ -160,7 +206,7 @@
       font-size: .8rem;
       color: var(--ink-dim);
       z-index: 1;
-      background: rgba(0,0,0,.15);
+      background: color-mix(in oklab, var(--panel-2) 70%, transparent);
       padding: .25rem .5rem;
       border-radius: .5rem;
       border: 1px solid rgba(255,255,255,.06);
@@ -178,17 +224,29 @@
       .contact-grid { grid-template-columns: 1fr; }
     }
 
+    .chip {
+      display: inline-block;
+      background: var(--chip);
+      color: var(--chip-ink);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .25rem .6rem;
+      font-size: .8rem;
+      margin-right: .35rem;
+    }
+
     .email-btn {
       display: inline-block;
       margin-top: .75rem;
       padding: .8rem 1.1rem;
       border-radius: .9rem;
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, #1d1d22, #15151a);
+      background: linear-gradient(180deg, color-mix(in oklab, var(--panel) 70%, black 30%), var(--panel-2));
       color: var(--ink);
       text-decoration: none;
       box-shadow: var(--shadow);
       transition: transform .08s ease, box-shadow .08s ease;
+      font-weight: 600;
     }
     .email-btn:hover, .email-btn:focus {
       transform: translateY(-1px);
@@ -219,12 +277,12 @@
     }
     .cloud a:hover { transform: translateY(-1px); }
     /* sizes via class; JS randomizes per refresh */
-    .w1{ font-size: clamp(.85rem, 1.2vw, 1rem); font-weight: 300; }
-    .w2{ font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 300; }
+    .w1{ font-size: clamp(.85rem, 1.2vw, 1rem); font-weight: 300; opacity: .85; }
+    .w2{ font-size: clamp(1rem, 1.6vw, 1.25rem); font-weight: 300; opacity: .9; }
     .w3{ font-size: clamp(1.15rem, 2.1vw, 1.5rem); font-weight: 400; }
     .w4{ font-size: clamp(1.3rem, 2.6vw, 1.75rem); font-weight: 500; }
     .w5{ font-size: clamp(1.5rem, 3.1vw, 2.1rem); font-weight: 600; }
-    .w6{ font-size: clamp(1.8rem, 3.8vw, 2.6rem); font-weight: 700; }
+    .w6{ font-size: clamp(1.8rem, 3.8vw, 2.6rem); font-weight: 700; letter-spacing: .5px; }
     @media (prefers-reduced-motion: reduce) { .email-btn, .cloud a { transition: none; } }
 
     footer { color: var(--ink-dim); text-align: center; padding: 1.25rem 0 2rem; }
@@ -234,8 +292,8 @@
 
     /* Definition list styling for contact values */
     dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem .75rem; margin: 0; }
-    dt { color: var(--ink-dim); }
-    dd { margin: 0; }
+    dt { color: var(--ink-dim); font-weight: 500; }
+    dd { margin: 0; color: var(--ink); }
   </style>
 
   <!-- Structured data for AI indexing -->
@@ -247,7 +305,10 @@
     "alternateName": "Pat Bɇɇ",
     "jobTitle": "Information Designer",
     "url": "https://example.com/",
-    "worksFor": { "@type": "Organization", "name": "Georgetown University McDonough School of Business" },
+    "worksFor": {
+      "@type": "Organization",
+      "name": "Georgetown University McDonough School of Business"
+    },
     "knowsAbout": [
       "Information Architecture",
       "Data Visualization",
@@ -268,17 +329,22 @@
 
   <div class="wrap">
     <header role="banner" aria-labelledby="site-title">
-      <h1 id="site-title">Information Designer <span class="visually-hidden">—</span> Patrick Burritt</h1>
-      <p class="subtitle" aria-label="Also known as">Pat Bɇɇ</p>
+      <div class="masthead" aria-describedby="aka">
+        <h1 id="site-title" class="title-line title-role">Information Designer</h1>
+        <h2 class="title-line title-name">Patrick Burritt</h2>
+        <p id="aka" class="subtitle" aria-label="Also known as">Pat Bɇɇ</p>
+      </div>
     </header>
 
     <main id="main" role="main">
       <!-- Bio -->
       <section aria-labelledby="bio-h">
         <header><h2 id="bio-h">Bio</h2></header>
-        <p>
+        <p class="lede"><p>
         I’m an Information Designer who lives at the intersection of communication, structure, and intuition, where content systems start and data begins, and begins to tell human stories. I translate complexity into clarity: mapping messy information into visual, linguistic, and technical frameworks that help people find what they need (and ideally, what they didn’t know they were looking for). My background blends marketing strategy, semiotics, and digital systems design, which basically means I get to build <i>meaning</i> for a living.
         </p>
+        <p class="fine">
+          
 I’m most at home in projects that ask for equal parts logic and empathy: accessibility audits that make interfaces actually usable, editorial ecosystems that sync humans and algorithms, AI-enhanced workflows that stay true to the story. I love shaping systems that hum quietly in the background — elegant, maintainable, future-proof. I’m also human: curious, occasionally over-caffeinated, and still chasing that balance between precision and play. If your project needs a translator between design, content, and technology, I’m probably who you were looking for.
       </p>
       </section>
@@ -358,7 +424,14 @@ I’m most at home in projects that ask for equal parts logic and empathy: acces
             </dl>
           </address>
           <div>
-            <p>Open to collaborations, advisory, and systems design work. For speaking or workshops, please reach out via email.</p>
+            <p>Open to collaborations, advisory, and systems design work.</p>
+            <div aria-label="Availability" class="chips">
+              <span class="chip">Accessibility Audits</span>
+              <span class="chip">IA &amp; Taxonomy</span>
+              <span class="chip">AEO/SEO Systems</span>
+              <span class="chip">Data Viz</span>
+              <span class="chip">RAG/AI Ops</span>
+            </div>
             <a class="email-btn" href="mailto:patrick.burritt@example.com?subject=Hello%20Patrick%20%E2%80%94%20From%20your%20bio%20site" aria-label="Send an email">Email me</a>
           </div>
         </div>
@@ -397,20 +470,62 @@ I’m most at home in projects that ask for equal parts logic and empathy: acces
   </div>
 
   <script>
-    // Current year
+    // ===== Current year =====
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Word cloud random but restrained weights each refresh
+    // ===== Time-based theme (day vs night by local browser time) =====
+    (function(){
+      const hour = new Date().getHours();
+      // Define "day" broadly: 7am–7pm
+      const isDay = hour >= 7 && hour < 19;
+      const root = document.documentElement;
+      const meta = document.getElementById('themeColorMeta');
+      if(isDay){
+        root.classList.add('theme-day');
+        if(meta) meta.setAttribute('content', '#f4f4f7');
+      } else {
+        root.classList.remove('theme-day');
+        if(meta) meta.setAttribute('content', '#0f0f12');
+      }
+    })();
+
+    // ===== Single-line fit logic for titles =====
+    function fitOneLine(el, opts){
+      const { min=16, max=160, step=1 } = (opts||{});
+      // Start big, shrink until fits
+      let size = max;
+      el.style.fontSize = size + 'px';
+      el.style.whiteSpace = 'nowrap';
+      const parent = el.parentElement;
+      // guard to avoid infinite loops on display:none
+      const canMeasure = () => el.offsetWidth > 0 && parent.offsetWidth > 0;
+      if(!canMeasure()) return;
+      // decrease until it fits
+      while ((el.scrollWidth > parent.clientWidth) && size > min){
+        size -= step;
+        el.style.fontSize = size + 'px';
+      }
+    }
+    function fitAll(){
+      const role = document.querySelector('.title-role');
+      const name = document.querySelector('.title-name');
+      if(role) fitOneLine(role, {min:18, max:120, step:1});
+      if(name) fitOneLine(name, {min:16, max:90, step:1});
+    }
+    window.addEventListener('resize', () => { window.requestAnimationFrame(fitAll); });
+    window.addEventListener('load', fitAll);
+    // Also refit when fonts are ready
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(fitAll); }
+
+    // ===== Word cloud random weights per refresh (gentle) =====
     (function(){
       const nodes = Array.from(document.querySelectorAll('#wordCloud > *'));
-      const weights = ['w1','w2','w2','w3','w3','w4','w4','w5','w6']; // gentle bias toward mid/large
-      // Deterministic-ish random per refresh without being jarring
+      const weights = ['w1','w2','w2','w3','w3','w4','w4','w5','w6']; // bias toward mid/large
       const seed = (Date.now() % 97) + nodes.length;
       function rand(i){ return Math.abs(Math.sin(seed + i) * 10000) % 1; }
       nodes.forEach((el, i) => {
         const w = weights[Math.floor(rand(i) * weights.length)];
         el.classList.add(w);
-        // mild jitter for layout variety
         el.style.transform = 'translateY(' + Math.floor(rand(i+7)*2) + 'px)';
         el.setAttribute('aria-label', el.textContent + ' tag');
       });
