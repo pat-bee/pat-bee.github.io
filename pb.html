@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,20 +18,13 @@
 
   <style>
     :root{
-      --bg:#0f0f12; --panel:#16161b; --panel-2:#1a1a20;
-      --ink:#e6e6e9; --ink-strong:#ffffff; --ink-dim:#bcbcc4;
-      --line:#2a2a2f; --muted:#8f8f98; --accent:#d9d9df;
-      --focus:#d0d0d5; --chip:#202027; --chip-ink:#d7d7dd;
+      --bg:#f4f4f7; --panel:#ffffff; --panel-2:#f0f0f4;
+      --ink:#0b0b0e; --ink-strong:#0b0b0e; --ink-dim:#50505a;
+      --line:#d8d8df; --muted:#8f8f98; --accent:#d9d9df;
+      --focus:#2a2a36; --chip:#ececf0; --chip-ink:#2b2b33;
       --shadow:0 10px 30px rgba(0,0,0,.5); --radius:18px; --maxw:1100px;
     }
-    .theme-day{
-      --bg:#f4f4f7; --panel:#fff; --panel-2:#f0f0f4;
-      --ink:#1a1a1f; --ink-strong:#0b0b0e; --ink-dim:#50505a;
-      --line:#d8d8df; --muted:#9a9aa2; --accent:#34343d;
-      --focus:#2a2a36; --chip:#ececf0; --chip-ink:#2b2b33;
-      --shadow:0 8px 24px rgba(0,0,0,.12);
-    }
-
+  
     *{box-sizing:border-box;}
     html,body{
       height:100%; background:var(--bg); color:var(--ink);
@@ -111,6 +105,8 @@
       background:linear-gradient(180deg,var(--panel),var(--panel-2));
       border:1px solid var(--line);border-radius:var(--radius);
       padding:clamp(1rem,2vw,1.5rem);box-shadow:var(--shadow);
+        padding-bottom: 20px;
+        margin-bottom: 50px;
     }
     section h2{text-align:center;color:var(--ink-strong);font-weight:600;margin:.25rem 0;line-height:1.2;}
     p{margin:0 0 .85rem 0;color:var(--ink);}
@@ -125,6 +121,15 @@
     }
 
     footer{color:var(--ink-dim);text-align:center;padding:1.25rem 0 2rem;}
+
+}
+      
+      
+      
+      
+      
+      
+      
   </style>
 </head>
 <body>
@@ -156,7 +161,34 @@
           <li><a href="#sound-design">Sound Design</a></li>
         </ul>
       </nav>
-
+<section aria-labelledby="bio-h">
+        <header><h2 id="bio-h">Bio</h2></header>
+        <p class="lede">
+        I’m an Information Designer who lives at the intersection of communication, structure, and intuition, where content systems start and data begins, and begins to tell human stories. I translate complexity into clarity: mapping messy information into visual, linguistic, and technical frameworks that help people find what they need (and ideally, what they didn’t know they were looking for). My background blends marketing strategy, semiotics, and digital systems design, which basically means I get to build <i>meaning</i> for a living.
+        </p>
+        <p class="fine">
+        I’m most at home in projects that ask for equal parts logic and empathy: accessibility audits that make interfaces actually usable, editorial ecosystems that sync humans and algorithms, AI-enhanced workflows that stay true to the story. I love shaping systems that hum quietly in the background — elegant, maintainable, future-proof. I’m also human: curious, occasionally over-caffeinated, and still chasing that balance between precision and play. If your project needs a translator between design, content, and technology, I’m probably who you were looking for.
+        </p>
+      </section>
+        
+        
+        <section aria-labelledby="skills-h">
+        <header><h2 id="skills-h">Skills</h2></header>
+        <ul class="skills">
+          <li>Information Architecture &amp; Content Modeling</li>
+          <li>Data Visualization &amp; Dashboard Design</li>
+          <li>Accessibility (WCAG 2.2) &amp; Inclusive Writing</li>
+          <li>UX Writing &amp; Microcopy Systems</li>
+          <li>Taxonomy, Metadata, &amp; Controlled Vocabularies</li>
+          <li>Structured Data (schema.org, JSON-LD, RDF)</li>
+          <li>SEO &amp; AEO for Human + AI Findability</li>
+          <li>Content Strategy &amp; Editorial Operations</li>
+          <li>Analytics (GA4), Experimentation &amp; Measurement</li>
+          <li>Prototyping (HTML/CSS), Design Systems, Tokens</li>
+          <li>RAG &amp; AI-assisted Content Pipelines</li>
+          <li>Stakeholder Workshops &amp; Facilitation</li>
+        </ul>
+      </section>
       <section id="websites">
         <h2>Websites</h2>
         <div class="content">
@@ -196,6 +228,48 @@
           <audio controls style="width:100%;">
             <source src="sample.mp3" type="audio/mpeg">
           </audio>
+        </div>
+      </section>
+      <section aria-labelledby="contact-h">
+        <header><h2 id="contact-h">Contact</h2></header>
+        <div class="contact-grid">
+          <address aria-label="Contact information">
+            <dl>
+              <dt>Name</dt><dd>Patrick Burritt</dd>
+              <dt>Role</dt><dd>Information Designer</dd>
+              <dt>Location</dt><dd>Washington, DC, USA</dd>
+              <dt>Email</dt><dd><a href="mailto:patrick.burritt@example.com" aria-label="Email Patrick (replace with your address)">patrick.burritt@example.com</a></dd>
+            </dl>
+          </address>
+          <div>
+            <p>Open to collaborations, advisory, and systems design work.</p>
+            <div aria-label="Availability" class="chips">
+              <span class="chip">Accessibility Audits</span>
+              <span class="chip">IA &amp; Taxonomy</span>
+              <span class="chip">AEO/SEO Systems</span>
+              <span class="chip">Data Viz</span>
+              <span class="chip">RAG/AI Ops</span>
+            </div>
+            <a class="email-btn" href="mailto:patrick.burritt@example.com?subject=Hello%20Patrick%20%E2%80%94%20From%20your%20bio%20site" aria-label="Send an email">Email me</a>
+          </div>
+        </div>
+
+        <!-- Full-width Other Interests -->
+        <div class="cloud-wrap" aria-labelledby="interests-h">
+          <h3 id="interests-h" style="margin:0 0 .5rem 0; font-weight:600;">Other interests</h3>
+          <div class="cloud" id="wordCloud">
+            <a href="https://www.georgetown.edu" target="_blank" rel="noopener" class="w6" aria-label="Georgetown tag" style="transform: translateY(0px);">Georgetown</a>
+            <a href="https://msb.georgetown.edu" target="_blank" rel="noopener" class="w5" aria-label="McDonough tag" style="transform: translateY(1px);">McDonough</a>
+            <a href="https://www.w3.org/WAI/" target="_blank" rel="noopener" class="w4" aria-label="Accessibility tag" style="transform: translateY(0px);">Accessibility</a>
+            <a href="https://schema.org" target="_blank" rel="noopener" class="w5" aria-label="schema.org tag" style="transform: translateY(1px);">schema.org</a>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noopener" class="w3" aria-label="CSS tag" style="transform: translateY(0px);">CSS</a>
+            <a href="https://observablehq.com/" target="_blank" rel="noopener" class="w4" aria-label="Observable tag" style="transform: translateY(0px);">Observable</a>
+            <a href="https://d3js.org/" target="_blank" rel="noopener" class="w5" aria-label="D3 tag" style="transform: translateY(1px);">D3</a>
+            <a href="https://www.tableau.com/" target="_blank" rel="noopener" class="w1" aria-label="Tableau tag" style="transform: translateY(0px);">Tableau</a>
+            <a href="https://ga-dev-tools.google/ga4/dimensions-metrics-explorer/" target="_blank" rel="noopener" class="w5" aria-label="GA4 tag" style="transform: translateY(0px);">GA4</a>
+            <span class="w1" aria-label="WordPress tag" style="transform: translateY(0px);">WordPress</span><span class="w4" aria-label="Design Tokens tag" style="transform: translateY(1px);">Design Tokens</span><span class="w2" aria-label="Semantics tag" style="transform: translateY(0px);">Semantics</span><span class="w2" aria-label="Taxonomy tag" style="transform: translateY(0px);">Taxonomy</span><span class="w5" aria-label="Ontologies tag" style="transform: translateY(0px);">Ontologies</span><span class="w2" aria-label="Metadata tag" style="transform: translateY(1px);">Metadata</span><span class="w3" aria-label="Prototyping tag" style="transform: translateY(1px);">Prototyping</span><span class="w3" aria-label="Information Theory tag" style="transform: translateY(1px);">Information Theory</span><span class="w5" aria-label="Systems Thinking tag" style="transform: translateY(1px);">Systems Thinking</span>
+          </div>
+          <noscript><p class="subtitle">Enable JavaScript to see dynamic word sizes.</p></noscript>
         </div>
       </section>
     </main>
