@@ -79,7 +79,7 @@
 line-height:1.2;
     }
  .subtitle a{
-    color:#7322f4;
+    color:#2b232e;
  }
     .subtitle a:hover{
     color:#e95945:
@@ -183,7 +183,27 @@ nav a:visited:focus{
   background: /*var(--nav-hover-bg);*/ #a8a8aa;
   color: #fff;
 }
-  
+  /* chip-style anchors so the bg shows */
+nav a {
+  display: inline-block;
+  padding: .4rem .7rem;
+  border-radius: .6rem;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+/* your hover color from earlier (optional) */
+nav a:hover,
+nav a:focus {
+  background: #382e38;
+  color: #fff;
+}
+
+/* “visited this session” state */
+nav a.is-visited {
+  background: #2b232e;   /* stays until refresh */
+  color: #fff;            /* readable on that bg */
+}
+
       
       
       
@@ -196,7 +216,22 @@ nav a:visited:focus{
     (isNight ? document.documentElement : document.documentElement).classList.toggle('theme-night', isNight);
   })();
 </script> 
+<script>
+  (function () {
+    // Mark any clicked nav anchor as "visited this session"
+    document.querySelectorAll('nav a[href^="#"]').forEach(function(a){
+      a.addEventListener('click', function(){
+        a.classList.add('is-visited');
+      });
+    });
 
+    // If you want the link for the current hash to start “visited” on load, keep this:
+    if (location.hash) {
+      var current = document.querySelector('nav a[href="' + location.hash + '"]');
+      if (current) current.classList.add('is-visited');
+    }
+  })();
+</script>
 <body>
   <div class="wrap">
     <header role="banner">
