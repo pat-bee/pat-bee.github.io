@@ -1,11 +1,4 @@
-Got it—here’s your file with the profile photo logic fully integrated:
 
-* Uses the new image (`profile-fall-RND-2025.png`)
-* Perfect circular crop with 5 px black ring
-* No oval stretching (`object-fit: cover`)
-* Sensible desktop size cap (120–220 px); mobile remains CSS-responsive and centered
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,9 +295,85 @@ Got it—here’s your file with the profile photo logic fully integrated:
 
       <!-- Portfolio example section left out for brevity in this snippet -->
       <section>
-        <header><h2>Portfolio (example placeholder)</h2></header>
-        <p class="fine">Your existing 3-across portfolio section remains unchanged; this file focuses on the masthead photo centering and raw image URL.</p>
-      </section>
+       <nav>
+    <ul>
+        <li><a href="#websites">Websites</a></li>
+        <li><a href="#writings">Writings</a></li>
+        <li><a href="#photos">Photos</a></li>
+        <li><a href="#graphic-design">Graphic&nbsp;Design</a></li>
+        <li><a href="#sound-design">Sound&nbsp;Design</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="websites">
+        <h2>Websites</h2>
+        <div class="content">
+              <div class="item">
+                <div class="image-container">
+                 <a href="https://msb.georgetown.edu"><img src="https://pat-bee.github.io/303_msb.png" alt="msb"></a>
+                 <a href="https://futureofwork.georgetown.edu/">< <img src="https://pat-bee.github.io/303_ai.png" alt="fow"></a>
+                  <a href="https://businessforimpact.georgetown.edu/"><<img src="https://pat-bee.github.io/303_b4i.png" alt="b41"></a>
+                </div>
+        </div>
+    </section>
+    <section id="writings">
+        <h2>Writings</h2>
+        <div class="content">
+            <div class="item">
+                <h3>Article Title</h3>
+                <p>Brief overview or excerpt of the writing piece.</p>
+                <p><a href="#" target="_blank">Read More</a></p>
+            </div>
+        </div>
+    </section>
+    <section id="photos">
+        <h2>Photos</h2>
+        <div class="content">
+            <div class="item">
+                <div class="image-container">
+                  <img src="https://pat-bee.github.io/303-hustle.png" alt="hustle photo">
+                  <img src="https://pat-bee.github.io/303-mocking-bird.png" alt="bird photo">
+                  <img src="https://pat-bee.github.io/303-red-leaf.png" alt="leaft photo">
+                </div>
+                <br/>
+                <div class="image-container">
+                  <img src="https://pat-bee.github.io/tbt-911-v2.png" alt="tt photo">
+                  <img src="https://pat-bee.github.io/303_service.png" alt="service photo">
+                  <img src="https://pat-bee.github.io/303_heart.png" alt="heart photo">
+                </div>
+                <br/>
+                <p>Pat captures evocative, offbeat moments in everyday life—framing shadow, light, and texture in ways that turn fleeting details into quiet, impactful visual stories.</p>
+            </div>
+        </div>
+    </section>
+    <section id="graphic-design">
+        <h2>Graphic Design</h2>
+        <div class="content">
+            <div class="item">
+\                <div class="image-container">
+                  <img src="https://pat-bee.github.io/303-ctrl-v2.png" alt="Design Mockup 1">
+                  <img src="https://pat-bee.github.io/303-SG-PATCH.png" alt="Design Mockup 2">
+                  <img src="https://pat-bee.github.io/lb_flyer1_front.jpg" alt="Design Mockup 3">
+                </div>
+                <br/>
+                <p>Pat’s graphic design thrives on strong compositions that balance precision with play—each piece revealing subtle humor, layered meaning, or hidden gems that reward the careful observer.</p>
+            </div>
+        </div>
+    </section>
+    <section id="sound-design">
+        <h2>Sound Design</h2>
+        <div class="content">
+            <div class="item">
+                <h3>Track Title</h3>
+                <audio controls style="width:100%;">
+                    <source src="sample.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <p>Short description of the sound design piece.</p>
+            </div>
+        </div>
+    </section>
+</main>
 
       <!-- Contact -->
       <section aria-labelledby="contact-h">
