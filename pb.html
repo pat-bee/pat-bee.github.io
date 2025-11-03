@@ -160,7 +160,7 @@ nav li a {font-color:000000;}
   --nav-visited-ink: #fff;   /* night = white */
 }
 
-/* make anchors look like chips so bg shows nicely */
+/* 
 nav a{
   display: inline-block;
   padding: .4rem .7rem;
@@ -169,49 +169,91 @@ nav a{
   transition: background-color .18s ease, color .18s ease;
 }
 
-/* hover/focus state */
+
 nav a:hover,
 nav a:focus{
   background: #a8a8aa;
-  color: #000;                  /* readable on #382e38 */
-  border-bottom-color: transparent; /* if you had an underline */
+  color: #000;                 
+  border-bottom-color: transparent; 
 }
 
-/* visited default state */
+
 nav a:visited{
   background: #a8a8aa;
   color: var(--nav-visited-ink);
 }
 
-/* visited + hover/focus should still use the hover color */
+
 nav a:visited:hover,
 nav a:visited:focus{
   background: /*var(--nav-hover-bg);*/ #a8a8aa;
   /* 
   color: #fff;
 }
-  /* chip-style anchors so the bg shows */
+
 nav a {
   display: inline-block;
   padding: .4rem .7rem;
   transition: background-color .18s ease, color .18s ease;
 }
 
-/* your hover color from earlier (optional) */
+
 nav a:hover,
 nav a:focus {
   background: #382e38;
   color: #fff;
 }
 
-/* “visited this session” state */
+
 nav a.is-visited {
   background: #2b232e;   /* stays until refresh */
   /* 
   color: #fff;            /* readable on that bg */
 }
 
-      
+/* === NAV CONTAINER === */
+  nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  /* === BASE LINK STYLE === */
+  nav a {
+    color: #000;                        /* black text by default */
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.25s ease;
+  }
+
+  /* === HOVER / FOCUS STATE === */
+  nav a:hover,
+  nav a:focus {
+    background-color: #1d082b;          /* deep purple background */
+    color: #fff;                        /* white text */
+  }
+
+  /* === VISITED STATE (visual bookmark) === */
+  nav a:visited {
+    background-color: #b0a2ba;          /* muted lavender gray */
+    color: #1d082b;                     /* deep purple text */
+  }
+
+  /* === Responsive tweaks === */
+  @media (max-width: 600px) {
+    nav {
+      gap: 0.5rem;
+    }
+    nav a {
+      display: inline-block;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.95rem;
+    }
+  }
       
       
   </style>
