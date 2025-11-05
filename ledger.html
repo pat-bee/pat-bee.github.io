@@ -1,94 +1,256 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart</title>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<style>
-:root { --maxw: 1000px; }
-html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-.wrap { max-width: var(--maxw); margin: 0 auto; padding: 8px 12px; }
-header { position: sticky; top: 0; background: #fff; z-index: 5; }
-#chart { height: 30vh; width: 100%; }
-.toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; padding:6px 0; }
-.toolbar label { font-size: 12px; }
-.accounts { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 740px) { .accounts { grid-template-columns: 1fr; } }
-.row { display:flex; align-items:flex-start; justify-content:space-between; border-bottom: 1px solid #eee; padding: 8px 0; }
-.left { flex: 1 1 auto; padding-right: 12px; }
-.right { flex: 0 0 auto; min-width: 40%; text-align: right; font-size: 12px; line-height: 1.4; white-space: nowrap; overflow-x:auto; }
-h2 { margin: 0 0 6px 0; font-size: 18px; display: flex; align-items: baseline; gap: 10px; }
-.lastval { font-weight: 700; }
-.apr { font-weight: 400; font-size: 12px; opacity: .75; }
-.name { font-weight: 600; }
-.input-line { display:flex; gap:8px; align-items:center; }
-input[type="number"] { width: 160px; padding: 6px 8px; font-size: 14px; }
-button { padding: 6px 10px; border: 1px solid #ddd; background:#fafafa; cursor:pointer; border-radius: 6px; }
-button:hover { background:#f1f1f1; }
-.values { display: inline-flex; gap: 8px; }
-.debt { color: #c22727; }
-.asset { color: #138a13; }
-footer { padding: 16px 0 24px; text-align: right; }
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ledger — Accounts & Chart</title>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    :root { --maxw: 1000px; }
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 8px 12px; }
+    header { position: sticky; top: 0; background: #fff; z-index: 5; }
+    #chart { height: 30vh; width: 100%; }
+    .toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; padding:6px 0; }
+    .toolbar label { font-size: 12px; }
+    .accounts { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 740px) { .accounts { grid-template-columns: 1fr; } }
+    .row { display:flex; align-items:flex-start; justify-content:space-between; border-bottom: 1px solid #eee; padding: 8px 0; }
+    .left { flex: 1 1 auto; padding-right: 12px; }
+    .right { flex: 0 0 auto; min-width: 40%; text-align: right; font-size: 12px; line-height: 1.4; white-space: nowrap; overflow-x:auto; }
+    h2 { margin: 0 0 6px 0; font-size: 18px; display: flex; align-items: baseline; gap: 10px; }
+    .lastval { font-weight: 700; }
+    .apr { font-weight: 400; font-size: 12px; opacity: .75; }
+    .name { font-weight: 600; }
+    .input-line { display:flex; gap:8px; align-items:center; }
+    input[type="number"] { width: 160px; padding: 6px 8px; font-size: 14px; }
+    button { padding: 6px 10px; border: 1px solid #ddd; background:#fafafa; cursor:pointer; border-radius: 6px; }
+    button:hover { background:#f1f1f1; }
+    .values { display: inline-flex; gap: 8px; }
+    .debt { color: #c22727; }
+    .asset { color: #138a13; }
+    footer { padding: 16px 0 24px; text-align: right; }
+  </style>
 </head>
 <body>
-<header class="wrap">
-<div class="toolbar">
-<label><input type="radio" name="mode" value="totals" checked> Totals</label>
-<label><input type="radio" name="mode" value="accounts"> Per‑account</label>
-<button id="submitAll">Submit All</button>
-</div>
-<div id="chart"></div>
-</header>
-<div id="status" class="wrap" style="color:#888;font-size:12px;"></div>
+  <header class="wrap">
+    <div class="toolbar">
+      <label><input type="radio" name="mode" value="totals" checked> Totals</label>
+      <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+      <button id="submitAll">Submit All</button>
+    </div>
+    <div id="chart"></div>
+  </header>
 
+  <div id="status" class="wrap" style="color:#888;font-size:12px;"></div>
 
-<main class="wrap">
-<section id="accounts" class="accounts"></section>
-<footer>
-<small>Enter value(s) and press <b>Enter</b> (per‑account) or click <b>Submit All</b>.</small>
-</footer>
-</main>
+  <main class="wrap">
+    <section id="accounts" class="accounts"></section>
+    <footer>
+      <small>Enter value(s) and press <b>Enter</b> (per-account) or click <b>Submit All</b>.</small>
+    </footer>
+  </main>
 
+  <script>
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxnOPTfs4343etEt_ASSvu5OU5ly8TESgBbm0xP4O8GwLaXNNq9SelnUg3152fvd8FmRw/exec';
 
-<script>
-const API_BASE = 'https://script.google.com/macros/s/AKfycbxnOPTfs4343etEt_ASSvu5OU5ly8TESgBbm0xP4O8GwLaXNNq9SelnUg3152fvd8FmRw/exec'; // e.g., https://script.google.com/macros/s/AKfycb.../exec
+  // Load Google Charts
+  google.charts.load('current', {packages:['corechart']});
 
+  let SNAP = null;            // last snapshot
+  let MODE = 'totals';        // 'totals' | 'accounts'
 
-// Google Charts loader
-google.charts.load('current', {'packages':['corechart']});
+  function setStatus(msg) {
+    const el = document.getElementById('status');
+    if (el) el.textContent = msg || '';
+  }
 
+  async function fetchSnapshot() {
+    try {
+      setStatus('Loading snapshot…');
+      const res = await fetch(`${API_BASE}?route=snapshot`);
+      const text = await res.text();
+      let j;
+      try { j = JSON.parse(text); } catch (e) {
+        console.error('Non-JSON response:', text);
+        setStatus('Error: API returned non-JSON (check Web App access & URL)');
+        return;
+      }
+      if (!j.ok) {
+        console.error('Snapshot error:', j);
+        setStatus('Error: ' + (j.error || 'snapshot failed'));
+        return;
+      }
+      SNAP = j;
+      setStatus('Snapshot loaded');
+      renderAll();
+    } catch (err) {
+      console.error(err);
+      setStatus('Fetch failed (see console)');
+    }
+  }
 
-let SNAP = null; // last snapshot
-let MODE = 'totals'; // 'totals' | 'accounts'
+  function renderAll() {
+    renderChart();
+    renderAccounts();
+  }
 
+  function renderChart() {
+    if (!SNAP) return;
+    const months = SNAP.months;
+    const data = new google.visualization.DataTable();
+    data.addColumn('string', 'Month');
 
-async function fetchSnapshot() {
-const res = await fetch(`${API_BASE}?route=snapshot`);
-const j = await res.json();
-if (!j.ok) throw new Error(j.error || 'Snapshot failed');
-SNAP = j;
-renderAll();
-}
+    let rows = [];
+    if (MODE === 'totals') {
+      data.addColumn('number', 'Assets');
+      data.addColumn('number', 'Debts');
+      for (let i = 0; i < months.length; i++) {
+        rows.push([
+          months[i],
+          Number(SNAP.totals.assets[i] || 0),
+          Number(SNAP.totals.debts[i]  || 0)
+        ]);
+      }
+    } else {
+      // per-account
+      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
+      for (let i = 0; i < months.length; i++) {
+        const row = [ months[i] ];
+        SNAP.accounts.forEach(a => {
+          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+          row.push(Number(v));
+        });
+        rows.push(row);
+      }
+    }
+    data.addRows(rows);
 
+    // symmetric Y-axis around 0
+    let minV = 0, maxV = 0;
+    for (const r of rows) for (let i=1; i<r.length; i++) {
+      const v = Number(r[i]) || 0;
+      if (v < minV) minV = v;
+      if (v > maxV) maxV = v;
+    }
+    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
+    const options = {
+      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+      legend: { position: 'top', alignment: 'center' },
+      hAxis: { slantedText: false },
+      vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0 },
+      seriesType: 'line',
+      colors: MODE === 'totals' ? ['#138a13', '#c22727'] : undefined
+    };
 
-function renderAll() {
-renderChart();
-renderAccounts();
-}
+    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
+    chart.draw(data, options);
+  }
 
+  function renderAccounts() {
+    const root = document.getElementById('accounts');
+    root.innerHTML = '';
+    SNAP.accounts.forEach(a => {
+      const s = SNAP.series[a.name];
+      const last = s?.last ?? 0;
 
-function renderChart() {
-if (!SNAP) return;
-const months = SNAP.months;
-const data = new google.visualization.DataTable();
-data.addColumn('string', 'Month');
+      const row = document.createElement('div'); row.className = 'row';
+      const left = document.createElement('div'); left.className = 'left';
+      const right = document.createElement('div'); right.className = 'right';
 
+      const h2 = document.createElement('h2');
+      const lastEl = document.createElement('span');
+      lastEl.className = 'lastval ' + a.kind;
+      lastEl.textContent = formatMoney(last);
 
-let rows = [];
-if (MODE === 'totals') {
-data.addColumn('number', 'Assets');
-data.addColumn('number', 'Debts');
-for (let i=0;i<months.length;i++) {
+      const nameEl = document.createElement('span');
+      nameEl.className = 'name';
+      nameEl.textContent = a.name;
+
+      const aprEl = document.createElement('span');
+      aprEl.className = 'apr';
+      aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
+
+      h2.appendChild(lastEl);
+      h2.appendChild(nameEl);
+      h2.appendChild(aprEl);
+
+      const inputLine = document.createElement('div'); inputLine.className = 'input-line';
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.placeholder = 'Add new value…';
+      inp.step = '0.01';
+      inp.addEventListener('keydown', async (ev) => {
+        if (ev.key === 'Enter') {
+          await submitEntries([{ account: a.name, value: inp.value }]);
+          inp.value = '';
+        }
+      });
+      inputLine.appendChild(inp);
+
+      left.appendChild(h2);
+      left.appendChild(inputLine);
+
+      const vals = document.createElement('div'); vals.className = 'values';
+      (s?.last12 || []).forEach(v => {
+        const span = document.createElement('span');
+        span.textContent = formatMoney(v);
+        span.className = (v < 0 ? 'debt' : 'asset');
+        vals.appendChild(span);
+      });
+      right.appendChild(vals);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      root.appendChild(row);
+    });
+  }
+
+  function formatMoney(n) {
+    const sign = n < 0 ? '-' : '';
+    const abs = Math.abs(Number(n) || 0);
+    return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  }
+
+  async function submitAll() {
+    const entries = [];
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+      const v = inp.value.trim();
+      if (v !== '') {
+        const name = inp.closest('.row').querySelector('.name').textContent;
+        entries.push({ account: name, value: Number(v) });
+      }
+    });
+    if (entries.length === 0) return;
+    await submitEntries(entries);
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
+  }
+
+  async function submitEntries(entries) {
+    try {
+      const res = await fetch(`${API_BASE}?route=submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entries })
+      });
+      const j = await res.json();
+      if (!j.ok) { alert('Submit failed: ' + (j.error || 'Unknown')); return; }
+      await fetchSnapshot();
+    } catch (e) {
+      console.error(e);
+      alert('Network error submitting data.');
+    }
+  }
+
+  // Wire up UI
+  window.addEventListener('resize', () => renderChart());
+  document.getElementById('submitAll').addEventListener('click', submitAll);
+  document.querySelectorAll('input[name="mode"]').forEach(r => {
+    r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
+  });
+
+  // Start once Google Charts is ready
+  google.charts.setOnLoadCallback(fetchSnapshot);
+  </script>
+</body>
 </html>
