@@ -13,7 +13,7 @@
     --c-black:#000000;  /* text, lines */
     --c-white:#ffffff;  /* background */
     --fs-base:18px;     /* base size up from 14 → 18 */
-    --fs-h2:24px;       /* big section labels */
+    --fs-h2:55px;       /* big section labels */
     --fs-small:14px;
     --radius:10px;      /* soft corners for inputs/buttons */
     --gap:12px;
@@ -37,7 +37,7 @@
   .right{ flex:0 0 auto; min-width:40%; text-align:right; font-size:var(--fs-small); white-space:nowrap; overflow-x:auto; }
 
   h2{ margin:0 0 8px 0; font-size:var(--fs-h2); display:flex; align-items:baseline; gap:10px; }
-  .lastval{ font-weight:800; }  /* bolder for quick scanning */
+  .lastval{ font-weight:100; }  /* bolder for quick scanning */
   .name{ font-weight:700; color:var(--c-black); }
   .apr{ font-weight:400; font-size:var(--fs-small); opacity:.75; }
 
@@ -327,12 +327,14 @@ lastEl.style.color = (Number(last) < 0) ? '#a02d2a' : '#4c8036';
   // Start once Google Charts is ready
   google.charts.setOnLoadCallback(fetchSnapshot);
   </script>
+  <center>
 <div class="toolbar">
   <button id="refresh" aria-label="Refresh data">Refresh</button>
   <label><input type="radio" name="mode" value="totals" checked> Totals</label>
   <label><input type="radio" name="mode" value="accounts"> Per-account</label>
   <button id="submitAll">Submit All</button>
 </div>
+    </center>
 
 </body>
 </html>
