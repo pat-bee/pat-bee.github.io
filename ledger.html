@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ledger — Accounts & Chart</title>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<style>
+:root { --maxw: 1000px; }
+html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 8px 12px; }
+header { position: sticky; top: 0; background: #fff; z-index: 5; }
+#chart { height: 30vh; width: 100%; }
+.toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; padding:6px 0; }
+.toolbar label { font-size: 12px; }
+.accounts { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 740px) { .accounts { grid-template-columns: 1fr; } }
+.row { display:flex; align-items:flex-start; justify-content:space-between; border-bottom: 1px solid #eee; padding: 8px 0; }
+.left { flex: 1 1 auto; padding-right: 12px; }
+.right { flex: 0 0 auto; min-width: 40%; text-align: right; font-size: 12px; line-height: 1.4; white-space: nowrap; overflow-x:auto; }
+h2 { margin: 0 0 6px 0; font-size: 18px; display: flex; align-items: baseline; gap: 10px; }
+.lastval { font-weight: 700; }
+.apr { font-weight: 400; font-size: 12px; opacity: .75; }
+.name { font-weight: 600; }
+.input-line { display:flex; gap:8px; align-items:center; }
+input[type="number"] { width: 160px; padding: 6px 8px; font-size: 14px; }
+button { padding: 6px 10px; border: 1px solid #ddd; background:#fafafa; cursor:pointer; border-radius: 6px; }
+button:hover { background:#f1f1f1; }
+.values { display: inline-flex; gap: 8px; }
+.debt { color: #c22727; }
+.asset { color: #138a13; }
+footer { padding: 16px 0 24px; text-align: right; }
+</style>
+</head>
+<body>
+<header class="wrap">
+<div class="toolbar">
+<label><input type="radio" name="mode" value="totals" checked> Totals</label>
+<label><input type="radio" name="mode" value="accounts"> Per‑account</label>
+<button id="submitAll">Submit All</button>
+</div>
+<div id="chart"></div>
+</header>
+
+
+<main class="wrap">
+<section id="accounts" class="accounts"></section>
+<footer>
+<small>Enter value(s) and press <b>Enter</b> (per‑account) or click <b>Submit All</b>.</small>
+</footer>
+</main>
+
+
+<script>
+const API_BASE = 'REPLACE_WITH_YOUR_WEB_APP_URL'; // e.g., https://script.google.com/macros/s/AKfycb.../exec
+
+
+// Google Charts loader
+google.charts.load('current', {'packages':['corechart']});
+
+
+let SNAP = null; // last snapshot
+let MODE = 'totals'; // 'totals' | 'accounts'
+
+
+async function fetchSnapshot() {
+const res = await fetch(`${API_BASE}?route=snapshot`);
+const j = await res.json();
+if (!j.ok) throw new Error(j.error || 'Snapshot failed');
+SNAP = j;
+renderAll();
+}
+
+
+function renderAll() {
+renderChart();
+renderAccounts();
+}
+
+
+function renderChart() {
+if (!SNAP) return;
+const months = SNAP.months;
+const data = new google.visualization.DataTable();
+data.addColumn('string', 'Month');
+
+
+let rows = [];
+if (MODE === 'totals') {
+data.addColumn('number', 'Assets');
+data.addColumn('number', 'Debts');
+for (let i=0;i<months.length;i++) {
+</html>
