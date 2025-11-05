@@ -1,52 +1,52 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Ledger — Accounts & Chart</title>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ledger — Accounts & Chart</title>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
 <style>
   :root{
-    --maxw: 1000px;
-    --c-pos:#4c8036;    /* positive */
-    --c-neg:#a02d2a;    /* negative */
-    --c-black:#000000;  /* text, lines */
-    --c-white:#ffffff;  /* background */
-    --fs-base:18px;     /* base size up from 14 → 18 */
-    --fs-h2:55px;       /* big section labels */
+    --c-pos:#4c8036;      /* positive */
+    --c-neg:#a02d2a;      /* negative */
+    --c-black:#000000;    /* text/lines */
+    --c-white:#ffffff;    /* bg */
+    --fs-base:18px;       /* larger base for readability */
+    --fs-h2:28px;         /* big but not overwhelming */
     --fs-small:14px;
-    --radius:10px;      /* soft corners for inputs/buttons */
+    --radius:10px;
     --gap:12px;
   }
 
   html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
   body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size:var(--fs-base); line-height:1.5; }
 
-  .wrap{ max-width:var(--maxw); margin:0 auto; padding:12px; }
+  /* 90% viewport width, 5% margins both sides */
+  .wrap{ width:90vw; margin-left:5vw; margin-right:5vw; padding:12px 0; }
 
   header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
-  .toolbar{ display:flex; gap:var(--gap); align-items:center; justify-content:flex-end; padding:6px 0; }
+  .toolbar{ display:flex; gap:var(--gap); align-items:center; justify-content:flex-end; padding:6px 0; flex-wrap:wrap; }
   .toolbar label{ font-size:var(--fs-small); }
 
   #chart{ height:30vh; width:100%; }
 
   .accounts{ display:grid; grid-template-columns: 1fr; gap:var(--gap); }
-  .row{ display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #eee; padding:12px 0; }
+  .row{ display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #eee; padding:12px 0; gap:12px; }
 
-  .left{ flex:1 1 auto; padding-right:12px; }
-  .right{ flex:0 0 auto; min-width:40%; text-align:right; font-size:var(--fs-small); white-space:nowrap; overflow-x:auto; }
+  .left{ flex:1 1 55%; min-width:0; }
+  .right{ flex:1 1 45%; min-width:260px; text-align:right; font-size:var(--fs-small); }
 
-  h2{ margin:0 0 8px 0; font-size:var(--fs-h2); display:flex; align-items:baseline; gap:10px; }
-  .lastval{ font-weight:100; }  /* bolder for quick scanning */
+  h2{ margin:0 0 8px 0; font-size:var(--fs-h2); display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .lastval{ font-weight:700; }
   .name{ font-weight:700; color:var(--c-black); }
   .apr{ font-weight:400; font-size:var(--fs-small); opacity:.75; }
 
   .input-line{ display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
 
   input[type="number"]{
-    width: 116px;               /* wider */
-    padding: 10px 10px;         /* comfortable */
-    font-size: 20px;            /* larger */
+    width: 160px;
+    padding: 12px 12px;
+    font-size: 20px;
     border: 2px solid #ddd;
     border-radius: var(--radius);
     background: var(--c-white);
@@ -57,15 +57,7 @@
     border-color: var(--c-black);
     box-shadow: 0 0 0 2px var(--c-black) inset;
   }
-/* Sign-based coloring for history chips */
-.values [data-sign="pos"] { color: #4c8036; }
-.values [data-sign="neg"] { color: #a02d2a; }
-.lastval[data-sign="pos"] { color:#4c8036; }
-.lastval[data-sign="neg"] { color:#a02d2a; }
-  .lastval[data-sign="pos"], .values .chip[data-sign="pos"] { color: #4c8036; }
-.lastval[data-sign="neg"], .values .chip[data-sign="neg"] { color: #a02d2a; }
 
-  
   button{
     padding: 12px 16px;
     font-size: 18px;
@@ -74,23 +66,34 @@
     background: var(--c-white);
     cursor:pointer;
     border-radius: var(--radius);
-    align: center;
   }
   button:hover{ background:#f6f6f6; }
   button:focus-visible{ outline:3px solid var(--c-black); outline-offset:2px; }
-  #refresh{ margin-left:auto; }
 
-  .values{ display:inline-flex; gap:10px; }
+  /* History chips: wrap intelligently and keep tight spacing on wide screens */
+  .values{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 12px;          /* row gap, column gap */
+    justify-content:flex-end;
+    font-variant-numeric: tabular-nums;
+  }
   .chip{
     padding: 4px 8px;
     border-radius: 999px;
     border: 1px solid #eee;
-    font-variant-numeric: tabular-nums;
   }
 
+  /* Sign-based coloring (site-wide palette) */
+  .lastval[data-sign="pos"], .values .chip[data-sign="pos"] { color: var(--c-pos); }
+  .lastval[data-sign="neg"], .values .chip[data-sign="neg"] { color: var(--c-neg); }
+
   footer{ padding: 16px 0 24px; text-align:right; }
-  @media (max-width:480px){
-    .right{ min-width:unset; text-align:left; }
+
+  @media (max-width: 780px){
+    .row{ flex-direction:column; }
+    .right{ text-align:left; min-width:0; }
+    .values{ justify-content:flex-start; }
     input[type="number"]{ width:100%; }
     .toolbar{ justify-content:space-between; }
   }
@@ -102,6 +105,7 @@
       <label><input type="radio" name="mode" value="totals" checked> Totals</label>
       <label><input type="radio" name="mode" value="accounts"> Per-account</label>
       <button id="submitAll">Submit All</button>
+      <button id="refresh">Refresh</button>
     </div>
     <div id="chart"></div>
   </header>
@@ -115,105 +119,108 @@
     </footer>
   </main>
 
-  <script>
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbypQ9-kml_zezjdZvZZFsXJ9NubkNLpX8Yqb6nduCHfIjdWBvI-u072MSwyg7-EoGabtg/exec';
-document.getElementById('refresh')?.addEventListener('click', fetchSnapshot);
+<script>
+const API_BASE = 'REPLACE_WITH_YOUR_WEB_APP_URL'; // e.g., https://script.google.com/macros/s/AKfycb.../exec
 
-  // Load Google Charts
-  google.charts.load('current', {packages:['corechart']});
+// Google Charts
+google.charts.load('current', {packages:['corechart']});
 
-  let SNAP = null;            // last snapshot
-  let MODE = 'totals';        // 'totals' | 'accounts'
+let SNAP = null;     // last snapshot
+let MODE = 'totals'; // 'totals' | 'accounts'
 
-  function setStatus(msg) {
-    const el = document.getElementById('status');
-    if (el) el.textContent = msg || '';
-  }
-
-  async function fetchSnapshot() {
-    try {
-      setStatus('Loading snapshot…');
-      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
-      const text = await res.text();
-      let j;
-      try { j = JSON.parse(text); } catch (e) {
-        console.error('Non-JSON response:', text);
-        setStatus('Error: API returned non-JSON (check Web App access & URL)');
-        return;
-      }
-      if (!j.ok) {
-        console.error('Snapshot error:', j);
-        setStatus('Error: ' + (j.error || 'snapshot failed'));
-        return;
-      }
-      SNAP = j;
-      setStatus('Snapshot loaded');
-      renderAll();
-    } catch (err) {
-      console.error(err);
-      setStatus('Fetch failed (see console)');
-    }
-  }
-
-  function renderAll() {
-    renderChart();
-    renderAccounts();
-  }
-
-  function renderChart() {
-    if (!SNAP) return;
-    const months = SNAP.months;
-    const data = new google.visualization.DataTable();
-    data.addColumn('string', 'Month');
-
-    let rows = [];
-    if (MODE === 'totals') {
-      data.addColumn('number', 'Assets');
-      data.addColumn('number', 'Debts');
-      for (let i = 0; i < months.length; i++) {
-        rows.push([
-          months[i],
-          Number(SNAP.totals.assets[i] || 0),
-          Number(SNAP.totals.debts[i]  || 0)
-        ]);
-      }
-    } else {
-      // per-account
-      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      for (let i = 0; i < months.length; i++) {
-        const row = [ months[i] ];
-        SNAP.accounts.forEach(a => {
-          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-          row.push(Number(v));
-        });
-        rows.push(row);
-      }
-    }
-    data.addRows(rows);
-
-    // symmetric Y-axis around 0
-    let minV = 0, maxV = 0;
-    for (const r of rows) for (let i=1; i<r.length; i++) {
-      const v = Number(r[i]) || 0;
-      if (v < minV) minV = v;
-      if (v > maxV) maxV = v;
-    }
-    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
-    const options = {
-      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
-      legend: { position: 'top', alignment: 'center' },
-      hAxis: { slantedText: false },
-      vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0 },
-      seriesType: 'line',
-      colors: MODE === 'totals' ? ['#138a13', '#c22727'] : undefined
-    };
-
-    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
-    chart.draw(data, options);
-  }
-
- // Helper: returns "pos" or "neg" for sign-based coloring
 const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
+
+function setStatus(msg) {
+  const el = document.getElementById('status');
+  if (el) el.textContent = msg || '';
+}
+
+async function fetchSnapshot() {
+  try {
+    setStatus('Loading snapshot…');
+    const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
+    const text = await res.text();
+    let j;
+    try { j = JSON.parse(text); } catch (e) {
+      console.error('Non-JSON response:', text);
+      setStatus('Error: API returned non-JSON (check Web App URL/access)');
+      return;
+    }
+    if (!j.ok) {
+      console.error('Snapshot error:', j);
+      setStatus('Error: ' + (j.error || 'snapshot failed'));
+      return;
+    }
+    SNAP = j;
+    setStatus('Snapshot loaded');
+    renderAll();
+  } catch (err) {
+    console.error(err);
+    setStatus('Fetch failed (see console)');
+  }
+}
+
+function renderAll() {
+  renderChart();
+  renderAccounts();
+}
+
+function renderChart() {
+  if (!SNAP) return;
+  const months = SNAP.months;
+  const data = new google.visualization.DataTable();
+  data.addColumn('string', 'Month');
+
+  let rows = [];
+  if (MODE === 'totals') {
+    data.addColumn('number', 'Assets');
+    data.addColumn('number', 'Debts');
+    for (let i = 0; i < months.length; i++) {
+      rows.push([
+        months[i],
+        Number(SNAP.totals.assets[i] || 0),
+        Number(SNAP.totals.debts[i]  || 0)
+      ]);
+    }
+  } else {
+    // Per-account (draw all series in black to honor palette constraint)
+    SNAP.accounts.forEach(a => data.addColumn('number', a.name));
+    for (let i = 0; i < months.length; i++) {
+      const row = [ months[i] ];
+      SNAP.accounts.forEach(a => {
+        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+        row.push(Number(v));
+      });
+      rows.push(row);
+    }
+  }
+  data.addRows(rows);
+
+  // symmetric Y-axis around 0
+  let minV = 0, maxV = 0;
+  for (const r of rows) for (let i=1; i<r.length; i++) {
+    const v = Number(r[i]) || 0;
+    if (v < minV) minV = v;
+    if (v > maxV) maxV = v;
+  }
+  const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
+
+  // Color array for per-account: all black
+  const perAccountColors = Array(SNAP.accounts.length).fill('#000000');
+
+  const options = {
+    height: Math.max(260, Math.round(window.innerHeight * 0.30)),
+    legend: { position: 'top', alignment: 'center', textStyle: { color:'#000000' } },
+    hAxis: { slantedText: false, textStyle: { color:'#000000' } },
+    vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0, textStyle: { color:'#000000' } },
+    seriesType: 'line',
+    colors: (MODE === 'totals') ? ['#4c8036', '#a02d2a'] : perAccountColors,
+    backgroundColor: '#ffffff'
+  };
+
+  const chart = new google.visualization.ComboChart(document.getElementById('chart'));
+  chart.draw(data, options);
+}
 
 function renderAccounts() {
   const root = document.getElementById('accounts');
@@ -223,22 +230,21 @@ function renderAccounts() {
     const s = SNAP.series[a.name];
     const last = s?.last ?? 0;
 
-    // Row containers
     const row  = document.createElement('div'); row.className = 'row';
     const left = document.createElement('div'); left.className = 'left';
     const right= document.createElement('div'); right.className = 'right';
 
-    // Heading: [LAST VALUE] [NAME] [APR]
+    // Heading
     const h2 = document.createElement('h2');
 
     const lastEl = document.createElement('span');
     lastEl.className = 'lastval';
     lastEl.textContent = formatMoney(last);
-    lastEl.dataset.sign = signOf(last);      // <-- drives color via CSS
+    lastEl.dataset.sign = signOf(last);
 
     const nameEl = document.createElement('span');
     nameEl.className = 'name';
-    nameEl.textContent = a.name;             // stays black in V2 brief
+    nameEl.textContent = a.name;
 
     const aprEl = document.createElement('span');
     aprEl.className = 'apr';
@@ -248,10 +254,8 @@ function renderAccounts() {
     h2.appendChild(nameEl);
     h2.appendChild(aprEl);
 
-    // Input line
-    const inputLine = document.createElement('div');
-    inputLine.className = 'input-line';
-
+    // Input
+    const inputLine = document.createElement('div'); inputLine.className = 'input-line';
     const inp = document.createElement('input');
     inp.type = 'number';
     inp.placeholder = 'Add new value…';
@@ -264,62 +268,53 @@ function renderAccounts() {
         inp.blur();
       }
     });
-
     inputLine.appendChild(inp);
+
     left.appendChild(h2);
     left.appendChild(inputLine);
 
-    // Right-side last-12 values (chips)
-    const vals = document.createElement('div');
-    vals.className = 'values';
-
+    // Right-side last-12 history chips (wrap intelligently)
+    const vals = document.createElement('div'); vals.className = 'values';
     (s?.last12 || []).forEach(v => {
       const chip = document.createElement('span');
-      chip.className = 'chip';               // visual pill
-      chip.dataset.sign = signOf(v);         // <-- drives color via CSS
+      chip.className = 'chip';
+      chip.dataset.sign = signOf(v);
       chip.textContent = formatMoney(v);
       vals.appendChild(chip);
     });
-
     right.appendChild(vals);
 
-    // Assemble row
     row.appendChild(left);
     row.appendChild(right);
     root.appendChild(row);
   });
 }
 
-  function formatMoney(n) {
-    const sign = n < 0 ? '-' : '';
-    const abs = Math.abs(Number(n) || 0);
-    return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-  }
+function formatMoney(n) {
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(Number(n) || 0);
+  return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+}
 
-  async function submitAll() {
-    const entries = [];
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      const v = inp.value.trim();
-      if (v !== '') {
-        const name = inp.closest('.row').querySelector('.name').textContent;
-        entries.push({ account: name, value: Number(v) });
-      }
-    });
-    if (entries.length === 0) return;
-    await submitEntries(entries);
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
-  }
+async function submitAll() {
+  const entries = [];
+  document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+    const v = inp.value.trim();
+    if (v !== '') {
+      const name = inp.closest('.row').querySelector('.name').textContent;
+      entries.push({ account: name, value: Number(v) });
+    }
+  });
+  if (entries.length === 0) return;
+  await submitEntries(entries);
+  document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
+}
 
- async function submitEntries(entries) {
+async function submitEntries(entries) {
   try {
     // form-encode to avoid CORS preflight
     const body = new URLSearchParams({ payload: JSON.stringify({ entries }) });
-    const res = await fetch(`${API_BASE}?route=submit`, {
-      method: 'POST',
-      body
-      // NOTE: no headers — lets the browser send a "simple" request
-    });
-    // Defensive parse (in case of HTML error pages)
+    const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
     const text = await res.text();
     let j;
     try { j = JSON.parse(text); } catch (e) {
@@ -339,25 +334,16 @@ function renderAccounts() {
   }
 }
 
+// UI wire-up
+window.addEventListener('resize', () => renderChart());
+document.getElementById('submitAll').addEventListener('click', submitAll);
+document.getElementById('refresh').addEventListener('click', fetchSnapshot);
+document.querySelectorAll('input[name="mode"]').forEach(r => {
+  r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
+});
 
-  // Wire up UI
-  window.addEventListener('resize', () => renderChart());
-  document.getElementById('submitAll').addEventListener('click', submitAll);
-  document.querySelectorAll('input[name="mode"]').forEach(r => {
-    r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
-  });
-
-  // Start once Google Charts is ready
-  google.charts.setOnLoadCallback(fetchSnapshot);
-  </script>
-  <center>
-<div class="toolbar">
-  <button id="refresh" aria-label="Refresh data">Refresh</button>
-  <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-  <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-  <button id="submitAll">Submit All</button>
-</div>
-    </center>
-
+// Start when Charts is ready
+google.charts.setOnLoadCallback(fetchSnapshot);
+</script>
 </body>
 </html>
