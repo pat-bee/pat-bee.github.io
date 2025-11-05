@@ -5,32 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ledger — Accounts & Chart</title>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <style>
-    :root { --maxw: 1000px; }
-    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 8px 12px; }
-    header { position: sticky; top: 0; background: #fff; z-index: 5; }
-    #chart { height: 30vh; width: 100%; }
-    .toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; padding:6px 0; }
-    .toolbar label { font-size: 12px; }
-    .accounts { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 740px) { .accounts { grid-template-columns: 1fr; } }
-    .row { display:flex; align-items:flex-start; justify-content:space-between; border-bottom: 1px solid #eee; padding: 8px 0; }
-    .left { flex: 1 1 auto; padding-right: 12px; }
-    .right { flex: 0 0 auto; min-width: 40%; text-align: right; font-size: 12px; line-height: 1.4; white-space: nowrap; overflow-x:auto; }
-    h2 { margin: 0 0 6px 0; font-size: 18px; display: flex; align-items: baseline; gap: 10px; }
-    .lastval { font-weight: 700; }
-    .apr { font-weight: 400; font-size: 12px; opacity: .75; }
-    .name { font-weight: 600; }
-    .input-line { display:flex; gap:8px; align-items:center; }
-    input[type="number"] { width: 160px; padding: 6px 8px; font-size: 14px; }
-    button { padding: 6px 10px; border: 1px solid #ddd; background:#fafafa; cursor:pointer; border-radius: 6px; }
-    button:hover { background:#f1f1f1; }
-    .values { display: inline-flex; gap: 8px; }
-    /*.debt { color: #c22727; }
-    .asset { color: #138a13; } */
-    footer { padding: 16px 0 24px; text-align: right; }
-  </style>
+<style>
+  :root{
+    --maxw: 1000px;
+    --c-pos:#4c8036;    /* positive */
+    --c-neg:#a02d2a;    /* negative */
+    --c-black:#000000;  /* text, lines */
+    --c-white:#ffffff;  /* background */
+    --fs-base:18px;     /* base size up from 14 → 18 */
+    --fs-h2:24px;       /* big section labels */
+    --fs-small:14px;
+    --radius:10px;      /* soft corners for inputs/buttons */
+    --gap:12px;
+  }
+
+  html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
+  body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size:var(--fs-base); line-height:1.5; }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:12px; }
+
+  header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
+  .toolbar{ display:flex; gap:var(--gap); align-items:center; justify-content:flex-end; padding:6px 0; }
+  .toolbar label{ font-size:var(--fs-small); }
+
+  #chart{ height:30vh; width:100%; }
+
+  .accounts{ display:grid; grid-template-columns: 1fr; gap:var(--gap); }
+  .row{ display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #eee; padding:12px 0; }
+
+  .left{ flex:1 1 auto; padding-right:12px; }
+  .right{ flex:0 0 auto; min-width:40%; text-align:right; font-size:var(--fs-small); white-space:nowrap; overflow-x:auto; }
+
+  h2{ margin:0 0 8px 0; font-size:var(--fs-h2); display:flex; align-items:baseline; gap:10px; }
+  .lastval{ font-weight:800; }  /* bolder for quick scanning */
+  .name{ font-weight:700; color:var(--c-black); }
+  .apr{ font-weight:400; font-size:var(--fs-small); opacity:.75; }
+
+  .input-line{ display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+
+  input[type="number"]{
+    width: 240px;               /* wider */
+    padding: 14px 14px;         /* comfortable */
+    font-size: 20px;            /* larger */
+    border: 2px solid #ddd;
+    border-radius: var(--radius);
+    background: var(--c-white);
+    color: var(--c-black);
+    outline: none;
+  }
+  input[type="number"]:focus{
+    border-color: var(--c-black);
+    box-shadow: 0 0 0 2px var(--c-black) inset;
+  }
+
+  button{
+    padding: 12px 16px;
+    font-size: 18px;
+    border: 2px solid var(--c-black);
+    color: var(--c-black);
+    background: var(--c-white);
+    cursor:pointer;
+    border-radius: var(--radius);
+  }
+  button:hover{ background:#f6f6f6; }
+  button:focus-visible{ outline:3px solid var(--c-black); outline-offset:2px; }
+  #refresh{ margin-left:auto; }
+
+  .values{ display:inline-flex; gap:10px; }
+  .chip{
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid #eee;
+    font-variant-numeric: tabular-nums;
+  }
+
+  footer{ padding: 16px 0 24px; text-align:right; }
+  @media (max-width:480px){
+    .right{ min-width:unset; text-align:left; }
+    input[type="number"]{ width:100%; }
+    .toolbar{ justify-content:space-between; }
+  }
+</style>
 </head>
 <body>
   <header class="wrap">
@@ -272,6 +327,12 @@ lastEl.style.color = (Number(last) < 0) ? '#a02d2a' : '#4c8036';
   // Start once Google Charts is ready
   google.charts.setOnLoadCallback(fetchSnapshot);
   </script>
-  <button id="refresh">Refresh</button>
+<div class="toolbar">
+  <button id="refresh" aria-label="Refresh data">Refresh</button>
+  <label><input type="radio" name="mode" value="totals" checked> Totals</label>
+  <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+  <button id="submitAll">Submit All</button>
+</div>
+
 </body>
 </html>
