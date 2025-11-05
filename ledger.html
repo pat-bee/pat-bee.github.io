@@ -226,21 +226,35 @@
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
   }
 
-  async function submitEntries(entries) {
-    try {
-      const res = await fetch(`${API_BASE}?route=submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries })
-      });
-      const j = await res.json();
-      if (!j.ok) { alert('Submit failed: ' + (j.error || 'Unknown')); return; }
-      await fetchSnapshot();
-    } catch (e) {
-      console.error(e);
-      alert('Network error submitting data.');
+ async function submitEntries(entries) {
+  try {
+    // form-encode to avoid CORS preflight
+    const body = new URLSearchParams({ payload: JSON.stringify({ entries }) });
+    const res = await fetch(`${API_BASE}?route=submit`, {
+      method: 'POST',
+      body
+      // NOTE: no headers — lets the browser send a "simple" request
+    });
+    // Defensive parse (in case of HTML error pages)
+    const text = await res.text();
+    let j;
+    try { j = JSON.parse(text); } catch (e) {
+      console.error('Submit non-JSON:', text);
+      alert('Submit failed (non-JSON response). Check Web App access or deployment.');
+      return;
     }
+    if (!j.ok) {
+      console.error('Submit JSON error:', j);
+      alert('Submit failed: ' + (j.error || 'Unknown'));
+      return;
+    }
+    await fetchSnapshot();
+  } catch (e) {
+    console.error(e);
+    alert('Network error submitting data.');
   }
+}
+
 
   // Wire up UI
   window.addEventListener('resize', () => renderChart());
