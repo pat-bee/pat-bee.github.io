@@ -57,7 +57,12 @@
     border-color: var(--c-black);
     box-shadow: 0 0 0 2px var(--c-black) inset;
   }
-
+/* Sign-based coloring for history chips */
+.values [data-sign="pos"] { color: #4c8036; }
+.values [data-sign="neg"] { color: #a02d2a; }
+.lastval[data-sign="pos"] { color:#4c8036; }
+.lastval[data-sign="neg"] { color:#a02d2a; }
+  
   button{
     padding: 12px 16px;
     font-size: 18px;
@@ -204,69 +209,83 @@ document.getElementById('refresh')?.addEventListener('click', fetchSnapshot);
     chart.draw(data, options);
   }
 
-  function renderAccounts() {
-    const root = document.getElementById('accounts');
-    root.innerHTML = '';
-    SNAP.accounts.forEach(a => {
-      const s = SNAP.series[a.name];
-      const last = s?.last ?? 0;
+ // Helper: returns "pos" or "neg" for sign-based coloring
+const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
-      const row = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right = document.createElement('div'); right.className = 'right';
+function renderAccounts() {
+  const root = document.getElementById('accounts');
+  root.innerHTML = '';
 
-      const h2 = document.createElement('h2');
-      const lastEl = document.createElement('span');
-lastEl.className = 'lastval';
-lastEl.textContent = formatMoney(last);
-// Color by current value (green >= 0, red < 0)
-lastEl.style.color = (Number(last) < 0) ? '#a02d2a' : '#4c8036';
+  SNAP.accounts.forEach(a => {
+    const s = SNAP.series[a.name];
+    const last = s?.last ?? 0;
 
+    // Row containers
+    const row  = document.createElement('div'); row.className = 'row';
+    const left = document.createElement('div'); left.className = 'left';
+    const right= document.createElement('div'); right.className = 'right';
 
-      const nameEl = document.createElement('span');
-      nameEl.className = 'name';
-      nameEl.textContent = a.name;
-      if (a.color) nameEl.style.color = a.color;   // e.g., "#42fbb1" for SoFi
+    // Heading: [LAST VALUE] [NAME] [APR]
+    const h2 = document.createElement('h2');
 
+    const lastEl = document.createElement('span');
+    lastEl.className = 'lastval';
+    lastEl.textContent = formatMoney(last);
+    lastEl.dataset.sign = signOf(last);      // <-- drives color via CSS
 
-      const aprEl = document.createElement('span');
-      aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = a.name;             // stays black in V2 brief
 
-      h2.appendChild(lastEl);
-      h2.appendChild(nameEl);
-      h2.appendChild(aprEl);
+    const aprEl = document.createElement('span');
+    aprEl.className = 'apr';
+    aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
 
-      const inputLine = document.createElement('div'); inputLine.className = 'input-line';
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.placeholder = 'Add new value…';
-      inp.step = '0.01';
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value }]);
-          inp.value = '';
-        }
-      });
-      inputLine.appendChild(inp);
+    h2.appendChild(lastEl);
+    h2.appendChild(nameEl);
+    h2.appendChild(aprEl);
 
-      left.appendChild(h2);
-      left.appendChild(inputLine);
+    // Input line
+    const inputLine = document.createElement('div');
+    inputLine.className = 'input-line';
 
-      const vals = document.createElement('div'); vals.className = 'values';
-      (s?.last12 || []).forEach(v => {
-        const span = document.createElement('span');
-        span.textContent = formatMoney(v);
-        span.className = (v < 0 ? 'debt' : 'asset');
-        vals.appendChild(span);
-      });
-      right.appendChild(vals);
-
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.placeholder = 'Add new value…';
+    inp.step = '0.01';
+    inp.setAttribute('aria-label', `New value for ${a.name}`);
+    inp.addEventListener('keydown', async (ev) => {
+      if (ev.key === 'Enter') {
+        await submitEntries([{ account: a.name, value: inp.value }]);
+        inp.value = '';
+        inp.blur();
+      }
     });
-  }
+
+    inputLine.appendChild(inp);
+    left.appendChild(h2);
+    left.appendChild(inputLine);
+
+    // Right-side last-12 values (chips)
+    const vals = document.createElement('div');
+    vals.className = 'values';
+
+    (s?.last12 || []).forEach(v => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';               // visual pill
+      chip.dataset.sign = signOf(v);         // <-- drives color via CSS
+      chip.textContent = formatMoney(v);
+      vals.appendChild(chip);
+    });
+
+    right.appendChild(vals);
+
+    // Assemble row
+    row.appendChild(left);
+    row.appendChild(right);
+    root.appendChild(row);
+  });
+}
 
   function formatMoney(n) {
     const sign = n < 0 ? '-' : '';
