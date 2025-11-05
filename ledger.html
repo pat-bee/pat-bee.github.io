@@ -53,6 +53,7 @@
 
   <script>
   const API_BASE = 'https://script.google.com/macros/s/AKfycbypQ9-kml_zezjdZvZZFsXJ9NubkNLpX8Yqb6nduCHfIjdWBvI-u072MSwyg7-EoGabtg/exec';
+document.getElementById('refresh')?.addEventListener('click', fetchSnapshot);
 
   // Load Google Charts
   google.charts.load('current', {packages:['corechart']});
@@ -68,7 +69,7 @@
   async function fetchSnapshot() {
     try {
       setStatus('Loading snapshot…');
-      const res = await fetch(`${API_BASE}?route=snapshot`);
+      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
       const text = await res.text();
       let j;
       try { j = JSON.parse(text); } catch (e) {
@@ -160,12 +161,17 @@
 
       const h2 = document.createElement('h2');
       const lastEl = document.createElement('span');
-      lastEl.className = 'lastval ' + a.kind;
-      lastEl.textContent = formatMoney(last);
+lastEl.className = 'lastval';
+lastEl.textContent = formatMoney(last);
+// Color by current value (green >= 0, red < 0)
+lastEl.style.color = (Number(last) < 0) ? '#a02d2a' : '#4c8036';
+
 
       const nameEl = document.createElement('span');
       nameEl.className = 'name';
       nameEl.textContent = a.name;
+      if (a.color) nameEl.style.color = a.color;   // e.g., "#42fbb1" for SoFi
+
 
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
@@ -266,5 +272,6 @@
   // Start once Google Charts is ready
   google.charts.setOnLoadCallback(fetchSnapshot);
   </script>
+  <button id="refresh">Refresh</button>
 </body>
 </html>
