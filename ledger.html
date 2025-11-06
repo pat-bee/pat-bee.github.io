@@ -4,7 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ledger — Accounts & Chart</title>
-  <script defer src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- (Optional) Preload; we’ll still safety-load in JS if not present -->
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
   <style>
     :root{
       --maxw: 1400px;
@@ -26,11 +27,10 @@
     html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
     body{
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: calc(var(--fs-base) * var(--fs-scale)); /* sets rem baseline */
+      font-size: calc(var(--fs-base) * var(--fs-scale));
       line-height:1.5;
     }
 
-    /* 90% of viewport width, centered */
     .wrap{ width:90vw; max-width:var(--maxw); margin:0 auto; padding:12px; }
 
     header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
@@ -67,7 +67,6 @@
       box-shadow: 0 0 0 2px var(--c-black) inset;
     }
 
-    /* sign-based colors for current value + history */
     .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
     .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
@@ -104,12 +103,10 @@
 <body>
   <header class="wrap">
     <div class="toolbar">
-      <!-- Font controls -->
       <button id="resetSizes" aria-label="Reset text sizes">Reset</button>
       <button id="fontMinus" aria-label="Decrease text size">−</button>
       <button id="fontPlus"  aria-label="Increase text size">+</button>
 
-      <!-- Data controls -->
       <button id="refresh" aria-label="Refresh data">Refresh</button>
       <label><input type="radio" name="mode" value="totals" checked> Totals</label>
       <label><input type="radio" name="mode" value="accounts"> Per-account</label>
@@ -129,17 +126,27 @@
 
   <script>
   // ==== CONFIG ====
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec'; // e.g., https://script.google.com/macros/s/AKfy.../exec
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
-  // Google Charts
-  google.charts.load('current', {packages:['corechart']});
+  // ==== UTIL: ensure Google Charts is present before using `google` ====
+  function ensureChartsReady(onReady){
+    if (window.google && google.charts){
+      onReady();
+      return;
+    }
+    // If loader tag failed / was blocked, add it now
+    const s = document.createElement('script');
+    s.src = 'https://www.gstatic.com/charts/loader.js';
+    s.onload = () => onReady();
+    document.head.appendChild(s);
+  }
 
-  // ==== UI SCALE (browser only) ====
+  // ==== UI SCALE ====
   function safeNum(v, fb){ const n = Number(v); return Number.isFinite(n) ? n : fb; }
   function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
 
-  let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00); // overall UI
-  let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00); // heading only
+  let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00);
+  let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00);
 
   function applyScaleVars(){
     FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
@@ -170,7 +177,7 @@
 
   // ==== APP STATE ====
   let SNAP = null;
-  let MODE = 'totals'; // 'totals' | 'accounts'
+  let MODE = 'totals';
 
   function setStatus(msg){
     const el = document.getElementById('status');
@@ -202,10 +209,7 @@
     }
   }
 
-  function renderAll(){
-    renderChart();
-    renderAccounts();
-  }
+  function renderAll(){ renderChart(); renderAccounts(); }
 
   function renderChart(){
     if (!SNAP) return;
@@ -238,7 +242,6 @@
     }
     data.addRows(rows);
 
-    // symmetric Y-axis around 0
     let minV = 0, maxV = 0;
     for (const r of rows) for (let i=1;i<r.length;i++){
       const v = Number(r[i])||0;
@@ -401,10 +404,12 @@
       }
     });
 
-    // Start after Google Charts loads
-    google.charts.setOnLoadCallback(fetchSnapshot);
+    // Ensure Charts loader exists, then load & start
+    ensureChartsReady(() => {
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(fetchSnapshot);
+    });
   });
   </script>
 </body>
 </html>
-
