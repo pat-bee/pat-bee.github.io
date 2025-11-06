@@ -4,7 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ledger — Accounts & Chart</title>
-  <!-- (Optional) Preload; we’ll still safety-load in JS if not present -->
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <style>
     :root{
@@ -13,13 +12,6 @@
       --c-neg:#a02d2a;   /* negative */
       --c-black:#000000;
       --c-white:#ffffff;
-
-      --fs-base:18px;    /* base font */
-      --fs-h2:55px;      /* base H2 */
-
-      --fs-scale:1;      /* global scale (A+/A−) */
-      --h2-scale:1;      /* H2 scale (inverse of global to keep headings sane) */
-
       --radius:10px;
       --gap:12px;
     }
@@ -27,7 +19,7 @@
     html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
     body{
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: calc(var(--fs-base) * var(--fs-scale));
+      font-size: 18px;
       line-height:1.5;
     }
 
@@ -45,7 +37,8 @@
     .left{ flex:1 1 auto; padding-right:12px; min-width:0; }
     .right{ flex:0 1 auto; min-width:40%; text-align:right; font-size:.9rem; white-space:nowrap; overflow-x:auto; }
 
-    h2{ margin:0 0 8px 0; font-size: calc(var(--fs-h2) * var(--h2-scale)); display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+    /* H2 fixed at 4rem as requested */
+    h2{ margin:0 0 8px 0; font-size: 4rem; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
     .lastval{ font-weight:600; }
     .name{ font-weight:700; color:var(--c-black); }
     .apr{ font-weight:400; font-size:.85rem; opacity:.75; }
@@ -103,7 +96,7 @@
 <body>
   <header class="wrap">
     <div class="toolbar">
-      <button id="resetSizes" aria-label="Reset text sizes">Reset</button>
+      <!-- Keep +/- for future; they are inert now -->
       <button id="fontMinus" aria-label="Decrease text size">−</button>
       <button id="fontPlus"  aria-label="Increase text size">+</button>
 
@@ -128,58 +121,17 @@
   // ==== CONFIG ====
   const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
-  // ==== UTIL: ensure Google Charts is present before using `google` ====
+  // Ensure Charts loader exists before using `google`
   function ensureChartsReady(onReady){
     if (window.google && google.charts){
       onReady();
       return;
     }
-    // If loader tag failed / was blocked, add it now
     const s = document.createElement('script');
     s.src = 'https://www.gstatic.com/charts/loader.js';
     s.onload = () => onReady();
     document.head.appendChild(s);
   }
-
- // ==== UI SCALE ====
-function safeNum(v, fb){ const n = Number(v); return Number.isFinite(n) ? n : fb; }
-function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
-
-let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00);
-let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00);
-
-function applyScaleVars(){
-  // allow headings to shrink further so more rows fit
-  FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
-  H2_SCALE = clamp(H2_SCALE, 0.50, 1.40); // MIN made smaller (0.50)
-  document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
-  document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
-}
-
-function handleFontPlus(){
-  // Keep current behavior: overall bigger, H2 smaller (more compact headers)
-  FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
-  H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.50, 1.40);
-  applyScaleVars();
-  localStorage.setItem('fsScale', FS_SCALE.toString());
-  localStorage.setItem('h2Scale', H2_SCALE.toString());
-}
-
-function handleFontMinus(){
-  // FIX: also shrink H2 so you can “strike them down” to see more accounts
-  FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
-  H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.50, 1.40);
-  applyScaleVars();
-  localStorage.setItem('fsScale', FS_SCALE.toString());
-  localStorage.setItem('h2Scale', H2_SCALE.toString());
-}
-
-function handleResetSizes(){
-  localStorage.removeItem('fsScale');
-  localStorage.removeItem('h2Scale');
-  FS_SCALE = 1.00; H2_SCALE = 1.00;
-  applyScaleVars();
-}
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -276,75 +228,74 @@ function handleResetSizes(){
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
   function renderAccounts(){
-  const root = document.getElementById('accounts');
-  root.innerHTML = '';
+    const root = document.getElementById('accounts');
+    root.innerHTML = '';
 
-  SNAP.accounts.forEach(a => {
-    const s = SNAP.series[a.name];
-    const last = s?.last ?? 0;
+    SNAP.accounts.forEach(a => {
+      const s = SNAP.series[a.name];
+      const last = s?.last ?? 0;
 
-    const row  = document.createElement('div'); row.className = 'row';
-    const left = document.createElement('div'); left.className = 'left';
-    const right= document.createElement('div'); right.className = 'right';
+      const row  = document.createElement('div'); row.className = 'row';
+      const left = document.createElement('div'); left.className = 'left';
+      const right= document.createElement('div'); right.className = 'right';
 
-    const h2 = document.createElement('h2');
+      const h2 = document.createElement('h2');
 
-    const lastEl = document.createElement('span');
-    lastEl.className = 'lastval';
-    lastEl.textContent = formatMoney(last);
-    lastEl.dataset.sign = signOf(last);
+      const lastEl = document.createElement('span');
+      lastEl.className = 'lastval';
+      lastEl.textContent = formatMoney(last);
+      lastEl.dataset.sign = signOf(last);
 
-    const nameEl = document.createElement('span');
-    nameEl.className = 'name';
-    nameEl.textContent = a.name;
+      const nameEl = document.createElement('span');
+      nameEl.className = 'name';
+      nameEl.textContent = a.name;
 
-    const aprEl = document.createElement('span');
-    aprEl.className = 'apr';
-    aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
+      const aprEl = document.createElement('span');
+      aprEl.className = 'apr';
+      aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
 
-    h2.appendChild(lastEl);
-    h2.appendChild(nameEl);
-    h2.appendChild(aprEl);
+      h2.appendChild(lastEl);
+      h2.appendChild(nameEl);
+      h2.appendChild(aprEl);
 
-    const inputLine = document.createElement('div');
-    inputLine.className = 'input-line';
-    const inp = document.createElement('input');
-    inp.type = 'number';
-    inp.placeholder = 'Add new value…';
-    inp.step = '0.01';
-    inp.setAttribute('aria-label', `New value for ${a.name}`);
+      const inputLine = document.createElement('div');
+      inputLine.className = 'input-line';
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.placeholder = 'Add new value…';
+      inp.step = '0.01';
+      inp.setAttribute('aria-label', `New value for ${a.name}`);
 
-    // NEW: color input background based on sign of last value
-    inp.style.backgroundColor = last < 0 ? '#faf4f4' : '#f6f9f5';
+      /* tint input by sign of last value */
+      inp.style.backgroundColor = last < 0 ? '#faf4f4' : '#f6f9f5';
 
-    inp.addEventListener('keydown', async (ev) => {
-      if (ev.key === 'Enter') {
-        await submitEntries([{ account: a.name, value: inp.value }]);
-        inp.value = '';
-        inp.blur();
-      }
+      inp.addEventListener('keydown', async (ev) => {
+        if (ev.key === 'Enter') {
+          await submitEntries([{ account: a.name, value: inp.value }]);
+          inp.value = '';
+          inp.blur();
+        }
+      });
+      inputLine.appendChild(inp);
+
+      left.appendChild(h2);
+      left.appendChild(inputLine);
+
+      const vals = document.createElement('div'); vals.className = 'values';
+      (s?.last12 || []).forEach(v => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.dataset.sign = signOf(v);
+        chip.textContent = formatMoney(v);
+        vals.appendChild(chip);
+      });
+      right.appendChild(vals);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      root.appendChild(row);
     });
-    inputLine.appendChild(inp);
-
-    left.appendChild(h2);
-    left.appendChild(inputLine);
-
-    const vals = document.createElement('div'); vals.className = 'values';
-    (s?.last12 || []).forEach(v => {
-      const chip = document.createElement('span');
-      chip.className = 'chip';
-      chip.dataset.sign = signOf(v);
-      chip.textContent = formatMoney(v);
-      vals.appendChild(chip);
-    });
-    right.appendChild(vals);
-
-    row.appendChild(left);
-    row.appendChild(right);
-    root.appendChild(row);
-  });
-}
-
+  }
 
   function formatMoney(n){
     const sign = n < 0 ? '-' : '';
@@ -389,33 +340,15 @@ function handleResetSizes(){
     }
   }
 
-  // Wire up once DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
-    applyScaleVars();
-
-    // font controls
-    document.getElementById('fontPlus').addEventListener('click', handleFontPlus);
-    document.getElementById('fontMinus').addEventListener('click', handleFontMinus);
-    document.getElementById('resetSizes').addEventListener('click', handleResetSizes);
-
-    // data controls
+    // wire live controls (no-op handlers for +/- kept for future)
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
     document.getElementById('submitAll').addEventListener('click', submitAll);
     document.querySelectorAll('input[name="mode"]').forEach(r => {
       r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
     });
 
-    // keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.metaKey || e.ctrlKey) {
-        if (e.key === '=') { e.preventDefault(); handleFontPlus(); }
-        if (e.key === '-') { e.preventDefault(); handleFontMinus(); }
-        if (e.key.toLowerCase() === 'r') { e.preventDefault(); fetchSnapshot(); }
-        if (e.key.toLowerCase() === 'enter') { e.preventDefault(); submitAll(); }
-      }
-    });
-
-    // Ensure Charts loader exists, then load & start
+    // ensure charts, then load & start
     ensureChartsReady(() => {
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(fetchSnapshot);
