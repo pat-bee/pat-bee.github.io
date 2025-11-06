@@ -262,7 +262,48 @@ function renderAccounts() {
     h2.appendChild(lastEl);
     h2.appendChild(nameEl);
     h2.appendChild(aprEl);
+    // Scaling
+    // Live scales; stored as multipliers (1.00 = 100%)
+let FS_SCALE = Number(localStorage.getItem('fsScale') || '1.00');  // overall
+let H2_SCALE = Number(localStorage.getItem('h2Scale') || '1.00');  // headings
 
+function applyScaleVars() {
+  document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
+  document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
+}
+applyScaleVars();
+
+function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+
+// A+: overall +5%; H2 −5% (relative smaller)
+function handleFontPlus() {
+  FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
+  H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.60, 1.40);
+  applyScaleVars();
+  localStorage.setItem('fsScale', FS_SCALE.toString());
+  localStorage.setItem('h2Scale', H2_SCALE.toString());
+}
+
+// A−: overall −5%; H2 +5% (relative larger)
+function handleFontMinus() {
+  FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
+  H2_SCALE = clamp(Math.round((H2_SCALE + 0.05) * 100) / 100, 0.60, 1.40);
+  applyScaleVars();
+  localStorage.setItem('fsScale', FS_SCALE.toString());
+  localStorage.setItem('h2Scale', H2_SCALE.toString());
+}
+
+// Wire up the new buttons
+document.getElementById('fontPlus').addEventListener('click', handleFontPlus);
+document.getElementById('fontMinus').addEventListener('click', handleFontMinus);
+
+// Optional keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey) {
+    if (e.key === '=') { e.preventDefault(); handleFontPlus(); }
+    if (e.key === '-') { e.preventDefault(); handleFontMinus(); }
+  }
+});
     // Input
     const inputLine = document.createElement('div'); inputLine.className = 'input-line';
     const inp = document.createElement('input');
