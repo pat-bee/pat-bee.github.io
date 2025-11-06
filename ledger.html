@@ -1,125 +1,127 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart</title>
-<script src="https://www.gstatic.com/charts/loader.js"></script>
-<style>
-  :root{
-    --maxw: 1000px;
-    --c-pos:#4c8036;
-    --c-neg:#a02d2a;
-    --c-black:#000000;
-    --c-white:#ffffff;
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ledger — Accounts & Chart</title>
+  <script defer src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    :root{
+      --maxw: 1400px;           /* allow wide but still cap */
+      --c-pos:#4c8036;          /* positive */
+      --c-neg:#a02d2a;          /* negative */
+      --c-black:#000000;
+      --c-white:#ffffff;
 
-    /* base sizes */
-    --fs-base:18px;
-    --fs-h2:55px;
+      /* base sizes */
+      --fs-base:18px;           /* base font (scaled via --fs-scale) */
+      --fs-h2:55px;             /* base heading size (scaled via --h2-scale) */
 
-    /* NEW: live scale factors (changed by A+/A−) */
-    --fs-scale:1;   /* overall UI scale (1.00 = 100%) */
-    --h2-scale:1;   /* H2 specific scale (1.00 = 100%) */
+      /* live scales (A+/A−) */
+      --fs-scale:1;             /* overall UI multiplier */
+      --h2-scale:1;             /* H2-only multiplier (inverse of overall) */
 
-    --fs-small:14px;
-    --radius:10px;
-    --gap:12px;
-  }
+      --radius:10px;
+      --gap:12px;
+    }
 
-  html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
-  /* APPLY global scale */
-  body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        font-size: calc(var(--fs-base) * var(--fs-scale));
-        line-height:1.5; }
+    html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
+    /* Apply global scale via rem baseline */
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: calc(var(--fs-base) * var(--fs-scale)); /* this sets 1rem */
+      line-height:1.5;
+    }
 
-  .wrap{ max-width:var(--maxw); margin:0 auto; padding:12px; }
+    /* 90% viewport width, centered; max ~1400px */
+    .wrap{ width:90vw; max-width:var(--maxw); margin:0 auto; padding:12px; }
 
-  header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
-  .toolbar{ display:flex; gap:var(--gap); align-items:center; justify-content:flex-end; padding:6px 0; }
-  .toolbar label{ font-size:var(--fs-small); }
+    header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
+    .toolbar{ display:flex; gap:var(--gap); align-items:center; justify-content:flex-end; padding:6px 0; flex-wrap:wrap; }
+    .toolbar label{ font-size:.85rem; }
 
-  #chart{ height:30vh; width:100%; }
+    #chart{ height:30vh; width:100%; }
 
-  .accounts{ display:grid; grid-template-columns: 1fr; gap:var(--gap); }
-  .row{ display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #eee; padding:12px 0; }
+    .accounts{ display:grid; grid-template-columns: 1fr; gap:var(--gap); }
+    .row{ display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #eee; padding:12px 0; gap:12px; }
 
-  .left{ flex:1 1 auto; padding-right:12px; }
-  .right{ flex:0 0 auto; min-width:40%; text-align:right; font-size:var(--fs-small); white-space:nowrap; overflow-x:auto; }
+    .left{ flex:1 1 auto; padding-right:12px; min-width:0; }
+    .right{ flex:0 1 auto; min-width:40%; text-align:right; font-size:.9rem; white-space:nowrap; overflow-x:auto; }
 
-  /* APPLY H2 scale (independent from global) */
-  h2{ margin:0 0 8px 0; font-size: calc(var(--fs-h2) * var(--h2-scale)); display:flex; align-items:baseline; gap:10px; }
+    /* H2 scales independently of overall */
+    h2{ margin:0 0 8px 0; font-size: calc(var(--fs-h2) * var(--h2-scale)); display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+    .lastval{ font-weight:600; }
+    .name{ font-weight:700; color:var(--c-black); }
+    .apr{ font-weight:400; font-size:.85rem; opacity:.75; }
 
-  .lastval{ font-weight:100; }
-  .name{ font-weight:700; color:var(--c-black); }
-  .apr{ font-weight:400; font-size:var(--fs-small); opacity:.75; }
+    .input-line{ display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
 
-  .input-line{ display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+    input[type="number"]{
+      width: 14rem;                  /* scales with rem */
+      padding: .7rem .8rem;
+      font-size: 1.1rem;             /* scales with base */
+      border: 2px solid #ddd;
+      border-radius: var(--radius);
+      background: var(--c-white);
+      color: var(--c-black);
+      outline: none;
+    }
+    input[type="number"]:focus{
+      border-color: var(--c-black);
+      box-shadow: 0 0 0 2px var(--c-black) inset;
+    }
 
-  input[type="number"]{
-    width: 116px;
-    padding: 10px 10px;
-    font-size: 20px;
-    border: 2px solid #ddd;
-    border-radius: var(--radius);
-    background: var(--c-white);
-    color: var(--c-black);
-    outline: none;
-  }
-  input[type="number"]:focus{
-    border-color: var(--c-black);
-    box-shadow: 0 0 0 2px var(--c-black) inset;
-  }
+    /* Sign-based coloring for history chips + last value */
+    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
+    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
-  .values [data-sign="pos"] { color: #4c8036; }
-  .values [data-sign="neg"] { color: #a02d2a; }
-  .lastval[data-sign="pos"] { color:#4c8036; }
-  .lastval[data-sign="neg"] { color:#a02d2a; }
+    button{
+      padding: .7rem 1rem;
+      font-size: 1rem;               /* scale with base */
+      border: 2px solid var(--c-black);
+      color: var(--c-black);
+      background: var(--c-white);
+      cursor:pointer;
+      border-radius: var(--radius);
+    }
+    button:hover{ background:#f6f6f6; }
+    button:focus-visible{ outline:3px solid var(--c-black); outline-offset:2px; }
 
-  button{
-    padding: 12px 16px;
-    font-size: 18px;
-    border: 2px solid var(--c-black);
-    color: var(--c-black);
-    background: var(--c-white);
-    cursor:pointer;
-    border-radius: var(--radius);
-  }
-  button:hover{ background:#f6f6f6; }
-  button:focus-visible{ outline:3px solid var(--c-black); outline-offset:2px; }
+    .values{ display:inline-flex; gap:.6rem; }
+    .chip{
+      padding: .25rem .6rem;
+      border-radius: 999px;
+      border: 1px solid #eee;
+      font-variant-numeric: tabular-nums;
+      font-size: .95rem;
+    }
 
-  .values{ display:inline-flex; gap:10px; }
-  .chip{
-    padding: 4px 8px;
-    border-radius: 999px;
-    border: 1px solid #eee;
-    font-variant-numeric: tabular-nums;
-  }
+    footer{ padding: 16px 0 24px; text-align:right; }
 
-  footer{ padding: 16px 0 24px; text-align:right; }
-
-  @media (max-width:480px){
-    .right{ min-width:unset; text-align:left; }
-    input[type="number"]{ width:100%; }
-    .toolbar{ justify-content:space-between; }
-  }
-</style>
-
+    @media (max-width:700px){
+      .right{ min-width:unset; text-align:left; }
+      input[type="number"]{ width:100%; }
+      .toolbar{ justify-content:space-between; }
+    }
+  </style>
 </head>
 <body>
   <header class="wrap">
     <div class="toolbar">
+      <!-- NEW: font size controls -->
+      <button id="fontMinus" aria-label="Decrease text size">−</button>
+      <button id="fontPlus"  aria-label="Increase text size">+</button>
+
+      <!-- existing controls -->
+      <button id="refresh" aria-label="Refresh data">Refresh</button>
       <label><input type="radio" name="mode" value="totals" checked> Totals</label>
       <label><input type="radio" name="mode" value="accounts"> Per-account</label>
       <button id="submitAll">Submit All</button>
-      <button id="refresh">Refresh</button>
-         <!-- NEW: font size controls -->
-    <button id="fontMinus" aria-label="Decrease text size">A−</button>
-    <button id="fontPlus"  aria-label="Increase text size">A+</button>
     </div>
     <div id="chart"></div>
   </header>
 
-  <div id="status" class="wrap" style="color:#888;font-size:12px;"></div>
+  <div id="status" class="wrap" style="color:#888;font-size:.85rem;"></div>
 
   <main class="wrap">
     <section id="accounts" class="accounts"></section>
@@ -128,272 +130,266 @@
     </footer>
   </main>
 
-<script>
-const API_BASE = 'https://script.google.com/macros/s/AKfycbxpUu10MhrTMdSqZpmKqmqgjbpYMiWcqjXtq9-uGEWuiPgpGPTSBwRmEJG1qz0koqctnw/exec'; // e.g., https://script.google.com/macros/s/AKfycb.../exec
+  <script>
+  const API_BASE = 'YOUR_WEB_APP_URL_HERE'; // <- replace with your Apps Script Web App /exec URL
+  google.charts.load('current', {packages:['corechart']});
 
-// Google Charts
-google.charts.load('current', {packages:['corechart']});
+  // --- Scales persisted in localStorage
+  let FS_SCALE = Number(localStorage.getItem('fsScale') || '1.00');  // overall rem baseline
+  let H2_SCALE = Number(localStorage.getItem('h2Scale') || '1.00');  // heading scale
 
-let SNAP = null;     // last snapshot
-let MODE = 'totals'; // 'totals' | 'accounts'
-
-const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
-
-function setStatus(msg) {
-  const el = document.getElementById('status');
-  if (el) el.textContent = msg || '';
-}
-
-async function fetchSnapshot() {
-  try {
-    setStatus('Loading snapshot…');
-    const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
-    const text = await res.text();
-    let j;
-    try { j = JSON.parse(text); } catch (e) {
-      console.error('Non-JSON response:', text);
-      setStatus('Error: API returned non-JSON (check Web App URL/access)');
-      return;
-    }
-    if (!j.ok) {
-      console.error('Snapshot error:', j);
-      setStatus('Error: ' + (j.error || 'snapshot failed'));
-      return;
-    }
-    SNAP = j;
-    setStatus('Snapshot loaded');
-    renderAll();
-  } catch (err) {
-    console.error(err);
-    setStatus('Fetch failed (see console)');
+  function applyScaleVars() {
+    document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
+    document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
   }
-}
 
-function renderAll() {
-  renderChart();
-  renderAccounts();
-}
+  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
 
-function renderChart() {
-  if (!SNAP) return;
-  const months = SNAP.months;
-  const data = new google.visualization.DataTable();
-  data.addColumn('string', 'Month');
+  function handleFontPlus() {
+    FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
+    H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.60, 1.40);
+    applyScaleVars();
+    localStorage.setItem('fsScale', FS_SCALE.toString());
+    localStorage.setItem('h2Scale', H2_SCALE.toString());
+  }
+  function handleFontMinus() {
+    FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
+    H2_SCALE = clamp(Math.round((H2_SCALE + 0.05) * 100) / 100, 0.60, 1.40);
+    applyScaleVars();
+    localStorage.setItem('fsScale', FS_SCALE.toString());
+    localStorage.setItem('h2Scale', H2_SCALE.toString());
+  }
 
-  let rows = [];
-  if (MODE === 'totals') {
-    data.addColumn('number', 'Assets');
-    data.addColumn('number', 'Debts');
-    for (let i = 0; i < months.length; i++) {
-      rows.push([
-        months[i],
-        Number(SNAP.totals.assets[i] || 0),
-        Number(SNAP.totals.debts[i]  || 0)
-      ]);
+  // --- App state
+  let SNAP = null;
+  let MODE = 'totals'; // 'totals' | 'accounts'
+
+  function setStatus(msg) {
+    const el = document.getElementById('status');
+    if (el) el.textContent = msg || '';
+  }
+
+  async function fetchSnapshot() {
+    try {
+      setStatus('Loading snapshot…');
+      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
+      const text = await res.text();
+      let j;
+      try { j = JSON.parse(text); } catch (e) {
+        console.error('Non-JSON response:', text);
+        setStatus('Error: API returned non-JSON (check Web App access & URL)');
+        return;
+      }
+      if (!j.ok) {
+        console.error('Snapshot error:', j);
+        setStatus('Error: ' + (j.error || 'snapshot failed'));
+        return;
+      }
+      SNAP = j;
+      setStatus('Snapshot loaded');
+      renderAll();
+    } catch (err) {
+      console.error(err);
+      setStatus('Fetch failed (see console)');
     }
-  } else {
-    // Per-account (draw all series in black to honor palette constraint)
-    SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-    for (let i = 0; i < months.length; i++) {
-      const row = [ months[i] ];
-      SNAP.accounts.forEach(a => {
-        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-        row.push(Number(v));
+  }
+
+  function renderAll() {
+    renderChart();
+    renderAccounts();
+  }
+
+  function renderChart() {
+    if (!SNAP) return;
+    const months = SNAP.months;
+    const data = new google.visualization.DataTable();
+    data.addColumn('string', 'Month');
+
+    let rows = [];
+    if (MODE === 'totals') {
+      data.addColumn('number', 'Assets');
+      data.addColumn('number', 'Debts');
+      for (let i=0;i<months.length;i++) {
+        rows.push([
+          months[i],
+          Number(SNAP.totals.assets[i]||0),
+          Number(SNAP.totals.debts[i]||0)
+        ]);
+      }
+    } else {
+      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
+      for (let i=0;i<months.length;i++) {
+        const row = [ months[i] ];
+        SNAP.accounts.forEach(a => {
+          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+          row.push(Number(v));
+        });
+        rows.push(row);
+      }
+    }
+    data.addRows(rows);
+
+    // Symmetric Y-axis around 0
+    let minV = 0, maxV = 0;
+    for (const r of rows) for (let i=1; i<r.length; i++) {
+      const v = Number(r[i])||0;
+      if (v < minV) minV = v;
+      if (v > maxV) maxV = v;
+    }
+    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
+    const options = {
+      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+      legend: { position: 'top', alignment: 'center' },
+      hAxis: { slantedText: false },
+      vAxis: { viewWindow: { min: -maxAbs * 1.05, max:  maxAbs * 1.05 }, baseline: 0 },
+      seriesType: 'line',
+      colors: MODE === 'totals' ? [getComputedStyle(document.documentElement).getPropertyValue('--c-pos').trim(), getComputedStyle(document.documentElement).getPropertyValue('--c-neg').trim()] : undefined
+    };
+
+    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
+    chart.draw(data, options);
+  }
+
+  const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
+
+  function renderAccounts() {
+    const root = document.getElementById('accounts');
+    root.innerHTML = '';
+    SNAP.accounts.forEach(a => {
+      const s = SNAP.series[a.name];
+      const last = s?.last ?? 0;
+
+      const row  = document.createElement('div'); row.className = 'row';
+      const left = document.createElement('div'); left.className = 'left';
+      const right= document.createElement('div'); right.className = 'right';
+
+      const h2 = document.createElement('h2');
+
+      const lastEl = document.createElement('span');
+      lastEl.className = 'lastval';
+      lastEl.textContent = formatMoney(last);
+      lastEl.dataset.sign = signOf(last);
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'name';
+      nameEl.textContent = a.name;
+
+      const aprEl = document.createElement('span');
+      aprEl.className = 'apr';
+      aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
+
+      h2.appendChild(lastEl);
+      h2.appendChild(nameEl);
+      h2.appendChild(aprEl);
+
+      const inputLine = document.createElement('div');
+      inputLine.className = 'input-line';
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.placeholder = 'Add new value…';
+      inp.step = '0.01';
+      inp.setAttribute('aria-label', `New value for ${a.name}`);
+      inp.addEventListener('keydown', async (ev) => {
+        if (ev.key === 'Enter') {
+          await submitEntries([{ account: a.name, value: inp.value }]);
+          inp.value = '';
+          inp.blur();
+        }
       });
-      rows.push(row);
-    }
+      inputLine.appendChild(inp);
+
+      left.appendChild(h2);
+      left.appendChild(inputLine);
+
+      const vals = document.createElement('div'); vals.className = 'values';
+      (s?.last12 || []).forEach(v => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.dataset.sign = signOf(v);
+        chip.textContent = formatMoney(v);
+        vals.appendChild(chip);
+      });
+      right.appendChild(vals);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      root.appendChild(row);
+    });
   }
-  data.addRows(rows);
 
-  // symmetric Y-axis around 0
-  let minV = 0, maxV = 0;
-  for (const r of rows) for (let i=1; i<r.length; i++) {
-    const v = Number(r[i]) || 0;
-    if (v < minV) minV = v;
-    if (v > maxV) maxV = v;
+  function formatMoney(n) {
+    const sign = n < 0 ? '-' : '';
+    const abs = Math.abs(Number(n) || 0);
+    return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }
-  const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
 
-  // Color array for per-account: all black
-  const perAccountColors = Array(SNAP.accounts.length).fill('#000000');
-
-  const options = {
-    height: Math.max(260, Math.round(window.innerHeight * 0.30)),
-    legend: { position: 'top', alignment: 'center', textStyle: { color:'#000000' } },
-    hAxis: { slantedText: false, textStyle: { color:'#000000' } },
-    vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0, textStyle: { color:'#000000' } },
-    seriesType: 'line',
-    colors: (MODE === 'totals') ? ['#4c8036', '#a02d2a'] : perAccountColors,
-    backgroundColor: '#ffffff'
-  };
-
-  const chart = new google.visualization.ComboChart(document.getElementById('chart'));
-  chart.draw(data, options);
-}
-
-function renderAccounts() {
-  const root = document.getElementById('accounts');
-  root.innerHTML = '';
-
-  SNAP.accounts.forEach(a => {
-    const s = SNAP.series[a.name];
-    const last = s?.last ?? 0;
-
-    const row  = document.createElement('div'); row.className = 'row';
-    const left = document.createElement('div'); left.className = 'left';
-    const right= document.createElement('div'); right.className = 'right';
-
-    // Heading
-    const h2 = document.createElement('h2');
-
-    const lastEl = document.createElement('span');
-    lastEl.className = 'lastval';
-    lastEl.textContent = formatMoney(last);
-    lastEl.dataset.sign = signOf(last);
-
-    const nameEl = document.createElement('span');
-    nameEl.className = 'name';
-    nameEl.textContent = a.name;
-
-    const aprEl = document.createElement('span');
-    aprEl.className = 'apr';
-    aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-
-    h2.appendChild(lastEl);
-    h2.appendChild(nameEl);
-    h2.appendChild(aprEl);
-    // Scaling
-    // Live scales; stored as multipliers (1.00 = 100%)
-let FS_SCALE = Number(localStorage.getItem('fsScale') || '1.00');  // overall
-let H2_SCALE = Number(localStorage.getItem('h2Scale') || '1.00');  // headings
-
-function applyScaleVars() {
-  document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
-  document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
-}
-applyScaleVars();
-
-function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
-
-// A+: overall +5%; H2 −5% (relative smaller)
-function handleFontPlus() {
-  FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
-  H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.60, 1.40);
-  applyScaleVars();
-  localStorage.setItem('fsScale', FS_SCALE.toString());
-  localStorage.setItem('h2Scale', H2_SCALE.toString());
-}
-
-// A−: overall −5%; H2 +5% (relative larger)
-function handleFontMinus() {
-  FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
-  H2_SCALE = clamp(Math.round((H2_SCALE + 0.05) * 100) / 100, 0.60, 1.40);
-  applyScaleVars();
-  localStorage.setItem('fsScale', FS_SCALE.toString());
-  localStorage.setItem('h2Scale', H2_SCALE.toString());
-}
-
-// Wire up the new buttons
-document.getElementById('fontPlus').addEventListener('click', handleFontPlus);
-document.getElementById('fontMinus').addEventListener('click', handleFontMinus);
-
-// Optional keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-  if (e.metaKey || e.ctrlKey) {
-    if (e.key === '=') { e.preventDefault(); handleFontPlus(); }
-    if (e.key === '-') { e.preventDefault(); handleFontMinus(); }
-  }
-});
-    // Input
-    const inputLine = document.createElement('div'); inputLine.className = 'input-line';
-    const inp = document.createElement('input');
-    inp.type = 'number';
-    inp.placeholder = 'Add new value…';
-    inp.step = '0.01';
-    inp.setAttribute('aria-label', `New value for ${a.name}`);
-    inp.addEventListener('keydown', async (ev) => {
-      if (ev.key === 'Enter') {
-        await submitEntries([{ account: a.name, value: inp.value }]);
-        inp.value = '';
-        inp.blur();
+  async function submitAll() {
+    const entries = [];
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+      const v = inp.value.trim();
+      if (v !== '') {
+        const name = inp.closest('.row').querySelector('.name').textContent;
+        entries.push({ account: name, value: Number(v) });
       }
     });
-    inputLine.appendChild(inp);
-
-    left.appendChild(h2);
-    left.appendChild(inputLine);
-
-    // Right-side last-12 history chips (wrap intelligently)
-    const vals = document.createElement('div'); vals.className = 'values';
-    (s?.last12 || []).forEach(v => {
-      const chip = document.createElement('span');
-      chip.className = 'chip';
-      chip.dataset.sign = signOf(v);
-      chip.textContent = formatMoney(v);
-      vals.appendChild(chip);
-    });
-    right.appendChild(vals);
-
-    row.appendChild(left);
-    row.appendChild(right);
-    root.appendChild(row);
-  });
-}
-
-function formatMoney(n) {
-  const sign = n < 0 ? '-' : '';
-  const abs = Math.abs(Number(n) || 0);
-  return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
-
-async function submitAll() {
-  const entries = [];
-  document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-    const v = inp.value.trim();
-    if (v !== '') {
-      const name = inp.closest('.row').querySelector('.name').textContent;
-      entries.push({ account: name, value: Number(v) });
-    }
-  });
-  if (entries.length === 0) return;
-  await submitEntries(entries);
-  document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
-}
-
-async function submitEntries(entries) {
-  try {
-    // form-encode to avoid CORS preflight
-    const body = new URLSearchParams({ payload: JSON.stringify({ entries }) });
-    const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-    const text = await res.text();
-    let j;
-    try { j = JSON.parse(text); } catch (e) {
-      console.error('Submit non-JSON:', text);
-      alert('Submit failed (non-JSON response). Check Web App access or deployment.');
-      return;
-    }
-    if (!j.ok) {
-      console.error('Submit JSON error:', j);
-      alert('Submit failed: ' + (j.error || 'Unknown'));
-      return;
-    }
-    await fetchSnapshot();
-  } catch (e) {
-    console.error(e);
-    alert('Network error submitting data.');
+    if (entries.length === 0) return;
+    await submitEntries(entries);
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
   }
-}
 
-// UI wire-up
-window.addEventListener('resize', () => renderChart());
-document.getElementById('submitAll').addEventListener('click', submitAll);
-document.getElementById('refresh').addEventListener('click', fetchSnapshot);
-document.querySelectorAll('input[name="mode"]').forEach(r => {
-  r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
-});
+  async function submitEntries(entries) {
+    try {
+      const body = new URLSearchParams({ payload: JSON.stringify({ entries }) });
+      const res = await fetch(`${API_BASE}?route=submit`, {
+        method: 'POST',
+        body
+      });
+      const text = await res.text();
+      let j;
+      try { j = JSON.parse(text); } catch (e) {
+        console.error('Submit non-JSON:', text);
+        alert('Submit failed (non-JSON response). Check Web App access or deployment.');
+        return;
+      }
+      if (!j.ok) {
+        console.error('Submit JSON error:', j);
+        alert('Submit failed: ' + (j.error || 'Unknown'));
+        return;
+      }
+      await fetchSnapshot();
+    } catch (e) {
+      console.error(e);
+      alert('Network error submitting data.');
+    }
+  }
 
-// Start when Charts is ready
-google.charts.setOnLoadCallback(fetchSnapshot);
-</script>
+  // Wire up once DOM is ready so buttons always work
+  document.addEventListener('DOMContentLoaded', () => {
+    applyScaleVars();
+
+    document.getElementById('fontPlus').addEventListener('click', handleFontPlus);
+    document.getElementById('fontMinus').addEventListener('click', handleFontMinus);
+
+    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
+    document.getElementById('submitAll').addEventListener('click', submitAll);
+
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
+    });
+
+    // Optional keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === '=') { e.preventDefault(); handleFontPlus(); }
+        if (e.key === '-') { e.preventDefault(); handleFontMinus(); }
+        if (e.key.toLowerCase() === 'r') { e.preventDefault(); fetchSnapshot(); }
+        if (e.key.toLowerCase() === 'enter') { e.preventDefault(); submitAll(); }
+      }
+    });
+
+    // Start after Google Charts loads
+    google.charts.setOnLoadCallback(fetchSnapshot);
+  });
+  </script>
 </body>
 </html>
