@@ -276,70 +276,75 @@ function handleResetSizes(){
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
   function renderAccounts(){
-    const root = document.getElementById('accounts');
-    root.innerHTML = '';
+  const root = document.getElementById('accounts');
+  root.innerHTML = '';
 
-    SNAP.accounts.forEach(a => {
-      const s = SNAP.series[a.name];
-      const last = s?.last ?? 0;
+  SNAP.accounts.forEach(a => {
+    const s = SNAP.series[a.name];
+    const last = s?.last ?? 0;
 
-      const row  = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right= document.createElement('div'); right.className = 'right';
+    const row  = document.createElement('div'); row.className = 'row';
+    const left = document.createElement('div'); left.className = 'left';
+    const right= document.createElement('div'); right.className = 'right';
 
-      const h2 = document.createElement('h2');
+    const h2 = document.createElement('h2');
 
-      const lastEl = document.createElement('span');
-      lastEl.className = 'lastval';
-      lastEl.textContent = formatMoney(last);
-      lastEl.dataset.sign = signOf(last);
+    const lastEl = document.createElement('span');
+    lastEl.className = 'lastval';
+    lastEl.textContent = formatMoney(last);
+    lastEl.dataset.sign = signOf(last);
 
-      const nameEl = document.createElement('span');
-      nameEl.className = 'name';
-      nameEl.textContent = a.name;
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = a.name;
 
-      const aprEl = document.createElement('span');
-      aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
+    const aprEl = document.createElement('span');
+    aprEl.className = 'apr';
+    aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
 
-      h2.appendChild(lastEl);
-      h2.appendChild(nameEl);
-      h2.appendChild(aprEl);
+    h2.appendChild(lastEl);
+    h2.appendChild(nameEl);
+    h2.appendChild(aprEl);
 
-      const inputLine = document.createElement('div');
-      inputLine.className = 'input-line';
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.placeholder = 'Add new value…';
-      inp.step = '0.01';
-      inp.setAttribute('aria-label', `New value for ${a.name}`);
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value }]);
-          inp.value = '';
-          inp.blur();
-        }
-      });
-      inputLine.appendChild(inp);
+    const inputLine = document.createElement('div');
+    inputLine.className = 'input-line';
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.placeholder = 'Add new value…';
+    inp.step = '0.01';
+    inp.setAttribute('aria-label', `New value for ${a.name}`);
 
-      left.appendChild(h2);
-      left.appendChild(inputLine);
+    // NEW: color input background based on sign of last value
+    inp.style.backgroundColor = last < 0 ? '#faf4f4' : '#f6f9f5';
 
-      const vals = document.createElement('div'); vals.className = 'values';
-      (s?.last12 || []).forEach(v => {
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.dataset.sign = signOf(v);
-        chip.textContent = formatMoney(v);
-        vals.appendChild(chip);
-      });
-      right.appendChild(vals);
-
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
+    inp.addEventListener('keydown', async (ev) => {
+      if (ev.key === 'Enter') {
+        await submitEntries([{ account: a.name, value: inp.value }]);
+        inp.value = '';
+        inp.blur();
+      }
     });
-  }
+    inputLine.appendChild(inp);
+
+    left.appendChild(h2);
+    left.appendChild(inputLine);
+
+    const vals = document.createElement('div'); vals.className = 'values';
+    (s?.last12 || []).forEach(v => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.dataset.sign = signOf(v);
+      chip.textContent = formatMoney(v);
+      vals.appendChild(chip);
+    });
+    right.appendChild(vals);
+
+    row.appendChild(left);
+    row.appendChild(right);
+    root.appendChild(row);
+  });
+}
+
 
   function formatMoney(n){
     const sign = n < 0 ? '-' : '';
