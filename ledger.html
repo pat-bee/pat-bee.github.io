@@ -7,33 +7,30 @@
   <script defer src="https://www.gstatic.com/charts/loader.js"></script>
   <style>
     :root{
-      --maxw: 1400px;           /* allow wide but still cap */
-      --c-pos:#4c8036;          /* positive */
-      --c-neg:#a02d2a;          /* negative */
+      --maxw: 1400px;
+      --c-pos:#4c8036;   /* positive */
+      --c-neg:#a02d2a;   /* negative */
       --c-black:#000000;
       --c-white:#ffffff;
 
-      /* base sizes */
-      --fs-base:18px;           /* base font (scaled via --fs-scale) */
-      --fs-h2:55px;             /* base heading size (scaled via --h2-scale) */
+      --fs-base:18px;    /* base font */
+      --fs-h2:55px;      /* base H2 */
 
-      /* live scales (A+/A−) */
-      --fs-scale:1;             /* overall UI multiplier */
-      --h2-scale:1;             /* H2-only multiplier (inverse of overall) */
+      --fs-scale:1;      /* global scale (A+/A−) */
+      --h2-scale:1;      /* H2 scale (inverse of global to keep headings sane) */
 
       --radius:10px;
       --gap:12px;
     }
 
     html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
-    /* Apply global scale via rem baseline */
     body{
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: calc(var(--fs-base) * var(--fs-scale)); /* this sets 1rem */
+      font-size: calc(var(--fs-base) * var(--fs-scale)); /* sets rem baseline */
       line-height:1.5;
     }
 
-    /* 90% viewport width, centered; max ~1400px */
+    /* 90% of viewport width, centered */
     .wrap{ width:90vw; max-width:var(--maxw); margin:0 auto; padding:12px; }
 
     header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
@@ -48,7 +45,6 @@
     .left{ flex:1 1 auto; padding-right:12px; min-width:0; }
     .right{ flex:0 1 auto; min-width:40%; text-align:right; font-size:.9rem; white-space:nowrap; overflow-x:auto; }
 
-    /* H2 scales independently of overall */
     h2{ margin:0 0 8px 0; font-size: calc(var(--fs-h2) * var(--h2-scale)); display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
     .lastval{ font-weight:600; }
     .name{ font-weight:700; color:var(--c-black); }
@@ -57,9 +53,9 @@
     .input-line{ display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
 
     input[type="number"]{
-      width: 14rem;                  /* scales with rem */
+      width: 14rem;
       padding: .7rem .8rem;
-      font-size: 1.1rem;             /* scales with base */
+      font-size: 1.1rem;
       border: 2px solid #ddd;
       border-radius: var(--radius);
       background: var(--c-white);
@@ -71,13 +67,13 @@
       box-shadow: 0 0 0 2px var(--c-black) inset;
     }
 
-    /* Sign-based coloring for history chips + last value */
+    /* sign-based colors for current value + history */
     .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
     .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
     button{
       padding: .7rem 1rem;
-      font-size: 1rem;               /* scale with base */
+      font-size: 1rem;
       border: 2px solid var(--c-black);
       color: var(--c-black);
       background: var(--c-white);
@@ -108,14 +104,12 @@
 <body>
   <header class="wrap">
     <div class="toolbar">
-      <!-- NEW: font size controls -->
+      <!-- Font controls -->
       <button id="resetSizes" aria-label="Reset text sizes">Reset</button>
-
       <button id="fontMinus" aria-label="Decrease text size">−</button>
       <button id="fontPlus"  aria-label="Increase text size">+</button>
-      
 
-      <!-- existing controls -->
+      <!-- Data controls -->
       <button id="refresh" aria-label="Refresh data">Refresh</button>
       <label><input type="radio" name="mode" value="totals" checked> Totals</label>
       <label><input type="radio" name="mode" value="accounts"> Per-account</label>
@@ -134,56 +128,67 @@
   </main>
 
   <script>
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbxxzXvASGytBhhU_arW8thppm8y03VW9opXpYMRWAvCDlr6N6uU9NE4ohdiz5CKN5XXoA/exec'; // <- replace with your Apps Script Web App /exec URL
+  // ==== CONFIG ====
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec'; // e.g., https://script.google.com/macros/s/AKfy.../exec
+
+  // Google Charts
   google.charts.load('current', {packages:['corechart']});
 
-  // --- Scales persisted in localStorage
-  let FS_SCALE = Number(localStorage.getItem('fsScale') || '1.00');  // overall rem baseline
-  let H2_SCALE = Number(localStorage.getItem('h2Scale') || '1.00');  // heading scale
+  // ==== UI SCALE (browser only) ====
+  function safeNum(v, fb){ const n = Number(v); return Number.isFinite(n) ? n : fb; }
+  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
 
-  function applyScaleVars() {
+  let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00); // overall UI
+  let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00); // heading only
+
+  function applyScaleVars(){
+    FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
+    H2_SCALE = clamp(H2_SCALE, 0.60, 1.40);
     document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
     document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
   }
-
-  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
-
-  function handleFontPlus() {
+  function handleFontPlus(){
     FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
     H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.60, 1.40);
     applyScaleVars();
     localStorage.setItem('fsScale', FS_SCALE.toString());
     localStorage.setItem('h2Scale', H2_SCALE.toString());
   }
-  function handleFontMinus() {
+  function handleFontMinus(){
     FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
     H2_SCALE = clamp(Math.round((H2_SCALE + 0.05) * 100) / 100, 0.60, 1.40);
     applyScaleVars();
     localStorage.setItem('fsScale', FS_SCALE.toString());
     localStorage.setItem('h2Scale', H2_SCALE.toString());
   }
+  function handleResetSizes(){
+    localStorage.removeItem('fsScale');
+    localStorage.removeItem('h2Scale');
+    FS_SCALE = 1.00; H2_SCALE = 1.00;
+    applyScaleVars();
+  }
 
-  // --- App state
+  // ==== APP STATE ====
   let SNAP = null;
   let MODE = 'totals'; // 'totals' | 'accounts'
 
-  function setStatus(msg) {
+  function setStatus(msg){
     const el = document.getElementById('status');
     if (el) el.textContent = msg || '';
   }
 
-  async function fetchSnapshot() {
-    try {
+  async function fetchSnapshot(){
+    try{
       setStatus('Loading snapshot…');
       const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
       const text = await res.text();
       let j;
-      try { j = JSON.parse(text); } catch (e) {
+      try { j = JSON.parse(text); } catch {
         console.error('Non-JSON response:', text);
         setStatus('Error: API returned non-JSON (check Web App access & URL)');
         return;
       }
-      if (!j.ok) {
+      if (!j.ok){
         console.error('Snapshot error:', j);
         setStatus('Error: ' + (j.error || 'snapshot failed'));
         return;
@@ -191,28 +196,29 @@
       SNAP = j;
       setStatus('Snapshot loaded');
       renderAll();
-    } catch (err) {
+    } catch (err){
       console.error(err);
       setStatus('Fetch failed (see console)');
     }
   }
 
-  function renderAll() {
+  function renderAll(){
     renderChart();
     renderAccounts();
   }
 
-  function renderChart() {
+  function renderChart(){
     if (!SNAP) return;
+
     const months = SNAP.months;
     const data = new google.visualization.DataTable();
     data.addColumn('string', 'Month');
 
     let rows = [];
-    if (MODE === 'totals') {
+    if (MODE === 'totals'){
       data.addColumn('number', 'Assets');
       data.addColumn('number', 'Debts');
-      for (let i=0;i<months.length;i++) {
+      for (let i=0;i<months.length;i++){
         rows.push([
           months[i],
           Number(SNAP.totals.assets[i]||0),
@@ -221,7 +227,7 @@
       }
     } else {
       SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      for (let i=0;i<months.length;i++) {
+      for (let i=0;i<months.length;i++){
         const row = [ months[i] ];
         SNAP.accounts.forEach(a => {
           const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
@@ -232,21 +238,26 @@
     }
     data.addRows(rows);
 
-    // Symmetric Y-axis around 0
+    // symmetric Y-axis around 0
     let minV = 0, maxV = 0;
-    for (const r of rows) for (let i=1; i<r.length; i++) {
+    for (const r of rows) for (let i=1;i<r.length;i++){
       const v = Number(r[i])||0;
       if (v < minV) minV = v;
       if (v > maxV) maxV = v;
     }
     const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
+
+    const styles = getComputedStyle(document.documentElement);
+    const pos = styles.getPropertyValue('--c-pos').trim();
+    const neg = styles.getPropertyValue('--c-neg').trim();
+
     const options = {
       height: Math.max(240, Math.round(window.innerHeight * 0.30)),
       legend: { position: 'top', alignment: 'center' },
       hAxis: { slantedText: false },
-      vAxis: { viewWindow: { min: -maxAbs * 1.05, max:  maxAbs * 1.05 }, baseline: 0 },
+      vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0 },
       seriesType: 'line',
-      colors: MODE === 'totals' ? [getComputedStyle(document.documentElement).getPropertyValue('--c-pos').trim(), getComputedStyle(document.documentElement).getPropertyValue('--c-neg').trim()] : undefined
+      colors: MODE === 'totals' ? [pos, neg] : undefined
     };
 
     const chart = new google.visualization.ComboChart(document.getElementById('chart'));
@@ -255,9 +266,10 @@
 
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
-  function renderAccounts() {
+  function renderAccounts(){
     const root = document.getElementById('accounts');
     root.innerHTML = '';
+
     SNAP.accounts.forEach(a => {
       const s = SNAP.series[a.name];
       const last = s?.last ?? 0;
@@ -319,29 +331,14 @@
       root.appendChild(row);
     });
   }
-// --- Scales persisted in localStorage (SAFE PARSE)
-function safeNum(v, fallback) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fallback;
-}
-let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00); // overall rem baseline
-let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00); // heading scale
 
-function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
-function applyScaleVars() {
-  // clamp on every apply to avoid bad values
-  FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
-  H2_SCALE = clamp(H2_SCALE, 0.60, 1.40);
-  document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
-  document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
-}
-  function formatMoney(n) {
+  function formatMoney(n){
     const sign = n < 0 ? '-' : '';
     const abs = Math.abs(Number(n) || 0);
     return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }
 
-  async function submitAll() {
+  async function submitAll(){
     const entries = [];
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
       const v = inp.value.trim();
@@ -355,47 +352,46 @@ function applyScaleVars() {
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
   }
 
-  async function submitEntries(entries) {
-    try {
+  async function submitEntries(entries){
+    try{
       const body = new URLSearchParams({ payload: JSON.stringify({ entries }) });
-      const res = await fetch(`${API_BASE}?route=submit`, {
-        method: 'POST',
-        body
-      });
+      const res = await fetch(`${API_BASE}?route=submit`, { method:'POST', body });
       const text = await res.text();
       let j;
-      try { j = JSON.parse(text); } catch (e) {
+      try { j = JSON.parse(text); } catch {
         console.error('Submit non-JSON:', text);
         alert('Submit failed (non-JSON response). Check Web App access or deployment.');
         return;
       }
-      if (!j.ok) {
+      if (!j.ok){
         console.error('Submit JSON error:', j);
         alert('Submit failed: ' + (j.error || 'Unknown'));
         return;
       }
       await fetchSnapshot();
-    } catch (e) {
+    } catch (e){
       console.error(e);
       alert('Network error submitting data.');
     }
   }
 
-  // Wire up once DOM is ready so buttons always work
+  // Wire up once DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
     applyScaleVars();
 
+    // font controls
     document.getElementById('fontPlus').addEventListener('click', handleFontPlus);
     document.getElementById('fontMinus').addEventListener('click', handleFontMinus);
+    document.getElementById('resetSizes').addEventListener('click', handleResetSizes);
 
+    // data controls
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
     document.getElementById('submitAll').addEventListener('click', submitAll);
-
     document.querySelectorAll('input[name="mode"]').forEach(r => {
       r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
     });
 
-    // Optional keyboard shortcuts
+    // keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.metaKey || e.ctrlKey) {
         if (e.key === '=') { e.preventDefault(); handleFontPlus(); }
@@ -404,16 +400,11 @@ function applyScaleVars() {
         if (e.key.toLowerCase() === 'enter') { e.preventDefault(); submitAll(); }
       }
     });
-document.getElementById('resetSizes')?.addEventListener('click', () => {
-  localStorage.removeItem('fsScale');
-  localStorage.removeItem('h2Scale');
-  FS_SCALE = 1.00;
-  H2_SCALE = 1.00;
-  applyScaleVars();
-});
+
     // Start after Google Charts loads
     google.charts.setOnLoadCallback(fetchSnapshot);
   });
   </script>
 </body>
 </html>
+
