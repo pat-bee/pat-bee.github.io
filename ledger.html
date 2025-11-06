@@ -141,39 +141,45 @@
     document.head.appendChild(s);
   }
 
-  // ==== UI SCALE ====
-  function safeNum(v, fb){ const n = Number(v); return Number.isFinite(n) ? n : fb; }
-  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+ // ==== UI SCALE ====
+function safeNum(v, fb){ const n = Number(v); return Number.isFinite(n) ? n : fb; }
+function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
 
-  let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00);
-  let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00);
+let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00);
+let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00);
 
-  function applyScaleVars(){
-    FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
-    H2_SCALE = clamp(H2_SCALE, 0.60, 1.40);
-    document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
-    document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
-  }
-  function handleFontPlus(){
-    FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
-    H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.60, 1.40);
-    applyScaleVars();
-    localStorage.setItem('fsScale', FS_SCALE.toString());
-    localStorage.setItem('h2Scale', H2_SCALE.toString());
-  }
-  function handleFontMinus(){
-    FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
-    H2_SCALE = clamp(Math.round((H2_SCALE + 0.05) * 100) / 100, 0.60, 1.40);
-    applyScaleVars();
-    localStorage.setItem('fsScale', FS_SCALE.toString());
-    localStorage.setItem('h2Scale', H2_SCALE.toString());
-  }
-  function handleResetSizes(){
-    localStorage.removeItem('fsScale');
-    localStorage.removeItem('h2Scale');
-    FS_SCALE = 1.00; H2_SCALE = 1.00;
-    applyScaleVars();
-  }
+function applyScaleVars(){
+  // allow headings to shrink further so more rows fit
+  FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
+  H2_SCALE = clamp(H2_SCALE, 0.50, 1.40); // MIN made smaller (0.50)
+  document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
+  document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
+}
+
+function handleFontPlus(){
+  // Keep current behavior: overall bigger, H2 smaller (more compact headers)
+  FS_SCALE = clamp(Math.round((FS_SCALE + 0.05) * 100) / 100, 0.60, 2.00);
+  H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.50, 1.40);
+  applyScaleVars();
+  localStorage.setItem('fsScale', FS_SCALE.toString());
+  localStorage.setItem('h2Scale', H2_SCALE.toString());
+}
+
+function handleFontMinus(){
+  // FIX: also shrink H2 so you can “strike them down” to see more accounts
+  FS_SCALE = clamp(Math.round((FS_SCALE - 0.05) * 100) / 100, 0.60, 2.00);
+  H2_SCALE = clamp(Math.round((H2_SCALE - 0.05) * 100) / 100, 0.50, 1.40);
+  applyScaleVars();
+  localStorage.setItem('fsScale', FS_SCALE.toString());
+  localStorage.setItem('h2Scale', H2_SCALE.toString());
+}
+
+function handleResetSizes(){
+  localStorage.removeItem('fsScale');
+  localStorage.removeItem('h2Scale');
+  FS_SCALE = 1.00; H2_SCALE = 1.00;
+  applyScaleVars();
+}
 
   // ==== APP STATE ====
   let SNAP = null;
