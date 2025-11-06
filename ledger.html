@@ -109,8 +109,11 @@
   <header class="wrap">
     <div class="toolbar">
       <!-- NEW: font size controls -->
-      <button id="fontMinus" aria-label="Decrease text size">A−</button>
-      <button id="fontPlus"  aria-label="Increase text size">A+</button>
+      <button id="resetSizes" aria-label="Reset text sizes">Reset</button>
+
+      <button id="fontMinus" aria-label="Decrease text size">−</button>
+      <button id="fontPlus"  aria-label="Increase text size">+</button>
+      
 
       <!-- existing controls -->
       <button id="refresh" aria-label="Refresh data">Refresh</button>
@@ -316,7 +319,22 @@
       root.appendChild(row);
     });
   }
+// --- Scales persisted in localStorage (SAFE PARSE)
+function safeNum(v, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+let FS_SCALE = safeNum(localStorage.getItem('fsScale'), 1.00); // overall rem baseline
+let H2_SCALE = safeNum(localStorage.getItem('h2Scale'), 1.00); // heading scale
 
+function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+function applyScaleVars() {
+  // clamp on every apply to avoid bad values
+  FS_SCALE = clamp(FS_SCALE, 0.60, 2.00);
+  H2_SCALE = clamp(H2_SCALE, 0.60, 1.40);
+  document.documentElement.style.setProperty('--fs-scale', FS_SCALE.toString());
+  document.documentElement.style.setProperty('--h2-scale', H2_SCALE.toString());
+}
   function formatMoney(n) {
     const sign = n < 0 ? '-' : '';
     const abs = Math.abs(Number(n) || 0);
@@ -386,7 +404,13 @@
         if (e.key.toLowerCase() === 'enter') { e.preventDefault(); submitAll(); }
       }
     });
-
+document.getElementById('resetSizes')?.addEventListener('click', () => {
+  localStorage.removeItem('fsScale');
+  localStorage.removeItem('h2Scale');
+  FS_SCALE = 1.00;
+  H2_SCALE = 1.00;
+  applyScaleVars();
+});
     // Start after Google Charts loads
     google.charts.setOnLoadCallback(fetchSnapshot);
   });
