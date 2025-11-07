@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Ledger — Accounts & Chart (v1c)</title>
+  <!-- Changed title to v1d -->
+  <title>Ledger — Accounts & Chart (v1d)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -14,7 +15,6 @@
       --radius: 10px;
       --gap: 12px;
       
-      /* 3. Colors for input tints */
       --c-tint-pos: #f7f9f4;
       --c-tint-neg: #f9f4f4;
     }
@@ -98,16 +98,13 @@
       gap: 12px; 
     }
 
-    /* 4/6. Left column is now a flex row to hold identity, APR, and input */
     .left { 
       flex: 1 1 auto; 
       padding-right: 12px; 
       min-width: 0; 
-      
-      /* Align identity, APR, and input box in a row */
       display: flex;
-      flex-wrap: wrap; /* Allow wrapping on small screens */
-      align-items: center; /* Vertically center all items */
+      flex-wrap: wrap;
+      align-items: center;
       gap: var(--gap);
     }
     
@@ -116,41 +113,37 @@
       min-width: 40%; 
       text-align: right; 
       font-size: .9rem; 
-      /* 4. Do not scroll, just cut off cleanly */
       white-space: nowrap; 
       overflow-x: hidden;
     }
 
-    /* 2/5. Make lastval and name 2.6rem */
     .lastval { 
       font-weight: 600; 
       font-size: 2.6rem; 
-      white-space: nowrap; /* Keep value from wrapping */
+      white-space: nowrap;
     }
     .name { 
       font-weight: 700; 
+      /* Color is now set by JS, but defaults to black */
       color: var(--c-black); 
       font-size: 2.6rem; 
-      
-      /* 5. Truncate name if it's too long */
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     
-    /* 7. Make APR smaller */
     .apr { 
       font-weight: 400; 
-      font-size: 0.75rem; /* Reduced from .85rem */
+      font-size: 0.75rem;
       opacity: .75; 
-      flex-shrink: 0; /* Don't let it shrink */
+      flex-shrink: 0;
     }
 
     .input-line { 
       display: flex; 
       gap: 10px; 
       align-items: center; 
-      flex-shrink: 0; /* Don't let it shrink */
+      flex-shrink: 0;
     }
 
     input[type="number"] {
@@ -217,11 +210,9 @@
       cursor: not-allowed;
     }
 
-    /* 4. Chips container - no wrap */
     .values { 
       display: inline-flex; 
       gap: .6rem; 
-      /* Removed flex-wrap: wrap */
     }
     
     .chip {
@@ -239,7 +230,6 @@
       color: var(--c-white);
     }
     
-    /* 1/2. Style for non-deletable chips (old data format) */
     .chip.no-delete {
       cursor: default;
       opacity: 0.7;
@@ -358,18 +348,14 @@
     }
 
     @media (max-width: 700px) {
-      /* 4. Remove mobile-specific text/flex wrapping */
       .right { 
         min-width: unset; 
         text-align: left; 
-        /* white-space: normal; <-- REMOVED */
       }
-      /* .values { flex-wrap: wrap; } <-- REMOVED */
       
       input[type="number"] { width: 100%; }
       .toolbar { justify-content: space-around; }
       
-      /* 2. Adjust h2 font size on mobile to prevent overflow */
       .lastval, .name {
         font-size: 2rem;
       }
@@ -418,8 +404,8 @@
 
   <script>
   // ==== CONFIG ====
-  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1c)
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbwrUtK25UUR8-0v8KHA-0d1QG3YY8OP95wbCxAMkbnCBuXsR38JdS28v6OvYjusgze0/exec';
+  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1d)
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbyjy3RWohIsJnsE5Xu9ZZh2xEBMGqw2Wen3MFlxzfSJ12Bp79YQwDVln7aVdnpXUSk31Q/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -429,7 +415,6 @@
   let TOAST_TIMER = null;
 
   // ==== UI FUNCTIONS ====
-
   function showToast(msg, type = 'info', duration = 3000) {
     // ... (No changes)
     const el = document.getElementById('toast');
@@ -466,7 +451,6 @@
   }
 
   // ==== DELETE MODAL FUNCTIONS ====
-  
   function showDeleteConfirm(account, date, value, readableValue) {
     // ... (No changes)
     if (IS_LOADING) return;
@@ -513,7 +497,6 @@
       
       if (!j.ok) {
         console.error('Delete JSON error:', j);
-        // 1. This is the error you are seeing. Re-deploying CODE.JS will fix this.
         showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
         setLoading(false);
         return;
@@ -530,7 +513,6 @@
   }
 
   // ==== DATA & RENDERING ====
-
   async function fetchSnapshot() {
     // ... (No changes)
     if (IS_LOADING) return;
@@ -575,7 +557,6 @@
   }
 
   function renderChart() {
-    // ... (No changes)
     if (!SNAP || !window.google || !google.visualization) return;
     const months = SNAP.months;
     const data = new google.visualization.DataTable();
@@ -617,6 +598,19 @@
     const neg = styles.getPropertyValue('--c-neg').trim();
     const black = styles.getPropertyValue('--c-black').trim();
     const textStyle = { color: black, fontName: 'system-ui' };
+    
+    // *** NEW LOGIC for Custom Colors ***
+    // Dynamically set chart colors based on mode and account data
+    let chartColors;
+    if (MODE === 'totals') {
+      chartColors = [pos, neg];
+    } else {
+      // Build color array from sorted accounts
+      // Use the account's color, or null to use the default chart color
+      chartColors = SNAP.accounts.map(a => a.color || null);
+    }
+    // *** END NEW LOGIC ***
+    
     const options = {
       height: Math.max(240, Math.round(window.innerHeight * 0.30)),
       backgroundColor: { fill: 'transparent' },
@@ -632,7 +626,8 @@
       },
       seriesType: 'line',
       lineWidth: 3,
-      colors: MODE === 'totals' ? [pos, neg] : undefined
+      // Use the new dynamic chartColors array
+      colors: chartColors
     };
     const chart = new google.visualization.ComboChart(document.getElementById('chart'));
     chart.draw(data, options);
@@ -660,13 +655,12 @@
       const left = document.createElement('div'); left.className = 'left';
       const right = document.createElement('div'); right.className = 'right';
 
-      // 5/6. Create wrapper for lastval and name
       const identityWrap = document.createElement('div');
       identityWrap.style.display = 'flex';
       identityWrap.style.alignItems = 'baseline';
       identityWrap.style.gap = '10px';
       identityWrap.style.flexWrap = 'nowrap';
-      identityWrap.style.minWidth = '0'; // Allow this group to shrink
+      identityWrap.style.minWidth = '0';
 
       const lastEl = document.createElement('span');
       lastEl.className = 'lastval';
@@ -677,17 +671,24 @@
       nameEl.className = 'name';
       nameEl.textContent = a.name;
       
+      // *** NEW LOGIC for H2 Color ***
+      // Apply the color from the sheet, if it exists
+      if (a.color) {
+        nameEl.style.color = a.color;
+      }
+      // *** END NEW LOGIC ***
+      
       identityWrap.appendChild(lastEl);
       identityWrap.appendChild(nameEl);
 
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
       aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-      aprEl.style.flexShrink = '0'; // 7.
+      aprEl.style.flexShrink = '0';
 
       const inputLine = document.createElement('div');
       inputLine.className = 'input-line';
-      inputLine.style.flexShrink = '0'; // 6.
+      inputLine.style.flexShrink = '0';
       
       const inp = document.createElement('input');
       inp.type = 'number';
@@ -711,34 +712,25 @@
       });
       inputLine.appendChild(inp);
       
-      // 5/6. Add items directly to .left flex container
       left.appendChild(identityWrap);
       left.appendChild(aprEl);
       left.appendChild(inputLine);
 
       const vals = document.createElement('div'); vals.className = 'values';
       
-      // 3. Use 'lastN' (from CODE.JS) instead of 'last12'
       (s?.lastN || []).forEach(v => {
-        
-        // 1/2. Backwards compatibility fix for $0 bug.
-        // v can be a number (from old script) or an object {value, date} (from new script)
         const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-        
         const val = Number(isObject ? v.value : v);
-        const date = isObject ? v.date : null; // No date available for old format
+        const date = isObject ? v.date : null;
         const readableValue = formatMoney(val);
         
         const chip = document.createElement('span');
         chip.className = 'chip';
         chip.dataset.sign = signOf(val);
         chip.textContent = readableValue;
-        
-        // Store data on the chip for deletion
         chip.dataset.value = val;
         
         if (date) {
-          // Only add delete listeners if we have a date (i.e., new v1c script)
           chip.dataset.date = date;
           chip.dataset.account = a.name;
           chip.dataset.readableValue = readableValue;
@@ -751,7 +743,6 @@
             }
           });
         } else {
-          // Old script data, make it non-interactive
           chip.classList.add('no-delete');
           chip.title = "Re-deploy CODE.JS to enable deletion";
         }
@@ -774,7 +765,6 @@
     const chip = e.currentTarget;
     const { account, date, value, readableValue } = chip.dataset;
     
-    // This check is belt-and-suspenders, but good practice
     if (!date) {
       showToast('Cannot delete. Data is from an older script version.', 'error');
       return;
@@ -865,7 +855,6 @@
   }
   
   // ==== INITIALIZATION ====
-
   document.addEventListener('DOMContentLoaded', () => {
     // ... (No changes)
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
@@ -893,7 +882,8 @@
       google.charts.setOnLoadCallback(fetchSnapshot);
     } else {
       const s = document.createElement('script');
-      s.src = 'https.www.gstatic.com/charts/loader.js';
+      // Fixed a typo in the charts loader URL
+      s.src = 'https://www.gstatic.com/charts/loader.js';
       s.onload = () => {
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(fetchSnapshot);
