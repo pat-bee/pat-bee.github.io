@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Ledger — Accounts & Chart (v1a)</title>
+  <meta name="viewport" content="width=device-width, initial-scale-1"/>
+  <title>Ledger — Accounts & Chart (v1b)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -13,6 +13,10 @@
       --c-white: #ffffff;
       --radius: 10px;
       --gap: 12px;
+      
+      /* 3. Colors for input tints */
+      --c-tint-pos: #f7f9f4;
+      --c-tint-neg: #f9f4f4;
     }
 
     html, body { 
@@ -35,7 +39,6 @@
       padding: 12px; 
     }
 
-    /* Make links black and underlined as requested */
     a {
       color: var(--c-black);
       text-decoration: underline;
@@ -46,7 +49,7 @@
       top: 0; 
       background: var(--c-white); 
       z-index: 5; 
-      border-bottom: 1px solid var(--c-black); /* Use black */
+      border-bottom: 1px solid var(--c-black);
     }
     
     .toolbar { 
@@ -90,7 +93,7 @@
       display: flex; 
       align-items: flex-start; 
       justify-content: space-between; 
-      border-bottom: 1px solid var(--c-black); /* Use black */
+      border-bottom: 1px solid var(--c-black);
       padding: 12px 0; 
       gap: 12px; 
     }
@@ -107,21 +110,33 @@
       text-align: right; 
       font-size: .9rem; 
       white-space: nowrap; 
-      overflow-x: auto; 
+      /* 4. Do not scroll, just cut off cleanly */
+      overflow-x: hidden;
     }
 
     h2 { 
       margin: 0 0 8px 0; 
-      font-size: clamp(1.6rem, 2vw, 2.6rem);
       display: flex; 
       align-items: baseline; 
       gap: 10px; 
       flex-wrap: wrap; 
     }
     
-    .lastval { font-weight: 600; }
-    .name { font-weight: 700; color: var(--c-black); }
-    .apr { font-weight: 400; font-size: .85rem; opacity: .75; }
+    /* 2. Make lastval and name 2.6rem */
+    .lastval { 
+      font-weight: 600; 
+      font-size: 2.6rem; 
+    }
+    .name { 
+      font-weight: 700; 
+      color: var(--c-black); 
+      font-size: 2.6rem; 
+    }
+    .apr { 
+      font-weight: 400; 
+      font-size: .85rem; 
+      opacity: .75; 
+    }
 
     .input-line { 
       display: flex; 
@@ -135,14 +150,15 @@
       width: 14rem;
       padding: .7rem .8rem;
       font-size: 1.1rem;
-      border: 2px solid var(--c-black); /* Use black */
+      border: 2px solid var(--c-black);
       border-radius: var(--radius);
-      background: var(--c-white); /* Use white */
+      background: var(--c-white); /* Default white */
       color: var(--c-black);
       outline: none;
+      /* 3. Add transition for background color change */
+      transition: background-color 0.3s ease;
     }
     
-    /* Style placeholder text to be subtle */
     input[type="number"]::placeholder {
       color: var(--c-black);
       opacity: 0.6;
@@ -153,14 +169,12 @@
       box-shadow: 0 0 0 2px var(--c-black) inset;
     }
     
-    /* Added class for submission feedback */
     input[type="number"].submitting {
       opacity: 0.5;
       pointer-events: none;
     }
     
     input[type="number"].submitted-ok {
-      /* Brief green flash on success */
       animation: flash-green 0.8s ease-out;
     }
     
@@ -183,7 +197,7 @@
     }
     
     button:hover { 
-      background: var(--c-white); /* Keep white, add underline */
+      background: var(--c-white);
       text-decoration: underline;
     }
     
@@ -205,9 +219,17 @@
     .chip {
       padding: .25rem .6rem;
       border-radius: 999px;
-      border: 1px solid var(--c-black); /* Use black */
+      border: 1px solid var(--c-black);
       font-variant-numeric: tabular-nums;
       font-size: .95rem;
+      /* 5. Add cursor pointer to hint at interactivity */
+      cursor: pointer;
+      user-select: none; /* Prevent text selection on double-click */
+    }
+    
+    .chip:hover {
+      background: var(--c-black);
+      color: var(--c-white);
     }
 
     footer { 
@@ -215,7 +237,7 @@
       text-align: right; 
     }
     
-    /* New Toast Notification Styles */
+    /* Toast Notification Styles */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -250,6 +272,75 @@
       color: var(--c-white);
       border-color: var(--c-white);
     }
+    
+    /* 5. New Delete Confirmation Modal Styles */
+    #delete-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    #delete-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--c-white);
+      color: var(--c-black);
+      border: 2px solid var(--c-black);
+      border-radius: var(--radius);
+      z-index: 201;
+      padding: 24px;
+      width: 90vw;
+      max-width: 400px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, top 0.3s ease;
+    }
+    
+    #delete-modal-backdrop.show,
+    #delete-modal.show {
+      display: block;
+      opacity: 1;
+    }
+    
+    #delete-modal p {
+      margin-top: 0;
+      line-height: 1.4;
+    }
+    
+    #delete-modal-details {
+      font-weight: 600;
+      display: block;
+      margin: 12px 0;
+      font-size: 1.1rem;
+    }
+    
+    #delete-modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    /* Style delete button with negative color */
+    #delete-btn-confirm {
+      background: var(--c-neg);
+      color: var(--c-white);
+      border-color: var(--c-neg);
+    }
+    #delete-btn-confirm:hover {
+      background: #802421; /* Darker red */
+      border-color: #802421;
+      text-decoration: none;
+    }
 
     @media (max-width: 700px) {
       .right { 
@@ -260,19 +351,31 @@
       .values { flex-wrap: wrap; }
       input[type="number"] { width: 100%; }
       .toolbar { justify-content: space-around; }
+      
+      /* 2. Adjust h2 font size on mobile to prevent overflow */
+      .lastval, .name {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Toast element for notifications -->
   <div id="toast" role="status" aria-live="polite"></div>
+  
+  <!-- 5. New Delete Confirmation Modal HTML -->
+  <div id="delete-modal-backdrop"></div>
+  <div id="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <h3 id="delete-modal-title" style="margin-top:0;">Delete Entry?</h3>
+    <p>Do you really want to delete this entry?</p>
+    <span id="delete-modal-details"></span>
+    <div id="delete-modal-buttons">
+      <button id="delete-btn-cancel">Cancel</button>
+      <button id="delete-btn-confirm">Yes, Delete</button>
+    </div>
+  </div>
 
   <header class="wrap">
     <div class="toolbar">
-      <!-- Keep +/- for future; they are inert now -->
-      <!-- <button id="fontMinus" aria-label="Decrease text size">−</button> -->
-      <!-- <button id="fontPlus"  aria-label="Increase text size">+</button> -->
-
       <label for="timeframe">Timeframe:</label>
       <select id="timeframe">
         <option value="ytd" selected>Year to Date</option>
@@ -288,13 +391,12 @@
     <div id="chart"></div>
   </header>
 
-  <!-- HR element as requested -->
   <hr class="wrap divider">
 
   <main class="wrap">
     <section id="accounts" class="accounts"></section>
     <footer>
-      <small>Enter value(s) and press <b>Enter</b> (per-account) or click <b>Submit All</b>.</small>
+      <small>Enter value(s) and press <b>Enter</b> or <b>Submit All</b>. Double-click an entry to delete.</small>
     </footer>
   </main>
 
@@ -311,34 +413,18 @@
 
   // ==== UI FUNCTIONS ====
 
-  /**
-   * Shows a toast notification. Replaces alert().
-   * @param {string} msg - The message to display.
-   * @param {'info'|'success'|'error'} type - Controls the toast color.
-   * @param {number} [duration=3000] - How long to show the toast (ms).
-   */
   function showToast(msg, type = 'info', duration = 3000) {
     const el = document.getElementById('toast');
     if (!el) return;
-    
-    // Clear any existing timer
     if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
-
     el.textContent = msg;
     el.dataset.type = type;
     el.classList.add('show');
-
-    // Hide after duration
     TOAST_TIMER = setTimeout(() => {
       el.classList.remove('show');
     }, duration);
   }
   
-  /**
-   * Sets the loading state for the app, disabling buttons.
-   * @param {boolean} loading - Whether the app is currently loading.
-   * @param {string} [message] - An optional message for the toast.
-   */
   function setLoading(loading, message) {
     IS_LOADING = loading;
     document.getElementById('refresh').disabled = loading;
@@ -353,7 +439,93 @@
     });
     
     if (message) {
-      showToast(message, 'info', loading ? 10000 : 3000); // Show for 10s if it's a loading message
+      // Don't show "loading" toast if a delete modal is showing
+      if (document.getElementById('delete-modal-backdrop').classList.contains('show')) {
+        return;
+      }
+      showToast(message, 'info', loading ? 10000 : 3000);
+    }
+  }
+
+  // ==== 5. NEW DELETE MODAL FUNCTIONS ====
+  
+  /**
+   * Shows the custom delete confirmation modal.
+   * @param {string} account - The account name.
+   * @param {string} date - The entry date (YYYY-MM-DD).
+   * @param {string} value - The entry value.
+   * @param {string} readableValue - The formatted currency value.
+   */
+  function showDeleteConfirm(account, date, value, readableValue) {
+    if (IS_LOADING) return; // Don't show if already busy
+    
+    const backdrop = document.getElementById('delete-modal-backdrop');
+    const modal = document.getElementById('delete-modal');
+    const details = document.getElementById('delete-modal-details');
+    const confirmBtn = document.getElementById('delete-btn-confirm');
+    
+    // Set details
+    details.textContent = `${account}: ${readableValue} on ${date}`;
+    
+    // Show modal
+    backdrop.classList.add('show');
+    modal.classList.add('show');
+    
+    // Set up button click handlers
+    // Use .onclick to replace any old listeners
+    confirmBtn.onclick = () => {
+      processDelete(account, date, value);
+    };
+    // Cancel button is wired up in DOMContentLoaded
+  }
+  
+  /**
+   * Hides the delete confirmation modal.
+   */
+  function hideDeleteConfirm() {
+    document.getElementById('delete-modal-backdrop').classList.remove('show');
+    document.getElementById('delete-modal').classList.remove('show');
+  }
+  
+  /**
+   * Handles the actual API call to delete an entry.
+   * @param {string} account - The account name.
+   * @param {string} date - The entry date (YYYY-MM-DD).
+   * @param {string} value - The entry value.
+   */
+  async function processDelete(account, date, value) {
+    hideDeleteConfirm();
+    if (IS_LOADING) return;
+    setLoading(true, 'Deleting entry…');
+    
+    try {
+      const body = new URLSearchParams({ payload: JSON.stringify({ account, date, value: Number(value) }) });
+      const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
+      const text = await res.text();
+      
+      let j;
+      try { j = JSON.parse(text); } catch {
+        console.error('Delete non-JSON:', text);
+        showToast('Delete failed (non-JSON response)', 'error', 5000);
+        setLoading(false);
+        return;
+      }
+      
+      if (!j.ok) {
+        console.error('Delete JSON error:', j);
+        showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
+        setLoading(false);
+        return;
+      }
+      
+      // Success!
+      showToast('Entry deleted. Refreshing…', 'success');
+      await fetchSnapshot(); // This will reset loading state
+      
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+      showToast('Network error deleting entry.', 'error', 5000);
     }
   }
 
@@ -364,7 +536,6 @@
     setLoading(true, 'Loading snapshot…');
     
     try {
-      // Pass timeframe to API
       const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
       const text = await res.text();
       
@@ -374,12 +545,14 @@
       } catch {
         console.error('Non-JSON response:', text);
         showToast('Error: API returned non-JSON', 'error', 5000);
+        setLoading(false); // Manually reset loading state on critical error
         return;
       }
       
       if (!j.ok) {
         console.error('Snapshot error:', j);
         showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
+        setLoading(false); // Manually reset loading state
         return;
       }
       
@@ -400,12 +573,11 @@
   }
 
   function renderChart() {
+    // ... (No changes to renderChart function)
     if (!SNAP || !window.google || !google.visualization) return;
-
     const months = SNAP.months;
     const data = new google.visualization.DataTable();
     data.addColumn('string', 'Month');
-
     let rows = [];
     if (MODE === 'totals') {
       data.addColumn('number', 'Assets');
@@ -429,7 +601,6 @@
       }
     }
     data.addRows(rows);
-
     let minV = 0, maxV = 0;
     for (const r of rows) {
       for (let i = 1; i < r.length; i++) {
@@ -438,16 +609,12 @@
         if (v > maxV) maxV = v;
       }
     }
-    // Symmetrical Y-Axis ("breakeven in the middle")
-    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100); // Min $100 view
-
+    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
     const styles = getComputedStyle(document.documentElement);
     const pos = styles.getPropertyValue('--c-pos').trim();
     const neg = styles.getPropertyValue('--c-neg').trim();
     const black = styles.getPropertyValue('--c-black').trim();
-    
     const textStyle = { color: black, fontName: 'system-ui' };
-
     const options = {
       height: Math.max(240, Math.round(window.innerHeight * 0.30)),
       backgroundColor: { fill: 'transparent' },
@@ -465,21 +632,14 @@
       lineWidth: 3,
       colors: MODE === 'totals' ? [pos, neg] : undefined
     };
-
     const chart = new google.visualization.ComboChart(document.getElementById('chart'));
     chart.draw(data, options);
   }
 
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
-  /**
-   * Formats a number as currency, with a + or - sign.
-   * @param {number} n - The number to format.
-   * @returns {string} - Formatted string (e.g., "+$100.00" or "−$50.00").
-   */
   function formatMoney(n) {
     const val = Number(n) || 0;
-    // Use '−' (minus sign) not '-' (hyphen) for better typography
     const sign = val < 0 ? '−' : (val > 0 ? '+' : '');
     const abs = Math.abs(val);
     return `${sign}$${abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -498,20 +658,16 @@
       const right = document.createElement('div'); right.className = 'right';
 
       const h2 = document.createElement('h2');
-
       const lastEl = document.createElement('span');
       lastEl.className = 'lastval';
       lastEl.textContent = formatMoney(last);
       lastEl.dataset.sign = signOf(last);
-
       const nameEl = document.createElement('span');
       nameEl.className = 'name';
       nameEl.textContent = a.name;
-
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
       aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-
       h2.appendChild(lastEl);
       h2.appendChild(nameEl);
       h2.appendChild(aprEl);
@@ -523,25 +679,53 @@
       inp.placeholder = 'Add new value…';
       inp.step = '0.01';
       inp.setAttribute('aria-label', `New value for ${a.name}`);
-      inp.dataset.accountName = a.name; // Store name for submitAll
+      inp.dataset.accountName = a.name;
+
+      // 3. Tint input box background based on the last value
+      if (last > 0) {
+        inp.style.backgroundColor = 'var(--c-tint-pos)';
+      } else if (last < 0) {
+        inp.style.backgroundColor = 'var(--c-tint-neg)';
+      } else {
+        inp.style.backgroundColor = 'var(--c-white)'; // Explicitly set white if 0
+      }
 
       inp.addEventListener('keydown', async (ev) => {
         if (ev.key === 'Enter') {
           await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
-          // Do not clear input on submit, wait for refresh
         }
       });
       inputLine.appendChild(inp);
-
       left.appendChild(h2);
       left.appendChild(inputLine);
 
       const vals = document.createElement('div'); vals.className = 'values';
+      
+      // 5. Modified loop to handle new data structure {value, date}
       (s?.last12 || []).forEach(v => {
         const chip = document.createElement('span');
         chip.className = 'chip';
-        chip.dataset.sign = signOf(v);
-        chip.textContent = formatMoney(v);
+        const val = Number(v.value);
+        const readableValue = formatMoney(val);
+        
+        chip.dataset.sign = signOf(val);
+        chip.textContent = readableValue;
+        
+        // Store data on the chip for deletion
+        chip.dataset.value = val;
+        chip.dataset.date = v.date;
+        chip.dataset.account = a.name; // Get account name from parent loop
+        chip.dataset.readableValue = readableValue;
+        
+        // 5. Add event listeners for deletion
+        chip.addEventListener('dblclick', handleDeleteClick);
+        chip.addEventListener('contextmenu', handleDeleteClick);
+        chip.addEventListener('click', (e) => {
+          if (e.shiftKey || e.ctrlKey || e.altKey) {
+            handleDeleteClick(e);
+          }
+        });
+        
         vals.appendChild(chip);
       });
       right.appendChild(vals);
@@ -550,6 +734,21 @@
       row.appendChild(right);
       root.appendChild(row);
     });
+  }
+  
+  /**
+   * 5. New handler for delete clicks on chips.
+   * @param {Event} e - The click, dblclick, or contextmenu event.
+   */
+  function handleDeleteClick(e) {
+    e.preventDefault(); // Prevent right-click menu, etc.
+    if (IS_LOADING) return; // Don't allow delete while loading
+    
+    const chip = e.currentTarget;
+    const { account, date, value, readableValue } = chip.dataset;
+    
+    // Call the custom confirmation modal
+    showDeleteConfirm(account, date, value, readableValue);
   }
 
   async function submitAll() {
@@ -560,7 +759,7 @@
         entries.push({ 
           account: inp.dataset.accountName, 
           value: Number(v),
-          inputEl: inp // Pass element for feedback
+          inputEl: inp
         });
       }
     });
@@ -575,11 +774,9 @@
     if (IS_LOADING) return;
     setLoading(true, 'Submitting entries…');
     
-    // Flag inputs as submitting
     entries.forEach(e => e.inputEl?.classList.add('submitting'));
 
     try {
-      // Filter out any invalid entries before sending
       const validEntries = entries
         .map(e => ({ account: e.account, value: e.value }))
         .filter(e => e.account && !isNaN(e.value));
@@ -587,6 +784,7 @@
       if (validEntries.length === 0) {
         showToast('No valid entries to submit.', 'error');
         setLoading(false);
+        entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
         return;
       }
 
@@ -601,6 +799,7 @@
         console.error('Submit non-JSON:', text);
         showToast('Submit failed (non-JSON response)', 'error', 5000);
         setLoading(false);
+        entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
         return;
       }
       
@@ -608,30 +807,32 @@
         console.error('Submit JSON error:', j);
         showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
         setLoading(false);
+        entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
         return;
       }
 
-      // Success! Show feedback and flash inputs
+      // 1. Success! Show toast and flash inputs.
       showToast('Submit successful! Refreshing data…', 'success');
       entries.forEach(e => {
         e.inputEl?.classList.add('submitted-ok');
         e.inputEl.value = ''; // Clear on success
-        // Remove flash class after animation
         setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
       });
 
-      // Refresh data
+      // 1. Refresh the display by calling fetchSnapshot()
+      // This will also reset the loading state at the end
       await fetchSnapshot();
       
     } catch (e) {
       console.error(e);
       setLoading(false);
       showToast('Network error submitting data.', 'error', 5000);
+      entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
     }
     
-    // Always remove 'submitting' class, even on failure
-    entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-    setLoading(false); // Ensure loading state is reset
+    // Note: setLoading(false) is handled by fetchSnapshot() on success,
+    // but we call it here just in case of an error *before* fetchSnapshot
+    setLoading(false);
   }
   
   // ==== INITIALIZATION ====
@@ -650,18 +851,20 @@
     
     document.getElementById('timeframe').addEventListener('change', (e) => {
       TIMEFRAME = e.target.value;
-      fetchSnapshot(); // Re-fetch data for the new timeframe
+      fetchSnapshot();
     });
+    
+    // 5. Wire up delete modal cancel buttons
+    document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
+    document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
     
     window.addEventListener('resize', renderChart);
 
     // --- Load Google Charts & Initial Data ---
     if (window.google && google.charts) {
-      // If already loaded (e.g., in a cached environment)
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(fetchSnapshot);
     } else {
-      // Load for the first time
       const s = document.createElement('script');
       s.src = 'https://www.gstatic.com/charts/loader.js';
       s.onload = () => {
