@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- Changed title to v1d -->
-  <title>Ledger — Accounts & Chart (v1d)</title>
+  <!-- Changed title to v1e -->
+  <title>Ledger — Accounts & Chart (v1e)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -124,7 +124,6 @@
     }
     .name { 
       font-weight: 700; 
-      /* Color is now set by JS, but defaults to black */
       color: var(--c-black); 
       font-size: 2.6rem; 
       white-space: nowrap;
@@ -379,9 +378,16 @@
   <header class="wrap">
     <div class="toolbar">
       <label for="timeframe">Timeframe:</label>
+      <!-- NEW: Updated timeframe options -->
       <select id="timeframe">
-        <option value="ytd" selected>Year to Date</option>
-        <option value="12m">Last 12 Months</option>
+        <option value="ytd" selected>This Calendar Year</option>
+        <option value="today">Today</option>
+        <option value="7d">Last 7 Days</option>
+        <option value="14d">Last 14 Days</option>
+        <option value="30d">Last 30 Days</option>
+        <option value="90d">Last 90 Days</option>
+        <option value="1y">Last Year (12mo)</option>
+        <option value="all">All Time</option>
       </select>
       
       <label><input type="radio" name="mode" value="totals" checked> Totals</label>
@@ -404,13 +410,13 @@
 
   <script>
   // ==== CONFIG ====
-  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1d)
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbyjy3RWohIsJnsE5Xu9ZZh2xEBMGqw2Wen3MFlxzfSJ12Bp79YQwDVln7aVdnpXUSk31Q/exec';
+  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1e)
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbwdHTaDGGgHeerP5IVq0kIkhwpphFT-ioC_cr3GyLeRamvhwHjdOverRYtNefjQucMxhg/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
   let MODE = 'totals';
-  let TIMEFRAME = 'ytd';
+  let TIMEFRAME = 'ytd'; // Default timeframe
   let IS_LOADING = false;
   let TOAST_TIMER = null;
 
@@ -514,11 +520,11 @@
 
   // ==== DATA & RENDERING ====
   async function fetchSnapshot() {
-    // ... (No changes)
     if (IS_LOADING) return;
     setLoading(true, 'Loading snapshot…');
     
     try {
+      // The TIMEFRAME variable is now sent with the new values
       const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
       const text = await res.text();
       
@@ -551,32 +557,44 @@
   }
 
   function renderAll() {
-    // ... (No changes)
     renderChart();
     renderAccounts();
   }
 
   function renderChart() {
     if (!SNAP || !window.google || !google.visualization) return;
-    const months = SNAP.months;
+    
+    // NEW: Use dateAxis instead of months
+    const labels = SNAP.dateAxis; 
+    if (!labels || labels.length === 0) {
+      // No data to render
+      document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
+      return;
+    }
+    
     const data = new google.visualization.DataTable();
-    data.addColumn('string', 'Month');
+    // NEW: Column name is now 'Date'
+    data.addColumn('string', 'Date'); 
     let rows = [];
+    
     if (MODE === 'totals') {
       data.addColumn('number', 'Assets');
       data.addColumn('number', 'Debts');
-      for (let i = 0; i < months.length; i++) {
+      // NEW: Loop over labels (was months)
+      for (let i = 0; i < labels.length; i++) { 
         rows.push([
-          months[i],
+          labels[i], // Use the new label
           Number(SNAP.totals.assets[i] || 0),
           Number(SNAP.totals.debts[i] || 0)
         ]);
       }
     } else {
       SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      for (let i = 0; i < months.length; i++) {
-        const row = [ months[i] ];
+      // NEW: Loop over labels (was months)
+      for (let i = 0; i < labels.length; i++) {
+        const row = [ labels[i] ]; // Use the new label
         SNAP.accounts.forEach(a => {
+          // 'monthly' is the key from the API, even if data is daily
           const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
           row.push(Number(v));
         });
@@ -584,6 +602,7 @@
       }
     }
     data.addRows(rows);
+    
     let minV = 0, maxV = 0;
     for (const r of rows) {
       for (let i = 1; i < r.length; i++) {
@@ -599,24 +618,25 @@
     const black = styles.getPropertyValue('--c-black').trim();
     const textStyle = { color: black, fontName: 'system-ui' };
     
-    // *** NEW LOGIC for Custom Colors ***
-    // Dynamically set chart colors based on mode and account data
     let chartColors;
     if (MODE === 'totals') {
       chartColors = [pos, neg];
     } else {
-      // Build color array from sorted accounts
-      // Use the account's color, or null to use the default chart color
       chartColors = SNAP.accounts.map(a => a.color || null);
     }
-    // *** END NEW LOGIC ***
     
     const options = {
       height: Math.max(240, Math.round(window.innerHeight * 0.30)),
       backgroundColor: { fill: 'transparent' },
       chartArea: { width: '85%', height: '70%' },
       legend: { position: 'top', alignment: 'center', textStyle: textStyle },
-      hAxis: { slantedText: false, textStyle: textStyle },
+      hAxis: { 
+        slantedText: false, 
+        textStyle: textStyle,
+        // NEW: Show fewer labels if there are too many (e.g., 90 days)
+        // This keeps the X-axis from becoming unreadable
+        showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
+      },
       vAxis: { 
         viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
         baseline: 0, 
@@ -626,7 +646,6 @@
       },
       seriesType: 'line',
       lineWidth: 3,
-      // Use the new dynamic chartColors array
       colors: chartColors
     };
     const chart = new google.visualization.ComboChart(document.getElementById('chart'));
@@ -644,6 +663,7 @@
   }
 
   function renderAccounts() {
+    // ... (No changes to this function)
     const root = document.getElementById('accounts');
     root.innerHTML = '';
 
@@ -671,12 +691,9 @@
       nameEl.className = 'name';
       nameEl.textContent = a.name;
       
-      // *** NEW LOGIC for H2 Color ***
-      // Apply the color from the sheet, if it exists
       if (a.color) {
         nameEl.style.color = a.color;
       }
-      // *** END NEW LOGIC ***
       
       identityWrap.appendChild(lastEl);
       identityWrap.appendChild(nameEl);
@@ -794,7 +811,6 @@
   }
 
   async function submitEntries(entries) {
-    // ... (No changes)
     if (IS_LOADING) return;
     setLoading(true, 'Submitting entries…');
     
@@ -835,6 +851,7 @@
         return;
       }
 
+      // 1. CONFIRMATION: This is the successful submit logic.
       showToast('Submit successful! Refreshing data…', 'success');
       entries.forEach(e => {
         e.inputEl?.classList.add('submitted-ok');
@@ -842,6 +859,7 @@
         setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
       });
 
+      // 1. CONFIRMATION: The refresh only happens here, on success.
       await fetchSnapshot();
       
     } catch (e) {
@@ -856,7 +874,7 @@
   
   // ==== INITIALIZATION ====
   document.addEventListener('DOMContentLoaded', () => {
-    // ... (No changes)
+    // ... (No changes to refresh or submitAll listeners)
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
     document.getElementById('submitAll').addEventListener('click', submitAll);
     
@@ -867,9 +885,10 @@
       });
     });
     
+    // NEW: The timeframe listener now works with all the new options
     document.getElementById('timeframe').addEventListener('change', (e) => {
       TIMEFRAME = e.target.value;
-      fetchSnapshot();
+      fetchSnapshot(); // Fetch new data when timeframe changes
     });
     
     document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
@@ -877,12 +896,12 @@
     
     window.addEventListener('resize', renderChart);
 
+    // ... (No changes to charts loader)
     if (window.google && google.charts) {
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(fetchSnapshot);
     } else {
       const s = document.createElement('script');
-      // Fixed a typo in the charts loader URL
       s.src = 'https://www.gstatic.com/charts/loader.js';
       s.onload = () => {
         google.charts.load('current', { packages: ['corechart'] });
