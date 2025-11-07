@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale-1"/>
-  <title>Ledger — Accounts & Chart (v1b)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ledger — Accounts & Chart (v1c)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -98,10 +98,17 @@
       gap: 12px; 
     }
 
+    /* 4/6. Left column is now a flex row to hold identity, APR, and input */
     .left { 
       flex: 1 1 auto; 
       padding-right: 12px; 
       min-width: 0; 
+      
+      /* Align identity, APR, and input box in a row */
+      display: flex;
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+      align-items: center; /* Vertically center all items */
+      gap: var(--gap);
     }
     
     .right { 
@@ -109,41 +116,41 @@
       min-width: 40%; 
       text-align: right; 
       font-size: .9rem; 
-      white-space: nowrap; 
       /* 4. Do not scroll, just cut off cleanly */
+      white-space: nowrap; 
       overflow-x: hidden;
     }
 
-    h2 { 
-      margin: 0 0 8px 0; 
-      display: flex; 
-      align-items: baseline; 
-      gap: 10px; 
-      flex-wrap: wrap; 
-    }
-    
-    /* 2. Make lastval and name 2.6rem */
+    /* 2/5. Make lastval and name 2.6rem */
     .lastval { 
       font-weight: 600; 
       font-size: 2.6rem; 
+      white-space: nowrap; /* Keep value from wrapping */
     }
     .name { 
       font-weight: 700; 
       color: var(--c-black); 
       font-size: 2.6rem; 
+      
+      /* 5. Truncate name if it's too long */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    
+    /* 7. Make APR smaller */
     .apr { 
       font-weight: 400; 
-      font-size: .85rem; 
+      font-size: 0.75rem; /* Reduced from .85rem */
       opacity: .75; 
+      flex-shrink: 0; /* Don't let it shrink */
     }
 
     .input-line { 
       display: flex; 
       gap: 10px; 
       align-items: center; 
-      margin-top: 6px; 
-      flex-wrap: wrap; 
+      flex-shrink: 0; /* Don't let it shrink */
     }
 
     input[type="number"] {
@@ -152,10 +159,9 @@
       font-size: 1.1rem;
       border: 2px solid var(--c-black);
       border-radius: var(--radius);
-      background: var(--c-white); /* Default white */
+      background: var(--c-white);
       color: var(--c-black);
       outline: none;
-      /* 3. Add transition for background color change */
       transition: background-color 0.3s ease;
     }
     
@@ -211,9 +217,11 @@
       cursor: not-allowed;
     }
 
+    /* 4. Chips container - no wrap */
     .values { 
       display: inline-flex; 
       gap: .6rem; 
+      /* Removed flex-wrap: wrap */
     }
     
     .chip {
@@ -222,14 +230,24 @@
       border: 1px solid var(--c-black);
       font-variant-numeric: tabular-nums;
       font-size: .95rem;
-      /* 5. Add cursor pointer to hint at interactivity */
       cursor: pointer;
-      user-select: none; /* Prevent text selection on double-click */
+      user-select: none;
     }
     
     .chip:hover {
       background: var(--c-black);
       color: var(--c-white);
+    }
+    
+    /* 1/2. Style for non-deletable chips (old data format) */
+    .chip.no-delete {
+      cursor: default;
+      opacity: 0.7;
+      background: transparent;
+      color: var(--c-black);
+    }
+    .chip.no-delete:hover {
+      background: transparent;
     }
 
     footer { 
@@ -237,7 +255,6 @@
       text-align: right; 
     }
     
-    /* Toast Notification Styles */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -273,7 +290,6 @@
       border-color: var(--c-white);
     }
     
-    /* 5. New Delete Confirmation Modal Styles */
     #delete-modal-backdrop {
       position: fixed;
       top: 0;
@@ -330,25 +346,26 @@
       margin-top: 20px;
     }
     
-    /* Style delete button with negative color */
     #delete-btn-confirm {
       background: var(--c-neg);
       color: var(--c-white);
       border-color: var(--c-neg);
     }
     #delete-btn-confirm:hover {
-      background: #802421; /* Darker red */
+      background: #802421;
       border-color: #802421;
       text-decoration: none;
     }
 
     @media (max-width: 700px) {
+      /* 4. Remove mobile-specific text/flex wrapping */
       .right { 
         min-width: unset; 
         text-align: left; 
-        white-space: normal;
+        /* white-space: normal; <-- REMOVED */
       }
-      .values { flex-wrap: wrap; }
+      /* .values { flex-wrap: wrap; } <-- REMOVED */
+      
       input[type="number"] { width: 100%; }
       .toolbar { justify-content: space-around; }
       
@@ -362,7 +379,6 @@
 <body>
   <div id="toast" role="status" aria-live="polite"></div>
   
-  <!-- 5. New Delete Confirmation Modal HTML -->
   <div id="delete-modal-backdrop"></div>
   <div id="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
     <h3 id="delete-modal-title" style="margin-top:0;">Delete Entry?</h3>
@@ -402,7 +418,8 @@
 
   <script>
   // ==== CONFIG ====
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbx8CVKYhqspVD1fZOMLRYtDUxnTlSxWlPobZxm00XQDm80VKimEzNnjHIzS3FMTHUeFtA/exec';
+  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1c)
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -414,6 +431,7 @@
   // ==== UI FUNCTIONS ====
 
   function showToast(msg, type = 'info', duration = 3000) {
+    // ... (No changes)
     const el = document.getElementById('toast');
     if (!el) return;
     if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
@@ -426,6 +444,7 @@
   }
   
   function setLoading(loading, message) {
+    // ... (No changes)
     IS_LOADING = loading;
     document.getElementById('refresh').disabled = loading;
     document.getElementById('submitAll').disabled = loading;
@@ -439,7 +458,6 @@
     });
     
     if (message) {
-      // Don't show "loading" toast if a delete modal is showing
       if (document.getElementById('delete-modal-backdrop').classList.contains('show')) {
         return;
       }
@@ -447,53 +465,35 @@
     }
   }
 
-  // ==== 5. NEW DELETE MODAL FUNCTIONS ====
+  // ==== DELETE MODAL FUNCTIONS ====
   
-  /**
-   * Shows the custom delete confirmation modal.
-   * @param {string} account - The account name.
-   * @param {string} date - The entry date (YYYY-MM-DD).
-   * @param {string} value - The entry value.
-   * @param {string} readableValue - The formatted currency value.
-   */
   function showDeleteConfirm(account, date, value, readableValue) {
-    if (IS_LOADING) return; // Don't show if already busy
+    // ... (No changes)
+    if (IS_LOADING) return;
     
     const backdrop = document.getElementById('delete-modal-backdrop');
     const modal = document.getElementById('delete-modal');
     const details = document.getElementById('delete-modal-details');
     const confirmBtn = document.getElementById('delete-btn-confirm');
     
-    // Set details
     details.textContent = `${account}: ${readableValue} on ${date}`;
     
-    // Show modal
     backdrop.classList.add('show');
     modal.classList.add('show');
     
-    // Set up button click handlers
-    // Use .onclick to replace any old listeners
     confirmBtn.onclick = () => {
       processDelete(account, date, value);
     };
-    // Cancel button is wired up in DOMContentLoaded
   }
   
-  /**
-   * Hides the delete confirmation modal.
-   */
   function hideDeleteConfirm() {
+    // ... (No changes)
     document.getElementById('delete-modal-backdrop').classList.remove('show');
     document.getElementById('delete-modal').classList.remove('show');
   }
   
-  /**
-   * Handles the actual API call to delete an entry.
-   * @param {string} account - The account name.
-   * @param {string} date - The entry date (YYYY-MM-DD).
-   * @param {string} value - The entry value.
-   */
   async function processDelete(account, date, value) {
+    // ... (No changes)
     hideDeleteConfirm();
     if (IS_LOADING) return;
     setLoading(true, 'Deleting entry…');
@@ -513,14 +513,14 @@
       
       if (!j.ok) {
         console.error('Delete JSON error:', j);
+        // 1. This is the error you are seeing. Re-deploying CODE.JS will fix this.
         showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
         setLoading(false);
         return;
       }
       
-      // Success!
       showToast('Entry deleted. Refreshing…', 'success');
-      await fetchSnapshot(); // This will reset loading state
+      await fetchSnapshot();
       
     } catch (e) {
       console.error(e);
@@ -532,6 +532,7 @@
   // ==== DATA & RENDERING ====
 
   async function fetchSnapshot() {
+    // ... (No changes)
     if (IS_LOADING) return;
     setLoading(true, 'Loading snapshot…');
     
@@ -545,14 +546,14 @@
       } catch {
         console.error('Non-JSON response:', text);
         showToast('Error: API returned non-JSON', 'error', 5000);
-        setLoading(false); // Manually reset loading state on critical error
+        setLoading(false);
         return;
       }
       
       if (!j.ok) {
         console.error('Snapshot error:', j);
         showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
-        setLoading(false); // Manually reset loading state
+        setLoading(false);
         return;
       }
       
@@ -568,12 +569,13 @@
   }
 
   function renderAll() {
+    // ... (No changes)
     renderChart();
     renderAccounts();
   }
 
   function renderChart() {
-    // ... (No changes to renderChart function)
+    // ... (No changes)
     if (!SNAP || !window.google || !google.visualization) return;
     const months = SNAP.months;
     const data = new google.visualization.DataTable();
@@ -639,6 +641,7 @@
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
   function formatMoney(n) {
+    // ... (No changes)
     const val = Number(n) || 0;
     const sign = val < 0 ? '−' : (val > 0 ? '+' : '');
     const abs = Math.abs(val);
@@ -657,23 +660,35 @@
       const left = document.createElement('div'); left.className = 'left';
       const right = document.createElement('div'); right.className = 'right';
 
-      const h2 = document.createElement('h2');
+      // 5/6. Create wrapper for lastval and name
+      const identityWrap = document.createElement('div');
+      identityWrap.style.display = 'flex';
+      identityWrap.style.alignItems = 'baseline';
+      identityWrap.style.gap = '10px';
+      identityWrap.style.flexWrap = 'nowrap';
+      identityWrap.style.minWidth = '0'; // Allow this group to shrink
+
       const lastEl = document.createElement('span');
       lastEl.className = 'lastval';
       lastEl.textContent = formatMoney(last);
       lastEl.dataset.sign = signOf(last);
+      
       const nameEl = document.createElement('span');
       nameEl.className = 'name';
       nameEl.textContent = a.name;
+      
+      identityWrap.appendChild(lastEl);
+      identityWrap.appendChild(nameEl);
+
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
       aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-      h2.appendChild(lastEl);
-      h2.appendChild(nameEl);
-      h2.appendChild(aprEl);
+      aprEl.style.flexShrink = '0'; // 7.
 
       const inputLine = document.createElement('div');
       inputLine.className = 'input-line';
+      inputLine.style.flexShrink = '0'; // 6.
+      
       const inp = document.createElement('input');
       inp.type = 'number';
       inp.placeholder = 'Add new value…';
@@ -681,13 +696,12 @@
       inp.setAttribute('aria-label', `New value for ${a.name}`);
       inp.dataset.accountName = a.name;
 
-      // 3. Tint input box background based on the last value
       if (last > 0) {
         inp.style.backgroundColor = 'var(--c-tint-pos)';
       } else if (last < 0) {
         inp.style.backgroundColor = 'var(--c-tint-neg)';
       } else {
-        inp.style.backgroundColor = 'var(--c-white)'; // Explicitly set white if 0
+        inp.style.backgroundColor = 'var(--c-white)';
       }
 
       inp.addEventListener('keydown', async (ev) => {
@@ -696,35 +710,51 @@
         }
       });
       inputLine.appendChild(inp);
-      left.appendChild(h2);
+      
+      // 5/6. Add items directly to .left flex container
+      left.appendChild(identityWrap);
+      left.appendChild(aprEl);
       left.appendChild(inputLine);
 
       const vals = document.createElement('div'); vals.className = 'values';
       
-      // 5. Modified loop to handle new data structure {value, date}
-      (s?.last12 || []).forEach(v => {
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        const val = Number(v.value);
+      // 3. Use 'lastN' (from CODE.JS) instead of 'last12'
+      (s?.lastN || []).forEach(v => {
+        
+        // 1/2. Backwards compatibility fix for $0 bug.
+        // v can be a number (from old script) or an object {value, date} (from new script)
+        const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+        
+        const val = Number(isObject ? v.value : v);
+        const date = isObject ? v.date : null; // No date available for old format
         const readableValue = formatMoney(val);
         
+        const chip = document.createElement('span');
+        chip.className = 'chip';
         chip.dataset.sign = signOf(val);
         chip.textContent = readableValue;
         
         // Store data on the chip for deletion
         chip.dataset.value = val;
-        chip.dataset.date = v.date;
-        chip.dataset.account = a.name; // Get account name from parent loop
-        chip.dataset.readableValue = readableValue;
         
-        // 5. Add event listeners for deletion
-        chip.addEventListener('dblclick', handleDeleteClick);
-        chip.addEventListener('contextmenu', handleDeleteClick);
-        chip.addEventListener('click', (e) => {
-          if (e.shiftKey || e.ctrlKey || e.altKey) {
-            handleDeleteClick(e);
-          }
-        });
+        if (date) {
+          // Only add delete listeners if we have a date (i.e., new v1c script)
+          chip.dataset.date = date;
+          chip.dataset.account = a.name;
+          chip.dataset.readableValue = readableValue;
+          
+          chip.addEventListener('dblclick', handleDeleteClick);
+          chip.addEventListener('contextmenu', handleDeleteClick);
+          chip.addEventListener('click', (e) => {
+            if (e.shiftKey || e.ctrlKey || e.altKey) {
+              handleDeleteClick(e);
+            }
+          });
+        } else {
+          // Old script data, make it non-interactive
+          chip.classList.add('no-delete');
+          chip.title = "Re-deploy CODE.JS to enable deletion";
+        }
         
         vals.appendChild(chip);
       });
@@ -736,22 +766,25 @@
     });
   }
   
-  /**
-   * 5. New handler for delete clicks on chips.
-   * @param {Event} e - The click, dblclick, or contextmenu event.
-   */
   function handleDeleteClick(e) {
-    e.preventDefault(); // Prevent right-click menu, etc.
-    if (IS_LOADING) return; // Don't allow delete while loading
+    // ... (No changes)
+    e.preventDefault();
+    if (IS_LOADING) return;
     
     const chip = e.currentTarget;
     const { account, date, value, readableValue } = chip.dataset;
     
-    // Call the custom confirmation modal
+    // This check is belt-and-suspenders, but good practice
+    if (!date) {
+      showToast('Cannot delete. Data is from an older script version.', 'error');
+      return;
+    }
+    
     showDeleteConfirm(account, date, value, readableValue);
   }
 
   async function submitAll() {
+    // ... (No changes)
     const entries = [];
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
       const v = inp.value.trim();
@@ -771,6 +804,7 @@
   }
 
   async function submitEntries(entries) {
+    // ... (No changes)
     if (IS_LOADING) return;
     setLoading(true, 'Submitting entries…');
     
@@ -784,7 +818,7 @@
       if (validEntries.length === 0) {
         showToast('No valid entries to submit.', 'error');
         setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
+        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
         return;
       }
 
@@ -799,7 +833,7 @@
         console.error('Submit non-JSON:', text);
         showToast('Submit failed (non-JSON response)', 'error', 5000);
         setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
+        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
         return;
       }
       
@@ -807,38 +841,33 @@
         console.error('Submit JSON error:', j);
         showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
         setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
+        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
         return;
       }
 
-      // 1. Success! Show toast and flash inputs.
       showToast('Submit successful! Refreshing data…', 'success');
       entries.forEach(e => {
         e.inputEl?.classList.add('submitted-ok');
-        e.inputEl.value = ''; // Clear on success
+        e.inputEl.value = '';
         setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
       });
 
-      // 1. Refresh the display by calling fetchSnapshot()
-      // This will also reset the loading state at the end
       await fetchSnapshot();
       
     } catch (e) {
       console.error(e);
       setLoading(false);
       showToast('Network error submitting data.', 'error', 5000);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting')); // Unflag inputs
+      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
     }
     
-    // Note: setLoading(false) is handled by fetchSnapshot() on success,
-    // but we call it here just in case of an error *before* fetchSnapshot
     setLoading(false);
   }
   
   // ==== INITIALIZATION ====
 
   document.addEventListener('DOMContentLoaded', () => {
-    // --- Wire controls ---
+    // ... (No changes)
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
     document.getElementById('submitAll').addEventListener('click', submitAll);
     
@@ -854,19 +883,17 @@
       fetchSnapshot();
     });
     
-    // 5. Wire up delete modal cancel buttons
     document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
     document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
     
     window.addEventListener('resize', renderChart);
 
-    // --- Load Google Charts & Initial Data ---
     if (window.google && google.charts) {
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(fetchSnapshot);
     } else {
       const s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/charts/loader.js';
+      s.src = 'https.www.gstatic.com/charts/loader.js';
       s.onload = () => {
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(fetchSnapshot);
