@@ -1,464 +1,676 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Ledger — Accounts & Chart</title>
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
-  <style>
-    :root{
-      --maxw: 1400px;
-      --c-pos:#4c8036;   /* positive */
-      --c-neg:#a02d2a;   /* negative */
-      --c-black:#000000;
-      --c-white:#ffffff;
-      --radius:10px;
-      --gap:12px;
-      /* NEW: Tints for input boxes */
-      --c-input-pos-tint: #f7f9f4; /* positive value lastval tint */
-      --c-input-neg-tint: #f9f4f4; /* negative value lastval tint */
-    }
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ledger — Accounts & Chart (v1a)</title>
+  <style>
+    :root {
+      --maxw: 1400px;
+      --c-pos: #4c8036;  /* positive */
+      --c-neg: #a02d2a;  /* negative */
+      --c-black: #000000;
+      --c-white: #ffffff;
+      --radius: 10px;
+      --gap: 12px;
+    }
 
-    html, body { height:100%; margin:0; background:var(--c-white); color:var(--c-black); }
-    body{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 18px;
-      line-height:1.5;
-    }
+    html, body { 
+      height: 100%; 
+      margin: 0; 
+      background: var(--c-white); 
+      color: var(--c-black); 
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+    }
 
-    .wrap{ width:90vw; max-width:var(--maxw); margin:0 auto; padding:12px; }
+    .wrap { 
+      width: 90vw; 
+      max-width: var(--maxw); 
+      margin: 0 auto; 
+      padding: 12px; 
+    }
 
-    header{ position:sticky; top:0; background:var(--c-white); z-index:5; border-bottom:1px solid #eee; }
-    .toolbar{ display:flex; gap:var(--gap); align-items:center; justify-content:flex-end; padding:6px 0; flex-wrap:wrap; }
-    .toolbar label{ font-size:.85rem; }
+    /* Make links black and underlined as requested */
+    a {
+      color: var(--c-black);
+      text-decoration: underline;
+    }
 
-    #chart{ height:30vh; width:100%; }
+    header { 
+      position: sticky; 
+      top: 0; 
+      background: var(--c-white); 
+      z-index: 5; 
+      border-bottom: 1px solid var(--c-black); /* Use black */
+    }
+    
+    .toolbar { 
+      display: flex; 
+      gap: var(--gap); 
+      align-items: center; 
+      justify-content: flex-end; 
+      padding: 6px 0; 
+      flex-wrap: wrap; 
+    }
+    
+    .toolbar label { 
+      font-size: .85rem; 
+      cursor: pointer;
+    }
+    
+    .toolbar select {
+      font-size: .85rem;
+      padding: 4px;
+      border: 1px solid var(--c-black);
+      border-radius: 4px;
+      background: var(--c-white);
+      color: var(--c-black);
+    }
 
-    .accounts{ display:grid; grid-template-columns: 1fr; gap:var(--gap); }
-    .row{ display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #eee; padding:12px 0; gap:12px; }
+    #chart { height: 30vh; width: 100%; }
+    
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--c-black);
+      margin-top: 1rem;
+    }
 
-    .left{ flex:1 1 auto; padding-right:12px; min-width:0; }
-    /* ADJUSTMENT 4: Remove scrollbar and allow content cutoff for previous entries */
-    .right{ 
-      flex:0 1 auto; 
-      min-width:40%; 
-      text-align:right; 
-      font-size:.9rem; 
-      white-space:nowrap; 
-      overflow-x: hidden; /* Prevent horizontal scrollbar on past values */
-    }
+    .accounts { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: var(--gap); 
+    }
+    
+    .row { 
+      display: flex; 
+      align-items: flex-start; 
+      justify-content: space-between; 
+      border-bottom: 1px solid var(--c-black); /* Use black */
+      padding: 12px 0; 
+      gap: 12px; 
+    }
 
-    /* ADJUSTMENT 2: Set h2 elements to 2.6rem size */
-    h2{ 
-      margin:0 0 8px 0; 
-      font-size: 2.6rem; /* Fixed size as requested */
-      display:flex; 
-      align-items:baseline; 
-      gap:10px; 
-      flex-wrap:wrap; 
-    }
-    .lastval{ font-weight:600; }
-    .name{ font-weight:700; color:var(--c-black); }
-    .apr{ font-weight:400; font-size:.85rem; opacity:.75; }
+    .left { 
+      flex: 1 1 auto; 
+      padding-right: 12px; 
+      min-width: 0; 
+    }
+    
+    .right { 
+      flex: 0 1 auto; 
+      min-width: 40%; 
+      text-align: right; 
+      font-size: .9rem; 
+      white-space: nowrap; 
+      overflow-x: auto; 
+    }
 
-    .input-line{ display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+    h2 { 
+      margin: 0 0 8px 0; 
+      font-size: clamp(1.6rem, 2vw, 2.6rem);
+      display: flex; 
+      align-items: baseline; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+    }
+    
+    .lastval { font-weight: 600; }
+    .name { font-weight: 700; color: var(--c-black); }
+    .apr { font-weight: 400; font-size: .85rem; opacity: .75; }
 
-    input[type="number"]{
-      width: 14rem;
-      padding: .7rem .8rem;
-      font-size: 1.1rem;
-      border: 2px solid #ddd;
-      border-radius: var(--radius);
-      background: var(--c-white); /* Will be overridden by inline style for tinting */
-      color: var(--c-black);
-      outline: none;
-      /* NEW: Add transition for smoother hover/focus */
-      transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
-    }
-    input[type="number"]:focus{
-      border-color: var(--c-black);
-      box-shadow: 0 0 0 2px var(--c-black) inset;
-    }
+    .input-line { 
+      display: flex; 
+      gap: 10px; 
+      align-items: center; 
+      margin-top: 6px; 
+      flex-wrap: wrap; 
+    }
 
-    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
-    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
+    input[type="number"] {
+      width: 14rem;
+      padding: .7rem .8rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--c-black); /* Use black */
+      border-radius: var(--radius);
+      background: var(--c-white); /* Use white */
+      color: var(--c-black);
+      outline: none;
+    }
+    
+    /* Style placeholder text to be subtle */
+    input[type="number"]::placeholder {
+      color: var(--c-black);
+      opacity: 0.6;
+    }
+    
+    input[type="number"]:focus {
+      border-color: var(--c-black);
+      box-shadow: 0 0 0 2px var(--c-black) inset;
+    }
+    
+    /* Added class for submission feedback */
+    input[type="number"].submitting {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    input[type="number"].submitted-ok {
+      /* Brief green flash on success */
+      animation: flash-green 0.8s ease-out;
+    }
+    
+    @keyframes flash-green {
+      0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
+      100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
+    }
 
-    button{
-      padding: .7rem 1rem;
-      font-size: 1rem;
-      border: 2px solid var(--c-black);
-      color: var(--c-black);
-      background: var(--c-white);
-      cursor:pointer;
-      border-radius: var(--radius);
-    }
-    button:hover{ background:#f6f6f6; }
-    button:focus-visible{ outline:3px solid var(--c-black); outline-offset:2px; }
+    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
+    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
-    .values{ 
-      display:inline-flex; 
-      gap:.6rem; 
-      /* NEW: Ensure past values are ordered right-to-left for cutoff */
-      flex-direction: row-reverse; 
-      justify-content: flex-end; /* Align right to ensure right-most items are visible */
-    }
+    button {
+      padding: .7rem 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--c-black);
+      color: var(--c-black);
+      background: var(--c-white);
+      cursor: pointer;
+      border-radius: var(--radius);
+    }
+    
+    button:hover { 
+      background: var(--c-white); /* Keep white, add underline */
+      text-decoration: underline;
+    }
+    
+    button:focus-visible { 
+      outline: 3px solid var(--c-black); 
+      outline-offset: 2px; 
+    }
+    
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
-    .chip{
-      padding: .25rem .6rem;
-      border-radius: 999px;
-      border: 1px solid #eee;
-      font-variant-numeric: tabular-nums;
-      font-size: .95rem;
-      cursor: pointer; /* Suggests interactivity for deletion */
-    }
-    /* NEW: Visual feedback for deletable chips */
-    .chip:hover {
-      border-color: #aaa;
-      box-shadow: 0 0 3px rgba(0,0,0,0.1);
-    }
+    .values { 
+      display: inline-flex; 
+      gap: .6rem; 
+    }
+    
+    .chip {
+      padding: .25rem .6rem;
+      border-radius: 999px;
+      border: 1px solid var(--c-black); /* Use black */
+      font-variant-numeric: tabular-nums;
+      font-size: .95rem;
+    }
 
-    footer{ padding: 16px 0 24px; text-align:right; }
+    footer { 
+      padding: 16px 0 24px; 
+      text-align: right; 
+    }
+    
+    /* New Toast Notification Styles */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      background: var(--c-black);
+      color: var(--c-white);
+      border: 2px solid var(--c-white);
+      font-weight: 500;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
+    }
+    
+    #toast.show {
+      opacity: 1;
+      visibility: visible;
+      bottom: 30px;
+    }
+    
+    #toast[data-type="error"] {
+      background: var(--c-neg);
+      color: var(--c-white);
+      border-color: var(--c-white);
+    }
+    
+    #toast[data-type="success"] {
+      background: var(--c-pos);
+      color: var(--c-white);
+      border-color: var(--c-white);
+    }
 
-    @media (max-width:700px){
-      .right{ min-width:unset; text-align:left; }
-      input[type="number"]{ width:100%; }
-      .toolbar{ justify-content:space-between; }
-    }
-  </style>
+    @media (max-width: 700px) {
+      .right { 
+        min-width: unset; 
+        text-align: left; 
+        white-space: normal;
+      }
+      .values { flex-wrap: wrap; }
+      input[type="number"] { width: 100%; }
+      .toolbar { justify-content: space-around; }
+    }
+  </style>
 </head>
 <body>
-  <header class="wrap">
-    <div class="toolbar">
-            <button id="fontMinus" aria-label="Decrease text size">−</button>
-      <button id="fontPlus"  aria-label="Increase text size">+</button>
+  <!-- Toast element for notifications -->
+  <div id="toast" role="status" aria-live="polite"></div>
 
-      <button id="refresh" aria-label="Refresh data">Refresh</button>
-      <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-      <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-      <button id="submitAll">Submit All</button>
-    </div>
-    <div id="chart"></div>
-  </header>
+  <header class="wrap">
+    <div class="toolbar">
+      <!-- Keep +/- for future; they are inert now -->
+      <!-- <button id="fontMinus" aria-label="Decrease text size">−</button> -->
+      <!-- <button id="fontPlus"  aria-label="Increase text size">+</button> -->
 
-  <div id="status" class="wrap" style="color:#888;font-size:.85rem;"></div>
+      <label for="timeframe">Timeframe:</label>
+      <select id="timeframe">
+        <option value="ytd" selected>Year to Date</option>
+        <option value="12m">Last 12 Months</option>
+      </select>
+      
+      <label><input type="radio" name="mode" value="totals" checked> Totals</label>
+      <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+      
+      <button id="refresh" aria-label="Refresh data">Refresh</button>
+      <button id="submitAll">Submit All</button>
+    </div>
+    <div id="chart"></div>
+  </header>
 
-  <main class="wrap">
-    <section id="accounts" class="accounts"></section>
-    <footer>
-      <small>Enter value(s) and press <b>Enter</b> (per-account) or click <b>Submit All</b>. Long-press or non-standard click on a past value to delete it.</small>
-    </footer>
-  </main>
+  <!-- HR element as requested -->
+  <hr class="wrap divider">
 
-  <script>
-  // ==== CONFIG ====
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
+  <main class="wrap">
+    <section id="accounts" class="accounts"></section>
+    <footer>
+      <small>Enter value(s) and press <b>Enter</b> (per-account) or click <b>Submit All</b>.</small>
+    </footer>
+  </main>
 
-  // Ensure Charts loader exists before using `google`
-  function ensureChartsReady(onReady){
-    if (window.google && google.charts){
-      onReady();
-      return;
-    }
-    const s = document.createElement('script');
-    s.src = 'https://www.gstatic.com/charts/loader.js';
-    s.onload = () => onReady();
-    document.head.appendChild(s);
-  }
+  <script>
+  // ==== CONFIG ====
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
-  // ==== APP STATE ====
-  let SNAP = null;
-  let MODE = 'totals';
+  // ==== APP STATE ====
+  let SNAP = null;
+  let MODE = 'totals';
+  let TIMEFRAME = 'ytd';
+  let IS_LOADING = false;
+  let TOAST_TIMER = null;
 
-  function setStatus(msg){
-    const el = document.getElementById('status');
-    if (el) el.textContent = msg || '';
-  }
+  // ==== UI FUNCTIONS ====
 
-  async function fetchSnapshot(){
-    try{
-      setStatus('Loading snapshot…');
-      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}`);
-      const text = await res.text();
-      let j;
-      try { j = JSON.parse(text); } catch {
-        console.error('Non-JSON response:', text);
-        setStatus('Error: API returned non-JSON (check Web App access & URL)');
-        return;
-      }
-      if (!j.ok){
-        console.error('Snapshot error:', j);
-        setStatus('Error: ' + (j.error || 'snapshot failed'));
-        return;
-      }
-      SNAP = j;
-      setStatus('Snapshot loaded');
-      renderAll();
-    } catch (err){
-      console.error(err);
-      setStatus('Fetch failed (see console)');
-    }
-  }
+  /**
+   * Shows a toast notification. Replaces alert().
+   * @param {string} msg - The message to display.
+   * @param {'info'|'success'|'error'} type - Controls the toast color.
+   * @param {number} [duration=3000] - How long to show the toast (ms).
+   */
+  function showToast(msg, type = 'info', duration = 3000) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    
+    // Clear any existing timer
+    if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
 
-  function renderAll(){ renderChart(); renderAccounts(); }
+    el.textContent = msg;
+    el.dataset.type = type;
+    el.classList.add('show');
 
-  function renderChart(){
-    // ... (renderChart function remains the same) ...
-    if (!SNAP) return;
+    // Hide after duration
+    TOAST_TIMER = setTimeout(() => {
+      el.classList.remove('show');
+    }, duration);
+  }
+  
+  /**
+   * Sets the loading state for the app, disabling buttons.
+   * @param {boolean} loading - Whether the app is currently loading.
+   * @param {string} [message] - An optional message for the toast.
+   */
+  function setLoading(loading, message) {
+    IS_LOADING = loading;
+    document.getElementById('refresh').disabled = loading;
+    document.getElementById('submitAll').disabled = loading;
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+      inp.disabled = loading;
+      if (loading) {
+        inp.classList.add('submitting');
+      } else {
+        inp.classList.remove('submitting');
+      }
+    });
+    
+    if (message) {
+      showToast(message, 'info', loading ? 10000 : 3000); // Show for 10s if it's a loading message
+    }
+  }
 
-    const months = SNAP.months;
-    const data = new google.visualization.DataTable();
-    data.addColumn('string', 'Month');
+  // ==== DATA & RENDERING ====
 
-    let rows = [];
-    if (MODE === 'totals'){
-      data.addColumn('number', 'Assets');
-      data.addColumn('number', 'Debts');
-      for (let i=0;i<months.length;i++){
-        rows.push([
-          months[i],
-          Number(SNAP.totals.assets[i]||0),
-          Number(SNAP.totals.debts[i]||0)
-        ]);
-      }
-    } else {
-      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      for (let i=0;i<months.length;i++){
-        const row = [ months[i] ];
-        SNAP.accounts.forEach(a => {
-          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-          row.push(Number(v));
-        });
-        rows.push(row);
-      }
-    }
-    data.addRows(rows);
+  async function fetchSnapshot() {
+    if (IS_LOADING) return;
+    setLoading(true, 'Loading snapshot…');
+    
+    try {
+      // Pass timeframe to API
+      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
+      const text = await res.text();
+      
+      let j;
+      try { 
+        j = JSON.parse(text); 
+      } catch {
+        console.error('Non-JSON response:', text);
+        showToast('Error: API returned non-JSON', 'error', 5000);
+        return;
+      }
+      
+      if (!j.ok) {
+        console.error('Snapshot error:', j);
+        showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
+        return;
+      }
+      
+      SNAP = j;
+      setLoading(false, 'Snapshot loaded');
+      renderAll();
+      
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      showToast('Fetch failed (see console)', 'error', 5000);
+    }
+  }
 
-    let minV = 0, maxV = 0;
-    for (const r of rows) for (let i=1;i<r.length;i++){
-      const v = Number(r[i])||0;
-      if (v < minV) minV = v;
-      if (v > maxV) maxV = v;
-    }
-    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV));
+  function renderAll() {
+    renderChart();
+    renderAccounts();
+  }
 
-    const styles = getComputedStyle(document.documentElement);
-    const pos = styles.getPropertyValue('--c-pos').trim();
-    const neg = styles.getPropertyValue('--c-neg').trim();
+  function renderChart() {
+    if (!SNAP || !window.google || !google.visualization) return;
 
-    const options = {
-      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
-      legend: { position: 'top', alignment: 'center' },
-      hAxis: { slantedText: false },
-      vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0 },
-      seriesType: 'line',
-      colors: MODE === 'totals' ? [pos, neg] : undefined
-    };
+    const months = SNAP.months;
+    const data = new google.visualization.DataTable();
+    data.addColumn('string', 'Month');
 
-    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
-    chart.draw(data, options);
-  }
+    let rows = [];
+    if (MODE === 'totals') {
+      data.addColumn('number', 'Assets');
+      data.addColumn('number', 'Debts');
+      for (let i = 0; i < months.length; i++) {
+        rows.push([
+          months[i],
+          Number(SNAP.totals.assets[i] || 0),
+          Number(SNAP.totals.debts[i] || 0)
+        ]);
+      }
+    } else {
+      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
+      for (let i = 0; i < months.length; i++) {
+        const row = [ months[i] ];
+        SNAP.accounts.forEach(a => {
+          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+          row.push(Number(v));
+        });
+        rows.push(row);
+      }
+    }
+    data.addRows(rows);
 
-  const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
+    let minV = 0, maxV = 0;
+    for (const r of rows) {
+      for (let i = 1; i < r.length; i++) {
+        const v = Number(r[i]) || 0;
+        if (v < minV) minV = v;
+        if (v > maxV) maxV = v;
+      }
+    }
+    // Symmetrical Y-Axis ("breakeven in the middle")
+    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100); // Min $100 view
 
-  function renderAccounts(){
-    const root = document.getElementById('accounts');
-    root.innerHTML = '';
+    const styles = getComputedStyle(document.documentElement);
+    const pos = styles.getPropertyValue('--c-pos').trim();
+    const neg = styles.getPropertyValue('--c-neg').trim();
+    const black = styles.getPropertyValue('--c-black').trim();
+    
+    const textStyle = { color: black, fontName: 'system-ui' };
 
-    SNAP.accounts.forEach(a => {
-      const s = SNAP.series[a.name];
-      const last = s?.last ?? 0;
+    const options = {
+      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+      backgroundColor: { fill: 'transparent' },
+      chartArea: { width: '85%', height: '70%' },
+      legend: { position: 'top', alignment: 'center', textStyle: textStyle },
+      hAxis: { slantedText: false, textStyle: textStyle },
+      vAxis: { 
+        viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
+        baseline: 0, 
+        baselineColor: black,
+        gridlines: { color: black, opacity: 0.1 },
+        textStyle: textStyle
+      },
+      seriesType: 'line',
+      lineWidth: 3,
+      colors: MODE === 'totals' ? [pos, neg] : undefined
+    };
 
-      const row  = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right= document.createElement('div'); right.className = 'right';
+    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
+    chart.draw(data, options);
+  }
 
-      const h2 = document.createElement('h2');
+  const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
-      const lastEl = document.createElement('span');
-      lastEl.className = 'lastval';
-      lastEl.textContent = formatMoney(last);
-      lastEl.dataset.sign = signOf(last);
+  /**
+   * Formats a number as currency, with a + or - sign.
+   * @param {number} n - The number to format.
+   * @returns {string} - Formatted string (e.g., "+$100.00" or "−$50.00").
+   */
+  function formatMoney(n) {
+    const val = Number(n) || 0;
+    // Use '−' (minus sign) not '-' (hyphen) for better typography
+    const sign = val < 0 ? '−' : (val > 0 ? '+' : '');
+    const abs = Math.abs(val);
+    return `${sign}$${abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
 
-      const nameEl = document.createElement('span');
-      nameEl.className = 'name';
-      nameEl.textContent = a.name;
+  function renderAccounts() {
+    const root = document.getElementById('accounts');
+    root.innerHTML = '';
 
-      const aprEl = document.createElement('span');
-      aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr*100).toFixed(2)}%`;
+    SNAP.accounts.forEach(a => {
+      const s = SNAP.series[a.name];
+      const last = s?.last ?? 0;
 
-      h2.appendChild(lastEl);
-      h2.appendChild(nameEl);
-      h2.appendChild(aprEl);
+      const row = document.createElement('div'); row.className = 'row';
+      const left = document.createElement('div'); left.className = 'left';
+      const right = document.createElement('div'); right.className = 'right';
 
-      const inputLine = document.createElement('div');
-      inputLine.className = 'input-line';
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.placeholder = 'Add new value…';
-      inp.step = '0.01';
-      inp.setAttribute('aria-label', `New value for ${a.name}`);
+      const h2 = document.createElement('h2');
 
-      /* ADJUSTMENT 3: Tint input by sign of last value */
-      inp.style.backgroundColor = last < 0 ? 'var(--c-input-neg-tint)' : 'var(--c-input-pos-tint)';
+      const lastEl = document.createElement('span');
+      lastEl.className = 'lastval';
+      lastEl.textContent = formatMoney(last);
+      lastEl.dataset.sign = signOf(last);
 
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value }]);
-          inp.value = '';
-          inp.blur();
-        }
-      });
-      inputLine.appendChild(inp);
+      const nameEl = document.createElement('span');
+      nameEl.className = 'name';
+      nameEl.textContent = a.name;
 
-      left.appendChild(h2);
-      left.appendChild(inputLine);
+      const aprEl = document.createElement('span');
+      aprEl.className = 'apr';
+      aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
 
-      const vals = document.createElement('div'); vals.className = 'values';
-      // s.last12 now includes {value, date} objects
-      (s?.last12 || []).forEach(item => {
-        const v = item.value;
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.dataset.sign = signOf(v);
-        chip.dataset.date = item.date; // Store date for deletion
-        chip.dataset.account = a.name; // Store account name for deletion
-        chip.textContent = formatMoney(v);
-        vals.appendChild(chip);
+      h2.appendChild(lastEl);
+      h2.appendChild(nameEl);
+      h2.appendChild(aprEl);
 
-        /* ADJUSTMENT 5: Implement deletion on non-standard click */
-        const deleteValue = (e) => {
-          e.preventDefault(); // Prevent default click/context menu behavior
-          const isSpecialClick = e.altKey || e.ctrlKey || e.shiftKey || e.button === 1 || e.type === 'dblclick';
-          
-          // Check for long press (touch devices) or a special desktop click
-          // NOTE: Long-press is complex; simplified here to check for modifier keys or double click
-          if (isSpecialClick || e.type === 'contextmenu') {
-            if (confirm(`Do you really want to delete the value ${chip.textContent} for ${a.name} on ${item.date}?`)) {
-              deleteEntry(a.name, item.date);
-            }
-          }
-        };
+      const inputLine = document.createElement('div');
+      inputLine.className = 'input-line';
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.placeholder = 'Add new value…';
+      inp.step = '0.01';
+      inp.setAttribute('aria-label', `New value for ${a.name}`);
+      inp.dataset.accountName = a.name; // Store name for submitAll
 
-        // Events for non-standard clicks
-        chip.addEventListener('click', (e) => {
-          // If any modifier key is pressed or it's a double click, treat it as a special click
-          if (e.altKey || e.ctrlKey || e.shiftKey) deleteValue(e);
-        });
-        chip.addEventListener('dblclick', deleteValue);
-        // Right-click (contextmenu) on desktop is another non-standard click
-        chip.addEventListener('contextmenu', deleteValue);
-      });
-      right.appendChild(vals);
+      inp.addEventListener('keydown', async (ev) => {
+        if (ev.key === 'Enter') {
+          await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
+          // Do not clear input on submit, wait for refresh
+        }
+      });
+      inputLine.appendChild(inp);
 
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
-    });
-  }
+      left.appendChild(h2);
+      left.appendChild(inputLine);
 
-  function formatMoney(n){
-    const sign = n < 0 ? '-' : '';
-    const abs = Math.abs(Number(n) || 0);
-    return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-  }
+      const vals = document.createElement('div'); vals.className = 'values';
+      (s?.last12 || []).forEach(v => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.dataset.sign = signOf(v);
+        chip.textContent = formatMoney(v);
+        vals.appendChild(chip);
+      });
+      right.appendChild(vals);
 
-  /* ADJUSTMENT 1: Modified submitAll to handle alerts and refresh */
-  async function submitAll(){
-    const entries = [];
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      const v = inp.value.trim();
-      if (v !== '') {
-        const name = inp.closest('.row').querySelector('.name').textContent;
-        entries.push({ account: name, value: Number(v) });
-      }
-    });
-    if (entries.length === 0) {
-      alert('No new values entered to submit.');
-      return;
-    }
+      row.appendChild(left);
+      row.appendChild(right);
+      root.appendChild(row);
+    });
+  }
 
-    const success = await submitEntries(entries);
-    
-    if (success) {
-      // Clear inputs only on success
-      document.querySelectorAll('.row .left input[type="number"]').forEach(inp => inp.value = '');
-      // ADJUSTMENT 1: Show alert and refresh display (handled inside submitEntries)
-      alert("Success! All accounts updated in the database and on this display.");
-    }
-  }
+  async function submitAll() {
+    const entries = [];
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+      const v = inp.value.trim();
+      if (v !== '') {
+        entries.push({ 
+          account: inp.dataset.accountName, 
+          value: Number(v),
+          inputEl: inp // Pass element for feedback
+        });
+      }
+    });
+    if (entries.length === 0) {
+      showToast('No values entered to submit.', 'info');
+      return;
+    };
+    await submitEntries(entries);
+  }
 
-  async function submitEntries(entries){
-    try{
-      setStatus('Submitting entries...');
-      const body = new URLSearchParams({ payload: JSON.stringify({ entries }) });
-      const res = await fetch(`${API_BASE}?route=submit`, { method:'POST', body });
-      const text = await res.text();
-      let j;
-      try { j = JSON.parse(text); } catch {
-        console.error('Submit non-JSON:', text);
-        setStatus('Submit failed (non-JSON response). Check Web App access or deployment.');
-        return false;
-      }
-      if (!j.ok){
-        console.error('Submit JSON error:', j);
-        setStatus('Submit failed: ' + (j.error || 'Unknown'));
-        return false;
-      }
-      // ADJUSTMENT 1: Refresh the display after a successful submission
-      await fetchSnapshot();
-      return true;
-    } catch (e){
-      console.error(e);
-      setStatus('Network error submitting data.');
-      return false;
-    }
-  }
+  async function submitEntries(entries) {
+    if (IS_LOADING) return;
+    setLoading(true, 'Submitting entries…');
+    
+    // Flag inputs as submitting
+    entries.forEach(e => e.inputEl?.classList.add('submitting'));
 
-  /* ADJUSTMENT 5: New function to handle entry deletion */
-  async function deleteEntry(accountName, date) {
-    try {
-      setStatus(`Attempting to delete ${accountName} entry on ${date}...`);
-      const body = new URLSearchParams({ payload: JSON.stringify({ account: accountName, date: date }) });
-      
-      // Call the new 'delete' route on the App Script side
-      const res = await fetch(`${API_BASE}?route=delete`, { method:'POST', body });
-      const text = await res.text();
-      let j;
-      try { j = JSON.parse(text); } catch {
-        console.error('Delete non-JSON:', text);
-        setStatus('Delete failed (non-JSON response).');
-        return;
-      }
-      if (!j.ok) {
-        console.error('Delete JSON error:', j);
-        setStatus('Delete failed: ' + (j.error || 'Unknown'));
-        return;
-      }
-      // Confirmation and refresh
-      alert(`Successfully deleted entry for ${accountName} on ${date}.`);
-      await fetchSnapshot();
-    } catch (e) {
-      console.error(e);
-      setStatus('Network error deleting data.');
-    }
-  }
+    try {
+      // Filter out any invalid entries before sending
+      const validEntries = entries
+        .map(e => ({ account: e.account, value: e.value }))
+        .filter(e => e.account && !isNaN(e.value));
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // wire live controls (no-op handlers for +/- kept for future)
-    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
-    // Use the modified submitAll function
-    document.getElementById('submitAll').addEventListener('click', submitAll); 
-    document.querySelectorAll('input[name="mode"]').forEach(r => {
-      r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
-    });
+      if (validEntries.length === 0) {
+        showToast('No valid entries to submit.', 'error');
+        setLoading(false);
+        return;
+      }
 
-    // ensure charts, then load & start
-    ensureChartsReady(() => {
-      google.charts.load('current', { packages: ['corechart'] });
-      google.charts.setOnLoadCallback(fetchSnapshot);
-    });
-  });
-  </script>
+      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
+      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+      const text = await res.text();
+      
+      let j;
+      try { 
+        j = JSON.parse(text); 
+      } catch {
+        console.error('Submit non-JSON:', text);
+        showToast('Submit failed (non-JSON response)', 'error', 5000);
+        setLoading(false);
+        return;
+      }
+      
+      if (!j.ok) {
+        console.error('Submit JSON error:', j);
+        showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
+        setLoading(false);
+        return;
+      }
+
+      // Success! Show feedback and flash inputs
+      showToast('Submit successful! Refreshing data…', 'success');
+      entries.forEach(e => {
+        e.inputEl?.classList.add('submitted-ok');
+        e.inputEl.value = ''; // Clear on success
+        // Remove flash class after animation
+        setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
+      });
+
+      // Refresh data
+      await fetchSnapshot();
+      
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+      showToast('Network error submitting data.', 'error', 5000);
+    }
+    
+    // Always remove 'submitting' class, even on failure
+    entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+    setLoading(false); // Ensure loading state is reset
+  }
+  
+  // ==== INITIALIZATION ====
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- Wire controls ---
+    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
+    document.getElementById('submitAll').addEventListener('click', submitAll);
+    
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => { 
+        MODE = e.target.value; 
+        renderChart(); 
+      });
+    });
+    
+    document.getElementById('timeframe').addEventListener('change', (e) => {
+      TIMEFRAME = e.target.value;
+      fetchSnapshot(); // Re-fetch data for the new timeframe
+    });
+    
+    window.addEventListener('resize', renderChart);
+
+    // --- Load Google Charts & Initial Data ---
+    if (window.google && google.charts) {
+      // If already loaded (e.g., in a cached environment)
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(fetchSnapshot);
+    } else {
+      // Load for the first time
+      const s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/charts/loader.js';
+      s.onload = () => {
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(fetchSnapshot);
+      };
+      document.head.appendChild(s);
+    }
+  });
+  </script>
 </body>
 </html>
