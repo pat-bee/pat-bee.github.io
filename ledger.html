@@ -5,481 +5,463 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <!-- Changed title to v1k -->
   <title>Ledger — Accounts & Chart (v1k)</title>
-  <style>
-    :root {
-      --maxw: 1400px;
-      --c-pos: #4c8036;  /* positive */
-      --c-neg: #a02d2a;  /* negative */
-      --c-black: #000000;
-      --c-white: #ffffff;
-      --radius: 10px;
-      --gap: 12px;
-      
-      --c-tint-pos: #f7f9f4;
-      --c-tint-neg: #f9f4f4;
-    }
+    <style>
+    :root {
+      --maxw: 1400px;
+      --c-pos: #4c8036;  /* positive */
+      --c-neg: #a02d2a;  /* negative */
+      --c-black: #000000;
+      --c-white: #ffffff;
+      --radius: 10px;
+      --gap: 12px;
+      
+      --c-tint-pos: #f7f9f4;
+      --c-tint-neg: #f9f4f4;
+    }
 
-    html, body { 
-      height: 100%; 
-      margin: 0; 
-      background: var(--c-white); 
-      color: var(--c-black); 
-    }
-    
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 18px;
-      line-height: 1.5;
-    }
-
-    .wrap { 
-      width: 90vw; 
-      max-width: var(--maxw); 
-      margin: 0 auto; 
-      padding: 12px; 
-    }
-
-    a {
-      color: var(--c-black);
-      text-decoration: underline;
-    }
-
-    header { 
-      position: sticky; 
-      top: 0; 
-      background: var(--c-white); 
-      z-index: 5; 
-      border-bottom: 1px solid var(--c-black);
-    }
-    
-    .toolbar { 
-      display: flex; 
-      gap: var(--gap); 
-      align-items: center; 
-      justify-content: space-between; /* CHANGED: Added space-between to accommodate summary on left */
-      padding: 6px 0; 
-      flex-wrap: wrap; 
-    }
-    
-    .toolbar-controls {
-      display: flex;
-      gap: var(--gap);
-      align-items: center;
-      flex-wrap: wrap;
-      flex-shrink: 0;
-    }
-    
-    .toolbar label { 
-      font-size: .85rem; 
-      cursor: pointer;
-    }
-    
-    .toolbar select {
-      font-size: .85rem;
-      padding: 4px;
-      border: 1px solid var(--c-black);
-      border-radius: 4px;
-      background: var(--c-white);
-      color: var(--c-black);
-    }
-    
-    #financial-summary {
-      font-size: 2.6rem; /* H1 equivalent size */
-      font-weight: 700;
-      white-space: nowrap;
-      line-height: 1.1;
-      flex-shrink: 1;
-      min-width: 0;
-    }
-    
-    .summary-debt {
-      color: var(--c-neg);
-    }
-
-    .summary-asset {
-      color: var(--c-pos);
-    }
-
-    #chart { height: 30vh; width: 100%; }
-    
-    hr.divider {
-      border: none;
-      border-top: 1px solid var(--c-black);
-      margin-top: 1rem;
-    }
-
-    .accounts { 
-      display: grid; 
-      grid-template-columns: 1fr; 
-      gap: var(--gap); 
-    }
-    
-    .row { 
-      display: flex; 
-      align-items: flex-start; 
-      justify-content: space-between; 
-      border-bottom: 1px solid var(--c-black);
-      padding: 12px 0; 
-      gap: 12px; 
-    }
-
-    .left { 
-      flex: 1 1 auto; 
-      padding-right: 12px; 
-      min-width: 0; 
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start; 
-      justify-content: space-between; 
-      gap: var(--gap);
-    }
-    
-    .right { 
-      flex: 0 1 auto; 
-      min-width: 40%; 
-      text-align: right; 
-      font-size: .9rem; 
-    }
-
-    /* RESTRUCTURED: To allow stacking of metadata */
-    .account-details {
-      display: flex;
-      flex-direction: column; /* Stacks the Identity Wrap and Metadata Stack */
-      align-items: flex-start;
-      gap: 0;
-      min-width: 0;
-    }
+    html, body { 
+      height: 100%; 
+      margin: 0; 
+      background: var(--c-white); 
+      color: var(--c-black); 
+    }
     
-    .identity-wrap {
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .wrap { 
+      width: 90vw; 
+      max-width: var(--maxw); 
+      margin: 0 auto; 
+      padding: 12px; 
+    }
+
+    a {
+      color: var(--c-black);
+      text-decoration: underline;
+    }
+
+    header { 
+      position: sticky; 
+      top: 0; 
+      background: var(--c-white); 
+      z-index: 5; 
+      border-bottom: 1px solid var(--c-black);
+    }
+    
+    .toolbar { 
+      display: flex; 
+      gap: var(--gap); 
+      align-items: center; 
+      justify-content: space-between; /* CHANGED: Added space-between to accommodate summary on left */
+      padding: 6px 0; 
+      flex-wrap: wrap; 
+    }
+    
+    .toolbar-controls {
       display: flex;
-      align-items: baseline;
-      gap: 10px;
-      flex-wrap: nowrap;
+      gap: var(--gap);
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    
+    .toolbar label { 
+      font-size: .85rem; 
+      cursor: pointer;
+    }
+    
+    .toolbar select {
+      font-size: .85rem;
+      padding: 4px;
+      border: 1px solid var(--c-black);
+      border-radius: 4px;
+      background: var(--c-white);
+      color: var(--c-black);
+    }
+    
+    #financial-summary {
+      font-size: 2.6rem; /* H1 equivalent size */
+      font-weight: 700;
+      white-space: nowrap;
+      line-height: 1.1;
+      flex-shrink: 1;
       min-width: 0;
     }
     
-    .metadata-stack {
+    .summary-debt {
+      color: var(--c-neg);
+    }
+
+    .summary-asset {
+      color: var(--c-pos);
+    }
+
+    #chart { height: 30vh; width: 100%; }
+    
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--c-black);
+      margin-top: 1rem;
+    }
+
+    .accounts { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: var(--gap); 
+    }
+    
+    .row { 
+      display: flex; 
+      align-items: flex-start; 
+      justify-content: space-between; 
+      border-bottom: 1px solid var(--c-black);
+      padding: 12px 0; 
+      gap: 12px; 
+    }
+
+    .left { 
+      flex: 1 1 auto; 
+      padding-right: 12px; 
+      min-width: 0; 
       display: flex;
-      flex-direction: column; /* Stacks APR and Limit vertically */
+      flex-wrap: wrap;
+      align-items: flex-start; 
+      justify-content: space-between; 
+      gap: var(--gap);
+    }
+    
+    .right { 
+      flex: 0 1 auto; 
+      min-width: 40%; 
+      text-align: right; 
+      font-size: .9rem; 
+    }
+
+    .account-details {
+      display: flex;
+      flex-wrap: wrap;
       align-items: flex-start;
-      gap: 0;
+      gap: var(--gap);
+      min-width: 0;
+    }
+
+    .lastval { 
+      font-weight: 600; 
+      font-size: 2.6rem; 
+      white-space: nowrap;
+    }
+    .name { 
+      font-weight: 700; 
+      color: var(--c-black); 
+      font-size: 2.6rem; 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .apr { 
+      font-weight: 400; 
+      font-size: 0.75rem;
+      opacity: .75; 
+      flex-shrink: 0;
+      padding-top: 0.5rem;
+    }
+
+    .input-line { 
+      display: flex; 
+      gap: 10px; 
+      align-items: center; 
+      flex-shrink: 0;
       padding-top: 0.25rem;
     }
 
-    .lastval { 
-      font-weight: 600; 
-      font-size: 2.6rem; 
-      white-space: nowrap;
-    }
-    .name { 
-      font-weight: 700; 
-      color: var(--c-black); 
-      font-size: 2.6rem; 
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .apr, .account-limit { 
-      font-weight: 400; 
-      font-size: 0.75rem;
-      opacity: .75; 
-      flex-shrink: 0;
-      line-height: 1.2;
-    }
+    input[type="number"] {
+      width: 10rem;
+      max-width: 10rem;
+      padding: .7rem .8rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--c-black);
+      border-radius: var(--radius);
+      background: var(--c-white);
+      color: var(--c-black);
+      outline: none;
+      transition: background-color 0.3s ease;
+    }
+    
+    input[type="number"]::placeholder {
+      color: var(--c-black);
+      opacity: 0.6;
+    }
+    
+    input[type="number"]:focus {
+      border-color: var(--c-black);
+      box-shadow: 0 0 0 2px var(--c-black) inset;
+    }
+    
+    input[type="number"].submitting {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    input[type="number"].submitted-ok {
+      animation: flash-green 0.8s ease-out;
+    }
+    
+    @keyframes flash-green {
+      0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
+      100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
+    }
 
-    .input-line { 
-      display: flex; 
-      gap: 10px; 
-      align-items: center; 
-      flex-shrink: 0;
-      padding-top: 0.25rem;
-    }
+    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
+    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
-    input[type="number"] {
-      width: 10rem;
-      max-width: 10rem;
-      padding: .7rem .8rem;
-      font-size: 1.1rem;
-      border: 2px solid var(--c-black);
-      border-radius: var(--radius);
-      background: var(--c-white);
-      color: var(--c-black);
-      outline: none;
-      transition: background-color 0.3s ease;
-    }
-    
-    input[type="number"]::placeholder {
-      color: var(--c-black);
-      opacity: 0.6;
-    }
-    
-    input[type="number"]:focus {
-      border-color: var(--c-black);
-      box-shadow: 0 0 0 2px var(--c-black) inset;
-    }
-    
-    input[type="number"].submitting {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    
-    input[type="number"].submitted-ok {
-      animation: flash-green 0.8s ease-out;
-    }
-    
-    @keyframes flash-green {
-      0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
-      100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
-    }
+    button {
+      padding: .7rem 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--c-black);
+      color: var(--c-black);
+      background: var(--c-white);
+      cursor: pointer;
+      border-radius: var(--radius);
+    }
+    
+    button:hover { 
+      background: var(--c-white);
+      text-decoration: underline;
+    }
+    
+    button:focus-visible { 
+      outline: 3px solid var(--c-black); 
+      outline-offset: 2px; 
+    }
+    
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
-    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
-    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
+    .values { 
+      display: flex; 
+      justify-content: flex-end;
+      gap: .6rem; 
+      overflow-x: auto;
+      /* FIX v1j: Changed max-width: 100% to width: 100%.
+        This gives the container a defined width relative to its parent (.right),
+        which allows the overflow-x: auto to function correctly.
+      */
+      width: 100%;
+    }
+    
+    .chip {
+      padding: .25rem .6rem;
+      border-radius: 999px;
+      border: 1px solid var(--c-black);
+      font-variant-numeric: tabular-nums;
+      font-size: .95rem;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    
+    .chip:hover {
+      background: var(--c-black);
+      color: var(--c-white);
+    }
+    
+    .chip.no-delete {
+      cursor: default;
+      opacity: 0.7;
+      background: transparent;
+      color: var(--c-black);
+    }
+    .chip.no-delete:hover {
+      background: transparent;
+    }
+    
+    .ratio-bar {
+      display: none; /* Hidden by default */
+      font-size: 1.5rem; /* H4 size */
+      margin: 0;
+      padding: 0;
+      white-space: nowrap;
+      letter-spacing: -1px; /* Make blocks touch */
+    }
+    .ratio-bar span {
+      display: inline-block;
+    }
 
-    button {
-      padding: .7rem 1rem;
-      font-size: 1rem;
-      border: 2px solid var(--c-black);
-      color: var(--c-black);
-      background: var(--c-white);
-      cursor: pointer;
-      border-radius: var(--radius);
-    }
-    
-    button:hover { 
-      background: var(--c-white);
-      text-decoration: underline;
-    }
-    
-    button:focus-visible { 
-      outline: 3px solid var(--c-black); 
-      outline-offset: 2px; 
-    }
-    
-    button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    footer { 
+      padding: 16px 0 24px; 
+      text-align: right; 
+    }
+    
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      background: var(--c-black);
+      color: var(--c-white);
+      border: 2px solid var(--c-white);
+      font-weight: 500;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
+    }
+    
+    #toast.show {
+      opacity: 1;
+      visibility: visible;
+      bottom: 30px;
+    }
+    
+    #toast[data-type="error"] {
+      background: var(--c-neg);
+      color: var(--c-white);
+      border-color: var(--c-white);
+    }
+    
+    #toast[data-type="success"] {
+      background: var(--c-pos);
+      color: var(--c-white);
+      border-color: var(--c-white);
+    }
+    
+    #delete-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    #delete-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--c-white);
+      color: var(--c-black);
+      border: 2px solid var(--c-black);
+      border-radius: var(--radius);
+      z-index: 201;
+      padding: 24px;
+      width: 90vw;
+      max-width: 400px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, top 0.3s ease;
+    }
+    
+    #delete-modal-backdrop.show,
+    #delete-modal.show {
+      display: block;
+      opacity: 1;
+    }
+    
+    #delete-modal p {
+      margin-top: 0;
+      line-height: 1.4;
+    }
+    
+    #delete-modal-details {
+      font-weight: 600;
+      display: block;
+      margin: 12px 0;
+      font-size: 1.1rem;
+    }
+    
+    #delete-modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    #delete-btn-confirm {
+      background: var(--c-neg);
+      color: var(--c-white);
+      border-color: var(--c-neg);
+    }
+    #delete-btn-confirm:hover {
+      background: #802421;
+      border-color: #802421;
+      text-decoration: none;
+    }
 
-    .values { 
-      display: flex; 
-      justify-content: flex-end;
-      gap: .6rem; 
-      overflow-x: auto;
-      /* FIX v1j: Changed max-width: 100% to width: 100%.
-        This gives the container a defined width relative to its parent (.right),
-        which allows the overflow-x: auto to function correctly.
-      */
-      width: 100%;
-    }
-    
-    .chip {
-      padding: .25rem .6rem;
-      border-radius: 999px;
-      border: 1px solid var(--c-black);
-      font-variant-numeric: tabular-nums;
-      font-size: .95rem;
-      cursor: pointer;
-      user-select: none;
-      flex-shrink: 0;
-    }
-    
-    .chip:hover {
-      background: var(--c-black);
-      color: var(--c-white);
-    }
-    
-    .chip.no-delete {
-      cursor: default;
-      opacity: 0.7;
-      background: transparent;
-      color: var(--c-black);
-    }
-    .chip.no-delete:hover {
-      background: transparent;
-    }
-    
-    .ratio-bar {
-      display: none; /* Hidden by default */
-      font-size: 1.5rem; /* H4 size */
-      margin: 0;
-      padding: 0;
-      white-space: nowrap;
-      letter-spacing: -1px; /* Make blocks touch */
-    }
-    .ratio-bar span {
-      display: inline-block;
-    }
+    @media (max-width: 650px) {
+      .row {
+        flex-direction: column;
+      }
+      
+      .right { 
+        min-width: unset; 
+        text-align: left; 
+        align-self: flex-start;
+        padding-top: 0.5rem; 
+      }
+      
+      .right .values {
+        display: none;
+      }
+      .right .ratio-bar {
+        display: block;
+      }
 
-    footer { 
-      padding: 16px 0 24px; 
-      text-align: right; 
-    }
-    
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: var(--radius);
-      background: var(--c-black);
-      color: var(--c-white);
-      border: 2px solid var(--c-white);
-      font-weight: 500;
-      z-index: 100;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
-    }
-    
-    #toast.show {
-      opacity: 1;
-      visibility: visible;
-      bottom: 30px;
-    }
-    
-    #toast[data-type="error"] {
-      background: var(--c-neg);
-      color: var(--c-white);
-      border-color: var(--c-white);
-    }
-    
-    #toast[data-type="success"] {
-      background: var(--c-pos);
-      color: var(--c-white);
-      border-color: var(--c-white);
-    }
-    
-    #delete-modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 200;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    #delete-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--c-white);
-      color: var(--c-black);
-      border: 2px solid var(--c-black);
-      border-radius: var(--radius);
-      z-index: 201;
-      padding: 24px;
-      width: 90vw;
-      max-width: 400px;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease, top 0.3s ease;
-    }
-    
-    #delete-modal-backdrop.show,
-    #delete-modal.show {
-      display: block;
-      opacity: 1;
-    }
-    
-    #delete-modal p {
-      margin-top: 0;
-      line-height: 1.4;
-    }
-    
-    #delete-modal-details {
-      font-weight: 600;
-      display: block;
-      margin: 12px 0;
-      font-size: 1.1rem;
-    }
-    
-    #delete-modal-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-    
-    #delete-btn-confirm {
-      background: var(--c-neg);
-      color: var(--c-white);
-      border-color: var(--c-neg);
-    }
-    #delete-btn-confirm:hover {
-      background: #802421;
-      border-color: #802421;
-      text-decoration: none;
-    }
-
-    @media (max-width: 650px) {
-      .row {
-        flex-direction: column;
-      }
-      
-      .right { 
-        min-width: unset; 
-        text-align: left; 
-        align-self: flex-start;
-        padding-top: 0.5rem; 
-      }
-      
-      .right .values {
-        display: none;
-      }
-      .right .ratio-bar {
-        display: block;
-      }
-
-      .left {
-        gap: 8px; /* Reduce gap slightly */
-        width: 100%;
-        padding-right: 0;
-      }
-      input[type="number"] { 
-        width: 100%; 
-        max-width: 100%;
-      }
-      .input-line {
-        width: 100%;
-        margin-left: 0; /* Don't align right on mobile */
-        padding-top: 0; /* Reset padding */
-      }
-      /* Mobile cleanup for stacked metadata */
-      .apr, .account-limit {
-        padding-top: 0.1rem;
-      }
-      
-      /* Mobile adjustments for summary and controls */
-      .toolbar { 
-        flex-direction: column; 
-        align-items: flex-start;
-        justify-content: flex-start;
-      }
-      
-      #financial-summary {
-        font-size: 1.8rem;
-        padding-bottom: 8px;
-        width: 100%;
-        text-align: center;
-      }
-    
-      .toolbar-controls {
-        justify-content: space-around;
-        width: 100%;
-      }
-      
-      .lastval, .name {
-        font-size: 2rem;
-      }
-    }
-  </style>
+      .left {
+        gap: 8px; /* Reduce gap slightly */
+        width: 100%;
+        padding-right: 0;
+      }
+      input[type="number"] { 
+        width: 100%; 
+        max-width: 100%;
+      }
+      .input-line {
+        width: 100%;
+        margin-left: 0; /* Don't align right on mobile */
+        padding-top: 0; /* Reset padding */
+      }
+      .apr {
+        padding-top: 0; /* Reset padding */
+      }
+      
+      /* Mobile adjustments for summary and controls */
+      .toolbar { 
+        flex-direction: column; 
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      
+      #financial-summary {
+        font-size: 1.8rem;
+        padding-bottom: 8px;
+        width: 100%;
+        text-align: center;
+      }
+    
+      .toolbar-controls {
+        justify-content: space-around;
+        width: 100%;
+      }
+      
+      .lastval, .name {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="toast" role="status" aria-live="polite"></div>
