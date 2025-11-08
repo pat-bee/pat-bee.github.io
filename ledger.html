@@ -789,7 +789,7 @@
   // ensuring the actual decimal value is preserved in the underlying data objects.
   function formatMoney(n) {
     const val = Number(n) || 0;
-    const sign = val < 0 ? '−' : (val > 0 ? '' : '');
+    const sign = val < 0 ? '−' : (val > 0 ? '+' : '');
     const abs = Math.abs(val);
     
     // Truncate to get only the whole number part (11.23 becomes 11)
