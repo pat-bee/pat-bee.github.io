@@ -623,6 +623,7 @@
   function renderChart() {
     if (!SNAP || !window.google || !google.visualization) return;
     
+    // FIX 1: Ensure we check if dateAxis has elements.
     const labels = SNAP.dateAxis; 
     if (!labels || labels.length === 0) {
       document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
@@ -636,11 +637,15 @@
     if (MODE === 'totals') {
       data.addColumn('number', 'Assets');
       data.addColumn('number', 'Debts');
+      // Ensure the arrays we are iterating over exist before using them
+      const assets = SNAP.totals?.assets || [];
+      const debts = SNAP.totals?.debts || [];
+
       for (let i = 0; i < labels.length; i++) { 
         rows.push([
           labels[i],
-          Number(SNAP.totals.assets[i] || 0),
-          Number(SNAP.totals.debts[i] || 0)
+          Number(assets[i] || 0),
+          Number(debts[i] || 0)
         ]);
       }
     } else {
@@ -648,6 +653,7 @@
       for (let i = 0; i < labels.length; i++) {
         const row = [ labels[i] ]; 
         SNAP.accounts.forEach(a => {
+          // Use safe navigation operator ?. for accessing nested monthly data
           const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
           row.push(Number(v));
         });
@@ -723,7 +729,8 @@
     }
 
     SNAP.accounts.forEach(a => {
-      const s = SNAP.series[a.name];
+      // Use safe navigation operator ?. and default to an empty object for 's'
+      const s = SNAP.series[a.name] || {};
       const last = s?.last ?? 0;
 
       const row = document.createElement('div'); row.className = 'row';
@@ -795,7 +802,9 @@
 
       const vals = document.createElement('div'); vals.className = 'values';
       
-      (s?.lastN || []).forEach(v => {
+      // FIX 2: Ensure s.lastN is treated as an array, even if it's undefined or null
+      // The || [] operator guarantees that we iterate over an empty array if lastN is missing.
+      (s.lastN || []).forEach(v => {
         const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
         const val = Number(isObject ? v.value : v);
         const date = isObject ? v.date : null;
