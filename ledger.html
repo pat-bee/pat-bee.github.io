@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- Changed title to v1g -->
-  <title>Ledger — Accounts & Chart (v1g)</title>
+  <!-- Changed title to v1i -->
+  <title>Ledger — Accounts & Chart (v1i)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -104,8 +104,9 @@
       min-width: 0; 
       display: flex;
       flex-wrap: wrap;
-      /* 1. NEW: Align items to top */
       align-items: flex-start; 
+      /* 2. NEW: Use space-between to align input box */
+      justify-content: space-between; 
       gap: var(--gap);
     }
     
@@ -114,8 +115,16 @@
       min-width: 40%; 
       text-align: right; 
       font-size: .9rem; 
-      white-space: nowrap; 
-      overflow-x: hidden;
+      /* 1. NEW: Removed white-space: nowrap */
+    }
+
+    /* 2. NEW: Wrapper for account name/value + APR */
+    .account-details {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: var(--gap);
+      min-width: 0;
     }
 
     .lastval { 
@@ -137,7 +146,6 @@
       font-size: 0.75rem;
       opacity: .75; 
       flex-shrink: 0;
-      /* 1. NEW: Add padding-top to align with text, not top of H2 */
       padding-top: 0.5rem;
     }
 
@@ -146,8 +154,7 @@
       gap: 10px; 
       align-items: center; 
       flex-shrink: 0;
-      margin-left: auto;
-      /* 1. NEW: Add padding-top to align with text, not top of H2 */
+      /* 2. NEW: Removed margin-left: auto */
       padding-top: 0.25rem;
     }
 
@@ -217,8 +224,12 @@
     }
 
     .values { 
-      display: inline-flex; 
+      /* 1. NEW: Changed to flex and aligned right */
+      display: flex; 
+      justify-content: flex-end;
       gap: .6rem; 
+      overflow-x: auto;
+      max-width: 100%;
     }
     
     .chip {
@@ -229,6 +240,8 @@
       font-size: .95rem;
       cursor: pointer;
       user-select: none;
+      /* 1. NEW: Ensure chips don't shrink */
+      flex-shrink: 0;
     }
     
     .chip:hover {
@@ -246,7 +259,6 @@
       background: transparent;
     }
     
-    /* 2. NEW: Ratio bar for mobile */
     .ratio-bar {
       display: none; /* Hidden by default */
       font-size: 1.5rem; /* H4 size */
@@ -366,17 +378,18 @@
       text-decoration: none;
     }
 
-    /* 2. NEW: Media query changed to 650px */
     @media (max-width: 650px) {
+      .row {
+        flex-direction: column;
+      }
+      
       .right { 
         min-width: unset; 
         text-align: left; 
-        /* Ensure bar aligns with top of row */
         align-self: flex-start;
-        padding-top: 0.5rem; /* Tweak alignment */
+        padding-top: 0.5rem; 
       }
       
-      /* 2. NEW: Hide chips, show ratio bar */
       .right .values {
         display: none;
       }
@@ -386,6 +399,8 @@
 
       .left {
         gap: 8px; /* Reduce gap slightly */
+        width: 100%;
+        padding-right: 0;
       }
       input[type="number"] { 
         width: 100%; 
@@ -696,21 +711,6 @@
     const root = document.getElementById('accounts');
     root.innerHTML = '';
     
-    // 2. NEW: Calculate blocks *before* the loop
-    const totalAssets = SNAP.totals.assets[SNAP.totals.assets.length - 1] || 0;
-    const totalDebts = Math.abs(SNAP.totals.debts[SNAP.totals.debts.length - 1] || 0);
-    const totalMag = totalAssets + totalDebts;
-    
-    let numAssetBlocks = 0;
-    if (totalMag > 0) {
-      numAssetBlocks = Math.round((totalAssets / totalMag) * 10);
-    } else {
-      numAssetBlocks = 5; // Default to 50/50 if no data
-    }
-    const numDebtBlocks = 10 - numAssetBlocks;
-    const assetBlocks = '█'.repeat(numAssetBlocks);
-    const debtBlocks = '█'.repeat(numDebtBlocks);
-
     SNAP.accounts.forEach(a => {
       const s = SNAP.series[a.name];
       const last = s?.last ?? 0;
@@ -718,6 +718,10 @@
       const row = document.createElement('div'); row.className = 'row';
       const left = document.createElement('div'); left.className = 'left';
       const right = document.createElement('div'); right.className = 'right';
+
+      // 2. NEW: Create wrapper for account details
+      const accountDetails = document.createElement('div');
+      accountDetails.className = 'account-details';
 
       const identityWrap = document.createElement('div');
       identityWrap.style.display = 'flex';
@@ -747,6 +751,10 @@
       aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
       aprEl.style.flexShrink = '0';
 
+      // 2. NEW: Add name/value and APR to the wrapper
+      accountDetails.appendChild(identityWrap);
+      accountDetails.appendChild(aprEl);
+
       const inputLine = document.createElement('div');
       inputLine.className = 'input-line';
       inputLine.style.flexShrink = '0';
@@ -773,8 +781,8 @@
       });
       inputLine.appendChild(inp);
       
-      left.appendChild(identityWrap);
-      left.appendChild(aprEl);
+      // 2. NEW: Add wrapper and input line to left container
+      left.appendChild(accountDetails);
       left.appendChild(inputLine);
 
       const vals = document.createElement('div'); vals.className = 'values';
@@ -812,17 +820,22 @@
       });
       right.appendChild(vals);
 
-      // 2. NEW: Add the ratio bar element
       const bar = document.createElement('h4');
       bar.className = 'ratio-bar';
       
       const assetSpan = document.createElement('span');
       assetSpan.style.color = 'var(--c-pos)';
-      assetSpan.textContent = assetBlocks;
       
       const debtSpan = document.createElement('span');
       debtSpan.style.color = 'var(--c-neg)';
-      debtSpan.textContent = debtBlocks;
+      
+      if (last >= 0) {
+        assetSpan.textContent = '█'.repeat(10);
+        debtSpan.textContent = '';
+      } else {
+        assetSpan.textContent = '';
+        debtSpan.textContent = '█'.repeat(10);
+      }
       
       bar.appendChild(assetSpan);
       bar.appendChild(debtSpan);
