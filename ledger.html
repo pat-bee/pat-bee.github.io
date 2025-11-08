@@ -169,7 +169,12 @@
       opacity: .75; 
       flex-shrink: 0;
       padding-top: 0.5rem;
+        display:block; 
     }
+        .account-limit
+        {display:block;
+        font-size: 0.75rem;
+        }
 
     .input-line { 
       display: flex; 
@@ -801,12 +806,12 @@
     })}`;
   }
   
-  // NEW: Function for formatting limits (removes all signs, truncates decimals)
-  function formatLimit(n) {
+  // NEW: Function for formatting s (removes all signs, truncates decimals)
+  function format(n) {
     const val = Math.abs(Number(n) || 0);
     const displayValue = Math.trunc(val);
     
-    // Only display if there is a limit set
+    // Only display if there is a  set
     if (displayValue === 0) return null;
     
     return `$${displayValue.toLocaleString(undefined, {
@@ -859,7 +864,7 @@
       identityWrap.appendChild(lastEl);
       identityWrap.appendChild(nameEl);
 
-      // 2. Metadata Stack (APR + Limit)
+      // 2. Metadata Stack (APR + )
       const metadataStack = document.createElement('div');
       metadataStack.className = 'metadata-stack';
 
@@ -868,13 +873,13 @@
       aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
       metadataStack.appendChild(aprEl);
 
-      // NEW: Limit Display
-      const formattedLimit = formatLimit(a.limit);
-      if (formattedLimit) {
-        const limitEl = document.createElement('span');
-        limitEl.className = 'account-limit';
-        limitEl.textContent = `Limit: ${formattedLimit}`;
-        metadataStack.appendChild(limitEl);
+      // NEW:  Display
+      const formatted = format(a.);
+      if (formatted) {
+        const El = document.createElement('span');
+        El.className = 'account-';
+        El.textContent = `: ${formatted}`;
+        metadataStack.appendChild(El);
       }
 
       accountDetails.appendChild(identityWrap);
