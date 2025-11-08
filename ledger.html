@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- Changed title to v1e -->
-  <title>Ledger — Accounts & Chart (v1e)</title>
+  <!-- Changed title to v1f -->
+  <title>Ledger — Accounts & Chart (v1f)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -143,10 +143,14 @@
       gap: 10px; 
       align-items: center; 
       flex-shrink: 0;
+      /* 2. NEW: Align this to the right of the .left flex container */
+      margin-left: auto;
     }
 
     input[type="number"] {
-      width: 14rem;
+      /* 1. NEW: Shortened width */
+      width: 10rem;
+      max-width: 10rem;
       padding: .7rem .8rem;
       font-size: 1.1rem;
       border: 2px solid var(--c-black);
@@ -352,9 +356,21 @@
         text-align: left; 
       }
       
-      input[type="number"] { width: 100%; }
-      .toolbar { justify-content: space-around; }
-      
+      /* On mobile, make input full width for easier entry */
+      .left {
+        gap: 8px; /* Reduce gap slightly */
+      }
+      input[type="number"] { 
+        width: 100%; 
+        max-width: 100%;
+      }
+      .input-line {
+        width: 100%;
+        margin-left: 0; /* Don't align right on mobile */
+      }
+      .toolbar { 
+        justify-content: space-around; 
+      }
       .lastval, .name {
         font-size: 2rem;
       }
@@ -410,8 +426,8 @@
 
   <script>
   // ==== CONFIG ====
-  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1e)
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbwdHTaDGGgHeerP5IVq0kIkhwpphFT-ioC_cr3GyLeRamvhwHjdOverRYtNefjQucMxhg/exec';
+  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1f)
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbw97m7RlHbUHQb0cb_eS_qOg0Y6FiUEnDuay3hmrRpr6iAtD4KriI7MKCy7qTpaNhnxsQ/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -422,7 +438,6 @@
 
   // ==== UI FUNCTIONS ====
   function showToast(msg, type = 'info', duration = 3000) {
-    // ... (No changes)
     const el = document.getElementById('toast');
     if (!el) return;
     if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
@@ -435,7 +450,6 @@
   }
   
   function setLoading(loading, message) {
-    // ... (No changes)
     IS_LOADING = loading;
     document.getElementById('refresh').disabled = loading;
     document.getElementById('submitAll').disabled = loading;
@@ -458,7 +472,6 @@
 
   // ==== DELETE MODAL FUNCTIONS ====
   function showDeleteConfirm(account, date, value, readableValue) {
-    // ... (No changes)
     if (IS_LOADING) return;
     
     const backdrop = document.getElementById('delete-modal-backdrop');
@@ -477,13 +490,11 @@
   }
   
   function hideDeleteConfirm() {
-    // ... (No changes)
     document.getElementById('delete-modal-backdrop').classList.remove('show');
     document.getElementById('delete-modal').classList.remove('show');
   }
   
   async function processDelete(account, date, value) {
-    // ... (No changes)
     hideDeleteConfirm();
     if (IS_LOADING) return;
     setLoading(true, 'Deleting entry…');
@@ -564,37 +575,31 @@
   function renderChart() {
     if (!SNAP || !window.google || !google.visualization) return;
     
-    // NEW: Use dateAxis instead of months
     const labels = SNAP.dateAxis; 
     if (!labels || labels.length === 0) {
-      // No data to render
       document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
       return;
     }
     
     const data = new google.visualization.DataTable();
-    // NEW: Column name is now 'Date'
     data.addColumn('string', 'Date'); 
     let rows = [];
     
     if (MODE === 'totals') {
       data.addColumn('number', 'Assets');
       data.addColumn('number', 'Debts');
-      // NEW: Loop over labels (was months)
       for (let i = 0; i < labels.length; i++) { 
         rows.push([
-          labels[i], // Use the new label
+          labels[i],
           Number(SNAP.totals.assets[i] || 0),
           Number(SNAP.totals.debts[i] || 0)
         ]);
       }
     } else {
       SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      // NEW: Loop over labels (was months)
       for (let i = 0; i < labels.length; i++) {
-        const row = [ labels[i] ]; // Use the new label
+        const row = [ labels[i] ]; 
         SNAP.accounts.forEach(a => {
-          // 'monthly' is the key from the API, even if data is daily
           const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
           row.push(Number(v));
         });
@@ -633,8 +638,6 @@
       hAxis: { 
         slantedText: false, 
         textStyle: textStyle,
-        // NEW: Show fewer labels if there are too many (e.g., 90 days)
-        // This keeps the X-axis from becoming unreadable
         showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
       },
       vAxis: { 
@@ -655,7 +658,6 @@
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
   function formatMoney(n) {
-    // ... (No changes)
     const val = Number(n) || 0;
     const sign = val < 0 ? '−' : (val > 0 ? '+' : '');
     const abs = Math.abs(val);
@@ -663,7 +665,6 @@
   }
 
   function renderAccounts() {
-    // ... (No changes to this function)
     const root = document.getElementById('accounts');
     root.innerHTML = '';
 
@@ -775,7 +776,6 @@
   }
   
   function handleDeleteClick(e) {
-    // ... (No changes)
     e.preventDefault();
     if (IS_LOADING) return;
     
@@ -791,7 +791,6 @@
   }
 
   async function submitAll() {
-    // ... (No changes)
     const entries = [];
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
       const v = inp.value.trim();
@@ -851,7 +850,6 @@
         return;
       }
 
-      // 1. CONFIRMATION: This is the successful submit logic.
       showToast('Submit successful! Refreshing data…', 'success');
       entries.forEach(e => {
         e.inputEl?.classList.add('submitted-ok');
@@ -859,7 +857,6 @@
         setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
       });
 
-      // 1. CONFIRMATION: The refresh only happens here, on success.
       await fetchSnapshot();
       
     } catch (e) {
@@ -874,7 +871,6 @@
   
   // ==== INITIALIZATION ====
   document.addEventListener('DOMContentLoaded', () => {
-    // ... (No changes to refresh or submitAll listeners)
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
     document.getElementById('submitAll').addEventListener('click', submitAll);
     
@@ -885,10 +881,9 @@
       });
     });
     
-    // NEW: The timeframe listener now works with all the new options
     document.getElementById('timeframe').addEventListener('change', (e) => {
       TIMEFRAME = e.target.value;
-      fetchSnapshot(); // Fetch new data when timeframe changes
+      fetchSnapshot();
     });
     
     document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
@@ -896,7 +891,6 @@
     
     window.addEventListener('resize', renderChart);
 
-    // ... (No changes to charts loader)
     if (window.google && google.charts) {
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(fetchSnapshot);
