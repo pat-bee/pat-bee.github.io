@@ -1,10 +1,39 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <!-- Changed title to v1k -->
   <title>Ledger — Accounts & Chart (v1k)</title>
+  <style>
+    :root {
+      --maxw: 1400px;
+      --c-pos: #4c8036;  /* positive */
+      --c-neg: #a02d2a;  /* negative */
+      --c-black: #000000;
+      --c-white: #ffffff;
+      --radius: 10px;
+      --gap: 12px;
+      
+      --c-tint-pos: #f7f9f4;
+      --c-tint-neg: #f9f4f4;
+    }
+
+    html, body { 
+      height: 100%; 
+      margin: 0; 
+      background: var(--c-white); 
+      color: var(--c-black); 
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .wrap { 
+      width: 90vw; 
+      max-width: var(--maxw); 
+      margin: 0 auto; 
+      padding: 12px; 
+    }
     <style>
     :root {
       --maxw: 1400px;
@@ -19,6 +48,10 @@
       --c-tint-neg: #f9f4f4;
     }
 
+    a {
+      color: var(--c-black);
+      text-decoration: underline;
+    }
     html, body { 
       height: 100%; 
       margin: 0; 
@@ -32,6 +65,57 @@
       line-height: 1.5;
     }
 
+    header { 
+      position: sticky; 
+      top: 0; 
+      background: var(--c-white); 
+      z-index: 5; 
+      border-bottom: 1px solid var(--c-black);
+    }
+    
+    .toolbar { 
+      display: flex; 
+      gap: var(--gap); 
+      align-items: center; 
+      justify-content: space-between; /* CHANGED: Added space-between to accommodate summary on left */
+      padding: 6px 0; 
+      flex-wrap: wrap; 
+    }
+    
+    .toolbar-controls {
+      display: flex;
+      gap: var(--gap);
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    
+    .toolbar label { 
+      font-size: .85rem; 
+      cursor: pointer;
+    }
+    
+    .toolbar select {
+      font-size: .85rem;
+      padding: 4px;
+      border: 1px solid var(--c-black);
+      border-radius: 4px;
+      background: var(--c-white);
+      color: var(--c-black);
+    }
+    
+    #financial-summary {
+      font-size: 2.6rem; /* H1 equivalent size */
+      font-weight: 700;
+      white-space: nowrap;
+      line-height: 1.1;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+    
+    .summary-debt {
+      color: var(--c-neg);
+    }
     .wrap { 
       width: 90vw; 
       max-width: var(--maxw); 
@@ -39,11 +123,21 @@
       padding: 12px; 
     }
 
+    .summary-asset {
+      color: var(--c-pos);
+    }
     a {
       color: var(--c-black);
       text-decoration: underline;
     }
 
+    #chart { height: 30vh; width: 100%; }
+    
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--c-black);
+      margin-top: 1rem;
+    }
     header { 
       position: sticky; 
       top: 0; 
@@ -96,10 +190,41 @@
       color: var(--c-neg);
     }
 
+    .accounts { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: var(--gap); 
+    }
+    
+    .row { 
+      display: flex; 
+      align-items: flex-start; 
+      justify-content: space-between; 
+      border-bottom: 1px solid var(--c-black);
+      padding: 12px 0; 
+      gap: 12px; 
+    }
     .summary-asset {
       color: var(--c-pos);
     }
 
+    .left { 
+      flex: 1 1 auto; 
+      padding-right: 12px; 
+      min-width: 0; 
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start; 
+      justify-content: space-between; 
+      gap: var(--gap);
+    }
+    
+    .right { 
+      flex: 0 1 auto; 
+      min-width: 40%; 
+      text-align: right; 
+      font-size: .9rem; 
+    }
     #chart { height: 30vh; width: 100%; }
     
     hr.divider {
@@ -108,12 +233,21 @@
       margin-top: 1rem;
     }
 
+    /* RESTRUCTURED: To allow stacking of metadata */
+    .account-details {
+      display: flex;
+      flex-direction: column; /* Stacks the Identity Wrap and Metadata Stack */
+      align-items: flex-start;
+      gap: 0;
+      min-width: 0;
+    }
     .accounts { 
       display: grid; 
       grid-template-columns: 1fr; 
       gap: var(--gap); 
     }
-    
+
+    .identity-wrap {
     .row { 
       display: flex; 
       align-items: flex-start; 
@@ -127,13 +261,18 @@
       flex: 1 1 auto; 
       padding-right: 12px; 
       min-width: 0; 
-      display: flex;
+display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: nowrap;
+      min-width: 0;
       flex-wrap: wrap;
       align-items: flex-start; 
       justify-content: space-between; 
       gap: var(--gap);
-    }
-    
+}
+
+    .metadata-stack {
     .right { 
       flex: 0 1 auto; 
       min-width: 40%; 
@@ -142,13 +281,37 @@
     }
 
     .account-details {
-      display: flex;
+display: flex;
+      flex-direction: column; /* Stacks APR and Limit vertically */
       flex-wrap: wrap;
-      align-items: flex-start;
+align-items: flex-start;
+      gap: 0;
+      padding-top: 0.25rem;
       gap: var(--gap);
       min-width: 0;
-    }
+}
 
+    .lastval { 
+      font-weight: 600; 
+      font-size: 2.6rem; 
+      white-space: nowrap;
+    }
+    .name { 
+      font-weight: 700; 
+      color: var(--c-black); 
+      font-size: 2.6rem; 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .apr, .account-limit { 
+      font-weight: 400; 
+      font-size: 0.75rem;
+      opacity: .75; 
+      flex-shrink: 0;
+      line-height: 1.2;
+    }
     .lastval { 
       font-weight: 600; 
       font-size: 2.6rem; 
@@ -169,13 +332,15 @@
       opacity: .75; 
       flex-shrink: 0;
       padding-top: 0.5rem;
-        display:block; 
     }
-        .account-limit
-        {display:block;
-        font-size: 0.75rem;
-        }
 
+    .input-line { 
+      display: flex; 
+      gap: 10px; 
+      align-items: center; 
+      flex-shrink: 0;
+      padding-top: 0.25rem;
+    }
     .input-line { 
       display: flex; 
       gap: 10px; 
@@ -184,6 +349,42 @@
       padding-top: 0.25rem;
     }
 
+    input[type="number"] {
+      width: 10rem;
+      max-width: 10rem;
+      padding: .7rem .8rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--c-black);
+      border-radius: var(--radius);
+      background: var(--c-white);
+      color: var(--c-black);
+      outline: none;
+      transition: background-color 0.3s ease;
+    }
+    
+    input[type="number"]::placeholder {
+      color: var(--c-black);
+      opacity: 0.6;
+    }
+    
+    input[type="number"]:focus {
+      border-color: var(--c-black);
+      box-shadow: 0 0 0 2px var(--c-black) inset;
+    }
+    
+    input[type="number"].submitting {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    input[type="number"].submitted-ok {
+      animation: flash-green 0.8s ease-out;
+    }
+    
+    @keyframes flash-green {
+      0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
+      100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
+    }
     input[type="number"] {
       width: 10rem;
       max-width: 10rem;
@@ -221,9 +422,35 @@
       100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
     }
 
+    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
+    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
     .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
     .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
+    button {
+      padding: .7rem 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--c-black);
+      color: var(--c-black);
+      background: var(--c-white);
+      cursor: pointer;
+      border-radius: var(--radius);
+    }
+    
+    button:hover { 
+      background: var(--c-white);
+      text-decoration: underline;
+    }
+    
+    button:focus-visible { 
+      outline: 3px solid var(--c-black); 
+      outline-offset: 2px; 
+    }
+    
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
     button {
       padding: .7rem 1rem;
       font-size: 1rem;
@@ -249,6 +476,55 @@
       cursor: not-allowed;
     }
 
+    .values { 
+      display: flex; 
+      justify-content: flex-end;
+      gap: .6rem; 
+      overflow-x: auto;
+      /* FIX v1j: Changed max-width: 100% to width: 100%.
+        This gives the container a defined width relative to its parent (.right),
+        which allows the overflow-x: auto to function correctly.
+      */
+      width: 100%;
+    }
+    
+    .chip {
+      padding: .25rem .6rem;
+      border-radius: 999px;
+      border: 1px solid var(--c-black);
+      font-variant-numeric: tabular-nums;
+      font-size: .95rem;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    
+    .chip:hover {
+      background: var(--c-black);
+      color: var(--c-white);
+    }
+    
+    .chip.no-delete {
+      cursor: default;
+      opacity: 0.7;
+      background: transparent;
+      color: var(--c-black);
+    }
+    .chip.no-delete:hover {
+      background: transparent;
+    }
+    
+    .ratio-bar {
+      display: none; /* Hidden by default */
+      font-size: 1.5rem; /* H4 size */
+      margin: 0;
+      padding: 0;
+      white-space: nowrap;
+      letter-spacing: -1px; /* Make blocks touch */
+    }
+    .ratio-bar span {
+      display: inline-block;
+    }
     .values { 
       display: flex; 
       justify-content: flex-end;
@@ -299,6 +575,112 @@
       display: inline-block;
     }
 
+    footer { 
+      padding: 16px 0 24px; 
+      text-align: right; 
+    }
+    
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      background: var(--c-black);
+      color: var(--c-white);
+      border: 2px solid var(--c-white);
+      font-weight: 500;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
+    }
+    
+    #toast.show {
+      opacity: 1;
+      visibility: visible;
+      bottom: 30px;
+    }
+    
+    #toast[data-type="error"] {
+      background: var(--c-neg);
+      color: var(--c-white);
+      border-color: var(--c-white);
+    }
+    
+    #toast[data-type="success"] {
+      background: var(--c-pos);
+      color: var(--c-white);
+      border-color: var(--c-white);
+    }
+    
+    #delete-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    #delete-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--c-white);
+      color: var(--c-black);
+      border: 2px solid var(--c-black);
+      border-radius: var(--radius);
+      z-index: 201;
+      padding: 24px;
+      width: 90vw;
+      max-width: 400px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, top 0.3s ease;
+    }
+    
+    #delete-modal-backdrop.show,
+    #delete-modal.show {
+      display: block;
+      opacity: 1;
+    }
+    
+    #delete-modal p {
+      margin-top: 0;
+      line-height: 1.4;
+    }
+    
+    #delete-modal-details {
+      font-weight: 600;
+      display: block;
+      margin: 12px 0;
+      font-size: 1.1rem;
+    }
+    
+    #delete-modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    #delete-btn-confirm {
+      background: var(--c-neg);
+      color: var(--c-white);
+      border-color: var(--c-neg);
+    }
+    #delete-btn-confirm:hover {
+      background: #802421;
+      border-color: #802421;
+      text-decoration: none;
+    }
     footer { 
       padding: 16px 0 24px; 
       text-align: right; 
@@ -406,6 +788,24 @@
       text-decoration: none;
     }
 
+    @media (max-width: 650px) {
+      .row {
+        flex-direction: column;
+      }
+      
+      .right { 
+        min-width: unset; 
+        text-align: left; 
+        align-self: flex-start;
+        padding-top: 0.5rem; 
+      }
+      
+      .right .values {
+        display: none;
+      }
+      .right .ratio-bar {
+        display: block;
+      }
     @media (max-width: 650px) {
       .row {
         flex-direction: column;
@@ -425,6 +825,49 @@
         display: block;
       }
 
+      .left {
+        gap: 8px; /* Reduce gap slightly */
+        width: 100%;
+        padding-right: 0;
+      }
+      input[type="number"] { 
+        width: 100%; 
+        max-width: 100%;
+      }
+      .input-line {
+        width: 100%;
+        margin-left: 0; /* Don't align right on mobile */
+        padding-top: 0; /* Reset padding */
+      }
+      /* Mobile cleanup for stacked metadata */
+      .apr, .account-limit {
+        padding-top: 0.1rem;
+      }
+      
+      /* Mobile adjustments for summary and controls */
+      .toolbar { 
+        flex-direction: column; 
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      
+      #financial-summary {
+        font-size: 1.8rem;
+        padding-bottom: 8px;
+        width: 100%;
+        text-align: center;
+      }
+    
+      .toolbar-controls {
+        justify-content: space-around;
+        width: 100%;
+      }
+      
+      .lastval, .name {
+        font-size: 2rem;
+      }
+    }
+  </style>
       .left {
         gap: 8px; /* Reduce gap slightly */
         width: 100%;
@@ -470,650 +913,3 @@
 </head>
 <body>
   <div id="toast" role="status" aria-live="polite"></div>
-  
-  <div id="delete-modal-backdrop"></div>
-  <div id="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
-    <h3 id="delete-modal-title" style="margin-top:0;">Delete Entry?</h3>
-    <p>Do you really want to delete this entry?</p>
-    <span id="delete-modal-details"></span>
-    <div id="delete-modal-buttons">
-      <button id="delete-btn-cancel">Cancel</button>
-      <button id="delete-btn-confirm">Yes, Delete</button>
-    </div>
-  </div>
-
-  <header class="wrap">
-    <div class="toolbar">
-      <!-- Financial Summary -->
-      <div id="financial-summary"></div>
-      
-      <div class="toolbar-controls">
-        <label for="timeframe">Timeframe:</label>
-        <select id="timeframe">
-          <option value="ytd" selected>This Calendar Year</option>
-          <option value="today">Today</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="14d">Last 14 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year (12mo)</option>
-          <option value="all">All Time</option>
-        </select>
-        
-        <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-        <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-        
-        <button id="refresh" aria-label="Refresh data">Refresh</button>
-        <button id="submitAll">Submit All</button>
-      </div>
-    </div>
-    <div id="chart"></div>
-  </header>
-
-  <hr class="wrap divider">
-
-  <main class="wrap">
-    <section id="accounts" class="accounts"></section>
-    <footer>
-      <small>Enter value(s) and press <b>Enter</b> or <b>Submit All</b>. Double-click an entry to delete. <br>Values displayed are truncated to whole numbers.</small>
-    </footer>
-  </main>
-
-  <script>
-  // ==== CONFIG ====
-  // IMPORTANT: Replace this with your own Google Apps Script Web App URL
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbxIcIkNpUTtSiIhv3kKjOrAmbWUcmzfOosOfNPqCDUSJoSkgNAIEyE52BoHbZgdUVJGNA/exec';
-
-  // ==== APP STATE ====
-  let SNAP = null;
-  let MODE = 'totals';
-  let TIMEFRAME = 'ytd';
-  let IS_LOADING = false;
-  let TOAST_TIMER = null;
-
-  // ==== UI FUNCTIONS ====
-  function showToast(msg, type = 'info', duration = 3000) {
-    const el = document.getElementById('toast');
-    if (!el) return;
-    if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
-    el.textContent = msg;
-    el.dataset.type = type;
-    el.classList.add('show');
-    TOAST_TIMER = setTimeout(() => {
-      el.classList.remove('show');
-    }, duration);
-  }
-  
-  function setLoading(loading, message) {
-    IS_LOADING = loading;
-    document.getElementById('refresh').disabled = loading;
-    document.getElementById('submitAll').disabled = loading;
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      inp.disabled = loading;
-      if (loading) {
-        inp.classList.add('submitting');
-      } else {
-        inp.classList.remove('submitting');
-      }
-    });
-    
-    if (message) {
-      if (document.getElementById('delete-modal-backdrop').classList.contains('show')) {
-        return;
-      }
-      showToast(message, 'info', loading ? 10000 : 3000);
-    }
-  }
-
-  // ==== DELETE MODAL FUNCTIONS ====
-  function showDeleteConfirm(account, date, value, readableValue) {
-    if (IS_LOADING) return;
-    
-    const backdrop = document.getElementById('delete-modal-backdrop');
-    const modal = document.getElementById('delete-modal');
-    const details = document.getElementById('delete-modal-details');
-    const confirmBtn = document.getElementById('delete-btn-confirm');
-    
-    details.textContent = `${account}: ${readableValue} on ${date}`;
-    
-    backdrop.classList.add('show');
-    modal.classList.add('show');
-    
-    confirmBtn.onclick = () => {
-      processDelete(account, date, value);
-    };
-  }
-  
-  function hideDeleteConfirm() {
-    document.getElementById('delete-modal-backdrop').classList.remove('show');
-    document.getElementById('delete-modal').classList.remove('show');
-  }
-  
-  async function processDelete(account, date, value) {
-    hideDeleteConfirm();
-    if (IS_LOADING) return;
-    setLoading(true, 'Deleting entry…');
-    
-    try {
-      const body = new URLSearchParams({ payload: JSON.stringify({ account, date, value: Number(value) }) });
-      const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
-      const text = await res.text();
-      
-      let j;
-      try { j = JSON.parse(text); } catch {
-        console.error('Delete non-JSON:', text);
-        showToast('Delete failed (non-JSON response)', 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      if (!j.ok) {
-        console.error('Delete JSON error:', j);
-        showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      showToast('Entry deleted. Refreshing…', 'success');
-      await fetchSnapshot();
-      
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      showToast('Network error deleting entry.', 'error', 5000);
-    }
-  }
-
-  // ==== DATA & RENDERING ====
-  async function fetchSnapshot() {
-    if (IS_LOADING) return;
-    setLoading(true, 'Loading snapshot…');
-    
-    try {
-      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
-      const text = await res.text();
-      
-      let j;
-      try { 
-        j = JSON.parse(text); 
-      } catch {
-        // Log the raw text returned by the server if it's not valid JSON
-        console.error('Non-JSON response (API issue):', text); 
-        showToast('Error: API returned non-JSON. Check console for raw output.', 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      if (!j.ok) {
-        // Log the JSON error object returned by the server
-        console.error('Snapshot error (j.ok is false):', j); 
-        showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      SNAP = j;
-      // Log the successfully loaded data object for debugging structure
-      console.log('--- Snapshot Data Loaded Successfully ---', SNAP); 
-
-      setLoading(false, 'Snapshot loaded');
-      renderAll();
-      
-    } catch (err) {
-      // Log network errors
-      console.error('Fetch failed (network/pre-parse error):', err); 
-      setLoading(false);
-      showToast('Fetch failed (see console)', 'error', 5000);
-    }
-  }
-
-  function renderAll() {
-    renderSummary();
-    renderChart();
-    renderAccounts();
-  }
-  
-  function renderSummary() {
-      const summaryEl = document.getElementById('financial-summary');
-      if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
-
-      // Get the index of the last (most recent) data point
-      const lastIndex = SNAP.dateAxis.length - 1;
-      
-      // If no data points exist, clear and exit
-      if (lastIndex < 0) {
-        summaryEl.innerHTML = 'No Data';
-        return;
-      }
-      
-      // Get the latest totals. Debts are stored as negative, so we use Math.abs for display.
-      const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-      const debts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0); 
-
-      // Format the totals using the function that truncates to whole numbers and removes '+' sign
-      const assetString = `<span class="summary-asset">${formatMoney(assets)}</span>`;
-      const debtString = `<span class="summary-debt">${formatMoney(debts)}</span>`;
-
-      // Render the summary: [Assets] | [Debts]
-      summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
-  }
-
-
-  function renderChart() {
-    if (!SNAP || !window.google || !google.visualization) return;
-    
-    // FIX 1: Ensure we check if dateAxis has elements.
-    const labels = SNAP.dateAxis; 
-    if (!labels || labels.length === 0) {
-      document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
-      return;
-    }
-    
-    const data = new google.visualization.DataTable();
-    data.addColumn('string', 'Date'); 
-    let rows = [];
-    
-    if (MODE === 'totals') {
-      data.addColumn('number', 'Assets');
-      data.addColumn('number', 'Debts');
-      // Ensure the arrays we are iterating over exist before using them
-      const assets = SNAP.totals?.assets || [];
-      const debts = SNAP.totals?.debts || [];
-
-      for (let i = 0; i < labels.length; i++) { 
-        rows.push([
-          labels[i],
-          Number(assets[i] || 0),
-          Number(debts[i] || 0)
-        ]);
-      }
-    } else {
-      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      for (let i = 0; i < labels.length; i++) {
-        const row = [ labels[i] ]; 
-        SNAP.accounts.forEach(a => {
-          // Use safe navigation operator ?. for accessing nested monthly data
-          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-          row.push(Number(v));
-        });
-        rows.push(row);
-      }
-    }
-    data.addRows(rows);
-    
-    let minV = 0, maxV = 0;
-    for (const r of rows) {
-      for (let i = 1; i < r.length; i++) {
-        const v = Number(r[i]) || 0;
-        if (v < minV) minV = v;
-        if (v > maxV) maxV = v;
-      }
-    }
-    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
-    const styles = getComputedStyle(document.documentElement);
-    const pos = styles.getPropertyValue('--c-pos').trim();
-    const neg = styles.getPropertyValue('--c-neg').trim();
-    const black = styles.getPropertyValue('--c-black').trim();
-    const textStyle = { color: black, fontName: 'system-ui' };
-    
-    let chartColors;
-    if (MODE === 'totals') {
-      chartColors = [pos, neg];
-    } else {
-      chartColors = SNAP.accounts.map(a => a.color || null);
-    }
-    
-    const options = {
-      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
-      backgroundColor: { fill: 'transparent' },
-      chartArea: { width: '85%', height: '70%' },
-      legend: { position: 'top', alignment: 'center', textStyle: textStyle },
-      hAxis: { 
-        slantedText: false, 
-        textStyle: textStyle,
-        showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
-      },
-      vAxis: { 
-        viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
-        baseline: 0, 
-        baselineColor: black,
-        gridlines: { color: black, opacity: 0.1 },
-        textStyle: textStyle
-      },
-      seriesType: 'line',
-      lineWidth: 3,
-      colors: chartColors
-    };
-    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
-    chart.draw(data, options);
-  }
-
-  const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
-
-  // Function for formatting balances (removes '+' sign, keeps '−' sign, truncates decimals)
-  function formatMoney(n) {
-    const val = Number(n) || 0;
-    const sign = val < 0 ? '−' : ''; // Only show negative sign
-    const abs = Math.abs(val);
-    
-    // Truncate to get only the whole number part (11.23 becomes 11)
-    const displayValue = Math.trunc(abs);
-
-    // Format the truncated value for currency display (e.g., adding thousands separators)
-    return `${sign}$${displayValue.toLocaleString(undefined, { 
-        minimumFractionDigits: 0, 
-        maximumFractionDigits: 0 
-    })}`;
-  }
-  
-  // NEW: Function for formatting s (removes all signs, truncates decimals)
-  function format(n) {
-    const val = Math.abs(Number(n) || 0);
-    const displayValue = Math.trunc(val);
-    
-    // Only display if there is a  set
-    if (displayValue === 0) return null;
-    
-    return `$${displayValue.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    })}`;
-  }
-
-
-  function renderAccounts() {
-    const root = document.getElementById('accounts');
-    root.innerHTML = '';
-    
-    // Check if SNAP is null or missing expected structure
-    if (!SNAP || !SNAP.accounts) {
-        // If the API call fails or returns empty data, we exit gracefully
-        return; 
-    }
-
-    SNAP.accounts.forEach(a => {
-      // Use safe navigation operator ?. and default to an empty object for 's'
-      const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
-
-      const row = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right = document.createElement('div'); right.className = 'right';
-
-      const accountDetails = document.createElement('div');
-      accountDetails.className = 'account-details';
-
-      // 1. Identity Wrap (Balance + Name)
-      const identityWrap = document.createElement('div');
-      identityWrap.className = 'identity-wrap'; // Added class for new CSS
-      
-      const lastEl = document.createElement('span');
-      lastEl.className = 'lastval';
-      // Calls the new formatMoney function which truncates the display and removes '+'
-      lastEl.textContent = formatMoney(last); 
-      lastEl.dataset.sign = signOf(last);
-      
-      const nameEl = document.createElement('span');
-      nameEl.className = 'name';
-      nameEl.textContent = a.name;
-      
-      if (a.color) {
-        nameEl.style.color = a.color;
-      }
-      
-      identityWrap.appendChild(lastEl);
-      identityWrap.appendChild(nameEl);
-
-      // 2. Metadata Stack (APR + )
-      const metadataStack = document.createElement('div');
-      metadataStack.className = 'metadata-stack';
-
-      const aprEl = document.createElement('span');
-      aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-      metadataStack.appendChild(aprEl);
-
-      // NEW:  Display
-      const formatted = format(a.);
-      if (formatted) {
-        const El = document.createElement('span');
-        El.className = 'account-';
-        El.textContent = `: ${formatted}`;
-        metadataStack.appendChild(El);
-      }
-
-      accountDetails.appendChild(identityWrap);
-      accountDetails.appendChild(metadataStack); // Stacked content
-
-      const inputLine = document.createElement('div');
-      inputLine.className = 'input-line';
-      inputLine.style.flexShrink = '0';
-      
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.placeholder = 'Add new value…';
-      inp.step = '0.01'; // Important: Keep step at 0.01 to allow decimal input
-      inp.setAttribute('aria-label', `New value for ${a.name}`);
-      inp.dataset.accountName = a.name;
-
-      if (last > 0) {
-        inp.style.backgroundColor = 'var(--c-tint-pos)';
-      } else if (last < 0) {
-        inp.style.backgroundColor = 'var(--c-tint-neg)';
-      } else {
-        inp.style.backgroundColor = 'var(--c-white)';
-      }
-
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
-        }
-      });
-      inputLine.appendChild(inp);
-      
-      left.appendChild(accountDetails);
-      left.appendChild(inputLine);
-
-      const vals = document.createElement('div'); vals.className = 'values';
-      
-      // FIX 2: Ensure s.lastN is treated as an array, even if it's undefined or null
-      // The || [] operator guarantees that we iterate over an empty array if lastN is missing.
-      (s.lastN || []).forEach(v => {
-        const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-        const val = Number(isObject ? v.value : v);
-        const date = isObject ? v.date : null;
-        
-        // Use formatMoney for display (which is now truncated)
-        const readableValue = formatMoney(val);
-        
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.dataset.sign = signOf(val);
-        chip.textContent = readableValue;
-        
-        // Important: Store the full decimal value in data-value for accurate deletion/submission
-        chip.dataset.value = val; 
-        
-        if (date) {
-          chip.dataset.date = date;
-          chip.dataset.account = a.name;
-          chip.dataset.readableValue = formatMoney(val);
-          
-          chip.addEventListener('dblclick', handleDeleteClick);
-          chip.addEventListener('contextmenu', handleDeleteClick);
-          chip.addEventListener('click', (e) => {
-            if (e.shiftKey || e.ctrlKey || e.altKey) {
-              handleDeleteClick(e);
-            }
-          });
-        } else {
-          chip.classList.add('no-delete');
-          chip.title = "Re-deploy CODE.JS to enable deletion";
-        }
-        
-        vals.appendChild(chip);
-      });
-      right.appendChild(vals);
-
-      const bar = document.createElement('h4');
-      bar.className = 'ratio-bar';
-      
-      const assetSpan = document.createElement('span');
-      assetSpan.style.color = 'var(--c-pos)';
-      
-      const debtSpan = document.createElement('span');
-      debtSpan.style.color = 'var(--c-neg)';
-      
-      if (last >= 0) {
-        assetSpan.textContent = '█'.repeat(10);
-        debtSpan.textContent = '';
-      } else {
-        assetSpan.textContent = '';
-        debtSpan.textContent = '█'.repeat(10);
-      }
-      
-      bar.appendChild(assetSpan);
-      bar.appendChild(debtSpan);
-      right.appendChild(bar);
-
-
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
-    });
-  }
-  
-  function handleDeleteClick(e) {
-    e.preventDefault();
-    if (IS_LOADING) return;
-    
-    const chip = e.currentTarget;
-    const { account, date, value, readableValue } = chip.dataset;
-    
-    if (!date) {
-      showToast('Cannot delete. Data is from an older script version.', 'error');
-      return;
-    }
-    
-    // Pass the full decimal value (value) to the deletion function
-    showDeleteConfirm(account, date, value, readableValue);
-  }
-
-  async function submitAll() {
-    const entries = [];
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      const v = inp.value.trim();
-      if (v !== '') {
-        entries.push({ 
-          account: inp.dataset.accountName, 
-          value: Number(v),
-          inputEl: inp
-        });
-      }
-    });
-    if (entries.length === 0) {
-      showToast('No values entered to submit.', 'info');
-      return;
-    };
-    await submitEntries(entries);
-  }
-
-  async function submitEntries(entries) {
-    if (IS_LOADING) return;
-    setLoading(true, 'Submitting entries…');
-    
-    entries.forEach(e => e.inputEl?.classList.add('submitting'));
-
-    try {
-      const validEntries = entries
-        .map(e => ({ account: e.account, value: e.value }))
-        .filter(e => e.account && !isNaN(e.value));
-
-      if (validEntries.length === 0) {
-        showToast('No valid entries to submit.', 'error');
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
-      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-      const text = await res.text();
-      
-      let j;
-      try { 
-        j = JSON.parse(text); 
-      } catch {
-        console.error('Submit non-JSON:', text);
-        showToast('Submit failed (non-JSON response)', 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-      
-      if (!j.ok) {
-        console.error('Submit JSON error:', j);
-        showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      showToast('Submit successful! Refreshing data…', 'success');
-      entries.forEach(e => {
-        e.inputEl?.classList.add('submitted-ok');
-        e.inputEl.value = '';
-        setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
-      });
-
-      await fetchSnapshot();
-      
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      showToast('Network error submitting data.', 'error', 5000);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-    }
-    
-    setLoading(false);
-  }
-  
-  // ==== INITIALIZATION ====
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
-    document.getElementById('submitAll').addEventListener('click', submitAll);
-    
-    document.querySelectorAll('input[name="mode"]').forEach(r => {
-      r.addEventListener('change', (e) => { 
-        MODE = e.target.value; 
-        renderChart(); 
-      });
-    });
-    
-    document.getElementById('timeframe').addEventListener('change', (e) => {
-      TIMEFRAME = e.target.value;
-      fetchSnapshot();
-    });
-    
-    document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
-    document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
-    
-    window.addEventListener('resize', renderChart);
-
-    if (window.google && google.charts) {
-      google.charts.load('current', { packages: ['corechart'] });
-      google.charts.setOnLoadCallback(fetchSnapshot);
-    } else {
-      const s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/charts/loader.js';
-      // FIX: Removed duplicate '=' that caused the SyntaxError
-      s.onload = () => { 
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(fetchSnapshot);
-      };
-      document.head.appendChild(s);
-    }
-  });
-  </script>
-</body>
-</html>
