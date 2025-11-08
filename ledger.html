@@ -585,25 +585,31 @@
       try { 
         j = JSON.parse(text); 
       } catch {
-        console.error('Non-JSON response:', text);
-        showToast('Error: API returned non-JSON', 'error', 5000);
+        // Log the raw text returned by the server if it's not valid JSON
+        console.error('Non-JSON response (API issue):', text); 
+        showToast('Error: API returned non-JSON. Check console for raw output.', 'error', 5000);
         setLoading(false);
         return;
       }
       
       if (!j.ok) {
-        console.error('Snapshot error:', j);
+        // Log the JSON error object returned by the server
+        console.error('Snapshot error (j.ok is false):', j); 
         showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
         setLoading(false);
         return;
       }
       
       SNAP = j;
+      // Log the successfully loaded data object for debugging structure
+      console.log('--- Snapshot Data Loaded Successfully ---', SNAP); 
+
       setLoading(false, 'Snapshot loaded');
       renderAll();
       
     } catch (err) {
-      console.error(err);
+      // Log network errors
+      console.error('Fetch failed (network/pre-parse error):', err); 
       setLoading(false);
       showToast('Fetch failed (see console)', 'error', 5000);
     }
@@ -710,6 +716,12 @@
     const root = document.getElementById('accounts');
     root.innerHTML = '';
     
+    // Check if SNAP is null or missing expected structure
+    if (!SNAP || !SNAP.accounts) {
+        // If the API call fails or returns empty data, we exit gracefully
+        return; 
+    }
+
     SNAP.accounts.forEach(a => {
       const s = SNAP.series[a.name];
       const last = s?.last ?? 0;
