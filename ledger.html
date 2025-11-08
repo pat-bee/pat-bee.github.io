@@ -56,9 +56,17 @@
       display: flex; 
       gap: var(--gap); 
       align-items: center; 
-      justify-content: flex-end; 
+      justify-content: space-between; /* CHANGED: Added space-between to accommodate summary on left */
       padding: 6px 0; 
       flex-wrap: wrap; 
+    }
+    
+    .toolbar-controls {
+      display: flex;
+      gap: var(--gap);
+      align-items: center;
+      flex-wrap: wrap;
+      flex-shrink: 0;
     }
     
     .toolbar label { 
@@ -73,6 +81,23 @@
       border-radius: 4px;
       background: var(--c-white);
       color: var(--c-black);
+    }
+    
+    #financial-summary {
+      font-size: 2.6rem; /* H1 equivalent size */
+      font-weight: 700;
+      white-space: nowrap;
+      line-height: 1.1;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+    
+    .summary-debt {
+      color: var(--c-neg);
+    }
+
+    .summary-asset {
+      color: var(--c-pos);
     }
 
     #chart { height: 30vh; width: 100%; }
@@ -412,9 +437,26 @@
       .apr {
         padding-top: 0; /* Reset padding */
       }
+      
+      /* Mobile adjustments for summary and controls */
       .toolbar { 
-        justify-content: space-around; 
+        flex-direction: column; 
+        align-items: flex-start;
+        justify-content: flex-start;
       }
+      
+      #financial-summary {
+        font-size: 1.8rem;
+        padding-bottom: 8px;
+        width: 100%;
+        text-align: center;
+      }
+    
+      .toolbar-controls {
+        justify-content: space-around;
+        width: 100%;
+      }
+      
       .lastval, .name {
         font-size: 2rem;
       }
@@ -437,23 +479,28 @@
 
   <header class="wrap">
     <div class="toolbar">
-      <label for="timeframe">Timeframe:</label>
-      <select id="timeframe">
-        <option value="ytd" selected>This Calendar Year</option>
-        <option value="today">Today</option>
-        <option value="7d">Last 7 Days</option>
-        <option value="14d">Last 14 Days</option>
-        <option value="30d">Last 30 Days</option>
-        <option value="90d">Last 90 Days</option>
-        <option value="1y">Last Year (12mo)</option>
-        <option value="all">All Time</option>
-      </select>
+      <!-- NEW: Financial Summary -->
+      <div id="financial-summary"></div>
       
-      <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-      <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-      
-      <button id="refresh" aria-label="Refresh data">Refresh</button>
-      <button id="submitAll">Submit All</button>
+      <div class="toolbar-controls">
+        <label for="timeframe">Timeframe:</label>
+        <select id="timeframe">
+          <option value="ytd" selected>This Calendar Year</option>
+          <option value="today">Today</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="14d">Last 14 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="90d">Last 90 Days</option>
+          <option value="1y">Last Year (12mo)</option>
+          <option value="all">All Time</option>
+        </select>
+        
+        <label><input type="radio" name="mode" value="totals" checked> Totals</label>
+        <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+        
+        <button id="refresh" aria-label="Refresh data">Refresh</button>
+        <button id="submitAll">Submit All</button>
+      </div>
     </div>
     <div id="chart"></div>
   </header>
@@ -470,7 +517,7 @@
   <script>
   // ==== CONFIG ====
   // IMPORTANT: Replace this with your own Google Apps Script Web App URL
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbzw3snwnotsuLMXmBJgdGvtKjpY5aCxlK0pP9rgvBd0Jjfto-NbwJ77L0yTQjJnd_0LvQ/exec';
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -616,9 +663,36 @@
   }
 
   function renderAll() {
+    renderSummary();
     renderChart();
     renderAccounts();
   }
+  
+  function renderSummary() {
+      const summaryEl = document.getElementById('financial-summary');
+      if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+
+      // Get the index of the last (most recent) data point
+      const lastIndex = SNAP.dateAxis.length - 1;
+      
+      // If no data points exist, clear and exit
+      if (lastIndex < 0) {
+        summaryEl.innerHTML = 'No Data';
+        return;
+      }
+      
+      // Get the latest totals. Debts are stored as negative, so we use Math.abs for display.
+      const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
+      const debts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0); 
+
+      // Format the totals using the function that truncates to whole numbers
+      const assetString = `<span class="summary-asset">${formatMoney(assets)}</span>`;
+      const debtString = `<span class="summary-debt">${formatMoney(debts)}</span>`;
+
+      // Render the summary: [Assets] | [Debts]
+      summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
+  }
+
 
   function renderChart() {
     if (!SNAP || !window.google || !google.visualization) return;
@@ -834,7 +908,7 @@
         if (date) {
           chip.dataset.date = date;
           chip.dataset.account = a.name;
-          chip.dataset.readableValue = formatMoney(val, true); // Store readable value with decimals for modal display (optional refinement)
+          chip.dataset.readableValue = formatMoney(val);
           
           chip.addEventListener('dblclick', handleDeleteClick);
           chip.addEventListener('contextmenu', handleDeleteClick);
