@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- Changed title to v1f -->
-  <title>Ledger — Accounts & Chart (v1f)</title>
+  <!-- Changed title to v1g -->
+  <title>Ledger — Accounts & Chart (v1g)</title>
   <style>
     :root {
       --maxw: 1400px;
@@ -104,7 +104,8 @@
       min-width: 0; 
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      /* 1. NEW: Align items to top */
+      align-items: flex-start; 
       gap: var(--gap);
     }
     
@@ -136,6 +137,8 @@
       font-size: 0.75rem;
       opacity: .75; 
       flex-shrink: 0;
+      /* 1. NEW: Add padding-top to align with text, not top of H2 */
+      padding-top: 0.5rem;
     }
 
     .input-line { 
@@ -143,12 +146,12 @@
       gap: 10px; 
       align-items: center; 
       flex-shrink: 0;
-      /* 2. NEW: Align this to the right of the .left flex container */
       margin-left: auto;
+      /* 1. NEW: Add padding-top to align with text, not top of H2 */
+      padding-top: 0.25rem;
     }
 
     input[type="number"] {
-      /* 1. NEW: Shortened width */
       width: 10rem;
       max-width: 10rem;
       padding: .7rem .8rem;
@@ -241,6 +244,19 @@
     }
     .chip.no-delete:hover {
       background: transparent;
+    }
+    
+    /* 2. NEW: Ratio bar for mobile */
+    .ratio-bar {
+      display: none; /* Hidden by default */
+      font-size: 1.5rem; /* H4 size */
+      margin: 0;
+      padding: 0;
+      white-space: nowrap;
+      letter-spacing: -1px; /* Make blocks touch */
+    }
+    .ratio-bar span {
+      display: inline-block;
     }
 
     footer { 
@@ -350,13 +366,24 @@
       text-decoration: none;
     }
 
-    @media (max-width: 700px) {
+    /* 2. NEW: Media query changed to 650px */
+    @media (max-width: 650px) {
       .right { 
         min-width: unset; 
         text-align: left; 
+        /* Ensure bar aligns with top of row */
+        align-self: flex-start;
+        padding-top: 0.5rem; /* Tweak alignment */
       }
       
-      /* On mobile, make input full width for easier entry */
+      /* 2. NEW: Hide chips, show ratio bar */
+      .right .values {
+        display: none;
+      }
+      .right .ratio-bar {
+        display: block;
+      }
+
       .left {
         gap: 8px; /* Reduce gap slightly */
       }
@@ -367,6 +394,10 @@
       .input-line {
         width: 100%;
         margin-left: 0; /* Don't align right on mobile */
+        padding-top: 0; /* Reset padding */
+      }
+      .apr {
+        padding-top: 0; /* Reset padding */
       }
       .toolbar { 
         justify-content: space-around; 
@@ -394,7 +425,6 @@
   <header class="wrap">
     <div class="toolbar">
       <label for="timeframe">Timeframe:</label>
-      <!-- NEW: Updated timeframe options -->
       <select id="timeframe">
         <option value="ytd" selected>This Calendar Year</option>
         <option value="today">Today</option>
@@ -426,13 +456,12 @@
 
   <script>
   // ==== CONFIG ====
-  // IMPORTANT: Make sure this URL is updated after you re-deploy CODE.JS (v1f)
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbyeIKMTJPRc0OqdQOjWG8BQPTxJPY3huLTz2B6WomV3mbOKykJLebmRcntfmBqVRmtKdg/exec';
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
   let MODE = 'totals';
-  let TIMEFRAME = 'ytd'; // Default timeframe
+  let TIMEFRAME = 'ytd';
   let IS_LOADING = false;
   let TOAST_TIMER = null;
 
@@ -535,7 +564,6 @@
     setLoading(true, 'Loading snapshot…');
     
     try {
-      // The TIMEFRAME variable is now sent with the new values
       const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
       const text = await res.text();
       
@@ -667,6 +695,21 @@
   function renderAccounts() {
     const root = document.getElementById('accounts');
     root.innerHTML = '';
+    
+    // 2. NEW: Calculate blocks *before* the loop
+    const totalAssets = SNAP.totals.assets[SNAP.totals.assets.length - 1] || 0;
+    const totalDebts = Math.abs(SNAP.totals.debts[SNAP.totals.debts.length - 1] || 0);
+    const totalMag = totalAssets + totalDebts;
+    
+    let numAssetBlocks = 0;
+    if (totalMag > 0) {
+      numAssetBlocks = Math.round((totalAssets / totalMag) * 10);
+    } else {
+      numAssetBlocks = 5; // Default to 50/50 if no data
+    }
+    const numDebtBlocks = 10 - numAssetBlocks;
+    const assetBlocks = '█'.repeat(numAssetBlocks);
+    const debtBlocks = '█'.repeat(numDebtBlocks);
 
     SNAP.accounts.forEach(a => {
       const s = SNAP.series[a.name];
@@ -768,6 +811,23 @@
         vals.appendChild(chip);
       });
       right.appendChild(vals);
+
+      // 2. NEW: Add the ratio bar element
+      const bar = document.createElement('h4');
+      bar.className = 'ratio-bar';
+      
+      const assetSpan = document.createElement('span');
+      assetSpan.style.color = 'var(--c-pos)';
+      assetSpan.textContent = assetBlocks;
+      
+      const debtSpan = document.createElement('span');
+      debtSpan.style.color = 'var(--c-neg)';
+      debtSpan.textContent = debtBlocks;
+      
+      bar.appendChild(assetSpan);
+      bar.appendChild(debtSpan);
+      right.appendChild(bar);
+
 
       row.appendChild(left);
       row.appendChild(right);
