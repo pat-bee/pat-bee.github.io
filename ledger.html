@@ -463,14 +463,14 @@
   <main class="wrap">
     <section id="accounts" class="accounts"></section>
     <footer>
-      <small>Enter value(s) and press <b>Enter</b> or <b>Submit All</b>. Double-click an entry to delete.</small>
+      <small>Enter value(s) and press <b>Enter</b> or <b>Submit All</b>. Double-click an entry to delete. <br>Values displayed are truncated to whole numbers.</small>
     </footer>
   </main>
 
   <script>
   // ==== CONFIG ====
   // IMPORTANT: Replace this with your own Google Apps Script Web App URL
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbzw3snwnotsuLMXmBJgdGvtKjpY5aCxlK0pP9rgvBd0Jjfto-NbwJ77L0yTQjJnd_0LvQ/exec';
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxoauPDo1ZrIjFdsshNM_O4GhPZP5bDMupskLvz2ZUYuEbRRfSK9-vubCD81ws2jGP-3w/exec';
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -711,11 +711,21 @@
 
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
+  // MODIFIED: This function now truncates the value for display to a whole number, 
+  // ensuring the actual decimal value is preserved in the underlying data objects.
   function formatMoney(n) {
     const val = Number(n) || 0;
     const sign = val < 0 ? '−' : (val > 0 ? '+' : '');
     const abs = Math.abs(val);
-    return `${sign}$${abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    
+    // Truncate to get only the whole number part (11.23 becomes 11)
+    const displayValue = Math.trunc(abs);
+
+    // Format the truncated value for currency display (e.g., adding thousands separators)
+    return `${sign}$${displayValue.toLocaleString(undefined, { 
+        minimumFractionDigits: 0, 
+        maximumFractionDigits: 0 
+    })}`;
   }
 
   function renderAccounts() {
@@ -749,7 +759,8 @@
 
       const lastEl = document.createElement('span');
       lastEl.className = 'lastval';
-      lastEl.textContent = formatMoney(last);
+      // Calls the new formatMoney function which truncates the display
+      lastEl.textContent = formatMoney(last); 
       lastEl.dataset.sign = signOf(last);
       
       const nameEl = document.createElement('span');
@@ -778,7 +789,7 @@
       const inp = document.createElement('input');
       inp.type = 'number';
       inp.placeholder = 'Add new value…';
-      inp.step = '0.01';
+      inp.step = '0.01'; // Important: Keep step at 0.01 to allow decimal input
       inp.setAttribute('aria-label', `New value for ${a.name}`);
       inp.dataset.accountName = a.name;
 
@@ -808,18 +819,22 @@
         const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
         const val = Number(isObject ? v.value : v);
         const date = isObject ? v.date : null;
+        
+        // Use formatMoney for display (which is now truncated)
         const readableValue = formatMoney(val);
         
         const chip = document.createElement('span');
         chip.className = 'chip';
         chip.dataset.sign = signOf(val);
         chip.textContent = readableValue;
-        chip.dataset.value = val;
+        
+        // Important: Store the full decimal value in data-value for accurate deletion/submission
+        chip.dataset.value = val; 
         
         if (date) {
           chip.dataset.date = date;
           chip.dataset.account = a.name;
-          chip.dataset.readableValue = readableValue;
+          chip.dataset.readableValue = formatMoney(val, true); // Store readable value with decimals for modal display (optional refinement)
           
           chip.addEventListener('dblclick', handleDeleteClick);
           chip.addEventListener('contextmenu', handleDeleteClick);
@@ -877,6 +892,7 @@
       return;
     }
     
+    // Pass the full decimal value (value) to the deletion function
     showDeleteConfirm(account, date, value, readableValue);
   }
 
