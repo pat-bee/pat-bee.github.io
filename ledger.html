@@ -289,9 +289,11 @@
       padding: 0;
       white-space: nowrap;
       letter-spacing: -1px; /* Make blocks touch */
+      font-family: monospace; /* Added to ensure block characters are uniform */
     }
     .ratio-bar span {
       display: inline-block;
+      line-height: 1; /* Added to ensure blocks align */
     }
 
     footer { 
@@ -517,7 +519,12 @@
   <script>
   // ==== CONFIG ====
   // IMPORTANT: Replace this with your own Google Apps Script Web App URL
+  // UPDATED: Using the new API key provided by the user.
   const API_BASE = 'https://script.google.com/macros/s/AKfycbzw3snwnotsuLMXmBJgdGvtKjpY5aCxlK0pP9rgvBd0Jjfto-NbwJ77L0yTQjJnd_0LvQ/exec';
+
+  // CONSTANT: Proportional bar settings
+  const BLOCK_CHAR = '█';
+  const TOTAL_BLOCKS = 20;
 
   // ==== APP STATE ====
   let SNAP = null;
@@ -806,11 +813,27 @@
     const root = document.getElementById('accounts');
     root.innerHTML = '';
     
-    // Check if SNAP is null or missing expected structure
-    if (!SNAP || !SNAP.accounts) {
-        // If the API call fails or returns empty data, we exit gracefully
+    if (!SNAP || !SNAP.accounts || !SNAP.totals || !SNAP.dateAxis) {
         return; 
     }
+    
+    // --- New Logic for Proportional Bar Calculation ---
+    // 1. Get the latest overall totals from the snapshot (relying on the API structure)
+    const lastIndex = SNAP.dateAxis.length - 1;
+    let totalAssets = 0;
+    let totalDebts = 0;
+    
+    if (lastIndex >= 0) {
+        totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
+        // Total debts are stored as negative, but we need the absolute total for proportion calculation
+        totalDebts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0); 
+    }
+    
+    // Safety check for base totals
+    const totalAssetBase = Math.max(totalAssets, 0.01); 
+    const totalDebtBase = Math.max(totalDebts, 0.01);
+    const EMPTY_COLOR = '#cccccc'; // Light gray for empty blocks
+    // ----------------------------------------------------
 
     SNAP.accounts.forEach(a => {
       // Use safe navigation operator ?. and default to an empty object for 's'
@@ -926,21 +949,48 @@
       });
       right.appendChild(vals);
 
+      // --- Ratio Bar Logic Update ---
       const bar = document.createElement('h4');
       bar.className = 'ratio-bar';
       
       const assetSpan = document.createElement('span');
-      assetSpan.style.color = 'var(--c-pos)';
-      
       const debtSpan = document.createElement('span');
-      debtSpan.style.color = 'var(--c-neg)';
+      
+      const absLast = Math.abs(last);
+      let blocksToFill = 0;
       
       if (last >= 0) {
-        assetSpan.textContent = '█'.repeat(10);
-        debtSpan.textContent = '';
+        // Calculate proportion against total assets
+        const contributionRatio = absLast / totalAssetBase;
+        blocksToFill = Math.round(contributionRatio * TOTAL_BLOCKS);
+        
+        // Asset part (filled)
+        assetSpan.textContent = BLOCK_CHAR.repeat(blocksToFill);
+        assetSpan.style.color = 'var(--c-pos)';
+
+        // Debt part (empty space)
+        debtSpan.textContent = BLOCK_CHAR.repeat(TOTAL_BLOCKS - blocksToFill);
+        debtSpan.style.color = EMPTY_COLOR;
+        
       } else {
-        assetSpan.textContent = '';
-        debtSpan.textContent = '█'.repeat(10);
+        // Calculate proportion against total debts
+        const contributionRatio = absLast / totalDebtBase;
+        blocksToFill = Math.round(contributionRatio * TOTAL_BLOCKS);
+        
+        // Asset part (empty space)
+        assetSpan.textContent = BLOCK_CHAR.repeat(TOTAL_BLOCKS - blocksToFill);
+        assetSpan.style.color = EMPTY_COLOR;
+
+        // Debt part (filled)
+        debtSpan.textContent = BLOCK_CHAR.repeat(blocksToFill);
+        debtSpan.style.color = 'var(--c-neg)';
+      }
+
+      // Ensure that if the value is zero, no blocks are filled, even due to rounding.
+      if (absLast === 0) {
+          assetSpan.textContent = BLOCK_CHAR.repeat(TOTAL_BLOCKS);
+          assetSpan.style.color = EMPTY_COLOR;
+          debtSpan.textContent = '';
       }
       
       bar.appendChild(assetSpan);
