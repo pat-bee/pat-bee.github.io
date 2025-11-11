@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -536,7 +535,7 @@
   </main>
 
   <script>
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbw9uFomQ4Okilx2RrlYyiIOSrgCOQjcYlbLDrXQnUww3eTuu-PjqYVLQHpCCRwkD1bnjQ/exec';
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
 
   let SNAP = null;
   let MODE = 'totals';
@@ -551,9 +550,7 @@
     el.textContent = msg;
     el.dataset.type = type;
     el.classList.add('show');
-    TOAST_TIMER = setTimeout(() => {
-      el.classList.remove('show');
-    }, duration);
+    TOAST_TIMER = setTimeout(() => el.classList.remove('show'), duration);
   }
   
   function setLoading(loading, message) {
@@ -562,17 +559,10 @@
     document.getElementById('submitAll').disabled = loading;
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
       inp.disabled = loading;
-      if (loading) {
-        inp.classList.add('submitting');
-      } else {
-        inp.classList.remove('submitting');
-      }
+      inp.classList.toggle('submitting', loading);
     });
     
-    if (message) {
-      if (document.getElementById('delete-modal-backdrop').classList.contains('show')) {
-        return;
-      }
+    if (message && !document.getElementById('delete-modal-backdrop').classList.contains('show')) {
       showToast(message, 'info', loading ? 10000 : 3000);
     }
   }
@@ -586,13 +576,10 @@
     const confirmBtn = document.getElementById('delete-btn-confirm');
     
     details.textContent = `${account}: ${readableValue} on ${date}`;
-    
     backdrop.classList.add('show');
     modal.classList.add('show');
     
-    confirmBtn.onclick = () => {
-      processDelete(account, date, value);
-    };
+    confirmBtn.onclick = () => processDelete(account, date, value);
   }
   
   function hideDeleteConfirm() {
@@ -751,16 +738,12 @@
       const debts = SNAP.totals?.debts || [];
 
       for (let i = 0; i < labels.length; i++) { 
-        rows.push([
-          labels[i],
-          Number(assets[i] || 0),
-          Number(debts[i] || 0)
-        ]);
+        rows.push([labels[i], Number(assets[i] || 0), Number(debts[i] || 0)]);
       }
     } else {
       SNAP.accounts.forEach(a => data.addColumn('number', a.name));
       for (let i = 0; i < labels.length; i++) {
-        const row = [ labels[i] ]; 
+        const row = [labels[i]]; 
         SNAP.accounts.forEach(a => {
           const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
           row.push(Number(v));
@@ -785,12 +768,7 @@
     const black = styles.getPropertyValue('--c-black').trim();
     const textStyle = { color: black, fontName: 'system-ui' };
     
-    let chartColors;
-    if (MODE === 'totals') {
-      chartColors = [pos, neg];
-    } else {
-      chartColors = SNAP.accounts.map(a => a.color || null);
-    }
+    let chartColors = MODE === 'totals' ? [pos, neg] : SNAP.accounts.map(a => a.color || null);
     
     const options = {
       height: Math.max(240, Math.round(window.innerHeight * 0.30)),
@@ -824,38 +802,33 @@
     const sign = val < 0 ? '−' : '';
     const abs = Math.abs(val);
     const displayValue = Math.trunc(abs);
-
-    return `${sign}$${displayValue.toLocaleString(undefined, { 
-        minimumFractionDigits: 0, 
-        maximumFractionDigits: 0 
-    })}`;
+    return `${sign}$${displayValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   }
 
   function renderAccounts() {
     const root = document.getElementById('accounts');
     root.innerHTML = '';
     
-    if (!SNAP || !SNAP.accounts) {
-        return; 
-    }
+    if (!SNAP || !SNAP.accounts) return;
 
     SNAP.accounts.forEach(a => {
       const s = SNAP.series[a.name] || {};
       const last = s?.last ?? 0;
 
-      const row = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right = document.createElement('div'); right.className = 'right';
+      const row = document.createElement('div');
+      row.className = 'row';
+      
+      const left = document.createElement('div');
+      left.className = 'left';
+      
+      const right = document.createElement('div');
+      right.className = 'right';
 
       const accountDetails = document.createElement('div');
       accountDetails.className = 'account-details';
 
       const identityWrap = document.createElement('div');
-      identityWrap.style.display = 'flex';
-      identityWrap.style.alignItems = 'baseline';
-      identityWrap.style.gap = '10px';
-      identityWrap.style.flexWrap = 'nowrap';
-      identityWrap.style.minWidth = '0';
+      identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
       const lastEl = document.createElement('span');
       lastEl.className = 'lastval';
@@ -865,10 +838,7 @@
       const nameEl = document.createElement('span');
       nameEl.className = 'name';
       nameEl.textContent = a.name;
-      
-      if (a.color) {
-        nameEl.style.color = a.color;
-      }
+      if (a.color) nameEl.style.color = a.color;
       
       identityWrap.appendChild(lastEl);
       identityWrap.appendChild(nameEl);
@@ -876,14 +846,12 @@
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
       aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-      aprEl.style.flexShrink = '0';
 
       accountDetails.appendChild(identityWrap);
       accountDetails.appendChild(aprEl);
 
       const inputLine = document.createElement('div');
       inputLine.className = 'input-line';
-      inputLine.style.flexShrink = '0';
       
       const inp = document.createElement('input');
       inp.type = 'number';
@@ -895,5 +863,213 @@
       if (last > 0) {
         inp.style.backgroundColor = 'var(--c-tint-pos)';
       } else if (last < 0) {
-        inp
+        inp.style.backgroundColor = 'var(--c-tint-neg)';
+      } else {
+        inp.style.backgroundColor = 'var(--c-white)';
+      }
+
+      inp.addEventListener('keydown', async (ev) => {
+        if (ev.key === 'Enter') {
+          await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
+        }
+      });
+      inputLine.appendChild(inp);
+      
+      left.appendChild(accountDetails);
+      left.appendChild(inputLine);
+
+      const vals = document.createElement('div');
+      vals.className = 'values';
+      
+      (s.lastN || []).forEach(v => {
+        const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+        const val = Number(isObject ? v.value : v);
+        const date = isObject ? v.date : null;
+        
+        const readableValue = formatMoney(val);
+        
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.dataset.sign = signOf(val);
+        chip.textContent = readableValue;
+        chip.dataset.value = val; 
+        
+        if (date) {
+          chip.dataset.date = date;
+          chip.dataset.account = a.name;
+          chip.dataset.readableValue = formatMoney(val);
+          
+          chip.addEventListener('dblclick', handleDeleteClick);
+          chip.addEventListener('contextmenu', handleDeleteClick);
+          chip.addEventListener('click', (e) => {
+            if (e.shiftKey || e.ctrlKey || e.altKey) {
+              handleDeleteClick(e);
+            }
+          });
+        } else {
+          chip.classList.add('no-delete');
+          chip.title = "Re-deploy CODE.JS to enable deletion";
+        }
+        
+        vals.appendChild(chip);
+      });
+      right.appendChild(vals);
+
+      const bar = document.createElement('h4');
+      bar.className = 'ratio-bar';
+      
+      const assetSpan = document.createElement('span');
+      assetSpan.style.color = 'var(--c-pos)';
+      
+      const debtSpan = document.createElement('span');
+      debtSpan.style.color = 'var(--c-neg)';
+      
+      if (last >= 0) {
+        assetSpan.textContent = '█'.repeat(10);
+        debtSpan.textContent = '';
+      } else {
+        assetSpan.textContent = '';
+        debtSpan.textContent = '█'.repeat(10);
+      }
+      
+      bar.appendChild(assetSpan);
+      bar.appendChild(debtSpan);
+      right.appendChild(bar);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      root.appendChild(row);
+    });
+  }
+  
+  function handleDeleteClick(e) {
+    e.preventDefault();
+    if (IS_LOADING) return;
+    
+    const chip = e.currentTarget;
+    const { account, date, value, readableValue } = chip.dataset;
+    
+    if (!date) {
+      showToast('Cannot delete. Data is from an older script version.', 'error');
+      return;
+    }
+    
+    showDeleteConfirm(account, date, value, readableValue);
+  }
+
+  async function submitAll() {
+    const entries = [];
+    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+      const v = inp.value.trim();
+      if (v !== '') {
+        entries.push({ 
+          account: inp.dataset.accountName, 
+          value: Number(v),
+          inputEl: inp
+        });
+      }
+    });
+    if (entries.length === 0) {
+      showToast('No values entered to submit.', 'info');
+      return;
+    }
+    await submitEntries(entries);
+  }
+
+  async function submitEntries(entries) {
+    if (IS_LOADING) return;
+    setLoading(true, 'Submitting entries…');
+    
+    entries.forEach(e => e.inputEl?.classList.add('submitting'));
+
+    try {
+      const validEntries = entries
+        .map(e => ({ account: e.account, value: e.value }))
+        .filter(e => e.account && !isNaN(e.value));
+
+      if (validEntries.length === 0) {
+        showToast('No valid entries to submit.', 'error');
+        setLoading(false);
+        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+        return;
+      }
+
+      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
+      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+      const text = await res.text();
+      
+      let j;
+      try { 
+        j = JSON.parse(text); 
+      } catch {
+        console.error('Submit non-JSON:', text);
+        showToast('Submit failed (non-JSON response)', 'error', 5000);
+        setLoading(false);
+        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+        return;
+      }
+      
+      if (!j.ok) {
+        console.error('Submit JSON error:', j);
+        showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
+        setLoading(false);
+        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+        return;
+      }
+
+      showToast('Submit successful! Refreshing data…', 'success');
+      entries.forEach(e => {
+        e.inputEl?.classList.add('submitted-ok');
+        e.inputEl.value = '';
+        setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
+      });
+
+      await fetchSnapshot();
+      
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+      showToast('Network error submitting data.', 'error', 5000);
+      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+    }
+    
+    setLoading(false);
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
+    document.getElementById('submitAll').addEventListener('click', submitAll);
+    
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => { 
+        MODE = e.target.value; 
+        renderChart(); 
+      });
+    });
+    
+    document.getElementById('timeframe').addEventListener('change', (e) => {
+      TIMEFRAME = e.target.value;
+      fetchSnapshot();
+    });
+    
+    document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
+    document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
+    
+    window.addEventListener('resize', renderChart);
+
+    if (window.google && google.charts) {
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(fetchSnapshot);
+    } else {
+      const s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/charts/loader.js';
+      s.onload = () => { 
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(fetchSnapshot);
+      };
+      document.head.appendChild(s);
+    }
+  });
+  </script>
+</body>
 </html>
