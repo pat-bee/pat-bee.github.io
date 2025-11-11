@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -106,13 +107,14 @@
     }
     
     #statusbar {
-      font-size: 3rem;
+      font-size: clamp(0.5rem, 3vw, 3rem);
       line-height: 1;
       text-align: center;
       padding: 1rem 0;
-      letter-spacing: -2px;
+      letter-spacing: -0.1em;
       overflow: hidden;
       white-space: nowrap;
+      word-break: keep-all;
     }
     
     .status-positive {
@@ -476,10 +478,6 @@
       .lastval, .name {
         font-size: 2rem;
       }
-      
-      #statusbar {
-        font-size: 2rem;
-      }
     }
   </style>
 </head>
@@ -714,7 +712,8 @@
     }
     
     const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-    const debts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0);
+    const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
+    const debts = Math.abs(debtsRaw);
     const total = assets + debts;
     
     if (total === 0) {
@@ -723,13 +722,13 @@
     }
     
     const totalBlocks = 100;
-    const positiveBlocks = Math.round((assets / total) * totalBlocks);
-    const negativeBlocks = totalBlocks - positiveBlocks;
+    const assetBlocks = Math.round((assets / total) * totalBlocks);
+    const debtBlocks = totalBlocks - assetBlocks;
     
-    const positiveBar = '█'.repeat(positiveBlocks);
-    const negativeBar = '█'.repeat(negativeBlocks);
+    const assetBar = '█'.repeat(assetBlocks);
+    const debtBar = '█'.repeat(debtBlocks);
     
-    statusbarEl.innerHTML = `<span class="status-positive">${positiveBar}</span><span class="status-negative">${negativeBar}</span>`;
+    statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
   }
 
   function renderChart() {
@@ -896,212 +895,5 @@
       if (last > 0) {
         inp.style.backgroundColor = 'var(--c-tint-pos)';
       } else if (last < 0) {
-        inp.style.backgroundColor = 'var(--c-tint-neg)';
-      } else {
-        inp.style.backgroundColor = 'var(--c-white)';
-      }
-
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
-        }
-      });
-      inputLine.appendChild(inp);
-      
-      left.appendChild(accountDetails);
-      left.appendChild(inputLine);
-
-      const vals = document.createElement('div'); vals.className = 'values';
-      
-      (s.lastN || []).forEach(v => {
-        const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-        const val = Number(isObject ? v.value : v);
-        const date = isObject ? v.date : null;
-        
-        const readableValue = formatMoney(val);
-        
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.dataset.sign = signOf(val);
-        chip.textContent = readableValue;
-        chip.dataset.value = val; 
-        
-        if (date) {
-          chip.dataset.date = date;
-          chip.dataset.account = a.name;
-          chip.dataset.readableValue = formatMoney(val);
-          
-          chip.addEventListener('dblclick', handleDeleteClick);
-          chip.addEventListener('contextmenu', handleDeleteClick);
-          chip.addEventListener('click', (e) => {
-            if (e.shiftKey || e.ctrlKey || e.altKey) {
-              handleDeleteClick(e);
-            }
-          });
-        } else {
-          chip.classList.add('no-delete');
-          chip.title = "Re-deploy CODE.JS to enable deletion";
-        }
-        
-        vals.appendChild(chip);
-      });
-      right.appendChild(vals);
-
-      const bar = document.createElement('h4');
-      bar.className = 'ratio-bar';
-      
-      const assetSpan = document.createElement('span');
-      assetSpan.style.color = 'var(--c-pos)';
-      
-      const debtSpan = document.createElement('span');
-      debtSpan.style.color = 'var(--c-neg)';
-      
-      if (last >= 0) {
-        assetSpan.textContent = '█'.repeat(10);
-        debtSpan.textContent = '';
-      } else {
-        assetSpan.textContent = '';
-        debtSpan.textContent = '█'.repeat(10);
-      }
-      
-      bar.appendChild(assetSpan);
-      bar.appendChild(debtSpan);
-      right.appendChild(bar);
-
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
-    });
-  }
-  
-  function handleDeleteClick(e) {
-    e.preventDefault();
-    if (IS_LOADING) return;
-    
-    const chip = e.currentTarget;
-    const { account, date, value, readableValue } = chip.dataset;
-    
-    if (!date) {
-      showToast('Cannot delete. Data is from an older script version.', 'error');
-      return;
-    }
-    
-    showDeleteConfirm(account, date, value, readableValue);
-  }
-
-  async function submitAll() {
-    const entries = [];
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      const v = inp.value.trim();
-      if (v !== '') {
-        entries.push({ 
-          account: inp.dataset.accountName, 
-          value: Number(v),
-          inputEl: inp
-        });
-      }
-    });
-    if (entries.length === 0) {
-      showToast('No values entered to submit.', 'info');
-      return;
-    }
-    await submitEntries(entries);
-  }
-
-  async function submitEntries(entries) {
-    if (IS_LOADING) return;
-    setLoading(true, 'Submitting entries…');
-    
-    entries.forEach(e => e.inputEl?.classList.add('submitting'));
-
-    try {
-      const validEntries = entries
-        .map(e => ({ account: e.account, value: e.value }))
-        .filter(e => e.account && !isNaN(e.value));
-
-      if (validEntries.length === 0) {
-        showToast('No valid entries to submit.', 'error');
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
-      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-      const text = await res.text();
-      
-      let j;
-      try { 
-        j = JSON.parse(text); 
-      } catch {
-        console.error('Submit non-JSON:', text);
-        showToast('Submit failed (non-JSON response)', 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-      
-      if (!j.ok) {
-        console.error('Submit JSON error:', j);
-        showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      showToast('Submit successful! Refreshing data…', 'success');
-      entries.forEach(e => {
-        e.inputEl?.classList.add('submitted-ok');
-        e.inputEl.value = '';
-        setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
-      });
-
-      await fetchSnapshot();
-      
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      showToast('Network error submitting data.', 'error', 5000);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-    }
-    
-    setLoading(false);
-  }
-  
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
-    document.getElementById('submitAll').addEventListener('click', submitAll);
-    
-    document.querySelectorAll('input[name="mode"]').forEach(r => {
-      r.addEventListener('change', (e) => { 
-        MODE = e.target.value; 
-        renderChart(); 
-      });
-    });
-    
-    document.getElementById('timeframe').addEventListener('change', (e) => {
-      TIMEFRAME = e.target.value;
-      fetchSnapshot();
-    });
-    
-    document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
-    document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
-    
-    window.addEventListener('resize', renderChart);
-
-    if (window.google && google.charts) {
-      google.charts.load('current', { packages: ['corechart'] });
-      google.charts.setOnLoadCallback(fetchSnapshot);
-    } else {
-      const s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/charts/loader.js';
-      s.onload = () => { 
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(fetchSnapshot);
-      };
-      document.head.appendChild(s);
-    }
-  });
-  </script>
-</body>
+        inp
 </html>
