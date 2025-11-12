@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -536,7 +537,8 @@
 
   <script>
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
- let SNAP = null;
+ 
+  let SNAP = null;
   let MODE = 'totals';
   let TIMEFRAME = 'ytd';
   let IS_LOADING = false;
@@ -715,7 +717,6 @@
     const debtBar = '█'.repeat(debtBlocks);
     
     statusbarEl.innerHTML = `<span class="status-negative">${debtBar}</span><span class="status-positive">${assetBar}</span>`;
-
   }
 
   function renderChart() {
