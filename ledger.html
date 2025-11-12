@@ -536,8 +536,7 @@
 
   <script>
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
-
-  let SNAP = null;
+ let SNAP = null;
   let MODE = 'totals';
   let TIMEFRAME = 'ytd';
   let IS_LOADING = false;
@@ -924,12 +923,29 @@
       const debtSpan = document.createElement('span');
       debtSpan.style.color = 'var(--c-neg)';
       
-      if (last >= 0) {
-        assetSpan.textContent = '█'.repeat(10);
+      // Calculate proportional blocks based on account's share of total assets/debts
+      const lastIndex = SNAP.dateAxis.length - 1;
+      const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
+      const totalDebtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
+      const totalDebts = Math.abs(totalDebtsRaw);
+      
+      if (last >= 0 && totalAssets > 0) {
+        // Asset account: calculate proportion of total assets
+        const percentage = (last / totalAssets) * 100;
+        const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
+        assetSpan.textContent = '█'.repeat(blocks);
         debtSpan.textContent = '';
-      } else {
+      } else if (last < 0 && totalDebts > 0) {
+        // Debt account: calculate proportion of total debts
+        const absLast = Math.abs(last);
+        const percentage = (absLast / totalDebts) * 100;
+        const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
         assetSpan.textContent = '';
-        debtSpan.textContent = '█'.repeat(10);
+        debtSpan.textContent = '█'.repeat(blocks);
+      } else {
+        // Edge case: zero or no total
+        assetSpan.textContent = '';
+        debtSpan.textContent = '';
       }
       
       bar.appendChild(assetSpan);
