@@ -714,7 +714,8 @@
     const assetBar = '█'.repeat(assetBlocks);
     const debtBar = '█'.repeat(debtBlocks);
     
-    statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
+    statusbarEl.innerHTML = `<span class="status-negative">${debtBar}</span><span class="status-positive">${assetBar}</span>`;
+
   }
 
   function renderChart() {
