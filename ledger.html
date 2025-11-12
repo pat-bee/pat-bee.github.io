@@ -34,7 +34,7 @@
       width: 90vw; 
       max-width: var(--maxw); 
       margin: 0 auto; 
-      padding: 0px; 
+      padding: 12px; 
     }
 
     a {
@@ -82,7 +82,7 @@
     }
     
     #financial-summary {
-      font-size: 3.9rem;
+      font-size: 2.6rem;
       font-weight: 700;
       white-space: nowrap;
       line-height: 1.1;
@@ -463,7 +463,7 @@
       }
       
       #financial-summary {
-        font-size: 3.9rem;
+        font-size: 1.8rem;
         padding-bottom: 8px;
         width: 100%;
         text-align: center;
@@ -536,7 +536,8 @@
 
   <script>
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
- let SNAP = null;
+
+  let SNAP = null;
   let MODE = 'totals';
   let TIMEFRAME = 'ytd';
   let IS_LOADING = false;
@@ -715,7 +716,6 @@
     const debtBar = '█'.repeat(debtBlocks);
     
     statusbarEl.innerHTML = `<span class="status-negative">${debtBar}</span><span class="status-positive">${assetBar}</span>`;
-
   }
 
   function renderChart() {
@@ -845,7 +845,56 @@
 
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
+      
+      // Calculate interest for the selected timeframe
+      const apr = a.apr || 0;
+      let interestAmount = 0;
+      let periodLabel = '';
+      
+      if (apr > 0 && last !== 0) {
+        const dailyRate = (last * apr) / 365;
+        
+        switch(TIMEFRAME) {
+          case 'today':
+            interestAmount = dailyRate;
+            periodLabel = '/dy';
+            break;
+          case '7d':
+            interestAmount = dailyRate * 7;
+            periodLabel = '/wk';
+            break;
+          case '14d':
+            interestAmount = dailyRate * 14;
+            periodLabel = '/2w';
+            break;
+          case '30d':
+            interestAmount = dailyRate * 30;
+            periodLabel = '/mo';
+            break;
+          case '90d':
+            interestAmount = dailyRate * 90;
+            periodLabel = '/qt';
+            break;
+          case '1y':
+          case 'ytd':
+          case 'all':
+            interestAmount = last * apr;
+            periodLabel = '/yr';
+            break;
+        }
+      }
+      
+      // Build APR display
+      let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+      
+      // Add interest calculation if non-zero
+      if (Math.abs(interestAmount) >= 0.01) {
+        const sign = interestAmount >= 0 ? '+' : '';
+        const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
+        aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
+      }
+      
+      aprEl.innerHTML = aprHTML;
 
       accountDetails.appendChild(identityWrap);
       accountDetails.appendChild(aprEl);
