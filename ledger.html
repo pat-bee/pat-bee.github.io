@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -118,6 +119,25 @@
       line-height: 1.1;
       flex-shrink: 1;
       min-width: 0;
+    }
+    
+    /* Total interest costs/earnings display */
+    #interest-summary {
+      font-size: 1.95rem;  /* Half of main summary */
+      font-weight: 600;
+      white-space: nowrap;
+      line-height: 1.1;
+      flex-shrink: 1;
+      min-width: 0;
+      opacity: 0.9;
+    }
+    
+    .interest-earned {
+      color: var(--c-pos);
+    }
+    
+    .interest-cost {
+      color: var(--c-neg);
     }
     
     .summary-debt {
@@ -578,6 +598,13 @@
         width: 100%;
         text-align: center;
       }
+      
+      #interest-summary {
+        font-size: 1.95rem;
+        width: 100%;
+        text-align: center;
+        padding-bottom: 8px;
+      }
     
       .toolbar-controls {
         justify-content: space-around;
@@ -612,6 +639,9 @@
       <div class="toolbar">
         <!-- Financial summary: Total assets | Total debts -->
         <div id="financial-summary"></div>
+        
+        <!-- Interest summary: Total earnings | Total costs -->
+        <div id="interest-summary"></div>
         
         <!-- Controls: Timeframe selector, view mode, actions -->
         <div class="toolbar-controls">
@@ -660,8 +690,7 @@
      Replace with your own deployment URL.
   */
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
-
-  /* ============================================
+ /* ============================================
      APPLICATION STATE
      ============================================
      Global variables for app state management.
@@ -878,6 +907,7 @@
    */
   function renderAll() {
     renderSummary();
+    renderInterestSummary();
     renderStatusbar();
     renderChart();
     renderAccounts();
@@ -908,6 +938,95 @@
     const debtString = `<span class="summary-debt">${formatMoney(debts)}</span>`;
 
     summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
+  }
+
+  /**
+   * Render interest summary (Total earnings | Total costs)
+   * Calculates aggregate interest across all accounts for selected timeframe
+   */
+  function renderInterestSummary() {
+    const summaryEl = document.getElementById('interest-summary');
+    if (!summaryEl || !SNAP || !SNAP.accounts) return;
+
+    let totalEarnings = 0;  // Interest earned on positive balances
+    let totalCosts = 0;     // Interest paid on negative balances
+    let periodLabel = '';
+
+    // Calculate interest for each account
+    SNAP.accounts.forEach(a => {
+      const s = SNAP.series[a.name] || {};
+      const last = s?.last ?? 0;
+      const apr = a.apr || 0;
+
+      // Skip if no APR or zero balance
+      if (apr === 0 || last === 0) return;
+
+      // Calculate interest based on timeframe
+      const dailyRate = (last * apr) / 365;
+      let interestAmount = 0;
+
+      switch(TIMEFRAME) {
+        case 'today':
+          interestAmount = dailyRate * 1;
+          periodLabel = '/dy';
+          break;
+        case '7d':
+          interestAmount = dailyRate * 7;
+          periodLabel = '/wk';
+          break;
+        case '14d':
+          interestAmount = dailyRate * 14;
+          periodLabel = '/2w';
+          break;
+        case '30d':
+          interestAmount = dailyRate * 30;
+          periodLabel = '/mo';
+          break;
+        case '90d':
+          interestAmount = dailyRate * 90;
+          periodLabel = '/qt';
+          break;
+        case '1y':
+        case 'ytd':
+        case 'all':
+          interestAmount = last * apr;
+          periodLabel = '/yr';
+          break;
+      }
+
+      // Accumulate earnings (positive interest) or costs (negative interest)
+      if (interestAmount > 0) {
+        totalEarnings += interestAmount;
+      } else {
+        totalCosts += interestAmount;  // Already negative
+      }
+    });
+
+    // Only display if there's meaningful interest (threshold: $0.01)
+    if (Math.abs(totalEarnings) < 0.01 && Math.abs(totalCosts) < 0.01) {
+      summaryEl.innerHTML = '';
+      return;
+    }
+
+    // Format the display
+    const earningsStr = totalEarnings >= 0.01 
+      ? `<span class="interest-earned">+${formatMoney(totalEarnings)}${periodLabel}</span>` 
+      : '';
+    
+    const costsStr = Math.abs(totalCosts) >= 0.01 
+      ? `<span class="interest-cost">${formatMoney(totalCosts)}${periodLabel}</span>` 
+      : '';
+
+    // Build display with separator if both exist
+    let displayParts = [];
+    if (earningsStr) displayParts.push(earningsStr);
+    if (costsStr) displayParts.push(costsStr);
+    
+    if (displayParts.length > 0) {
+      summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+    } else {
+      summaryEl.innerHTML = '';
+    }
   }
 
   /**
