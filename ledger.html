@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -71,14 +70,15 @@
       background: var(--c-white); 
       z-index: 5; 
       border-bottom: 1px solid var(--c-black);
+      padding-bottom: 1rem;  /* Add padding for statusbar */
     }
     
     /* Toolbar contains financial summary (left) and controls (right) */
     .toolbar { 
       display: flex; 
       gap: var(--gap); 
-      align-items: center; 
-      justify-content: space-between;  /* Summary left, controls right */
+      align-items: baseline;  /* FIXED: Align to baseline */
+      justify-content: space-between;
       padding: 6px 0; 
       flex-wrap: wrap; 
     }
@@ -172,11 +172,12 @@
       font-size: clamp(0.5rem, 3vw, 3rem);  /* Responsive scaling */
       line-height: 1;
       text-align: center;
-      padding: 1rem 0;
-      letter-spacing: -0.1em;  /* Tighten blocks for better density */
+      padding: 0.5rem 0 0 0;  /* Only top padding, part of sticky header */
+      letter-spacing: -0.1em;
       overflow: hidden;
       white-space: nowrap;
       word-break: keep-all;
+      background: var(--c-white);  /* Match header background */
     }
     
     .status-positive {
@@ -667,11 +668,11 @@
     </div>
     <!-- Google Charts visualization -->
     <div id="chart"></div>
+    
+    <!-- Global statusbar: 100-block asset/debt ratio visualization (part of sticky header) -->
+    <section id="statusbar"></section>
   </header>
 
-  <!-- Global statusbar: 100-block asset/debt ratio visualization -->
-  <section id="statusbar"></section>
-  
   <hr class="wrap divider">
 
   <!-- Main content: Account list -->
@@ -1023,7 +1024,7 @@
     if (costsStr) displayParts.push(costsStr);
     
     if (displayParts.length > 0) {
-      summaryEl.innerHTML = `&#x231B; ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+      summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
     } else {
       summaryEl.innerHTML = '';
     }
@@ -1032,6 +1033,7 @@
   /**
    * Render global statusbar (100-block asset/debt ratio)
    * Visual representation of financial balance
+   * Green blocks = assets, Red blocks = debts (proportional to totals)
    */
   function renderStatusbar() {
     const statusbarEl = document.getElementById('statusbar');
@@ -1046,9 +1048,10 @@
     }
     
     // Calculate asset and debt totals
+    // Assets are positive, debts are stored as negative values
     const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
     const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
-    const debts = Math.abs(debtsRaw);  // Debts stored as negative, convert to positive
+    const debts = Math.abs(debtsRaw);  // Convert negative debt to positive for calculation
     const total = assets + debts;
     
     // Handle zero total (all green as default)
@@ -1058,6 +1061,9 @@
     }
     
     // Calculate proportional blocks (100 total)
+    // Example: $4,438 assets + $7,327 debts = $11,765 total
+    // Asset blocks = (4438 / 11765) * 100 = 38 blocks (green)
+    // Debt blocks = (7327 / 11765) * 100 = 62 blocks (red)
     const totalBlocks = 100;
     const assetBlocks = Math.round((assets / total) * totalBlocks);
     const debtBlocks = totalBlocks - assetBlocks;
@@ -1066,8 +1072,9 @@
     const assetBar = '█'.repeat(assetBlocks);
     const debtBar = '█'.repeat(debtBlocks);
     
-    // Render: Debts first (red), then assets (green)
-    statusbarEl.innerHTML = `<span class="status-negative">${debtBar}</span><span class="status-positive">${assetBar}</span>`;
+    // Render: GREEN (assets) FIRST on left, then RED (debts) on right
+    // This creates a visual: [GREEN...][RED...] matching the proportions
+    statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
   }
 
   /**
