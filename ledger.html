@@ -4,19 +4,34 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ledger — Accounts & Chart (v1k)</title>
+  
   <style>
+    /* ============================================
+       CSS VARIABLES & DESIGN TOKENS
+       ============================================
+       Centralized color palette and spacing values
+       for consistent theming throughout the app.
+    */
     :root {
-      --maxw: 1400px;
-      --c-pos: #4c8036;
-      --c-neg: #a02d2a;
-      --c-black: #000000;
-      --c-white: #ffffff;
-      --radius: 10px;
-      --gap: 12px;
-      --c-tint-pos: #f7f9f4;
-      --c-tint-neg: #f9f4f4;
+      --maxw: 1400px;           /* Maximum content width */
+      --c-pos: #4c8036;         /* Positive values (assets, gains) - Green */
+      --c-neg: #a02d2a;         /* Negative values (debts, losses) - Red */
+      --c-black: #000000;       /* Primary text and borders */
+      --c-white: #ffffff;       /* Background and inverted text */
+      --radius: 10px;           /* Border radius for rounded elements */
+      --gap: 12px;              /* Standard spacing gap */
+      
+      /* Tinted backgrounds for input fields based on account type */
+      --c-tint-pos: #f7f9f4;    /* Light green tint for positive accounts */
+      --c-tint-neg: #f9f4f4;    /* Light red tint for negative accounts */
     }
 
+    /* ============================================
+       BASE LAYOUT
+       ============================================
+       Foundation styles for html, body, and main
+       content wrapper with responsive width.
+    */
     html, body { 
       height: 100%; 
       margin: 0; 
@@ -30,11 +45,12 @@
       line-height: 1.5;
     }
 
+    /* Wrapper constrains content width while allowing full-width elements */
     .wrap { 
       width: 90vw; 
       max-width: var(--maxw); 
       margin: 0 auto; 
-      padding: 2px; 
+      padding: 0px;  /* Zero padding allows nested full-width elements */
     }
 
     a {
@@ -42,6 +58,12 @@
       text-decoration: underline;
     }
 
+    /* ============================================
+       HEADER & TOOLBAR
+       ============================================
+       Sticky header with financial summary and controls.
+       Chart container sits below toolbar but within header.
+    */
     header { 
       position: sticky; 
       top: 0; 
@@ -50,15 +72,17 @@
       border-bottom: 1px solid var(--c-black);
     }
     
+    /* Toolbar contains financial summary (left) and controls (right) */
     .toolbar { 
       display: flex; 
       gap: var(--gap); 
       align-items: center; 
-      justify-content: space-between;
+      justify-content: space-between;  /* Summary left, controls right */
       padding: 6px 0; 
       flex-wrap: wrap; 
     }
     
+    /* Controls group: timeframe selector, mode toggles, action buttons */
     .toolbar-controls {
       display: flex;
       gap: var(--gap);
@@ -81,6 +105,12 @@
       color: var(--c-black);
     }
     
+    /* ============================================
+       FINANCIAL SUMMARY
+       ============================================
+       Large, prominent display of total assets and debts.
+       Updates dynamically based on data and timeframe.
+    */
     #financial-summary {
       font-size: 3.9rem;
       font-weight: 700;
@@ -98,6 +128,12 @@
       color: var(--c-pos);
     }
 
+    /* ============================================
+       CHART CONTAINER
+       ============================================
+       Google Charts visualization area.
+       Spans full viewport width for maximum impact.
+    */
     #chart { 
       height: 30vh; 
       width: 100%; 
@@ -105,12 +141,19 @@
       padding: 0;
     }
     
+    /* ============================================
+       GLOBAL STATUSBAR
+       ============================================
+       100-block proportional visualization of asset/debt ratio.
+       Red blocks = debt proportion, Green blocks = asset proportion.
+       Font size scales responsively to fit all blocks on any screen.
+    */
     #statusbar {
-      font-size: clamp(0.5rem, 3vw, 3rem);
+      font-size: clamp(0.5rem, 3vw, 3rem);  /* Responsive scaling */
       line-height: 1;
       text-align: center;
       padding: 1rem 0;
-      letter-spacing: -0.1em;
+      letter-spacing: -0.1em;  /* Tighten blocks for better density */
       overflow: hidden;
       white-space: nowrap;
       word-break: keep-all;
@@ -130,6 +173,13 @@
       margin-top: 1rem;
     }
 
+    /* ============================================
+       ACCOUNT ROWS
+       ============================================
+       Each account displays as a row with:
+       - Left: account details, APR, input field
+       - Right: historical values (chips) or ratio bar (mobile)
+    */
     .accounts { 
       display: grid; 
       grid-template-columns: 1fr; 
@@ -145,6 +195,7 @@
       gap: 12px; 
     }
 
+    /* Left side: Account name, current balance, APR, input */
     .left { 
       flex: 1 1 auto; 
       padding-right: 12px; 
@@ -156,6 +207,7 @@
       gap: var(--gap);
     }
     
+    /* Right side: Historical value chips or mobile ratio bar */
     .right { 
       flex: 0 1 auto; 
       min-width: 40%; 
@@ -171,11 +223,14 @@
       min-width: 0;
     }
 
+    /* Current account balance (large, prominent) */
     .lastval { 
       font-weight: 600; 
       font-size: 2.6rem; 
       white-space: nowrap;
     }
+    
+    /* Account name (large, prominent) */
     .name { 
       font-weight: 700; 
       color: var(--c-black); 
@@ -185,6 +240,7 @@
       text-overflow: ellipsis;
     }
     
+    /* APR percentage and calculated interest cost/earning */
     .apr { 
       font-weight: 400; 
       font-size: 0.75rem;
@@ -193,6 +249,7 @@
       padding-top: 0.5rem;
     }
 
+    /* Input field container */
     .input-line { 
       display: flex; 
       gap: 10px; 
@@ -201,6 +258,12 @@
       padding-top: 0.25rem;
     }
 
+    /* ============================================
+       INPUT FIELDS
+       ============================================
+       Number inputs for adding new account values.
+       Background color tints based on account type.
+    */
     input[type="number"] {
       width: 10rem;
       max-width: 10rem;
@@ -224,11 +287,13 @@
       box-shadow: 0 0 0 2px var(--c-black) inset;
     }
     
+    /* Loading state during submission */
     input[type="number"].submitting {
       opacity: 0.5;
       pointer-events: none;
     }
     
+    /* Success animation after submission */
     input[type="number"].submitted-ok {
       animation: flash-green 0.8s ease-out;
     }
@@ -238,9 +303,15 @@
       100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
     }
 
+    /* Color coding for positive/negative values */
     .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
     .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
+    /* ============================================
+       BUTTONS
+       ============================================
+       Action buttons with hover and disabled states.
+    */
     button {
       padding: .7rem 1rem;
       font-size: 1rem;
@@ -266,12 +337,18 @@
       cursor: not-allowed;
     }
 
+    /* ============================================
+       VALUE CHIPS
+       ============================================
+       Historical account values displayed as chips.
+       Clickable for deletion (double-click or right-click).
+    */
     .values { 
       display: flex; 
       justify-content: flex-end;
       gap: .6rem; 
-      overflow-x: auto;
-      width: 100%;
+      overflow-x: auto;  /* Horizontal scroll for many values */
+      width: 100%;       /* Fixed width enables overflow scrolling */
     }
     
     .chip {
@@ -282,7 +359,7 @@
       font-size: .95rem;
       cursor: pointer;
       user-select: none;
-      flex-shrink: 0;
+      flex-shrink: 0;  /* Prevent chip compression */
     }
     
     .chip:hover {
@@ -290,6 +367,7 @@
       color: var(--c-white);
     }
     
+    /* Non-deletable chips (from older data format) */
     .chip.no-delete {
       cursor: default;
       opacity: 0.7;
@@ -300,8 +378,15 @@
       background: transparent;
     }
     
+    /* ============================================
+       MOBILE RATIO BARS
+       ============================================
+       Proportional visualization for individual accounts.
+       Shows account's percentage of total assets or debts.
+       Hidden on desktop, visible on mobile (< 650px).
+    */
     .ratio-bar {
-      display: none;
+      display: none;  /* Hidden by default (desktop) */
       font-size: 1.5rem;
       margin: 0;
       padding: 0;
@@ -317,6 +402,12 @@
       text-align: right; 
     }
     
+    /* ============================================
+       TOAST NOTIFICATIONS
+       ============================================
+       Temporary notifications for user feedback.
+       Auto-dismiss after specified duration.
+    */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -352,6 +443,12 @@
       border-color: var(--c-white);
     }
     
+    /* ============================================
+       DELETE CONFIRMATION MODAL
+       ============================================
+       Modal dialog for confirming entry deletion.
+       Backdrop dims the page, modal centers on screen.
+    */
     #delete-modal-backdrop {
       position: fixed;
       top: 0;
@@ -419,6 +516,15 @@
       text-decoration: none;
     }
 
+    /* ============================================
+       MOBILE RESPONSIVE (< 650px)
+       ============================================
+       Layout adjustments for mobile devices:
+       - Stack elements vertically
+       - Hide value chips, show ratio bars
+       - Full-width inputs
+       - Centered financial summary
+    */
     @media (max-width: 650px) {
       .row {
         flex-direction: column;
@@ -431,6 +537,7 @@
         padding-top: 0.5rem; 
       }
       
+      /* Hide chips, show ratio bars on mobile */
       .right .values {
         display: none;
       }
@@ -443,22 +550,21 @@
         width: 100%;
         padding-right: 0;
       }
+      
       input[type="number"] { 
         width: 100%; 
         max-width: 100%;
       }
+      
       .input-line {
         width: 100%;
         margin-left: 0;
         padding-top: 0;
       }
+      
       .apr {
         padding-top: 0;
       }
-
-
-
-
       
       .toolbar { 
         flex-direction: column; 
@@ -467,7 +573,7 @@
       }
       
       #financial-summary {
-        font-size: 1.8rem;
+        font-size: 3.9rem;
         padding-bottom: 8px;
         width: 100%;
         text-align: center;
@@ -485,8 +591,10 @@
   </style>
 </head>
 <body>
+  <!-- Toast notification container -->
   <div id="toast" role="status" aria-live="polite"></div>
   
+  <!-- Delete confirmation modal -->
   <div id="delete-modal-backdrop"></div>
   <div id="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
     <h3 id="delete-modal-title" style="margin-top:0;">Delete Entry?</h3>
@@ -498,11 +606,14 @@
     </div>
   </div>
 
+  <!-- Main header with toolbar and chart -->
   <header>
     <div class="wrap">
       <div class="toolbar">
+        <!-- Financial summary: Total assets | Total debts -->
         <div id="financial-summary"></div>
         
+        <!-- Controls: Timeframe selector, view mode, actions -->
         <div class="toolbar-controls">
           <label for="timeframe">Timeframe:</label>
           <select id="timeframe">
@@ -524,13 +635,16 @@
         </div>
       </div>
     </div>
-    <div id="chart"  style="width: 90%;" ></div>
+    <!-- Google Charts visualization -->
+    <div id="chart"></div>
   </header>
 
+  <!-- Global statusbar: 100-block asset/debt ratio visualization -->
   <section id="statusbar"></section>
   
   <hr class="wrap divider">
 
+  <!-- Main content: Account list -->
   <main class="wrap">
     <section id="accounts" class="accounts"></section>
     <footer>
@@ -539,38 +653,90 @@
   </main>
 
   <script>
+  /* ============================================
+     CONFIGURATION
+     ============================================
+     API endpoint for Google Apps Script backend.
+     Replace with your own deployment URL.
+  */
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
 
-  let SNAP = null;
-  let MODE = 'totals';
-  let TIMEFRAME = 'ytd';
-  let IS_LOADING = false;
-  let TOAST_TIMER = null;
+  /* ============================================
+     APPLICATION STATE
+     ============================================
+     Global variables for app state management.
+  */
+  let SNAP = null;              // Snapshot data from API
+  let MODE = 'totals';          // Chart mode: 'totals' or 'accounts'
+  let TIMEFRAME = 'ytd';        // Selected timeframe
+  let IS_LOADING = false;       // Loading state flag
+  let TOAST_TIMER = null;       // Toast auto-dismiss timer
 
+  /* ============================================
+     UI UTILITY FUNCTIONS
+     ============================================
+     Helper functions for user interface feedback.
+  */
+  
+  /**
+   * Display a toast notification
+   * @param {string} msg - Message to display
+   * @param {string} type - Type: 'info', 'success', or 'error'
+   * @param {number} duration - Display duration in milliseconds
+   */
   function showToast(msg, type = 'info', duration = 3000) {
     const el = document.getElementById('toast');
     if (!el) return;
+    
+    // Clear existing timer
     if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
+    
+    // Set content and show
     el.textContent = msg;
     el.dataset.type = type;
     el.classList.add('show');
+    
+    // Auto-dismiss after duration
     TOAST_TIMER = setTimeout(() => el.classList.remove('show'), duration);
   }
   
+  /**
+   * Set loading state for UI elements
+   * @param {boolean} loading - Loading state
+   * @param {string} message - Optional message to display
+   */
   function setLoading(loading, message) {
     IS_LOADING = loading;
+    
+    // Disable/enable buttons
     document.getElementById('refresh').disabled = loading;
     document.getElementById('submitAll').disabled = loading;
+    
+    // Disable/enable all input fields
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
       inp.disabled = loading;
       inp.classList.toggle('submitting', loading);
     });
     
+    // Show toast message if provided and modal isn't open
     if (message && !document.getElementById('delete-modal-backdrop').classList.contains('show')) {
       showToast(message, 'info', loading ? 10000 : 3000);
     }
   }
 
+  /* ============================================
+     DELETE MODAL FUNCTIONS
+     ============================================
+     Handle deletion confirmation workflow.
+  */
+  
+  /**
+   * Show delete confirmation modal
+   * @param {string} account - Account name
+   * @param {string} date - Entry date
+   * @param {number} value - Entry value
+   * @param {string} readableValue - Formatted value for display
+   */
   function showDeleteConfirm(account, date, value, readableValue) {
     if (IS_LOADING) return;
     
@@ -579,36 +745,58 @@
     const details = document.getElementById('delete-modal-details');
     const confirmBtn = document.getElementById('delete-btn-confirm');
     
+    // Set modal content
     details.textContent = `${account}: ${readableValue} on ${date}`;
+    
+    // Show modal
     backdrop.classList.add('show');
     modal.classList.add('show');
     
+    // Bind confirm button
     confirmBtn.onclick = () => processDelete(account, date, value);
   }
   
+  /**
+   * Hide delete confirmation modal
+   */
   function hideDeleteConfirm() {
     document.getElementById('delete-modal-backdrop').classList.remove('show');
     document.getElementById('delete-modal').classList.remove('show');
   }
   
+  /**
+   * Process entry deletion after confirmation
+   * @param {string} account - Account name
+   * @param {string} date - Entry date
+   * @param {number} value - Entry value
+   */
   async function processDelete(account, date, value) {
     hideDeleteConfirm();
     if (IS_LOADING) return;
     setLoading(true, 'Deleting entry…');
     
     try {
-      const body = new URLSearchParams({ payload: JSON.stringify({ account, date, value: Number(value) }) });
+      // Build API request
+      const body = new URLSearchParams({ 
+        payload: JSON.stringify({ account, date, value: Number(value) }) 
+      });
+      
+      // Send delete request
       const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
       const text = await res.text();
       
+      // Parse response
       let j;
-      try { j = JSON.parse(text); } catch {
+      try { 
+        j = JSON.parse(text); 
+      } catch {
         console.error('Delete non-JSON:', text);
         showToast('Delete failed (non-JSON response)', 'error', 5000);
         setLoading(false);
         return;
       }
       
+      // Check for errors
       if (!j.ok) {
         console.error('Delete JSON error:', j);
         showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
@@ -616,6 +804,7 @@
         return;
       }
       
+      // Success - refresh data
       showToast('Entry deleted. Refreshing…', 'success');
       await fetchSnapshot();
       
@@ -626,14 +815,26 @@
     }
   }
 
+  /* ============================================
+     DATA FETCHING
+     ============================================
+     Retrieve snapshot data from Google Apps Script API.
+  */
+  
+  /**
+   * Fetch account snapshot data from API
+   * Includes error handling and validation
+   */
   async function fetchSnapshot() {
     if (IS_LOADING) return;
     setLoading(true, 'Loading snapshot…');
     
     try {
+      // Fetch data with cache-busting timestamp
       const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
       const text = await res.text();
       
+      // Parse JSON response
       let j;
       try { 
         j = JSON.parse(text); 
@@ -644,6 +845,7 @@
         return;
       }
       
+      // Validate response structure
       if (!j.ok) {
         console.error('Snapshot error (j.ok is false):', j); 
         showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
@@ -651,6 +853,7 @@
         return;
       }
       
+      // Store snapshot and render
       SNAP = j;
       console.log('--- Snapshot Data Loaded Successfully ---', SNAP); 
 
@@ -664,6 +867,15 @@
     }
   }
 
+  /* ============================================
+     RENDERING FUNCTIONS
+     ============================================
+     Functions to update UI based on snapshot data.
+  */
+  
+  /**
+   * Master render function - calls all sub-renders
+   */
   function renderAll() {
     renderSummary();
     renderStatusbar();
@@ -671,71 +883,96 @@
     renderAccounts();
   }
   
+  /**
+   * Render financial summary (Assets | Debts)
+   * Displays total assets and debts from most recent data point
+   */
   function renderSummary() {
     const summaryEl = document.getElementById('financial-summary');
     if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
 
     const lastIndex = SNAP.dateAxis.length - 1;
     
+    // Handle empty data
     if (lastIndex < 0) {
       summaryEl.innerHTML = 'No Data';
       return;
     }
     
+    // Get most recent totals
     const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
     const debts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0); 
 
+    // Format with color coding
     const assetString = `<span class="summary-asset">${formatMoney(assets)}</span>`;
     const debtString = `<span class="summary-debt">${formatMoney(debts)}</span>`;
 
     summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
   }
 
+  /**
+   * Render global statusbar (100-block asset/debt ratio)
+   * Visual representation of financial balance
+   */
   function renderStatusbar() {
     const statusbarEl = document.getElementById('statusbar');
     if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
 
     const lastIndex = SNAP.dateAxis.length - 1;
     
+    // Handle empty data
     if (lastIndex < 0) {
       statusbarEl.innerHTML = '';
       return;
     }
     
+    // Calculate asset and debt totals
     const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
     const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
-    const debts = Math.abs(debtsRaw);
+    const debts = Math.abs(debtsRaw);  // Debts stored as negative, convert to positive
     const total = assets + debts;
     
+    // Handle zero total (all green as default)
     if (total === 0) {
       statusbarEl.innerHTML = '<span class="status-positive">████████████████████████████████████████████████████████████████████████████████████████████████████</span>';
       return;
     }
     
+    // Calculate proportional blocks (100 total)
     const totalBlocks = 100;
     const assetBlocks = Math.round((assets / total) * totalBlocks);
     const debtBlocks = totalBlocks - assetBlocks;
     
+    // Generate block strings
     const assetBar = '█'.repeat(assetBlocks);
     const debtBar = '█'.repeat(debtBlocks);
     
+    // Render: Debts first (red), then assets (green)
     statusbarEl.innerHTML = `<span class="status-negative">${debtBar}</span><span class="status-positive">${assetBar}</span>`;
   }
 
+  /**
+   * Render Google Charts visualization
+   * Shows either total assets/debts or per-account trends
+   */
   function renderChart() {
     if (!SNAP || !window.google || !google.visualization) return;
     
     const labels = SNAP.dateAxis; 
+    
+    // Handle empty data
     if (!labels || labels.length === 0) {
       document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
       return;
     }
     
+    // Build data table
     const data = new google.visualization.DataTable();
     data.addColumn('string', 'Date'); 
     let rows = [];
     
     if (MODE === 'totals') {
+      // Totals mode: Show aggregated assets vs debts
       data.addColumn('number', 'Assets');
       data.addColumn('number', 'Debts');
       const assets = SNAP.totals?.assets || [];
@@ -745,6 +982,7 @@
         rows.push([labels[i], Number(assets[i] || 0), Number(debts[i] || 0)]);
       }
     } else {
+      // Per-account mode: Show individual account trends
       SNAP.accounts.forEach(a => data.addColumn('number', a.name));
       for (let i = 0; i < labels.length; i++) {
         const row = [labels[i]]; 
@@ -757,6 +995,7 @@
     }
     data.addRows(rows);
     
+    // Calculate axis bounds
     let minV = 0, maxV = 0;
     for (const r of rows) {
       for (let i = 1; i < r.length; i++) {
@@ -766,14 +1005,18 @@
       }
     }
     const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
+    
+    // Get theme colors from CSS
     const styles = getComputedStyle(document.documentElement);
     const pos = styles.getPropertyValue('--c-pos').trim();
     const neg = styles.getPropertyValue('--c-neg').trim();
     const black = styles.getPropertyValue('--c-black').trim();
     const textStyle = { color: black, fontName: 'system-ui' };
     
+    // Set chart colors based on mode
     let chartColors = MODE === 'totals' ? [pos, neg] : SNAP.accounts.map(a => a.color || null);
     
+    // Chart options
     const options = {
       height: Math.max(240, Math.round(window.innerHeight * 0.30)),
       backgroundColor: { fill: 'transparent' },
@@ -795,30 +1038,53 @@
       lineWidth: 3,
       colors: chartColors
     };
+    
+    // Draw chart
     const chart = new google.visualization.ComboChart(document.getElementById('chart'));
     chart.draw(data, options);
   }
 
+  /**
+   * Determine sign class for value (pos/neg)
+   * @param {number} n - Number to evaluate
+   * @returns {string} 'neg' or 'pos'
+   */
   const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
+  /**
+   * Format number as money (truncated to whole dollars)
+   * @param {number} n - Number to format
+   * @returns {string} Formatted money string (e.g., "$1,234" or "−$5,678")
+   */
   function formatMoney(n) {
     const val = Number(n) || 0;
-    const sign = val < 0 ? '−' : '';
+    const sign = val < 0 ? '−' : '';  // Use proper minus sign
     const abs = Math.abs(val);
-    const displayValue = Math.trunc(abs);
-    return `${sign}$${displayValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    const displayValue = Math.trunc(abs);  // Truncate to whole number
+    
+    return `${sign}${displayValue.toLocaleString(undefined, { 
+        minimumFractionDigits: 0, 
+        maximumFractionDigits: 0 
+    })}`;
   }
 
+  /**
+   * Render all account rows with details, inputs, and history
+   * Main rendering function for account list
+   */
   function renderAccounts() {
     const root = document.getElementById('accounts');
     root.innerHTML = '';
     
+    // Safety check
     if (!SNAP || !SNAP.accounts) return;
 
+    // Render each account
     SNAP.accounts.forEach(a => {
       const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
+      const last = s?.last ?? 0;  // Current account balance
 
+      // Create row container
       const row = document.createElement('div');
       row.className = 'row';
       
@@ -828,17 +1094,21 @@
       const right = document.createElement('div');
       right.className = 'right';
 
+      // ===== LEFT SIDE: Account Details =====
       const accountDetails = document.createElement('div');
       accountDetails.className = 'account-details';
 
+      // Balance and name container
       const identityWrap = document.createElement('div');
       identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
+      // Current balance (large display)
       const lastEl = document.createElement('span');
       lastEl.className = 'lastval';
       lastEl.textContent = formatMoney(last); 
       lastEl.dataset.sign = signOf(last);
       
+      // Account name
       const nameEl = document.createElement('span');
       nameEl.className = 'name';
       nameEl.textContent = a.name;
@@ -847,20 +1117,23 @@
       identityWrap.appendChild(lastEl);
       identityWrap.appendChild(nameEl);
 
+      // ===== APR DISPLAY WITH INTEREST CALCULATION =====
       const aprEl = document.createElement('span');
       aprEl.className = 'apr';
       
-      // Calculate interest for the selected timeframe
+      // Calculate interest based on selected timeframe
       const apr = a.apr || 0;
       let interestAmount = 0;
       let periodLabel = '';
       
       if (apr > 0 && last !== 0) {
+        // Calculate daily interest rate
         const dailyRate = (last * apr) / 365;
         
+        // Map timeframe to period and calculate interest
         switch(TIMEFRAME) {
           case 'today':
-            interestAmount = dailyRate;
+            interestAmount = dailyRate * 1;
             periodLabel = '/dy';
             break;
           case '7d':
@@ -888,12 +1161,14 @@
         }
       }
       
-      // Build APR display
+      // Build APR display HTML
       let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
       
-      // Add interest calculation if non-zero
+      // Add interest calculation if non-zero (threshold: $0.01)
+      // For debt accounts (negative balance), interest will be negative
+      // For savings accounts (positive balance), interest will be positive
       if (Math.abs(interestAmount) >= 0.01) {
-        const sign = interestAmount >= 0 ? '+' : '';
+        const sign = interestAmount >= 0 ? '+' : '';  // Sign already in value for negatives
         const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
         aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
       }
@@ -903,16 +1178,18 @@
       accountDetails.appendChild(identityWrap);
       accountDetails.appendChild(aprEl);
 
+      // ===== INPUT FIELD FOR NEW VALUES =====
       const inputLine = document.createElement('div');
       inputLine.className = 'input-line';
       
       const inp = document.createElement('input');
       inp.type = 'number';
       inp.placeholder = 'Add new value…';
-      inp.step = '0.01';
+      inp.step = '0.01';  // Allow decimal input
       inp.setAttribute('aria-label', `New value for ${a.name}`);
       inp.dataset.accountName = a.name;
 
+      // Tint background based on account type
       if (last > 0) {
         inp.style.backgroundColor = 'var(--c-tint-pos)';
       } else if (last < 0) {
@@ -921,6 +1198,7 @@
         inp.style.backgroundColor = 'var(--c-white)';
       }
 
+      // Submit on Enter key
       inp.addEventListener('keydown', async (ev) => {
         if (ev.key === 'Enter') {
           await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
@@ -931,9 +1209,11 @@
       left.appendChild(accountDetails);
       left.appendChild(inputLine);
 
+      // ===== RIGHT SIDE: Historical Values (Chips) =====
       const vals = document.createElement('div');
       vals.className = 'values';
       
+      // Render historical value chips
       (s.lastN || []).forEach(v => {
         const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
         const val = Number(isObject ? v.value : v);
@@ -945,13 +1225,15 @@
         chip.className = 'chip';
         chip.dataset.sign = signOf(val);
         chip.textContent = readableValue;
-        chip.dataset.value = val; 
+        chip.dataset.value = val;  // Store full decimal value
         
         if (date) {
+          // Deletable chip (has date metadata)
           chip.dataset.date = date;
           chip.dataset.account = a.name;
           chip.dataset.readableValue = formatMoney(val);
           
+          // Multiple deletion triggers
           chip.addEventListener('dblclick', handleDeleteClick);
           chip.addEventListener('contextmenu', handleDeleteClick);
           chip.addEventListener('click', (e) => {
@@ -960,6 +1242,7 @@
             }
           });
         } else {
+          // Non-deletable chip (old data format)
           chip.classList.add('no-delete');
           chip.title = "Re-deploy CODE.JS to enable deletion";
         }
@@ -968,6 +1251,7 @@
       });
       right.appendChild(vals);
 
+      // ===== MOBILE RATIO BAR (Proportional) =====
       const bar = document.createElement('h4');
       bar.className = 'ratio-bar';
       
@@ -977,27 +1261,29 @@
       const debtSpan = document.createElement('span');
       debtSpan.style.color = 'var(--c-neg)';
       
-      // Calculate proportional blocks based on account's share of total assets/debts
+      // Calculate proportional blocks based on account's share of category
       const lastIndex = SNAP.dateAxis.length - 1;
       const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
       const totalDebtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
       const totalDebts = Math.abs(totalDebtsRaw);
       
       if (last >= 0 && totalAssets > 0) {
-        // Asset account: calculate proportion of total assets
+        // Asset account: show proportion of total assets
         const percentage = (last / totalAssets) * 100;
+        // 5% threshold: only show if >= 5%, minimum 1 block
         const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
         assetSpan.textContent = '█'.repeat(blocks);
         debtSpan.textContent = '';
       } else if (last < 0 && totalDebts > 0) {
-        // Debt account: calculate proportion of total debts
+        // Debt account: show proportion of total debts
         const absLast = Math.abs(last);
         const percentage = (absLast / totalDebts) * 100;
+        // 5% threshold: only show if >= 5%, minimum 1 block
         const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
         assetSpan.textContent = '';
         debtSpan.textContent = '█'.repeat(blocks);
       } else {
-        // Edge case: zero or no total
+        // Edge case: zero balance or no category total
         assetSpan.textContent = '';
         debtSpan.textContent = '';
       }
@@ -1006,12 +1292,17 @@
       bar.appendChild(debtSpan);
       right.appendChild(bar);
 
+      // Assemble row
       row.appendChild(left);
       row.appendChild(right);
       root.appendChild(row);
     });
   }
   
+  /**
+   * Handle delete click on value chip
+   * @param {Event} e - Click event
+   */
   function handleDeleteClick(e) {
     e.preventDefault();
     if (IS_LOADING) return;
@@ -1019,6 +1310,7 @@
     const chip = e.currentTarget;
     const { account, date, value, readableValue } = chip.dataset;
     
+    // Check if deletion is supported (needs date metadata)
     if (!date) {
       showToast('Cannot delete. Data is from an older script version.', 'error');
       return;
@@ -1027,8 +1319,20 @@
     showDeleteConfirm(account, date, value, readableValue);
   }
 
+  /* ============================================
+     DATA SUBMISSION FUNCTIONS
+     ============================================
+     Handle submitting new account values to API.
+  */
+  
+  /**
+   * Submit all entered values across all accounts
+   * Triggered by "Submit All" button
+   */
   async function submitAll() {
     const entries = [];
+    
+    // Collect all non-empty inputs
     document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
       const v = inp.value.trim();
       if (v !== '') {
@@ -1039,20 +1343,29 @@
         });
       }
     });
+    
+    // Validate we have entries
     if (entries.length === 0) {
       showToast('No values entered to submit.', 'info');
       return;
     }
+    
     await submitEntries(entries);
   }
 
+  /**
+   * Submit array of entries to API
+   * @param {Array} entries - Array of {account, value, inputEl} objects
+   */
   async function submitEntries(entries) {
     if (IS_LOADING) return;
     setLoading(true, 'Submitting entries…');
     
+    // Mark inputs as submitting
     entries.forEach(e => e.inputEl?.classList.add('submitting'));
 
     try {
+      // Build valid entries payload
       const validEntries = entries
         .map(e => ({ account: e.account, value: e.value }))
         .filter(e => e.account && !isNaN(e.value));
@@ -1064,10 +1377,14 @@
         return;
       }
 
-      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
+      // Send to API
+      const body = new URLSearchParams({ 
+        payload: JSON.stringify({ entries: validEntries }) 
+      });
       const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
       const text = await res.text();
       
+      // Parse response
       let j;
       try { 
         j = JSON.parse(text); 
@@ -1079,6 +1396,7 @@
         return;
       }
       
+      // Check for errors
       if (!j.ok) {
         console.error('Submit JSON error:', j);
         showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
@@ -1087,13 +1405,15 @@
         return;
       }
 
+      // Success!
       showToast('Submit successful! Refreshing data…', 'success');
       entries.forEach(e => {
         e.inputEl?.classList.add('submitted-ok');
-        e.inputEl.value = '';
+        e.inputEl.value = '';  // Clear input
         setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
       });
 
+      // Refresh data
       await fetchSnapshot();
       
     } catch (e) {
@@ -1106,27 +1426,38 @@
     setLoading(false);
   }
   
+  /* ============================================
+     INITIALIZATION & EVENT BINDING
+     ============================================
+     Set up event listeners and load initial data.
+  */
   document.addEventListener('DOMContentLoaded', () => {
+    // Bind button clicks
     document.getElementById('refresh').addEventListener('click', fetchSnapshot);
     document.getElementById('submitAll').addEventListener('click', submitAll);
     
+    // Bind chart mode toggle
     document.querySelectorAll('input[name="mode"]').forEach(r => {
       r.addEventListener('change', (e) => { 
         MODE = e.target.value; 
-        renderChart(); 
+        renderChart();  // Re-render chart with new mode
       });
     });
     
+    // Bind timeframe selector
     document.getElementById('timeframe').addEventListener('change', (e) => {
       TIMEFRAME = e.target.value;
-      fetchSnapshot();
+      fetchSnapshot();  // Fetch new data for timeframe
     });
     
+    // Bind modal controls
     document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
     document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
     
+    // Bind window resize to re-render chart
     window.addEventListener('resize', renderChart);
 
+    // Load Google Charts library and fetch initial data
     if (window.google && google.charts) {
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(fetchSnapshot);
