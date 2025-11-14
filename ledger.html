@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -182,24 +181,26 @@
        Font size scales responsively to fit all blocks on any screen.
     */
     #statusbar {
-      font-size: clamp(0.5rem, 3vw, 3rem);  /* Responsive scaling */
+      font-size: clamp(0.5rem, 2.5vw, 3rem);  /* Slightly smaller max to ensure fit */
       line-height: 1;
       text-align: center;
-      padding: 0.5rem 0 0 0;  /* Only top padding, part of sticky header */
-      letter-spacing: -0.1em;
-      overflow: visible;  /* Changed from hidden to visible */
+      padding: 0.5rem 12px 0 12px;  /* Add horizontal padding */
+      letter-spacing: -0.15em;  /* Tighter spacing to fit all blocks */
+      overflow-x: auto;  /* Allow horizontal scroll if needed */
+      overflow-y: hidden;
       white-space: nowrap;
       word-break: keep-all;
-      background: var(--c-white);  /* Match header background */
-      width: 100%;  /* Ensure full width */
+      background: var(--c-white);
+      width: 100%;
+      box-sizing: border-box;
     }
     
     .status-positive {
-      color: var(--c-neg);
+      color: var(--c-pos);
     }
     
     .status-negative {
-      color: var(--c-pos);
+      color: var(--c-neg);
     }
     
     hr.divider {
@@ -710,10 +711,10 @@
      API endpoint for Google Apps Script backend.
      Replace with your own deployment URL.
   */
-
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
  
-/* ============================================
+/* ============================================/* ============================================/* ============================================/* ============================================/* ============================================/* ============================================
+  /* ============================================
      APPLICATION STATE
      ============================================
      Global variables for app state management.
@@ -1046,7 +1047,7 @@
     if (costsStr) displayParts.push(costsStr);
     
     if (displayParts.length > 0) {
-      summaryEl.innerHTML = ` ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+      summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
     } else {
       summaryEl.innerHTML = '';
     }
@@ -1055,7 +1056,8 @@
   /**
    * Render global statusbar (100-block asset/debt ratio)
    * Visual representation of financial balance
-   * Green blocks = assets, Red blocks = debts (proportional to totals)
+   * LEFT (Green Ⅱ) = Assets (positive, 0 and above)
+   * RIGHT (Red Ⅱ) = Debts (negative, below 0)
    */
   function renderStatusbar() {
     console.log('renderStatusbar() called');
@@ -1081,7 +1083,7 @@
     }
     
     // Calculate asset and debt totals
-    // Assets are positive, debts are stored as negative values
+    // Assets are positive (0 and above), debts are negative (below 0)
     const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
     const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
     const debts = Math.abs(debtsRaw);  // Convert negative debt to positive for calculation
@@ -1096,9 +1098,9 @@
       total
     });
     
-    // Handle zero total (all green as default)
+    // Handle zero total (all green as default, 0 is treated as positive)
     if (total === 0) {
-      statusbarEl.innerHTML = '<span class="status-positive">████████████████████████████████████████████████████████████████████████████████████████████████████</span>';
+      statusbarEl.innerHTML = '<span class="status-positive">' + 'Ⅱ'.repeat(100) + '</span>';
       return;
     }
     
@@ -1118,9 +1120,9 @@
       debtPercentage: ((debts / total) * 100).toFixed(1) + '%'
     });
     
-    // Generate block strings
-    const assetBar = '█'.repeat(assetBlocks);
-    const debtBar = '█'.repeat(debtBlocks);
+    // Generate block strings using Ⅱ character
+    const assetBar = 'Ⅱ'.repeat(assetBlocks);
+    const debtBar = 'Ⅱ'.repeat(debtBlocks);
     
     console.log('Block counts:', {
       assetBarLength: assetBar.length,
@@ -1128,8 +1130,9 @@
       total: assetBar.length + debtBar.length
     });
     
-    // Render: GREEN (assets) FIRST on left, then RED (debts) on right
-    // This creates a visual: [GREEN...][RED...] matching the proportions
+    // Render: GREEN (positive/assets) FIRST on LEFT, then RED (negative/debts) on RIGHT
+    // LEFT = Positive (0+) = Green #4c8036
+    // RIGHT = Negative (<0) = Red #a02d2a
     const html = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
     console.log('Setting statusbar HTML, length:', html.length);
     statusbarEl.innerHTML = html;
