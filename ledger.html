@@ -162,37 +162,54 @@
       padding: 0;
     }
     
-    /* ============================================
-       GLOBAL STATUSBAR (v2.0: Using █  character)
-       ============================================ */
-    #statusbar {
-      font-size: clamp(0.5rem, 1vw, 3rem);
-      line-height: 1;
-      text-align: center;
-      padding: 0.5rem 12px 0 12px;
-      letter-spacing: -0.15em;
-      overflow-x: auto;
-      overflow-y: hidden;
-      white-space: nowrap;
-      word-break: keep-all;
-      background: var(--c-white);
-      width: 100%;
-      box-sizing: border-box;
-    }
-    
-    .status-positive {
-      color: var(--c-pos);
-    }
-    
-    .status-negative {
-      color: var(--c-neg);
-    }
-    
-    hr.divider {
-      border: none;
-      border-top: 1px solid var(--c-black);
-      margin-top: 1rem;
-    }
+/* ============================================
+   SINGLE SPLIT RATIO BAR (v2.1)
+   ============================================ */
+#statusbar {
+  display: flex;
+  width: 100vw;
+  height: 3rem;
+  background: var(--c-white);
+  border-top: 1px solid var(--c-black);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.ratio-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: flex 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.ratio-section-assets {
+  background: #4c8036;
+}
+
+.ratio-section-debts {
+  background: #a02d2a;
+}
+
+.ratio-dot {
+  font-size: 3rem;  /* H1-sized */
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
+  user-select: none;
+}
+
+/* Mobile: smaller bar height */
+@media (max-width: 650px) {
+  #statusbar {
+    height: 2.5rem;
+  }
+  
+  .ratio-dot {
+    font-size: 2.5rem;
+  }
+}
 
     /* ============================================
        ACCOUNT ROWS
@@ -817,8 +834,14 @@
     <div id="chart"></div>
     
     <!-- v2.0: Statusbar uses █  character -->
-    <section id="statusbar"></section>
-  </header>
+<div id="statusbar">
+  <div class="ratio-section ratio-section-assets" data-percentage="0">
+    <span class="ratio-dot">.</span>
+  </div>
+  <div class="ratio-section ratio-section-debts" data-percentage="0">
+    <span class="ratio-dot">.</span>
+  </div>
+</div>  </header>
 
   <hr class="wrap divider">
 
@@ -1264,17 +1287,67 @@
     }
   }
 
-  function renderStatusbar() {
-    const statusbarEl = document.getElementById('statusbar');
-    if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+ /**
+ * v2.1: Single split ratio bar
+ * Two divs with background colors, sized proportionally
+ */
+function renderStatusbar() {
+  const assetsSection = document.querySelector('.ratio-section-assets');
+  const debtsSection = document.querySelector('.ratio-section-debts');
+  
+  if (!assetsSection || !debtsSection || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+  
+  const lastIndex = SNAP.dateAxis.length - 1;
+  
+  if (lastIndex < 0) {
+    assetsSection.style.flex = '1';
+    debtsSection.style.flex = '0';
+    return;
+  }
+  
+  const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
+  const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
+  const debts = Math.abs(debtsRaw);
+  const total = assets + debts;
+  
+  if (total === 0) {
+    assetsSection.style.flex = '1';
+    debtsSection.style.flex = '0';
+    return;
+  }
+  
+  // Calculate flex-grow values (proportional sizing)
+  const assetPercent = (assets / total) * 100;
+  const debtPercent = (debts / total) * 100;
+  
+  // Set flex-grow to create proportional widths
+  assetsSection.style.flex = assetPercent.toString();
+  debtsSection.style.flex = debtPercent.toString();
+  
+  // Store percentages for potential tooltip use
+  assetsSection.dataset.percentage = Math.round(assetPercent);
+  debtsSection.dataset.percentage = Math.round(debtPercent);
+}
+```
 
-    const lastIndex = SNAP.dateAxis.length - 1;
-    
-    if (lastIndex < 0) {
-      statusbarEl.innerHTML = '';
-      return;
-    }
-    
+---
+
+## 🎯 Visual Result
+
+### Desktop (Assets: $125k, Debts: $58k)
+```
+┌───────────────────────────────────────────────────────────┐
+│                                  .          │      .       │
+│ ← Green background (68% width) →            │ ← Red (32%) →│
+└───────────────────────────────────────────────────────────┘
+```
+
+### Mobile (Same ratio)
+```
+┌─────────────────────────────────────┐
+│                 .      │     .      │
+│ ← Green (68%) →        │ ← Red (32%)│
+└─────────────────────────────────────┘
     const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
     const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
     const debts = Math.abs(debtsRaw);
