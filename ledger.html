@@ -79,8 +79,17 @@
       gap: var(--gap); 
       align-items: baseline;  /* FIXED: Align to baseline */
       justify-content: space-between;
-      padding: 6px 0; 
+      padding: 6px 12px;  /* Add horizontal padding since no longer in .wrap */
       flex-wrap: wrap; 
+      width: 100%;  /* Full viewport width */
+    }
+    
+    /* Group for financial numbers (summary + interest) */
+    .financial-group {
+      display: flex;
+      gap: var(--gap);
+      align-items: baseline;
+      flex-wrap: wrap;
     }
     
     /* Controls group: timeframe selector, mode toggles, action buttons */
@@ -591,6 +600,13 @@
         flex-direction: column; 
         align-items: flex-start;
         justify-content: flex-start;
+        padding: 6px 12px;
+      }
+      
+      .financial-group {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
       }
       
       #financial-summary {
@@ -636,36 +652,35 @@
 
   <!-- Main header with toolbar and chart -->
   <header>
-    <div class="wrap">
-      <div class="toolbar">
-        <!-- Financial summary: Total assets | Total debts -->
+    <div class="toolbar">
+      <!-- Financial numbers group (left) -->
+      <div class="financial-group">
         <div id="financial-summary"></div>
-        
-        <!-- Interest summary: Total earnings | Total costs -->
         <div id="interest-summary"></div>
+      </div>
+      
+      <!-- Controls group (right) -->
+      <div class="toolbar-controls">
+        <label for="timeframe">Timeframe:</label>
+        <select id="timeframe">
+          <option value="ytd" selected>This Calendar Year</option>
+          <option value="today">Today</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="14d">Last 14 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="90d">Last 90 Days</option>
+          <option value="1y">Last Year (12mo)</option>
+          <option value="all">All Time</option>
+        </select>
         
-        <!-- Controls: Timeframe selector, view mode, actions -->
-        <div class="toolbar-controls">
-          <label for="timeframe">Timeframe:</label>
-          <select id="timeframe">
-            <option value="ytd" selected>This Calendar Year</option>
-            <option value="today">Today</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="14d">Last 14 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-            <option value="1y">Last Year (12mo)</option>
-            <option value="all">All Time</option>
-          </select>
-          
-          <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-          <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-          
-          <button id="refresh" aria-label="Refresh data">Refresh</button>
-          <button id="submitAll">Submit All</button>
-        </div>
+        <label><input type="radio" name="mode" value="totals" checked> Totals</label>
+        <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+        
+        <button id="refresh" aria-label="Refresh data">Refresh</button>
+        <button id="submitAll">Submit All</button>
       </div>
     </div>
+    
     <!-- Google Charts visualization -->
     <div id="chart"></div>
     
@@ -690,8 +705,11 @@
      API endpoint for Google Apps Script backend.
      Replace with your own deployment URL.
   */
+
+
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
- /* ============================================
+ 
+  /* ============================================
      APPLICATION STATE
      ============================================
      Global variables for app state management.
