@@ -162,7 +162,7 @@
     }
     
     /* ============================================
-       GLOBAL STATUSBAR (v2.0: Using ░ character)
+       GLOBAL STATUSBAR (v2.0: Using █  character)
        ============================================ */
     #statusbar {
       font-size: clamp(0.5rem, 2.5vw, 3rem);
@@ -815,7 +815,7 @@
     
     <div id="chart"></div>
     
-    <!-- v2.0: Statusbar uses ░ character -->
+    <!-- v2.0: Statusbar uses █  character -->
     <section id="statusbar"></section>
   </header>
 
@@ -1280,7 +1280,7 @@
     const total = assets + debts;
     
     if (total === 0) {
-      statusbarEl.innerHTML = '<span class="status-positive">' + '░'.repeat(100) + '</span>';
+      statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>';
       return;
     }
     
@@ -1288,8 +1288,8 @@
     const assetBlocks = Math.round((assets / total) * totalBlocks);
     const debtBlocks = totalBlocks - assetBlocks;
     
-    const assetBar = '░'.repeat(assetBlocks);
-    const debtBar = '░'.repeat(debtBlocks);
+    const assetBar = '█ '.repeat(assetBlocks);
+    const debtBar = '█ '.repeat(debtBlocks);
     
     statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
   }
@@ -1600,14 +1600,14 @@
       if (last >= 0 && totalAssets > 0) {
         const percentage = (last / totalAssets) * 100;
         const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
-        assetSpan.textContent = '░'.repeat(blocks);
+        assetSpan.textContent = '█ '.repeat(blocks);
         debtSpan.textContent = '';
       } else if (last < 0 && totalDebts > 0) {
         const absLast = Math.abs(last);
         const percentage = (absLast / totalDebts) * 100;
         const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
         assetSpan.textContent = '';
-        debtSpan.textContent = '░'.repeat(blocks);
+        debtSpan.textContent = '█ '.repeat(blocks);
       } else {
         assetSpan.textContent = '';
         debtSpan.textContent = '';
