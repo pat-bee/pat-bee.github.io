@@ -1299,6 +1299,7 @@ statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span c
 
 /**
   * v2.1: Render chart with filled areas (stacked)
+  * v2.2: Fixed to properly show green (positive) above 0 and red (negative) below 0
   */
 function renderChart() {
 if (!SNAP || !window.google || !google.visualization) return;
@@ -1310,24 +1311,51 @@ document.getElementById('chart').innerHTML = '<div style="text-align:center; pad
 return;
 }
 
+const styles = getComputedStyle(document.documentElement);
+const pos = styles.getPropertyValue('--c-pos').trim();
+const neg = styles.getPropertyValue('--c-neg').trim();
+const black = styles.getPropertyValue('--c-black').trim();
+const textStyle = { color: black, fontName: 'system-ui' };
+
+// v2.2: Build data with positive assets stacked above 0, negative debts stacked below 0
 const data = new google.visualization.DataTable();
 data.addColumn('string', 'Date'); 
+
 let rows = [];
 
 if (MODE === 'totals') {
+// For totals mode: Assets (green, above 0) and Debts (red, below 0)
 data.addColumn('number', 'Assets');
 data.addColumn('number', 'Debts');
 const assets = SNAP.totals?.assets || [];
 const debts = SNAP.totals?.debts || [];
 
 for (let i = 0; i < labels.length; i++) { 
-rows.push([labels[i], Number(assets[i] || 0), Number(debts[i] || 0)]);
+const assetVal = Number(assets[i] || 0);
+const debtVal = Number(debts[i] || 0);
+rows.push([labels[i], assetVal, debtVal]);
 }
 } else {
-SNAP.accounts.forEach(a => data.addColumn('number', a.name));
+// For per-account mode: separate positive and negative accounts
+const positiveAccounts = SNAP.accounts.filter(a => {
+const s = SNAP.series[a.name] || {};
+return (s?.last ?? 0) >= 0;
+});
+const negativeAccounts = SNAP.accounts.filter(a => {
+const s = SNAP.series[a.name] || {};
+return (s?.last ?? 0) < 0;
+});
+
+positiveAccounts.forEach(a => data.addColumn('number', a.name));
+negativeAccounts.forEach(a => data.addColumn('number', a.name));
+
 for (let i = 0; i < labels.length; i++) {
 const row = [labels[i]]; 
-SNAP.accounts.forEach(a => {
+positiveAccounts.forEach(a => {
+const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+row.push(Number(v));
+});
+negativeAccounts.forEach(a => {
 const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
 row.push(Number(v));
 });
@@ -1346,17 +1374,27 @@ if (v > maxV) maxV = v;
 }
 const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
 
-const styles = getComputedStyle(document.documentElement);
-const pos = styles.getPropertyValue('--c-pos').trim();
-const neg = styles.getPropertyValue('--c-neg').trim();
-const black = styles.getPropertyValue('--c-black').trim();
-const textStyle = { color: black, fontName: 'system-ui' };
+// v2.2: Assign colors - green for positive series, red for negative series
+let chartColors;
+if (MODE === 'totals') {
+chartColors = [pos, neg]; // Green for assets, red for debts
+} else {
+const positiveAccounts = SNAP.accounts.filter(a => {
+const s = SNAP.series[a.name] || {};
+return (s?.last ?? 0) >= 0;
+});
+const negativeAccounts = SNAP.accounts.filter(a => {
+const s = SNAP.series[a.name] || {};
+return (s?.last ?? 0) < 0;
+});
+// Green for positive accounts, red for negative accounts
+chartColors = [
+...positiveAccounts.map(a => a.color || pos),
+...negativeAccounts.map(a => a.color || neg)
+];
+}
 
-let chartColors = MODE === 'totals' 
-? [pos, neg] 
-: SNAP.accounts.map(a => a.color || '#999999');
-
-// v2.1: Area chart with stacking
+// v2.2: Area chart with stacking that supports positive/negative
 const options = {
 height: Math.max(240, Math.round(window.innerHeight * 0.30)),
 backgroundColor: { fill: 'transparent' },
@@ -1374,10 +1412,10 @@ baselineColor: black,
 gridlines: { color: black, opacity: 0.1 },
 textStyle: textStyle
 },
-seriesType: 'area',      // v2.1: Changed from 'line'
-isStacked: true,          // v2.1: Enable stacking
-areaOpacity: 0.75,        // v2.1: Solid fill with slight transparency
-lineWidth: 2,             // v2.1: Thinner lines
+seriesType: 'area',
+isStacked: true,
+areaOpacity: 0.75,
+lineWidth: 2,
 colors: chartColors
 };
 
