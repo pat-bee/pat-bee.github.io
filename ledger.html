@@ -79,9 +79,10 @@
       gap: var(--gap); 
       align-items: baseline;  /* FIXED: Align to baseline */
       justify-content: space-between;
-      padding: 6px 12px;  /* Add horizontal padding since no longer in .wrap */
+      padding: 6px 24px;  /* Increased horizontal padding for breathing room */
       flex-wrap: wrap; 
       width: 100%;  /* Full viewport width */
+      box-sizing: border-box;  /* Include padding in width calculation */
     }
     
     /* Group for financial numbers (summary + interest) */
@@ -90,6 +91,8 @@
       gap: var(--gap);
       align-items: baseline;
       flex-wrap: wrap;
+      min-width: 0;  /* Allow shrinking */
+      flex-shrink: 1;  /* Allow group to shrink if needed */
     }
     
     /* Controls group: timeframe selector, mode toggles, action buttons */
@@ -600,7 +603,7 @@
         flex-direction: column; 
         align-items: flex-start;
         justify-content: flex-start;
-        padding: 6px 12px;
+        padding: 6px 24px;
       }
       
       .financial-group {
@@ -706,9 +709,9 @@
      Replace with your own deployment URL.
   */
 
-
   const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
  
+
   /* ============================================
      APPLICATION STATE
      ============================================
@@ -1042,7 +1045,7 @@
     if (costsStr) displayParts.push(costsStr);
     
     if (displayParts.length > 0) {
-      summaryEl.innerHTML = `&oplus; ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+      summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
     } else {
       summaryEl.innerHTML = '';
     }
