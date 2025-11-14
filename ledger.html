@@ -1298,8 +1298,8 @@ statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span c
 }
 
 /**
-  * v2.1: Render chart with filled areas (stacked)
-  * v2.2: Fixed to properly show green (positive) above 0 and red (negative) below 0
+  * v2.2: Render chart with bars that properly handle positive/negative split
+  * Bar chart naturally separates positive (above 0) and negative (below 0) values
   */
 function renderChart() {
 if (!SNAP || !window.google || !google.visualization) return;
@@ -1317,14 +1317,12 @@ const neg = styles.getPropertyValue('--c-neg').trim();
 const black = styles.getPropertyValue('--c-black').trim();
 const textStyle = { color: black, fontName: 'system-ui' };
 
-// v2.2: Build data with positive assets stacked above 0, negative debts stacked below 0
 const data = new google.visualization.DataTable();
 data.addColumn('string', 'Date'); 
-
 let rows = [];
 
 if (MODE === 'totals') {
-// For totals mode: Assets (green, above 0) and Debts (red, below 0)
+// Totals: Assets (positive, green) and Debts (negative, red)
 data.addColumn('number', 'Assets');
 data.addColumn('number', 'Debts');
 const assets = SNAP.totals?.assets || [];
@@ -1336,26 +1334,11 @@ const debtVal = Number(debts[i] || 0);
 rows.push([labels[i], assetVal, debtVal]);
 }
 } else {
-// For per-account mode: separate positive and negative accounts
-const positiveAccounts = SNAP.accounts.filter(a => {
-const s = SNAP.series[a.name] || {};
-return (s?.last ?? 0) >= 0;
-});
-const negativeAccounts = SNAP.accounts.filter(a => {
-const s = SNAP.series[a.name] || {};
-return (s?.last ?? 0) < 0;
-});
-
-positiveAccounts.forEach(a => data.addColumn('number', a.name));
-negativeAccounts.forEach(a => data.addColumn('number', a.name));
-
+// Per-account mode
+SNAP.accounts.forEach(a => data.addColumn('number', a.name));
 for (let i = 0; i < labels.length; i++) {
 const row = [labels[i]]; 
-positiveAccounts.forEach(a => {
-const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-row.push(Number(v));
-});
-negativeAccounts.forEach(a => {
+SNAP.accounts.forEach(a => {
 const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
 row.push(Number(v));
 });
@@ -1374,27 +1357,19 @@ if (v > maxV) maxV = v;
 }
 const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
 
-// v2.2: Assign colors - green for positive series, red for negative series
+// v2.2: Build color array - green for positive, red for negative
 let chartColors;
 if (MODE === 'totals') {
 chartColors = [pos, neg]; // Green for assets, red for debts
 } else {
-const positiveAccounts = SNAP.accounts.filter(a => {
+chartColors = SNAP.accounts.map(a => {
 const s = SNAP.series[a.name] || {};
-return (s?.last ?? 0) >= 0;
+const last = s?.last ?? 0;
+return last >= 0 ? (a.color || pos) : (a.color || neg);
 });
-const negativeAccounts = SNAP.accounts.filter(a => {
-const s = SNAP.series[a.name] || {};
-return (s?.last ?? 0) < 0;
-});
-// Green for positive accounts, red for negative accounts
-chartColors = [
-...positiveAccounts.map(a => a.color || pos),
-...negativeAccounts.map(a => a.color || neg)
-];
 }
 
-// v2.2: Area chart with stacking that supports positive/negative
+// v2.2: ColumnChart handles positive/negative stacking correctly
 const options = {
 height: Math.max(240, Math.round(window.innerHeight * 0.30)),
 backgroundColor: { fill: 'transparent' },
@@ -1412,14 +1387,15 @@ baselineColor: black,
 gridlines: { color: black, opacity: 0.1 },
 textStyle: textStyle
 },
-seriesType: 'area',
 isStacked: true,
-areaOpacity: 0.75,
-lineWidth: 2,
-colors: chartColors
+colors: chartColors,
+animation: {
+duration: 500,
+easing: 'out'
+}
 };
 
-const chart = new google.visualization.ComboChart(document.getElementById('chart'));
+const chart = new google.visualization.ColumnChart(document.getElementById('chart'));
 chart.draw(data, options);
 }
 
