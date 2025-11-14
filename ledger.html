@@ -1056,8 +1056,8 @@
   /**
    * Render global statusbar (100-block asset/debt ratio)
    * Visual representation of financial balance
-   * LEFT (Green Ⅱ) = Assets (positive, 0 and above)
-   * RIGHT (Red Ⅱ) = Debts (negative, below 0)
+   * LEFT (Green ❚) = Assets (positive, 0 and above)
+   * RIGHT (Red ❚) = Debts (negative, below 0)
    */
   function renderStatusbar() {
     console.log('renderStatusbar() called');
@@ -1100,7 +1100,7 @@
     
     // Handle zero total (all green as default, 0 is treated as positive)
     if (total === 0) {
-      statusbarEl.innerHTML = '<span class="status-positive">' + 'Ⅱ'.repeat(100) + '</span>';
+      statusbarEl.innerHTML = '<span class="status-positive">' + '❚'.repeat(100) + '</span>';
       return;
     }
     
@@ -1120,9 +1120,9 @@
       debtPercentage: ((debts / total) * 100).toFixed(1) + '%'
     });
     
-    // Generate block strings using Ⅱ character
-    const assetBar = 'Ⅱ'.repeat(assetBlocks);
-    const debtBar = 'Ⅱ'.repeat(debtBlocks);
+    // Generate block strings using ❚ character
+    const assetBar = '❚'.repeat(assetBlocks);
+    const debtBar = '❚'.repeat(debtBlocks);
     
     console.log('Block counts:', {
       assetBarLength: assetBar.length,
