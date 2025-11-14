@@ -1461,7 +1461,7 @@
         const percentage = (last / totalAssets) * 100;
         // 5% threshold: only show if >= 5%, minimum 1 block
         const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
-        assetSpan.textContent = '█'.repeat(blocks);
+        assetSpan.textContent = '░'.repeat(blocks);
         debtSpan.textContent = '';
       } else if (last < 0 && totalDebts > 0) {
         // Debt account: show proportion of total debts
