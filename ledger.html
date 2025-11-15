@@ -1,10 +1,9 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.1)</title>
+<title>Ledger — Accounts & Chart (v2.2)</title>
 
 <style>
 /* ============================================
@@ -20,6 +19,7 @@
 --gap: 12px;
 --c-tint-pos: #f7f9f4;
 --c-tint-neg: #f9f4f4;
+--c-muted: #e8e8e8;  /* v2.2: Muted account state */
 }
 
 /* ============================================
@@ -654,6 +654,140 @@ border-color: #3d6629;
 }
 
 /* ============================================
+      TYPE SUMMARY BAR (v2.2)
+      ============================================ */
+#type-summary-bar {
+text-align: center;
+padding: 2rem 0 1rem 0;
+margin: 2rem auto 0 auto;
+border-top: 1px solid var(--c-black);
+max-width: var(--maxw);
+}
+
+#type-summary-bar h4 {
+font-size: 1.5rem;
+font-weight: 300;
+margin: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 1rem;
+flex-wrap: wrap;
+}
+
+.type-value {
+font-weight: 600;
+white-space: nowrap;
+}
+
+.type-value.positive {
+color: var(--c-pos);
+}
+
+.type-value.negative {
+color: var(--c-neg);
+}
+
+.type-separator {
+font-weight: 300;
+color: var(--c-black);
+opacity: 0.5;
+}
+
+/* ============================================
+      MUTE TOGGLE (v2.2)
+      ============================================ */
+.mute-toggle-wrapper {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+
+.mute-checkbox {
+position: relative;
+width: 48px;
+height: 28px;
+flex-shrink: 0;
+}
+
+.mute-checkbox input[type="checkbox"] {
+position: absolute;
+opacity: 0;
+width: 100%;
+height: 100%;
+cursor: pointer;
+z-index: 2;
+margin: 0;
+}
+
+.mute-checkbox-slider {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: var(--c-pos);
+border: 2px solid var(--c-black);
+border-radius: 999px;
+transition: background 0.3s ease;
+pointer-events: none;
+}
+
+.mute-checkbox-slider::before {
+content: '';
+position: absolute;
+height: 20px;
+width: 20px;
+left: 2px;
+bottom: 2px;
+background: var(--c-white);
+border: 2px solid var(--c-black);
+border-radius: 50%;
+transition: transform 0.3s ease;
+}
+
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
+background: var(--c-muted);
+}
+
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before {
+transform: translateX(20px);
+}
+
+.mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
+outline: 3px solid var(--c-black);
+outline-offset: 2px;
+}
+
+/* ============================================
+      MUTED ACCOUNT STATE (v2.2)
+      ============================================ */
+.row.muted {
+opacity: 0.5;
+}
+
+.row.muted * {
+color: var(--c-muted) !important;
+border-color: var(--c-muted) !important;
+background-color: transparent !important;
+}
+
+.row.muted input[type="number"] {
+background: transparent !important;
+color: var(--c-muted) !important;
+}
+
+.row.muted .mute-checkbox-slider {
+background: var(--c-muted) !important;
+border-color: var(--c-muted) !important;
+}
+
+.row.muted .mute-checkbox-slider::before {
+background: var(--c-white) !important;
+border-color: var(--c-muted) !important;
+}
+
+/* ============================================
       MOBILE RESPONSIVE
       ============================================ */
 @media (max-width: 650px) {
@@ -735,6 +869,17 @@ font-size: 2rem;
 /* v2.1: Slightly larger footer on mobile for readability */
 footer, footer small, footer a, .security-notice {
 font-size: 0.75rem;
+}
+
+/* v2.2: Type summary bar mobile stacking */
+#type-summary-bar h4 {
+flex-direction: column;
+gap: 0.5rem;
+font-size: 1.2rem;
+}
+
+.type-separator {
+display: none;
 }
 }
 </style>
@@ -827,7 +972,12 @@ font-size: 0.75rem;
 <main class="wrap">
 <section id="accounts" class="accounts"></section>
 
-<!-- v2.1: Tiny footer with security notice -->
+<!-- v2.2: Type-based category summary -->
+<section id="type-summary-bar">
+<h4></h4>
+</section>
+
+<!-- v2.2: Tiny footer with security notice -->
 <footer>
 <div class="security-notice">
 🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
@@ -836,8 +986,8 @@ Your financial footprint, your control.
 </div>
 
 <small>
-<b>v2.1 Features:</b> Click chip to edit/delete • Long-press account name for menu • Filled chart visualization<br>
-Enter values and press <b>Enter</b> or <b>Submit All</b> • Values shown as whole numbers
+<b>v2.2 Features:</b> Type summaries • Mute/unmute accounts • Click chip to edit/delete<br>
+Long-press account name for menu • URL-based state persistence • Values shown as whole numbers
 </small>
 </footer>
 </main>
@@ -846,7 +996,8 @@ Enter values and press <b>Enter</b> or <b>Submit All</b> • Values shown as who
 /* ============================================
     CONFIGURATION
     ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbw_ZZA6z-PLIkBt3qJwEdOziJOZ9dOzyzrAQEjSLDHfZTOQQ7HUGj7kF7MkFdJOMOIj/exec';
+
 
 /* ============================================
     APPLICATION STATE
@@ -858,6 +1009,18 @@ let IS_LOADING = false;
 let TOAST_TIMER = null;
 let LONG_PRESS_TIMER = null;
 const LONG_PRESS_DURATION = 500;
+
+/* v2.2: Muted accounts state */
+let MUTED_ACCOUNTS = new Set();
+
+/* v2.2: Type mapping */
+const TYPE_LABELS = {
+  'bk': 'Banks',
+  'cc': 'CreditCards',
+  'bill': 'Bills',
+  'ii': 'Investments',
+  'sv': 'Savings'
+};
 
 /* ============================================
     UI UTILITY FUNCTIONS
@@ -1150,17 +1313,52 @@ showToast('Fetch failed (see console)', 'error', 5000);
     RENDERING FUNCTIONS
     ============================================ */
 
+/* v2.2: URL State Management */
+function loadMutedStateFromURL() {
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const mutedParam = params.get('muted');
+if (mutedParam) {
+MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
+}
+}
+
+function saveMutedStateToURL() {
+const mutedArray = Array.from(MUTED_ACCOUNTS);
+if (mutedArray.length > 0) {
+window.location.hash = `muted=${mutedArray.join(',')}`;
+} else {
+window.location.hash = '';
+}
+}
+
+function toggleAccountMute(accountName) {
+if (MUTED_ACCOUNTS.has(accountName)) {
+MUTED_ACCOUNTS.delete(accountName);
+} else {
+MUTED_ACCOUNTS.add(accountName);
+}
+saveMutedStateToURL();
+renderAll();
+}
+
+function isAccountMuted(accountName) {
+return MUTED_ACCOUNTS.has(accountName);
+}
+
 function renderAll() {
 renderSummary();
 renderInterestSummary();
 renderStatusbar();
 renderChart();
+renderTypeSummary();  // v2.2: New type summary bar
 renderAccounts();
 }
 
 /**
-  * v2.1: Smart font weight logic
+  * v2.2: Smart font weight logic + Muted account filtering
   * Only the larger absolute value gets bold
+  * Excludes muted accounts from totals
   */
 function renderSummary() {
 const summaryEl = document.getElementById('financial-summary');
@@ -1173,9 +1371,21 @@ summaryEl.innerHTML = 'No Data';
 return;
 }
 
-const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
-const debts = Math.abs(debtsRaw);
+// v2.2: Calculate totals excluding muted accounts
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+if (last >= 0) {
+assets += last;
+} else {
+debts += Math.abs(last);
+}
+}
+});
 
 // v2.1: Determine which absolute value is larger
 const assetClass = assets > debts ? 'bold-value' : '';
@@ -1197,6 +1407,8 @@ let totalCosts = 0;
 let periodLabel = '';
 
 SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;  // v2.2: Skip muted accounts
+
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
 const apr = a.apr || 0;
@@ -1266,6 +1478,50 @@ summaryEl.innerHTML = '';
 }
 }
 
+/**
+ * v2.2: Render type-based category summary bar
+ * Shows totals for: Banks, CreditCards, Bills, Investments, Savings
+ */
+function renderTypeSummary() {
+const summaryEl = document.querySelector('#type-summary-bar h4');
+if (!summaryEl || !SNAP || !SNAP.accounts) return;
+
+// Calculate totals by type (excluding muted accounts)
+const typeTotals = {
+'bk': 0,     // Banks
+'cc': 0,     // CreditCards
+'bill': 0,   // Bills
+'ii': 0,     // Investments
+'sv': 0      // Savings
+};
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;  // Skip muted accounts
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+const type = a.type || 'bk';  // Default to 'bk' if no type
+
+if (typeTotals.hasOwnProperty(type)) {
+typeTotals[type] += last;
+}
+});
+
+// Build HTML with proper formatting
+const typeOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+const parts = [];
+
+typeOrder.forEach(typeKey => {
+const value = typeTotals[typeKey];
+const label = TYPE_LABELS[typeKey] || typeKey;
+const colorClass = (typeKey === 'cc' || typeKey === 'bill') ? 'negative' : 'positive';
+const formattedValue = formatMoney(value);
+const signPrefix = value >= 0 ? '+' : '';
+parts.push(`<span class="type-value ${colorClass}">${signPrefix}${formattedValue}</span>`);
+});
+
+summaryEl.innerHTML = parts.join(' <span class="type-separator">|</span> ');
+}
+
 function renderStatusbar() {
 const statusbarEl = document.getElementById('statusbar');
 if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
@@ -1277,9 +1533,22 @@ statusbarEl.innerHTML = '';
 return;
 }
 
-const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-const debtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
-const debts = Math.abs(debtsRaw);
+// v2.2: Calculate totals excluding muted accounts
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+if (last >= 0) {
+assets += last;
+} else {
+debts += Math.abs(last);
+}
+}
+});
+
 const total = assets + debts;
 
 if (total === 0) {
@@ -1322,23 +1591,35 @@ data.addColumn('string', 'Date');
 let rows = [];
 
 if (MODE === 'totals') {
-// Totals: Assets (positive, green) and Debts (negative, red)
+// v2.2: Totals mode - calculate assets/debts excluding muted accounts
 data.addColumn('number', 'Assets');
 data.addColumn('number', 'Debts');
-const assets = SNAP.totals?.assets || [];
-const debts = SNAP.totals?.debts || [];
 
 for (let i = 0; i < labels.length; i++) { 
-const assetVal = Number(assets[i] || 0);
-const debtVal = Number(debts[i] || 0);
-rows.push([labels[i], assetVal, debtVal]);
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+if (v >= 0) {
+assets += v;
+} else {
+debts += v;
+}
+}
+});
+
+rows.push([labels[i], assets, debts]);
 }
 } else {
-// Per-account mode
-SNAP.accounts.forEach(a => data.addColumn('number', a.name));
+// v2.2: Per-account mode - only show non-muted accounts
+const visibleAccounts = SNAP.accounts.filter(a => !isAccountMuted(a.name));
+visibleAccounts.forEach(a => data.addColumn('number', a.name));
+
 for (let i = 0; i < labels.length; i++) {
 const row = [labels[i]]; 
-SNAP.accounts.forEach(a => {
+visibleAccounts.forEach(a => {
 const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
 row.push(Number(v));
 });
@@ -1562,10 +1843,38 @@ if (ev.key === 'Enter') {
 await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
 }
 });
+
+// v2.2: Add mute toggle checkbox
+const muteWrapper = document.createElement('label');
+muteWrapper.className = 'mute-checkbox';
+muteWrapper.setAttribute('aria-label', `Toggle ${a.name} visibility`);
+muteWrapper.title = `Show/hide ${a.name}`;
+
+const muteCheck = document.createElement('input');
+muteCheck.type = 'checkbox';
+muteCheck.checked = !isAccountMuted(a.name);  // Checked = visible
+muteCheck.setAttribute('aria-label', `Show ${a.name}`);
+
+muteCheck.addEventListener('change', (e) => {
+toggleAccountMute(a.name);
+});
+
+const muteSlider = document.createElement('span');
+muteSlider.className = 'mute-checkbox-slider';
+
+muteWrapper.appendChild(muteCheck);
+muteWrapper.appendChild(muteSlider);
+
 inputLine.appendChild(inp);
+inputLine.appendChild(muteWrapper);
 
 left.appendChild(accountDetails);
 left.appendChild(inputLine);
+
+// v2.2: Apply muted state to row
+if (isAccountMuted(a.name)) {
+row.classList.add('muted');
+}
 
 const vals = document.createElement('div');
 vals.className = 'values';
@@ -1732,6 +2041,9 @@ setLoading(false);
     INITIALIZATION
     ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
+// v2.2: Load muted accounts from URL
+loadMutedStateFromURL();
+
 document.getElementById('refresh').addEventListener('click', fetchSnapshot);
 document.getElementById('submitAll').addEventListener('click', submitAll);
 
