@@ -1,0 +1,620 @@
+# 📊 Ledger v2.1 — Official Project Manifest
+
+**Version:** 2.1 (Stable Baseline)  
+**Date:** January 2025  
+**Status:** ✅ Production Ready  
+**Deployment:** https://pat-bee.github.io/ledger.html
+
+---
+
+## 🎯 Project Overview
+
+**What It Is:**  
+A minimalist, privacy-first personal finance ledger that visualizes assets vs. debts with real-time data from Google Sheets.
+
+**Core Philosophy:**
+- **Privacy First** — No login, no PII storage, user controls all data
+- **Maximally Impactful** — Every pixel serves a purpose
+- **Minimalist Design** — Clean typography, generous whitespace
+- **Instant Comprehension** — Visual hierarchy shows what matters
+
+---
+
+## 🏗️ Architecture
+
+### **Tech Stack**
+```
+Frontend:  Vanilla JavaScript + HTML + CSS
+Backend:   Google Apps Script (deployed as web app)
+Database:  Google Sheets (2 tabs: Accounts, Ledger)
+Charts:    Google Charts API
+Hosting:   GitHub Pages
+```
+
+### **Data Flow**
+```
+User Action (UI)
+    ↓
+JavaScript (ledger.html)
+    ↓
+Fetch API → Google Apps Script
+    ↓
+Google Sheets (Accounts + Ledger tabs)
+    ↓
+Response (JSON)
+    ↓
+Render UI (Chart, Summary, Accounts)
+```
+
+---
+
+## 📁 File Structure
+
+### **Production Files**
+```
+ledger.html          — Main production instance
+dollardoc1.html      — Demo: Cheers theme
+dollardoc2.html      — Demo: Default template
+dollardoc3.html      — Demo: UFO/Area 51 theme
+index.html           — Landing page for all demos
+```
+
+### **Google Sheets Structure**
+
+#### **Tab 1: "Accounts"**
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| name | String | Account name | "Wells Fargo" |
+| apr | Decimal | Annual interest rate | 0.05 (= 5%) |
+| color | Hex | Display color | #4c8036 |
+
+#### **Tab 2: "Ledger"**
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| date | String | Entry date | "1/15/2025" |
+| account | String | Account name (matches Accounts tab) | "Wells Fargo" |
+| value | Number | Dollar amount (negative for debts) | -342.50 |
+
+---
+
+## 🎨 Design System
+
+### **Color Palette**
+```css
+--c-pos: #4c8036;      /* Assets/Positive (Green) */
+--c-neg: #a02d2a;      /* Debts/Negative (Red) */
+--c-black: #000000;    /* Text/Borders */
+--c-white: #ffffff;    /* Backgrounds */
+--c-tint-pos: #f7f9f4; /* Light green (input backgrounds) */
+--c-tint-neg: #f9f4f4; /* Light red (input backgrounds) */
+```
+
+### **Typography Scale**
+```
+Financial Summary:  3.9rem (300 light / 700 bold for larger value)
+Interest Summary:   1.95rem (300 light)
+Account Value:      2.6rem (600 semibold)
+Account Name:       2.2rem (lighter)
+Toolbar Controls:   0.85rem (300 light)
+Footer Text:        0.7rem
+```
+
+### **Spacing System**
+```
+--gap: 12px          (Standard spacing unit)
+--radius: 10px       (Border radius for buttons/inputs)
+Padding: 6-24px      (Contextual)
+```
+
+---
+
+## ✨ Feature Set (v2.1)
+
+### **Core Features**
+- ✅ **Real-time Financial Summary** — Assets | Debts with smart bolding
+- ✅ **Interest Calculation** — Per-account APR with timeframe projections
+- ✅ **Ratio Visualization** — Character-based statusbar (100 blocks = 100%)
+- ✅ **Interactive Charts** — Filled area charts (Google Charts)
+- ✅ **Editable Value Chips** — Click to edit/delete any entry
+- ✅ **Inline Value Entry** — Press Enter or Submit All
+- ✅ **Long-press Account Menu** — Hold account name for actions
+- ✅ **Timeframe Filters** — Today, 7d, 14d, 30d, 90d, YTD, 1y, All
+- ✅ **Chart Modes** — Totals view or Per-account breakdown
+- ✅ **Mobile Responsive** — Optimized for all screen sizes
+
+### **UI Components**
+
+#### **Header (Sticky)**
+1. **Toolbar**
+   - Financial Summary (Assets | Debts)
+   - Interest Summary (Earnings | Costs)
+   - Timeframe Selector
+   - Mode Toggle (Totals/Per-account)
+   - Refresh Button
+   - Submit All Button
+
+2. **Chart Container**
+   - Height: 30vh
+   - Type: Filled area chart (stacked)
+   - Opacity: 0.75
+   - Dynamic colors based on mode
+
+3. **Statusbar**
+   - Character-based ratio bar (█ blocks)
+   - Green (assets) | Red (debts)
+   - Proportional to actual values
+
+#### **Main Content**
+- **Account Rows** (for each account):
+  - Current Value (large, bold)
+  - Account Name (lighter weight)
+  - APR Display + Interest Projection
+  - Input Field (for new values)
+  - Value Chips (last N entries, clickable)
+  - Mobile Ratio Bar (blocks, hidden on desktop)
+
+#### **Modals**
+1. **Delete Confirmation**
+   - Triggered by chip click → Delete
+   - Shows: Account, Value, Date
+   - Actions: Cancel, Confirm Delete
+
+2. **Edit Chip**
+   - Triggered by chip click
+   - Editable: Value, Date
+   - Actions: Delete, Cancel, Save
+
+3. **Account Menu**
+   - Triggered by long-press account name
+   - Actions: Delete Account, Add Account, Cancel
+   - Status: Placeholder (v2.2 features)
+
+#### **Footer**
+- Privacy Notice (security badge)
+- Feature Summary
+- Version Number
+
+---
+
+## 🔧 Technical Specifications
+
+### **API Endpoints**
+```javascript
+Base URL: https://script.google.com/macros/s/[DEPLOYMENT_ID]/exec
+
+Routes:
+  ?route=snapshot&timeframe=[ytd|today|7d|14d|30d|90d|1y|all]
+  ?route=submit (POST with JSON payload)
+  ?route=delete (POST with JSON payload)
+```
+
+### **Data Models**
+
+#### **Snapshot Response**
+```javascript
+{
+  ok: true,
+  accounts: [
+    {
+      name: "Wells Fargo",
+      apr: 0.05,
+      color: "#4c8036"
+    }
+  ],
+  series: {
+    "Wells Fargo": {
+      last: 5000,           // Current value
+      monthly: [4800, 5000], // Historical values
+      lastN: [              // Recent entries (with dates)
+        { value: 5000, date: "1/15/2025" },
+        { value: 4800, date: "1/1/2025" }
+      ]
+    }
+  },
+  totals: {
+    assets: [12000, 13000],   // Historical assets
+    debts: [-5000, -4500]     // Historical debts
+  },
+  dateAxis: ["1/1/2025", "1/15/2025"] // X-axis labels
+}
+```
+
+#### **Submit Payload**
+```javascript
+{
+  entries: [
+    {
+      account: "Wells Fargo",
+      value: 5000,
+      date: "1/15/2025"  // Optional
+    }
+  ]
+}
+```
+
+#### **Delete Payload**
+```javascript
+{
+  account: "Wells Fargo",
+  date: "1/15/2025",
+  value: 5000
+}
+```
+
+### **State Management**
+```javascript
+Global State Variables:
+- SNAP                 // Current data snapshot
+- MODE                 // 'totals' or 'accounts'
+- TIMEFRAME           // 'ytd', 'today', '7d', etc.
+- IS_LOADING          // Boolean for loading state
+- TOAST_TIMER         // Toast notification timer
+- LONG_PRESS_TIMER    // Account menu timer
+```
+
+---
+
+## 📊 Current Data Structure (Production)
+
+### **Accounts (22 total)**
+
+**Banking (2):**
+- SoFi (0% APR, #000000)
+- Wells (0% APR, #000000)
+
+**Savings (6):**
+- DCU (5% APR, #000000)
+- Robinhood (0% APR, #5ac53b)
+- Coinbase (0% APR, #25528f)
+- Uphold (0% APR, #9b5277)
+- Phantom (0% APR, #8c7ebe)
+- TIAA (0% APR, #4c8036)
+
+**Debt - Credit Cards (7):**
+- Amex (30% APR, #a02d2a)
+- Indigo (29% APR, #5c340e)
+- Milestone (25% APR, #5c340e)
+- Destiny (25% APR, #5c340e)
+- Avant (30% APR, #000000)
+- Creditone (30% APR, #000000)
+- Capitalone (-30% APR, #000000) *unusual negative APR*
+- StepCard (-20% APR, #000000) *unusual negative APR*
+
+**Debt - Bills (5):**
+- Taxes (0% APR, #000000)
+- Medstar (0% APR, #000000)
+- Affirm (0% APR, #000000)
+- USA (0% APR, #000000)
+- MedStar (0% APR, #000000)
+
+**Ledger Entries:** 132 total transactions from 10/1/2023 onwards
+
+---
+
+## 🎯 User Workflows
+
+### **1. Adding a New Transaction**
+```
+User types value in account input → Press Enter
+  OR
+Fill multiple inputs → Click "Submit All"
+  ↓
+Loading state (inputs disabled, toast shown)
+  ↓
+POST to /submit endpoint
+  ↓
+Success: Flash green, clear input, refresh data
+  ↓
+Chart & summary update with new data
+```
+
+### **2. Editing an Entry**
+```
+Click value chip
+  ↓
+Modal opens with value & date
+  ↓
+Edit fields → Click "Save"
+  ↓
+Delete original → Submit new entry
+  ↓
+Refresh data & close modal
+```
+
+### **3. Deleting an Entry**
+```
+Click chip → Click "Delete" in edit modal
+  OR
+Click chip → Delete button
+  ↓
+Confirmation modal
+  ↓
+Confirm deletion
+  ↓
+POST to /delete endpoint
+  ↓
+Refresh data
+```
+
+### **4. Changing Timeframe**
+```
+Select timeframe dropdown
+  ↓
+Fetch new snapshot with timeframe parameter
+  ↓
+Chart, summary, and interest calculations update
+```
+
+### **5. Switching Chart Mode**
+```
+Click "Totals" or "Per-account" radio
+  ↓
+Redraw chart with different data series
+  ↓
+Totals: 2 series (Assets, Debts)
+Per-account: N series (one per account)
+```
+
+---
+
+## 🔐 Security & Privacy
+
+### **Privacy Guarantees**
+- ✅ No user authentication required
+- ✅ No PII collected or stored
+- ✅ No cookies, no tracking
+- ✅ All data in user's Google Sheet
+- ✅ User controls sharing/permissions
+
+### **Data Access**
+- Apps Script executes as **user** (sheet owner)
+- Web app access: **Anyone** (no login)
+- Data visible only to those with sheet access
+
+---
+
+## 📱 Responsive Design
+
+### **Breakpoint: 650px**
+
+**Desktop (>650px):**
+- Horizontal toolbar layout
+- Chart at 30vh
+- Value chips displayed inline
+- Ratio bars hidden
+
+**Mobile (<650px):**
+- Vertical toolbar layout
+- Smaller chart (still 30vh)
+- Value chips hidden
+- Ratio bars displayed (█ blocks)
+- Stacked account details
+- Full-width inputs
+
+---
+
+## 🚀 Deployment
+
+### **GitHub Pages Setup**
+```bash
+Repository: pat-bee/pat-bee.github.io
+Branch: main
+URL: https://pat-bee.github.io/ledger.html
+```
+
+### **Update Process**
+```bash
+# 1. Make changes to ledger.html locally
+# 2. Test locally (open file in browser)
+# 3. Commit and push
+git add ledger.html
+git commit -m "Update: [description]"
+git push origin main
+
+# 4. Wait ~1 minute for GitHub Pages to rebuild
+# 5. Hard refresh browser (Ctrl+Shift+R)
+```
+
+### **Google Apps Script Deployment**
+```
+1. Open Google Sheet → Extensions → Apps Script
+2. Paste CODE.JS
+3. Deploy → New deployment → Web app
+4. Execute as: Me
+5. Who has access: Anyone
+6. Copy deployment URL → Update API_BASE in HTML
+```
+
+---
+
+## 🐛 Known Issues & Quirks
+
+### **Data Anomalies**
+1. **Negative APR values** — Capitalone (-30%), StepCard (-20%)
+   - Interpretation: Cashback/rewards programs?
+   - Effect: Shows as "negative interest cost" (income)
+
+2. **Duplicate account names** — "Medstar" vs "MedStar"
+   - One uppercase S, one lowercase
+   - Treated as separate accounts
+
+3. **CSV extras** — Accounts tab has extra columns:
+   - Kind, Sort, Initial_Value, Limit, Type
+   - Currently unused by app (app only uses: name, apr, color)
+
+### **UI Considerations**
+- **Long account names** — Ellipsis (...) on overflow
+- **Many accounts (22)** — Chart legend can get crowded in per-account mode
+- **Large datasets** — Chart shows max 30 date labels (auto-skips)
+
+---
+
+## 📈 Performance
+
+### **Load Time**
+- Initial load: ~1-2s (depends on Google Sheets API)
+- Refresh: ~500ms-1s
+- Submit: ~1-2s (write + read)
+
+### **Optimization**
+- ✅ Single-file architecture (no external CSS/JS)
+- ✅ Minimal DOM manipulation
+- ✅ CSS transitions (hardware accelerated)
+- ✅ Debounced/cached Google Charts library
+
+---
+
+## 🎨 Design Decisions (Rationale)
+
+### **Why character-based statusbar?**
+- Visually impactful without complexity
+- Scales perfectly (100 blocks = 100% viewport)
+- No canvas/SVG dependencies
+- Instant comprehension of ratio
+
+### **Why smart bolding?**
+- Emphasizes what matters (larger value)
+- Reduces visual noise
+- Creates dynamic hierarchy
+
+### **Why lighter font weights?**
+- Modern, minimalist aesthetic
+- Values stand out more
+- Reduces visual heaviness
+
+### **Why whole numbers only?**
+- Easier to scan quickly
+- Reduces cognitive load
+- Cents rarely matter for big picture
+
+### **Why inline editing?**
+- Faster workflow than separate edit page
+- Context preserved (see other values)
+- Fewer clicks
+
+---
+
+## 🔮 Roadmap (v2.2+)
+
+### **Planned Features**
+- [ ] Account deletion (from long-press menu)
+- [ ] Add new account (from long-press menu)
+- [ ] Export data (CSV/JSON)
+- [ ] Print-friendly view
+- [ ] Keyboard shortcuts
+- [ ] Undo/redo for edits
+- [ ] Bulk import from CSV
+- [ ] Notes/memos per entry
+- [ ] Tags/categories
+- [ ] Budget tracking
+- [ ] Goal setting
+- [ ] Recurring transactions
+
+### **Possible Enhancements**
+- [ ] Dark mode
+- [ ] Custom color themes
+- [ ] Multiple chart types (donut, bar, line)
+- [ ] Swipeable chart views
+- [ ] Account sorting/filtering
+- [ ] Search functionality
+- [ ] Data visualization alternatives
+- [ ] PWA capabilities (offline mode)
+- [ ] Multi-currency support
+
+---
+
+## 📚 Documentation
+
+### **User Guide**
+See footer in-app for quick reference:
+- Click chip to edit/delete
+- Long-press account name for menu
+- Enter values and press Enter or Submit All
+- Values shown as whole numbers
+
+### **Developer Notes**
+- All JavaScript is vanilla (no frameworks)
+- CSS uses modern features (flexbox, grid, CSS variables)
+- Compatible with all modern browsers
+- Google Charts loaded asynchronously
+- Apps Script handles all backend logic
+
+---
+
+## 🏆 Version History
+
+### **v2.1** (Current - Stable)
+- Smart font weight (bold larger value)
+- Lighter typography throughout
+- Filled area charts (stacked)
+- Character-based statusbar
+- Edit chip functionality
+- Long-press account menu
+- Mobile ratio bars
+- Tiny footer with security notice
+
+### **v2.0**
+- Editable value chips
+- Modal system (delete, edit, menu)
+- Statusbar ratio visualization
+- Interest calculations
+
+### **v1.0**
+- Basic ledger with line charts
+- Account listing
+- Value submission
+- Timeframe filtering
+
+---
+
+## 🎯 Success Metrics
+
+**User Experience:**
+- ✅ Load time < 2 seconds
+- ✅ Mobile responsive
+- ✅ Zero login friction
+- ✅ Instant visual comprehension
+
+**Code Quality:**
+- ✅ Single-file deployment
+- ✅ No external dependencies (except Google Charts)
+- ✅ Clean separation of concerns
+- ✅ Documented functions
+
+**Design:**
+- ✅ Minimalist aesthetic
+- ✅ Accessible color contrast
+- ✅ Clear visual hierarchy
+- ✅ Consistent spacing
+
+---
+
+## 🔗 Quick Links
+
+**Production:**
+- Main App: https://pat-bee.github.io/ledger.html
+- Demo Index: https://pat-bee.github.io/
+
+**Source:**
+- Repository: https://github.com/pat-bee/pat-bee.github.io
+- File: ledger.html (1,776 lines)
+
+**Backend:**
+- Google Sheet: [Your LedgerDB sheet]
+- Apps Script: [Your deployment]
+
+---
+
+## 📝 Notes
+
+**This manifest represents the stable v2.1 baseline.**  
+All future development should build from this foundation.
+
+**Last Updated:** January 2025  
+**Maintained By:** pat-bee  
+**Status:** ✅ Production Ready
+
+---
+
+**Next Steps:**
+Ready for v2.2 feature additions and enhancements!
