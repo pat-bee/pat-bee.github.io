@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ledger — Accounts & Chart (v3.0)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --maxw: 1400px;
+            --c-pos: #4c8036;
+            --c-neg: #a02d2a;
+            --c-black: #000000;
+            --c-white: #ffffff;
+            --radius: 10px;
+            --gap: 12px;
+            --c-tint-pos: #f7f9f4;
+            --c-tint-neg: #f9f4f4;
+        }
+
+```
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #fafafa;
+        padding: 20px;
+        color: var(--c-black);
+    }
+
+    .container {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        background: var(--c-white);
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius);
+        padding: 30px;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+        color: var(--c-black);
+        font-weight: 600;
+    }
+
+    .version {
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 25px;
+    }
+
+    .controls {
+        display: flex;
+        gap: var(--gap);
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .control-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    label {
+        font-weight: 500;
+        font-size: 13px;
+        color: #666;
+    }
+
+    select, input[type="number"] {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: var(--radius);
+        font-size: 13px;
+        background: var(--c-white);
+    }
+
+    select {
+        min-width: 160px;
+    }
+
+    button {
+        padding: 6px 14px;
+        border: 1px solid #ccc;
+        border-radius: var(--radius);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+        background: var(--c-white);
+        color: #333;
+    }
+
+    button:hover {
+        background: #f5f5f5;
+    }
+
+    .btn-primary {
+        background: var(--c-pos);
+        color: var(--c-white);
+        border-color: var(--c-pos);
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .btn-secondary {
+        background: var(--c-white);
+        color: #666;
+    }
+
+    .btn-bulk {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .status-bar {
+        background: #f8f9fa;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius);
+    }
+
+    .status-info {
+        color: #666;
+    }
+
+    .status-info strong {
+        color: var(--c-black);
+    }
+
+    .accounts-section {
+        margin-bottom: 25px;
+    }
+
+    .account-row {
+        display: grid;
+        grid-template-columns: 30px 1fr 140px 100px;
+        gap: var(--gap);
+        align-items: center;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius);
+        margin-bottom: var(--gap);
+        transition: all 0.2s ease;
+        background: var(--c-white);
+    }
+
+    .account-row.disabled {
+        opacity: 0.4;
+        background: #fafafa;
+    }
+
+    .account-row.disabled .account-name {
+        text-decoration: line-through;
+        color: #999;
+    }
+
+    .account-row.disabled input {
+        background: #f5f5f5;
+        pointer-events: none;
+    }
+
+    .toggle-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--c-pos);
+    }
+
+    .account-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .account-name {
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--c-black);
+    }
+
+    .account-chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .chip {
+        background: #f0f0f0;
+        color: #666;
+        padding: 3px 8px;
+        border-radius: calc(var(--radius) / 2);
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: 1px solid #ddd;
+    }
+
+    .chip:hover {
+        background: #e8e8e8;
+        border-color: #ccc;
+    }
+
+    .value-input {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: var(--radius);
+        transition: border-color 0.15s;
+    }
+
+    .value-input:focus {
+        outline: none;
+        border-color: #666;
+    }
+
+    .account-total {
+        font-weight: 600;
+        font-size: 14px;
+        text-align: right;
+    }
+
+    .account-total.positive {
+        color: var(--c-pos);
+    }
+
+    .account-total.negative {
+        color: var(--c-neg);
+    }
+
+    .add-account-btn {
+        width: 100%;
+        padding: 10px;
+        background: var(--c-white);
+        color: #666;
+        border: 1px dashed #ccc;
+        border-radius: var(--radius);
+        font-weight: 500;
+        margin-top: 10px;
+    }
+
+    .add-account-btn:hover {
+        background: #f8f9fa;
+        border-color: #999;
+    }
+
+    .totals-section {
+        background: var(--c-white);
+        border: 2px solid #e0e0e0;
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .totals-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+    }
+
+    .total-item {
+        text-align: center;
+        padding: 10px;
+    }
+
+    .total-label {
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+    }
+
+    .total-value {
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .total-value.positive {
+        color: var(--c-pos);
+    }
+
+    .total-value.negative {
+        color: var(--c-neg);
+    }
+
+    .chart-container {
+        margin-top: 25px;
+        padding: 20px;
+        background: var(--c-white);
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius);
+    }
+
+    .chart-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: var(--c-black);
+    }
+
+    canvas {
+        max-height: 400px;
+    }
+
+    .footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .footer strong {
+        color: var(--c-black);
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <h1>Ledger — Accounts & Chart</h1>
+        <div class="version">v3.0 with Account Toggle</div>
+
+```
+    <div class="controls">
+        <div class="control-group">
+            <label>Timeframe:</label>
+            <select id="timeframe">
+                <option value="year">This Calendar Year</option>
+                <option value="today">Today</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="14days">Last 14 Days</option>
+                <option value="30days" selected>Last 30 Days</option>
+                <option value="90days">Last 90 Days</option>
+                <option value="12months">Last Year (12mo)</option>
+                <option value="all">All Time</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button class="btn-bulk" onclick="toggleAllAccounts(true)">✓ Enable All</button>
+            <button class="btn-bulk" onclick="toggleAllAccounts(false)">✗ Disable All</button>
+        </div>
+
+        <button class="btn-primary" onclick="refreshCalculations()">🔄 Refresh View</button>
+        <button class="btn-primary" onclick="submitAll()">Submit All</button>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-info">
+            <strong id="enabledCount">5</strong> of <strong id="totalCount">5</strong> accounts enabled
+        </div>
+        <div class="status-info">
+            Last refreshed: <strong id="lastRefresh">Never</strong>
+        </div>
+    </div>
+
+    <div class="accounts-section" id="accountsContainer">
+        <!-- Account rows will be generated here -->
+    </div>
+
+    <button class="add-account-btn" onclick="addAccount()">+ Add New Account</button>
+
+    <div class="totals-section">
+        <div class="totals-grid">
+            <div class="total-item">
+                <div class="total-label">Grand Total</div>
+                <div class="total-value" id="grandTotal">$0</div>
+            </div>
+            <div class="total-item">
+                <div class="total-label">Enabled Accounts</div>
+                <div class="total-value" id="enabledTotal">$0</div>
+            </div>
+            <div class="total-item">
+                <div class="total-label">Average per Account</div>
+                <div class="total-value" id="avgPerAccount">$0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-title">Account Balances (Enabled Accounts Only)</div>
+        <canvas id="accountChart"></canvas>
+    </div>
+
+    <div class="footer">
+        <p><strong>🔒 Privacy First:</strong> No login credentials or personally identifiable information is stored in this application. All data resides in your Google Sheet. Your financial footprint, your control.</p>
+        <p><strong>v3.0 Features:</strong> Toggle accounts on/off • Manual refresh for calculations • Visual feedback for disabled accounts • Bulk enable/disable options</p>
+    </div>
+</div>
+
+<script>
+    // Sample data structure
+    let accounts = [
+        { 
+            id: 1, 
+            name: 'Checking Account', 
+            enabled: true,
+            entries: [
+                { value: 1500, date: '2024-11-01' },
+                { value: 2300, date: '2024-11-15' }
+            ]
+        },
+        { 
+            id: 2, 
+            name: 'Savings Account', 
+            enabled: true,
+            entries: [
+                { value: 5000, date: '2024-11-01' },
+                { value: 5200, date: '2024-11-15' }
+            ]
+        },
+        { 
+            id: 3, 
+            name: 'Credit Card', 
+            enabled: true,
+            entries: [
+                { value: -850, date: '2024-11-05' },
+                { value: -920, date: '2024-11-20' }
+            ]
+        },
+        { 
+            id: 4, 
+            name: 'Investment Account', 
+            enabled: true,
+            entries: [
+                { value: 12500, date: '2024-11-01' }
+            ]
+        },
+        { 
+            id: 5, 
+            name: 'Cash', 
+            enabled: true,
+            entries: [
+                { value: 300, date: '2024-11-10' }
+            ]
+        }
+    ];
+
+    let chart = null;
+
+    // Initialize the page
+    function init() {
+        renderAccounts();
+        updateStatusBar();
+    }
+
+    // Render all account rows
+    function renderAccounts() {
+        const container = document.getElementById('accountsContainer');
+        container.innerHTML = '';
+
+        accounts.forEach(account => {
+            const row = createAccountRow(account);
+            container.appendChild(row);
+        });
+    }
+
+    // Create a single account row
+    function createAccountRow(account) {
+        const row = document.createElement('div');
+        row.className = `account-row ${!account.enabled ? 'disabled' : ''}`;
+        row.dataset.accountId = account.id;
+
+        const total = calculateAccountTotal(account);
+        const totalClass = total >= 0 ? 'positive' : 'negative';
+
+        row.innerHTML = `
+            <input type="checkbox" 
+                   class="toggle-checkbox" 
+                   ${account.enabled ? 'checked' : ''} 
+                   onchange="toggleAccount(${account.id}, this.checked)">
+            
+            <div class="account-info">
+                <div class="account-name">${account.name}</div>
+                <div class="account-chips">
+                    ${account.entries.map((entry, idx) => 
+                        `<span class="chip" onclick="editEntry(${account.id}, ${idx})">
+                            $${entry.value.toLocaleString()} • ${new Date(entry.date).toLocaleDateString()}
+                        </span>`
+                    ).join('')}
+                </div>
+            </div>
+            
+            <input type="number" 
+                   class="value-input" 
+                   placeholder="Enter value"
+                   onkeypress="handleEnter(event, ${account.id})">
+            
+            <div class="account-total ${totalClass}">$${total.toLocaleString()}</div>
+        `;
+
+        return row;
+    }
+
+    // Calculate total for a single account
+    function calculateAccountTotal(account) {
+        return account.entries.reduce((sum, entry) => sum + entry.value, 0);
+    }
+
+    // Toggle a single account
+    function toggleAccount(accountId, enabled) {
+        const account = accounts.find(a => a.id === accountId);
+        if (account) {
+            account.enabled = enabled;
+            const row = document.querySelector(`[data-account-id="${accountId}"]`);
+            if (enabled) {
+                row.classList.remove('disabled');
+            } else {
+                row.classList.add('disabled');
+            }
+            updateStatusBar();
+        }
+    }
+
+    // Toggle all accounts
+    function toggleAllAccounts(enabled) {
+        accounts.forEach(account => {
+            account.enabled = enabled;
+        });
+        renderAccounts();
+        updateStatusBar();
+    }
+
+    // Refresh calculations and visualizations
+    function refreshCalculations() {
+        updateTotals();
+        updateChart();
+        updateLastRefreshTime();
+    }
+
+    // Update the totals section
+    function updateTotals() {
+        const enabledAccounts = accounts.filter(a => a.enabled);
+        const allTotal = accounts.reduce((sum, acc) => sum + calculateAccountTotal(acc), 0);
+        const enabledTotal = enabledAccounts.reduce((sum, acc) => sum + calculateAccountTotal(acc), 0);
+        const avgPerAccount = enabledAccounts.length > 0 ? enabledTotal / enabledAccounts.length : 0;
+
+        const grandTotalEl = document.getElementById('grandTotal');
+        grandTotalEl.textContent = `$${allTotal.toLocaleString()}`;
+        grandTotalEl.className = `total-value ${allTotal >= 0 ? 'positive' : 'negative'}`;
+
+        const enabledTotalEl = document.getElementById('enabledTotal');
+        enabledTotalEl.textContent = `$${enabledTotal.toLocaleString()}`;
+        enabledTotalEl.className = `total-value ${enabledTotal >= 0 ? 'positive' : 'negative'}`;
+
+        const avgEl = document.getElementById('avgPerAccount');
+        avgEl.textContent = `$${Math.round(avgPerAccount).toLocaleString()}`;
+        avgEl.className = `total-value ${avgPerAccount >= 0 ? 'positive' : 'negative'}`;
+    }
+
+    // Update the chart
+    function updateChart() {
+        const ctx = document.getElementById('accountChart').getContext('2d');
+        const enabledAccounts = accounts.filter(a => a.enabled);
+
+        const data = {
+            labels: enabledAccounts.map(a => a.name),
+            datasets: [{
+                label: 'Account Balance',
+                data: enabledAccounts.map(a => calculateAccountTotal(a)),
+                backgroundColor: enabledAccounts.map(a => {
+                    const total = calculateAccountTotal(a);
+                    return total >= 0 ? 'rgba(76, 128, 54, 0.7)' : 'rgba(160, 45, 42, 0.7)';
+                }),
+                borderColor: enabledAccounts.map(a => {
+                    const total = calculateAccountTotal(a);
+                    return total >= 0 ? '#4c8036' : '#a02d2a';
+                }),
+                borderWidth: 2
+            }]
+        };
+
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update status bar
+    function updateStatusBar() {
+        const enabledCount = accounts.filter(a => a.enabled).length;
+        const totalCount = accounts.length;
+        
+        document.getElementById('enabledCount').textContent = enabledCount;
+        document.getElementById('totalCount').textContent = totalCount;
+    }
+
+    // Update last refresh time
+    function updateLastRefreshTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString();
+        document.getElementById('lastRefresh').textContent = timeString;
+    }
+
+    // Handle Enter key in input
+    function handleEnter(event, accountId) {
+        if (event.key === 'Enter') {
+            const input = event.target;
+            const value = parseFloat(input.value);
+            
+            if (!isNaN(value)) {
+                const account = accounts.find(a => a.id === accountId);
+                if (account) {
+                    account.entries.push({
+                        value: value,
+                        date: new Date().toISOString().split('T')[0]
+                    });
+                    input.value = '';
+                    renderAccounts();
+                }
+            }
+        }
+    }
+
+    // Add new account
+    function addAccount() {
+        const name = prompt('Enter account name:');
+        if (name) {
+            const newId = Math.max(...accounts.map(a => a.id)) + 1;
+            accounts.push({
+                id: newId,
+                name: name,
+                enabled: true,
+                entries: []
+            });
+            renderAccounts();
+            updateStatusBar();
+        }
+    }
+
+    // Submit all (placeholder)
+    function submitAll() {
+        alert('Submit all functionality would save data to your Google Sheet here.');
+    }
+
+    // Edit entry (placeholder)
+    function editEntry(accountId, entryIdx) {
+        const account = accounts.find(a => a.id === accountId);
+        if (account && account.entries[entryIdx]) {
+            const entry = account.entries[entryIdx];
+            const newValue = prompt(`Edit value (current: $${entry.value}):`, entry.value);
+            if (newValue !== null) {
+                entry.value = parseFloat(newValue);
+                renderAccounts();
+            }
+        }
+    }
+
+    // Initialize on page load
+    init();
+    refreshCalculations();
+</script>
+```
+
+</body>
+</html>
