@@ -1380,11 +1380,13 @@ const newLimit = limitInput.value ? Number(limitInput.value) : null;
 const newAPR = Number(aprInput.value);
 const newValue = Number(valueInput.value);
 
-// Store limit in memory (would need sheet update for persistence)
-if (newLimit !== null) {
+// v2.3: Store limit in memory and URL
+if (newLimit !== null && newLimit > 0) {
 const metadata = ACCOUNT_METADATA.get(accountName) || {};
 metadata.limit = newLimit;
 ACCOUNT_METADATA.set(accountName, metadata);
+saveMutedStateToURL(); // Persist to URL
+console.log('Limit saved:', accountName, newLimit);
 }
 
 hideEditAccountModal();
@@ -1478,15 +1480,42 @@ const mutedParam = params.get('muted');
 if (mutedParam) {
 MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
 }
+
+// v2.3: Load limits from URL
+const limitsParam = params.get('limits');
+if (limitsParam) {
+try {
+const limitsData = JSON.parse(decodeURIComponent(limitsParam));
+Object.entries(limitsData).forEach(([account, limit]) => {
+ACCOUNT_METADATA.set(account, { limit: Number(limit) });
+});
+} catch (e) {
+console.error('Failed to parse limits from URL:', e);
+}
+}
 }
 
 function saveMutedStateToURL() {
 const mutedArray = Array.from(MUTED_ACCOUNTS);
+const params = new URLSearchParams();
+
 if (mutedArray.length > 0) {
-window.location.hash = `muted=${mutedArray.join(',')}`;
-} else {
-window.location.hash = '';
+params.set('muted', mutedArray.join(','));
 }
+
+// v2.3: Save limits to URL
+const limitsObj = {};
+ACCOUNT_METADATA.forEach((metadata, accountName) => {
+if (metadata.limit) {
+limitsObj[accountName] = metadata.limit;
+}
+});
+
+if (Object.keys(limitsObj).length > 0) {
+params.set('limits', encodeURIComponent(JSON.stringify(limitsObj)));
+}
+
+window.location.hash = params.toString();
 }
 
 function toggleAccountMute(accountName) {
@@ -1944,6 +1973,9 @@ const limitColor = getLimitColor(last, limitValue);
 limitEl.style.color = limitColor;
 limitEl.textContent = `$${limitValue.toLocaleString()}`;
 accountDetails.appendChild(limitEl);
+} else if (a.type === 'cc') {
+// Debug: Log when CC account doesn't have limit
+console.log('CC account without limit:', a.name, 'metadata:', metadata);
 }
 
 const aprEl = document.createElement('span');
