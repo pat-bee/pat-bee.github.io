@@ -1,1473 +1,2241 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- Changed title to v1k -->
-  <title>Ledger — Accounts & Chart (v1k)</title>
-  <style>
-    :root {
-      --maxw: 1400px;
-      --c-pos: #4c8036;  /* positive */
-      --c-neg: #a02d2a;  /* negative */
-      --c-black: #000000;
-      --c-white: #ffffff;
-      --radius: 10px;
-      --gap: 12px;
-      
-      --c-tint-pos: #f7f9f4;
-      --c-tint-neg: #f9f4f4;
-    }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ledger — Accounts & Chart (v2.3)</title>
 
-    html, body { 
-      height: 100%; 
-      margin: 0; 
-      background: var(--c-white); 
-      color: var(--c-black); 
-    }
-    
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: 18px;
-      line-height: 1.5;
-    }
+<style>
+/* ============================================
+      CSS VARIABLES & DESIGN TOKENS
+      ============================================ */
+:root {
+--maxw: 1400px;
+--c-pos: #4c8036;
+--c-neg: #a02d2a;
+--c-black: #000000;
+--c-white: #ffffff;
+--radius: 10px;
+--gap: 12px;
+--c-tint-pos: #f7f9f4;
+--c-tint-neg: #f9f4f4;
+--c-muted: #e8e8e8;  /* v2.2: Muted account state */
+}
 
-    .wrap { 
-      width: 90vw; 
-      max-width: var(--maxw); 
-      margin: 0 auto; 
-      padding: 12px; 
-    }
+/* ============================================
+      BASE LAYOUT
+      ============================================ */
+html, body { 
+height: 100%; 
+margin: 0; 
+background: var(--c-white); 
+color: var(--c-black); 
+}
 
-    a {
-      color: var(--c-black);
-      text-decoration: underline;
-    }
+body {
+font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+font-size: 18px;
+line-height: 1.5;
+}
 
-    header { 
-      position: sticky; 
-      top: 0; 
-      background: var(--c-white); 
-      z-index: 5; 
-      border-bottom: 1px solid var(--c-black);
-    }
-    
-    .toolbar { 
-      display: flex; 
-      gap: var(--gap); 
-      align-items: center; 
-      justify-content: space-between; /* CHANGED: Added space-between to accommodate summary on left */
-      padding: 6px 0; 
-      flex-wrap: wrap; 
-    }
-    
-    .toolbar-controls {
-      display: flex;
-      gap: var(--gap);
-      align-items: center;
-      flex-wrap: wrap;
-      flex-shrink: 0;
-    }
-    
-    .toolbar label { 
-      font-size: .85rem; 
-      cursor: pointer;
-    }
-    
-    .toolbar select {
-      font-size: .85rem;
-      padding: 4px;
-      border: 1px solid var(--c-black);
-      border-radius: 4px;
-      background: var(--c-white);
-      color: var(--c-black);
-    }
-    
-    #financial-summary {
-      font-size: 2.6rem; /* H1 equivalent size */
-      font-weight: 700;
-      white-space: nowrap;
-      line-height: 1.1;
-      flex-shrink: 1;
-      min-width: 0;
-    }
-    
-    .summary-debt {
-      color: var(--c-neg);
-    }
+.wrap { 
+width: 90vw; 
+max-width: var(--maxw); 
+margin: 0 auto; 
+padding: 0px;
+}
 
-    .summary-asset {
-      color: var(--c-pos);
-    }
+a {
+color: var(--c-black);
+text-decoration: underline;
+}
 
-    #chart { height: 30vh; width: 100%; }
-    
-    hr.divider {
-      border: none;
-      border-top: 1px solid var(--c-black);
-      margin-top: 1rem;
-    }
+/* ============================================
+      HEADER & TOOLBAR
+      ============================================ */
+header { 
+position: sticky; 
+top: 0; 
+background: var(--c-white); 
+z-index: 5; 
+border-bottom: 1px solid var(--c-black);
+padding-bottom: 1rem;
+}
 
-    .accounts { 
-      display: grid; 
-      grid-template-columns: 1fr; 
-      gap: var(--gap); 
-    }
-    
-    .row { 
-      display: flex; 
-      align-items: flex-start; 
-      justify-content: space-between; 
-      border-bottom: 1px solid var(--c-black);
-      padding: 12px 0; 
-      gap: 12px; 
-    }
+.toolbar { 
+display: flex; 
+gap: var(--gap); 
+align-items: baseline;
+justify-content: space-between;
+padding: 6px 24px;
+flex-wrap: wrap; 
+width: 100%;
+box-sizing: border-box;
+}
 
-    .left { 
-      flex: 1 1 auto; 
-      padding-right: 12px; 
-      min-width: 0; 
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start; 
-      justify-content: space-between; 
-      gap: var(--gap);
-    }
-    
-    .right { 
-      flex: 0 1 auto; 
-      min-width: 40%; 
-      text-align: right; 
-      font-size: .9rem; 
-    }
+.financial-group {
+display: flex;
+gap: var(--gap);
+align-items: baseline;
+flex-wrap: wrap;
+min-width: 0;
+flex-shrink: 1;
+}
 
-    .account-details {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: var(--gap);
-      min-width: 0;
-    }
+.toolbar-controls {
+display: flex;
+gap: var(--gap);
+align-items: center;
+flex-wrap: wrap;
+flex-shrink: 0;
+}
 
-    .lastval { 
-      font-weight: 600; 
-      font-size: 2.6rem; 
-      white-space: nowrap;
-    }
-    .name { 
-      font-weight: 700; 
-      color: var(--c-black); 
-      font-size: 2.6rem; 
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .apr { 
-      font-weight: 400; 
-      font-size: 0.75rem;
-      opacity: .75; 
-      flex-shrink: 0;
-      padding-top: 0.5rem;
-    }
+.toolbar label { 
+font-size: .85rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+cursor: pointer;
+}
 
-    .input-line { 
-      display: flex; 
-      gap: 10px; 
-      align-items: center; 
-      flex-shrink: 0;
-      padding-top: 0.25rem;
-    }
+.toolbar select {
+font-size: .85rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+padding: 4px;
+border: 1px solid var(--c-black);
+border-radius: 4px;
+background: var(--c-white);
+color: var(--c-black);
+}
 
-    input[type="number"] {
-      width: 10rem;
-      max-width: 10rem;
-      padding: .7rem .8rem;
-      font-size: 1.1rem;
-      border: 2px solid var(--c-black);
-      border-radius: var(--radius);
-      background: var(--c-white);
-      color: var(--c-black);
-      outline: none;
-      transition: background-color 0.3s ease;
-    }
-    
-    input[type="number"]::placeholder {
-      color: var(--c-black);
-      opacity: 0.6;
-    }
-    
-    input[type="number"]:focus {
-      border-color: var(--c-black);
-      box-shadow: 0 0 0 2px var(--c-black) inset;
-    }
-    
-    input[type="number"].submitting {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    
-    input[type="number"].submitted-ok {
-      animation: flash-green 0.8s ease-out;
-    }
-    
-    @keyframes flash-green {
-      0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
-      100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
-    }
+/* ============================================
+      FINANCIAL SUMMARY
+      ============================================
+      v2.1: Smart bolding - only largest absolute value
+      ============================================ */
+#financial-summary {
+font-size: 3.9rem;
+font-weight: 300;  /* v2.1: Default to lighter */
+white-space: nowrap;
+line-height: 1.1;
+flex-shrink: 1;
+min-width: 0;
+}
 
-    .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
-    .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
+/* v2.1: Bold class applied dynamically to larger absolute value */
+#financial-summary .bold-value {
+font-weight: 700;
+}
 
-    button {
-      padding: .7rem 1rem;
-      font-size: 1rem;
-      border: 2px solid var(--c-black);
-      color: var(--c-black);
-      background: var(--c-white);
-      cursor: pointer;
-      border-radius: var(--radius);
-    }
-    
-    button:hover { 
-      background: var(--c-white);
-      text-decoration: underline;
-    }
-    
-    button:focus-visible { 
-      outline: 3px solid var(--c-black); 
-      outline-offset: 2px; 
-    }
-    
-    button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+/* v2.1: Interest summary always lighter */
+#interest-summary {
+font-size: 1.95rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+white-space: nowrap;
+line-height: 1.1;
+flex-shrink: 1;
+min-width: 0;
+opacity: 0.9;
+}
 
-    .values { 
-      display: flex; 
-      justify-content: flex-end;
-      gap: .6rem; 
-      overflow-x: auto;
-      /* FIX v1j: Changed max-width: 100% to width: 100%.
-        This gives the container a defined width relative to its parent (.right),
-        which allows the overflow-x: auto to function correctly.
-      */
-      width: 100%;
-    }
-    
-    .chip {
-      padding: .25rem .6rem;
-      border-radius: 999px;
-      border: 1px solid var(--c-black);
-      font-variant-numeric: tabular-nums;
-      font-size: .95rem;
-      cursor: pointer;
-      user-select: none;
-      flex-shrink: 0;
-    }
-    
-    .chip:hover {
-      background: var(--c-black);
-      color: var(--c-white);
-    }
-    
-    .chip.no-delete {
-      cursor: default;
-      opacity: 0.7;
-      background: transparent;
-      color: var(--c-black);
-    }
-    .chip.no-delete:hover {
-      background: transparent;
-    }
-    
-    .ratio-bar {
-      display: none; /* Hidden by default */
-      font-size: 1.5rem; /* H4 size */
-      margin: 0;
-      padding: 0;
-      white-space: nowrap;
-      letter-spacing: -1px; /* Make blocks touch */
-    }
-    .ratio-bar span {
-      display: inline-block;
-    }
+.interest-earned {
+color: var(--c-pos);
+}
 
-    footer { 
-      padding: 16px 0 24px; 
-      text-align: right; 
-    }
-    
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: var(--radius);
-      background: var(--c-black);
-      color: var(--c-white);
-      border: 2px solid var(--c-white);
-      font-weight: 500;
-      z-index: 100;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
-    }
-    
-    #toast.show {
-      opacity: 1;
-      visibility: visible;
-      bottom: 30px;
-    }
-    
-    #toast[data-type="error"] {
-      background: var(--c-neg);
-      color: var(--c-white);
-      border-color: var(--c-white);
-    }
-    
-    #toast[data-type="success"] {
-      background: var(--c-pos);
-      color: var(--c-white);
-      border-color: var(--c-white);
-    }
-    
-    #delete-modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 200;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    #delete-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--c-white);
-      color: var(--c-black);
-      border: 2px solid var(--c-black);
-      border-radius: var(--radius);
-      z-index: 201;
-      padding: 24px;
-      width: 90vw;
-      max-width: 400px;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease, top 0.3s ease;
-    }
-    
-    #delete-modal-backdrop.show,
-    #delete-modal.show {
-      display: block;
-      opacity: 1;
-    }
-    
-    #delete-modal p {
-      margin-top: 0;
-      line-height: 1.4;
-    }
-    
-    #delete-modal-details {
-      font-weight: 600;
-      display: block;
-      margin: 12px 0;
-      font-size: 1.1rem;
-    }
-    
-    #delete-modal-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-    
-    #delete-btn-confirm {
-      background: var(--c-neg);
-      color: var(--c-white);
-      border-color: var(--c-neg);
-    }
-    #delete-btn-confirm:hover {
-      background: #802421;
-      border-color: #802421;
-      text-decoration: none;
-    }
+.interest-cost {
+color: var(--c-neg);
+}
 
-    @media (max-width: 650px) {
-      .row {
-        flex-direction: column;
-      }
-      
-      .right { 
-        min-width: unset; 
-        text-align: left; 
-        align-self: flex-start;
-        padding-top: 0.5rem; 
-      }
-      
-      .right .values {
-        display: none;
-      }
-      .right .ratio-bar {
-        display: block;
-      }
+.summary-debt {
+color: var(--c-neg);
+}
 
-      .left {
-        gap: 8px; /* Reduce gap slightly */
-        width: 100%;
-        padding-right: 0;
-      }
-      input[type="number"] { 
-        width: 100%; 
-        max-width: 100%;
-      }
-      .input-line {
-        width: 100%;
-        margin-left: 0; /* Don't align right on mobile */
-        padding-top: 0; /* Reset padding */
-      }
-      .apr {
-        padding-top: 0; /* Reset padding */
-      }
-      
-      /* Mobile adjustments for summary and controls */
-      .toolbar { 
-        flex-direction: column; 
-        align-items: flex-start;
-        justify-content: flex-start;
-      }
-      
-      #financial-summary {
-        font-size: 1.8rem;
-        padding-bottom: 8px;
-        width: 100%;
-        text-align: center;
-      }
-    
-      .toolbar-controls {
-        justify-content: space-around;
-        width: 100%;
-      }
-      
-      .lastval, .name {
-        font-size: 2rem;
-      .statusbar{
-        font-size: 3rem;
-        text-align: center;
-      }
-    }
-  </style>
+.summary-asset {
+color: var(--c-pos);
+}
+
+/* ============================================
+      CHART CONTAINER
+      ============================================ */
+#chart { 
+height: 30vh; 
+width: 100%; 
+margin: 0;
+padding: 0;
+}
+
+/* ============================================
+      GLOBAL STATUSBAR (v2.0: Using █  character)
+      ============================================ */
+#statusbar {
+line-height: 3;
+font-size: larger;
+text-align: center;
+padding: 0.5rem 12px 0 12px;
+letter-spacing: -0.15em;
+overflow-x: auto;
+overflow-y: hidden;
+white-space: nowrap;
+word-break: keep-all;
+background: var(--c-white);
+width: 100%;
+box-sizing: border-box;
+}
+
+.status-positive {
+color: var(--c-pos);
+}
+
+.status-negative {
+color: var(--c-neg);
+}
+
+hr.divider {
+border: none;
+border-top: 1px solid var(--c-black);
+margin-top: 1rem;
+}
+
+/* ============================================
+      ACCOUNT ROWS
+      ============================================ */
+.accounts { 
+display: grid; 
+grid-template-columns: 1fr; 
+gap: var(--gap); 
+}
+
+.row { 
+display: flex; 
+align-items: flex-start; 
+justify-content: space-between; 
+border-bottom: 1px solid var(--c-black);
+padding: 12px 0; 
+gap: 12px; 
+}
+
+.left { 
+flex: 1 1 auto; 
+padding-right: 12px; 
+min-width: 0; 
+display: flex;
+flex-wrap: wrap;
+align-items: flex-start; 
+justify-content: space-between; 
+gap: var(--gap);
+}
+
+.right { 
+flex: 0 1 auto; 
+min-width: 40%; 
+text-align: right; 
+font-size: .9rem; 
+}
+
+.account-details {
+display: flex;
+flex-wrap: wrap;
+align-items: flex-start;
+gap: var(--gap);
+min-width: 0;
+}
+
+.lastval { 
+font-weight: 600; 
+font-size: 2.6rem; 
+white-space: nowrap;
+}
+
+.name { 
+font-weight: lighter; 
+color: var(--c-black); 
+font-size: 2.2rem; 
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+cursor: pointer;
+user-select: none;
+position: relative;
+}
+
+.name:hover {
+opacity: 0.8;
+}
+
+.name:active {
+opacity: 0.6;
+}
+
+/* v2.3: Credit limit display */
+.limit {
+font-weight: 600;
+font-size: 0.75rem;
+opacity: 0.75;
+flex-shrink: 0;
+padding-top: 0.5rem;
+color: var(--c-neg);
+}
+
+.apr { 
+font-weight: 400; 
+font-size: 0.75rem;
+opacity: .75; 
+flex-shrink: 0;
+padding-top: 0.5rem;
+}
+
+.input-line { 
+display: flex; 
+gap: 10px; 
+align-items: center; 
+flex-shrink: 0;
+padding-top: 0.25rem;
+}
+
+/* ============================================
+      INPUT FIELDS
+      ============================================ */
+input[type="number"], input[type="date"], input[type="text"] {
+width: 10rem;
+max-width: 10rem;
+padding: .7rem .8rem;
+font-size: 1.1rem;
+border: 2px solid var(--c-black);
+border-radius: var(--radius);
+background: var(--c-white);
+color: var(--c-black);
+outline: none;
+transition: background-color 0.3s ease;
+}
+
+input[type="number"]::placeholder,
+input[type="date"]::placeholder,
+input[type="text"]::placeholder {
+color: var(--c-black);
+opacity: 0.6;
+}
+
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="text"]:focus {
+border-color: var(--c-black);
+box-shadow: 0 0 0 2px var(--c-black) inset;
+}
+
+input[type="number"].submitting,
+input[type="date"].submitting,
+input[type="text"].submitting {
+opacity: 0.5;
+pointer-events: none;
+}
+
+input[type="number"].submitted-ok,
+input[type="date"].submitted-ok,
+input[type="text"].submitted-ok {
+animation: flash-green 0.8s ease-out;
+}
+
+@keyframes flash-green {
+0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
+100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
+}
+
+.values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
+.values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
+
+/* ============================================
+      BUTTONS
+      ============================================ */
+button {
+padding: .7rem 1rem;
+font-size: 1rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+border: 2px solid var(--c-black);
+color: var(--c-black);
+background: var(--c-white);
+cursor: pointer;
+border-radius: var(--radius);
+}
+
+button:hover { 
+background: var(--c-white);
+text-decoration: underline;
+}
+
+button:focus-visible { 
+outline: 3px solid var(--c-black); 
+outline-offset: 2px; 
+}
+
+button:disabled {
+opacity: 0.4;
+cursor: not-allowed;
+}
+
+/* ============================================
+      VALUE CHIPS (v2.0: Editable!)
+      ============================================ */
+.values { 
+display: flex; 
+justify-content: flex-end;
+gap: .6rem; 
+overflow-x: auto;
+width: 100%;
+}
+
+.chip {
+padding: .25rem .6rem;
+border-radius: 999px;
+border: 1px solid var(--c-black);
+font-variant-numeric: tabular-nums;
+font-size: .95rem;
+cursor: pointer;
+user-select: none;
+flex-shrink: 0;
+transition: all 0.2s ease;
+}
+
+.chip:hover {
+background: var(--c-black);
+color: var(--c-white);
+transform: scale(1.05);
+}
+
+.chip.no-delete {
+cursor: default;
+opacity: 0.7;
+background: transparent;
+color: var(--c-black);
+}
+.chip.no-delete:hover {
+background: transparent;
+transform: none;
+}
+
+/* ============================================
+      MOBILE RATIO BARS
+      ============================================ */
+.ratio-bar {
+display: none;
+font-size: 1.5rem;
+margin: 0;
+padding: 0;
+white-space: nowrap;
+letter-spacing: -1px;
+}
+.ratio-bar span {
+display: inline-block;
+}
+
+/* ============================================
+      FOOTER (v2.1: Tiny and elegant)
+      ============================================ */
+footer { 
+padding: 16px 24px 24px;
+text-align: center;
+font-size: 0.7rem;
+line-height: 1.6;
+opacity: 0.8;
+color: var(--c-black);
+}
+
+footer small {
+font-size: 0.7rem;
+display: block;
+margin-bottom: 8px;
+}
+
+footer a {
+font-size: 0.7rem;
+color: var(--c-black);
+text-decoration: underline;
+opacity: 0.9;
+}
+
+footer a:hover {
+opacity: 1;
+text-decoration: none;
+}
+
+footer b {
+font-weight: 600;
+}
+
+/* v2.1: Security notice */
+.security-notice {
+font-size: 0.7rem;
+background: #f8f8f8;
+padding: 10px 14px;
+border-radius: 8px;
+margin: 16px auto 8px;
+max-width: 900px;
+border-left: 3px solid var(--c-pos);
+text-align: left;
+line-height: 1.5;
+}
+
+.security-notice strong {
+font-weight: 700;
+color: var(--c-pos);
+}
+
+/* ============================================
+      TOAST NOTIFICATIONS
+      ============================================ */
+#toast {
+position: fixed;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+padding: 12px 24px;
+border-radius: var(--radius);
+background: var(--c-black);
+color: var(--c-white);
+border: 2px solid var(--c-white);
+font-weight: 500;
+z-index: 100;
+opacity: 0;
+visibility: hidden;
+transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
+}
+
+#toast.show {
+opacity: 1;
+visibility: visible;
+bottom: 30px;
+}
+
+#toast[data-type="error"] {
+background: var(--c-neg);
+color: var(--c-white);
+border-color: var(--c-white);
+}
+
+#toast[data-type="success"] {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-white);
+}
+
+/* ============================================
+      MODALS (Shared styles)
+      ============================================ */
+.modal-backdrop {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.6);
+z-index: 200;
+display: none;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+
+.modal {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: var(--c-white);
+color: var(--c-black);
+border: 2px solid var(--c-black);
+border-radius: var(--radius);
+z-index: 201;
+padding: 24px;
+width: 90vw;
+max-width: 400px;
+display: none;
+opacity: 0;
+transition: opacity 0.3s ease, top 0.3s ease;
+}
+
+.modal-backdrop.show,
+.modal.show {
+display: block;
+opacity: 1;
+}
+
+.modal h3 {
+margin-top: 0;
+}
+
+.modal p {
+margin-top: 0;
+line-height: 1.4;
+}
+
+.modal-details {
+font-weight: 600;
+display: block;
+margin: 12px 0;
+font-size: 1.1rem;
+}
+
+.modal-buttons {
+display: flex;
+gap: 12px;
+justify-content: flex-end;
+margin-top: 20px;
+}
+
+.modal-form-group {
+margin-bottom: 16px;
+}
+
+.modal-form-group label {
+display: block;
+margin-bottom: 6px;
+font-weight: 600;
+font-size: 0.9rem;
+}
+
+.modal-form-group input {
+width: 100%;
+max-width: 100%;
+box-sizing: border-box;
+}
+
+/* Delete modal */
+#delete-btn-confirm {
+background: var(--c-neg);
+color: var(--c-white);
+border-color: var(--c-neg);
+}
+#delete-btn-confirm:hover {
+background: #802421;
+border-color: #802421;
+text-decoration: none;
+}
+
+/* Edit chip modal */
+#edit-chip-modal .modal-form-group input[type="number"] {
+font-size: 1.2rem;
+padding: 0.8rem;
+}
+
+#edit-chip-modal .modal-form-group input[type="date"] {
+font-size: 1rem;
+padding: 0.8rem;
+}
+
+#edit-chip-save {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#edit-chip-save:hover {
+background: #3d6629;
+border-color: #3d6629;
+text-decoration: none;
+}
+
+/* Account menu modal */
+#account-menu-modal .modal-buttons {
+flex-direction: column;
+}
+
+#account-menu-modal .modal-buttons button {
+width: 100%;
+text-align: left;
+padding: 1rem;
+font-size: 1.1rem;
+}
+
+#account-menu-delete {
+background: var(--c-neg);
+color: var(--c-white);
+border-color: var(--c-neg);
+}
+#account-menu-delete:hover {
+background: #802421;
+border-color: #802421;
+}
+
+#account-menu-add {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#account-menu-add:hover {
+background: #3d6629;
+border-color: #3d6629;
+}
+
+/* v2.3: Edit account modal */
+#edit-account-save {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#edit-account-save:hover {
+background: #3d6629;
+border-color: #3d6629;
+text-decoration: none;
+}
+
+/* ============================================
+      TYPE SUMMARY BAR (v2.2)
+      ============================================ */
+#type-summary-bar {
+text-align: center;
+padding: 2rem 0 1rem 0;
+margin: 2rem auto 0 auto;
+border-top: 1px solid var(--c-black);
+max-width: var(--maxw);
+}
+
+#type-summary-bar h4 {
+font-size: 1.5rem;
+font-weight: 300;
+margin: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 1rem;
+flex-wrap: wrap;
+}
+
+.type-value {
+font-weight: 600;
+white-space: nowrap;
+}
+
+.type-value.positive {
+color: var(--c-pos);
+}
+
+.type-value.negative {
+color: var(--c-neg);
+}
+
+.type-separator {
+font-weight: 300;
+color: var(--c-black);
+opacity: 0.5;
+}
+
+/* ============================================
+      MUTE TOGGLE (v2.2 - Option 2: No borders)
+      ============================================ */
+.mute-toggle-wrapper {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+
+.mute-checkbox {
+position: relative;
+width: 48px;
+height: 28px;
+flex-shrink: 0;
+}
+
+.mute-checkbox input[type="checkbox"] {
+position: absolute;
+opacity: 0;
+width: 100%;
+height: 100%;
+cursor: pointer;
+z-index: 2;
+margin: 0;
+}
+
+/* v2.3: Option 2 - No borders, subtle shadow */
+.mute-checkbox-slider {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: var(--c-pos);
+border: none;
+border-radius: 999px;
+transition: background 0.3s ease;
+pointer-events: none;
+box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.mute-checkbox-slider::before {
+content: '';
+position: absolute;
+height: 22px;
+width: 22px;
+left: 3px;
+bottom: 3px;
+background: var(--c-white);
+border: none;
+border-radius: 50%;
+transition: transform 0.3s ease;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
+background: var(--c-muted);
+}
+
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before {
+transform: translateX(20px);
+}
+
+.mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
+outline: 3px solid var(--c-black);
+outline-offset: 2px;
+}
+
+/* ============================================
+      MUTED ACCOUNT STATE (v2.2)
+      ============================================ */
+.row.muted {
+opacity: 0.5;
+}
+
+.row.muted * {
+color: var(--c-muted) !important;
+border-color: var(--c-muted) !important;
+background-color: transparent !important;
+}
+
+.row.muted input[type="number"] {
+background: transparent !important;
+color: var(--c-muted) !important;
+}
+
+.row.muted .mute-checkbox-slider {
+background: var(--c-muted) !important;
+border-color: var(--c-muted) !important;
+}
+
+.row.muted .mute-checkbox-slider::before {
+background: var(--c-white) !important;
+border-color: var(--c-muted) !important;
+}
+
+/* ============================================
+      MOBILE RESPONSIVE
+      ============================================ */
+@media (max-width: 650px) {
+.row {
+flex-direction: column;
+}
+
+.right { 
+min-width: unset; 
+text-align: left; 
+align-self: flex-start;
+padding-top: 0.5rem; 
+}
+
+.right .values {
+display: none;
+}
+.right .ratio-bar {
+display: block;
+}
+
+.left {
+gap: 8px;
+width: 100%;
+padding-right: 0;
+}
+
+input[type="number"], input[type="date"], input[type="text"] { 
+width: 100%; 
+max-width: 100%;
+}
+
+.input-line {
+width: 100%;
+margin-left: 0;
+padding-top: 0;
+}
+
+.apr {
+padding-top: 0;
+}
+
+.toolbar { 
+flex-direction: column; 
+align-items: flex-start;
+justify-content: flex-start;
+padding: 6px 24px;
+}
+
+.financial-group {
+flex-direction: column;
+align-items: center;
+width: 100%;
+}
+
+#financial-summary {
+font-size: 3.9rem;
+padding-bottom: 8px;
+width: 100%;
+text-align: center;
+}
+
+#interest-summary {
+font-size: 1.95rem;
+width: 100%;
+text-align: center;
+padding-bottom: 8px;
+}
+
+.toolbar-controls {
+justify-content: space-around;
+width: 100%;
+}
+
+.lastval, .name {
+font-size: 2rem;
+}
+
+/* v2.1: Slightly larger footer on mobile for readability */
+footer, footer small, footer a, .security-notice {
+font-size: 0.75rem;
+}
+
+/* v2.2: Type summary bar mobile stacking */
+#type-summary-bar h4 {
+flex-direction: column;
+gap: 0.5rem;
+font-size: 1.2rem;
+}
+
+.type-separator {
+display: none;
+}
+}
+</style>
 </head>
 <body>
-  <div id="toast" role="status" aria-live="polite"></div>
-  
-  <div id="delete-modal-backdrop"></div>
-  <div id="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
-    <h3 id="delete-modal-title" style="margin-top:0;">Delete Entry?</h3>
-    <p>Do you really want to delete this entry?</p>
-    <span id="delete-modal-details"></span>
-    <div id="delete-modal-buttons">
-      <button id="delete-btn-cancel">Cancel</button>
-      <button id="delete-btn-confirm">Yes, Delete</button>
-    </div>
-  </div>
-
-  <header class="wrap">
-    <div class="toolbar">
-      <!-- NEW: Financial Summary -->
-      <div id="financial-summary"></div>
-      
-      <div class="toolbar-controls">
-        <label for="timeframe">Timeframe:</label>
-        <select id="timeframe">
-          <option value="ytd" selected>This Calendar Year</option>
-          <option value="today">Today</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="14d">Last 14 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year (12mo)</option>
-          <option value="all">All Time</option>
-        </select>
-        
-        <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-        <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-        
-        <button id="refresh" aria-label="Refresh data">Refresh</button>
-        <button id="submitAll">Submit All</button>
-      </div>
-    </div>
-    <div id="chart"></div>
-  </header>
-<!-- FIXED: Changed invalid <section> tag to a <div>, added class="wrap" for correct centering. -->
-<div id="statusbar" class="wrap"></div>
-  <hr class="wrap divider">
-
-  <main class="wrap">
-    <section id="accounts" class="accounts"></section>
-    <footer>
-      <small>Enter value(s) and press <b>Enter</b> or <b>Submit All</b>. Double-click an entry to delete. <br>Values displayed are truncated to whole numbers.</small>
-    </footer>
-  </main>
-
-  <script>
-  // ==== CONFIG ====
-  // IMPORTANT: Replace this with your own Google Apps Script Web App URL
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbwTGdC3eksqggTMAUtjcmmrCFBX_PGfLi_2_KkcLCDzXW8pYR9Uzum0c9UwfXPJvcM0Zw/exec';
-
-  // ==== APP STATE ====
-  let SNAP = null;
-  let MODE = 'totals';
-  let TIMEFRAME = 'ytd';
-  let IS_LOADING = false;
-  let TOAST_TIMER = null;
-
-  // ==== UI FUNCTIONS ====
-  function showToast(msg, type = 'info', duration = 3000) {
-    const el = document.getElementById('toast');
-    if (!el) return;
-    if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
-    el.textContent = msg;
-    el.dataset.type = type;
-    el.classList.add('show');
-    TOAST_TIMER = setTimeout(() => {
-      el.classList.remove('show');
-    }, duration);
-  }
-  
-  function setLoading(loading, message) {
-    IS_LOADING = loading;
-    document.getElementById('refresh').disabled = loading;
-    document.getElementById('submitAll').disabled = loading;
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      inp.disabled = loading;
-      if (loading) {
-        inp.classList.add('submitting');
-      } else {
-        inp.classList.remove('submitting');
-      }
-    });
-    
-    if (message) {
-      if (document.getElementById('delete-modal-backdrop').classList.contains('show')) {
-        return;
-      }
-      showToast(message, 'info', loading ? 10000 : 3000);
-    }
-  }
-
-  // ==== DELETE MODAL FUNCTIONS ====
-  function showDeleteConfirm(account, date, value, readableValue) {
-    if (IS_LOADING) return;
-    
-    const backdrop = document.getElementById('delete-modal-backdrop');
-    const modal = document.getElementById('delete-modal');
-    const details = document.getElementById('delete-modal-details');
-    const confirmBtn = document.getElementById('delete-btn-confirm');
-    
-    details.textContent = `${account}: ${readableValue} on ${date}`;
-    
-    backdrop.classList.add('show');
-    modal.classList.add('show');
-    
-    confirmBtn.onclick = () => {
-      processDelete(account, date, value);
-    };
-  }
-  
-  function hideDeleteConfirm() {
-    document.getElementById('delete-modal-backdrop').classList.remove('show');
-    document.getElementById('delete-modal').classList.remove('show');
-  }
-  
-  async function processDelete(account, date, value) {
-    hideDeleteConfirm();
-    if (IS_LOADING) return;
-    setLoading(true, 'Deleting entry…');
-    
-    try {
-      const body = new URLSearchParams({ payload: JSON.stringify({ account, date, value: Number(value) }) });
-      const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
-      const text = await res.text();
-      
-      let j;
-      try { j = JSON.parse(text); } catch {
-        console.error('Delete non-JSON:', text);
-        showToast('Delete failed (non-JSON response)', 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      if (!j.ok) {
-        console.error('Delete JSON error:', j);
-        showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      showToast('Entry deleted. Refreshing…', 'success');
-      await fetchSnapshot();
-      
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      showToast('Network error deleting entry.', 'error', 5000);
-    }
-  }
-
-  // ==== DATA & RENDERING ====
-  async function fetchSnapshot() {
-    if (IS_LOADING) return;
-    setLoading(true, 'Loading snapshot…');
-    
-    try {
-      const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
-      const text = await res.text();
-      
-      let j;
-      try { 
-        j = JSON.parse(text); 
-      } catch {
-        // Log the raw text returned by the server if it's not valid JSON
-        console.error('Non-JSON response (API issue):', text); 
-        showToast('Error: API returned non-JSON. Check console for raw output.', 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      if (!j.ok) {
-        // Log the JSON error object returned by the server
-        console.error('Snapshot error (j.ok is false):', j); 
-        showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
-        setLoading(false);
-        return;
-      }
-      
-      SNAP = j;
-      // Log the successfully loaded data object for debugging structure
-      console.log('--- Snapshot Data Loaded Successfully ---', SNAP); 
-
-      setLoading(false, 'Snapshot loaded');
-      renderAll();
-      
-    } catch (err) {
-      // Log network errors
-      console.error('Fetch failed (network/pre-parse error):', err); 
-      setLoading(false);
-      showToast('Fetch failed (see console)', 'error', 5000);
-    }
-  }
-
-  function renderAll() {
-    renderSummary();
-    renderChart();
-    renderAccounts();
-    renderStatusBar(); // Call the status bar renderer
-  }
-  
-  function renderSummary() {
-      const summaryEl = document.getElementById('financial-summary');
-      if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
-
-      // Get the index of the last (most recent) data point
-      const lastIndex = SNAP.dateAxis.length - 1;
-      
-      // If no data points exist, clear and exit
-      if (lastIndex < 0) {
-        summaryEl.innerHTML = 'No Data';
-        return;
-      }
-      
-      // Get the latest totals. Debts are stored as negative, so we use Math.abs for display.
-      const assets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-      const debts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0); 
-
-      // Format the totals using the function that truncates to whole numbers
-      const assetString = `<span class="summary-asset">${formatMoney(assets)}</span>`;
-      const debtString = `<span class="summary-debt">${formatMoney(debts)}</span>`;
-
-      // Render the summary: [Assets] | [Debts]
-      summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
-  }
-
-  // NEW/FIXED: Logic for Status Bar visualization
-  function renderStatusBar() {
-    const statusEl = document.getElementById('statusbar');
-    if (!statusEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
-    
-    const lastIndex = SNAP.dateAxis.length - 1;
-    if (lastIndex < 0) {
-        statusEl.innerHTML = '';
-        return;
-    }
-
-    const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-    const totalDebts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0);
-
-    // Calculate Total Magnitude (Assets + Debts) for 100% reference
-    const totalMagnitude = totalAssets + totalDebts;
-    
-    if (totalMagnitude === 0) {
-        // If everything is zero, show a neutral bar (e.g., 50/50 split)
-        const neutralBlocks = 50;
-        const blocks = `<span class="status-pos">${'█'.repeat(neutralBlocks)}</span><span class="status-neg">${'█'.repeat(100 - neutralBlocks)}</span>`;
-        statusEl.innerHTML = blocks;
-        return;
-    }
-
-    // Calculate percentage and map to 100 blocks
-    const assetPercentage = (totalAssets / totalMagnitude);
-    
-    // Round blocks and ensure they sum exactly to 100
-    const assetBlocks = Math.round(assetPercentage * 100);
-    const debtBlocks = 100 - assetBlocks;
-    
-    let blocks = '';
-    
-    // Assets (Green) first
-    if (assetBlocks > 0) {
-        blocks += `<span class="status-pos">${'█'.repeat(assetBlocks)}</span>`;
-    }
-    // Debts (Red) second
-    if (debtBlocks > 0) {
-        blocks += `<span class="status-neg">${'█'.repeat(debtBlocks)}</span>`;
-    }
-    
-    statusEl.innerHTML = blocks;
-  }
-
-  function renderChart() {
-    if (!SNAP || !window.google || !google.visualization) return;
-    
-    // FIX 1: Ensure we check if dateAxis has elements.
-    const labels = SNAP.dateAxis; 
-    if (!labels || labels.length === 0) {
-      document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
-      return;
-    }
-    
-    const data = new google.visualization.DataTable();
-    data.addColumn('string', 'Date'); 
-    let rows = [];
-    
-    if (MODE === 'totals') {
-      data.addColumn('number', 'Assets');
-      data.addColumn('number', 'Debts');
-      // Ensure the arrays we are iterating over exist before using them
-      const assets = SNAP.totals?.assets || [];
-      const debts = SNAP.totals?.debts || [];
-
-      for (let i = 0; i < labels.length; i++) { 
-        rows.push([
-          labels[i],
-          Number(assets[i] || 0),
-          Number(debts[i] || 0)
-        ]);
-      }
-    } else {
-      SNAP.accounts.forEach(a => data.addColumn('number', a.name));
-      for (let i = 0; i < labels.length; i++) {
-        const row = [ labels[i] ]; 
-        SNAP.accounts.forEach(a => {
-          // Use safe navigation operator ?. for accessing nested monthly data
-          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-          row.push(Number(v));
-        });
-        rows.push(row);
-      }
-    }
-    data.addRows(rows);
-    
-    let minV = 0, maxV = 0;
-    for (const r of rows) {
-      for (let i = 1; i < r.length; i++) {
-        const v = Number(r[i]) || 0;
-        if (v < minV) minV = v;
-        if (v > maxV) maxV = v;
-      }
-    }
-    const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
-    const styles = getComputedStyle(document.documentElement);
-    const pos = styles.getPropertyValue('--c-pos').trim();
-    const neg = styles.getPropertyValue('--c-neg').trim();
-    const black = styles.getPropertyValue('--c-black').trim();
-    const textStyle = { color: black, fontName: 'system-ui' };
-    
-    let chartColors;
-    if (MODE === 'totals') {
-      chartColors = [pos, neg];
-    } else {
-      chartColors = SNAP.accounts.map(a => a.color || null);
-    }
-    
-    const options = {
-      height: Math.max(240, Math.round(window.innerHeight * 0.30)),
-      backgroundColor: { fill: 'transparent' },
-      chartArea: { width: '85%', height: '70%' },
-      legend: { position: 'top', alignment: 'center', textStyle: textStyle },
-      hAxis: { 
-        slantedText: false, 
-        textStyle: textStyle,
-        showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
-      },
-      vAxis: { 
-        viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
-        baseline: 0, 
-        baselineColor: black,
-        gridlines: { color: black, opacity: 0.1 },
-        textStyle: textStyle
-      },
-      seriesType: 'line',
-      lineWidth: 3,
-      colors: chartColors
-    };
-    const chart = new google.visualization.ComboChart(document.getElementById('chart'));
-    chart.draw(data, options);
-  }
-
-  const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
-
-  // Function for formatting balances (removes '+' sign, keeps '−' sign, truncates decimals)
-  function formatMoney(n) {
-    const val = Number(n) || 0;
-    const sign = val < 0 ? '−' : ''; // Only show negative sign
-    const abs = Math.abs(val);
-    
-    // Truncate to get only the whole number part (11.23 becomes 11)
-    const displayValue = Math.trunc(abs);
-
-    // Format the truncated value for currency display (e.g., adding thousands separators)
-    return `${sign}$${displayValue.toLocaleString(undefined, { 
-        minimumFractionDigits: 0, 
-        maximumFractionDigits: 0 
-    })}`;
-  }
-  
-  // Function for formatting limits (removes all signs, truncates decimals)
-  function formatLimit(n) {
-    const val = Math.abs(Number(n) || 0);
-    const displayValue = Math.trunc(val);
-    
-    // Only display if there is a positive limit set
-    if (displayValue <= 0) return null;
-    
-    return `$${displayValue.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    })}`;
-  }
-
-
-  function renderAccounts() {
-    const root = document.getElementById('accounts');
-    root.innerHTML = '';
-    
-    // Check if SNAP is null or missing expected structure
-    if (!SNAP || !SNAP.accounts) {
-        // If the API call fails or returns empty data, we exit gracefully
-        return; 
-    }
-
-    SNAP.accounts.forEach(a => {
-      // Use safe navigation operator ?. and default to an empty object for 's'
-      const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
-
-      const row = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right = document.createElement('div'); right.className = 'right';
-
-      const accountDetails = document.createElement('div');
-      accountDetails.className = 'account-details';
-
-      // 1. Identity Wrap (Balance + Name)
-      const identityWrap = document.createElement('div');
-      identityWrap.className = 'identity-wrap'; 
-      
-      const lastEl = document.createElement('span');
-      lastEl.className = 'lastval';
-      // Calls the new formatMoney function which truncates the display
-      lastEl.textContent = formatMoney(last); 
-      lastEl.dataset.sign = signOf(last);
-      
-      const nameEl = document.createElement('span');
-      nameEl.className = 'name';
-      nameEl.textContent = a.name;
-      
-      if (a.color) {
-        nameEl.style.color = a.color;
-      }
-      
-      identityWrap.appendChild(lastEl);
-      identityWrap.appendChild(nameEl);
-
-      // 2. Metadata Stack (APR + Limit, stacked vertically)
-      const metadataStack = document.createElement('div');
-      metadataStack.className = 'metadata-stack';
-
-      const aprEl = document.createElement('span');
-      aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-      metadataStack.appendChild(aprEl);
-
-      // Limit Display (Using Limit data from Code.js v1h)
-      const formattedLimit = formatLimit(a.limit);
-      if (formattedLimit) {
-        const limitEl = document.createElement('span');
-        limitEl.className = 'account-limit';
-        limitEl.textContent = `Limit: ${formattedLimit}`;
-        metadataStack.appendChild(limitEl);
-      }
-      
-      accountDetails.appendChild(identityWrap);
-      accountDetails.appendChild(metadataStack);
-
-      const inputLine = document.createElement('div');
-      inputLine.className = 'input-line';
-      inputLine.style.flexShrink = '0';
-      
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.placeholder = 'Add new value…';
-      inp.step = '0.01'; // Important: Keep step at 0.01 to allow decimal input
-      inp.setAttribute('aria-label', `New value for ${a.name}`);
-      inp.dataset.accountName = a.name;
-
-      if (last > 0) {
-        inp.style.backgroundColor = 'var(--c-tint-pos)';
-      } else if (last < 0) {
-        inp.style.backgroundColor = 'var(--c-tint-neg)';
-      } else {
-        inp.style.backgroundColor = 'var(--c-white)';
-      }
-
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
-        }
-      });
-      inputLine.appendChild(inp);
-      
-      left.appendChild(accountDetails);
-      left.appendChild(inputLine);
-
-      const vals = document.createElement('div'); vals.className = 'values';
-      
-      // FIX 2: Ensure s.lastN is treated as an array, even if it's undefined or null
-      // The || [] operator guarantees that we iterate over an empty array if lastN is missing.
-      (s.lastN || []).forEach(v => {
-        const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-        const val = Number(isObject ? v.value : v);
-        const date = isObject ? v.date : null;
-        
-        // Use formatMoney for display (which is now truncated)
-        const readableValue = formatMoney(val);
-        
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.dataset.sign = signOf(val);
-        chip.textContent = readableValue;
-        
-        // Important: Store the full decimal value in data-value for accurate deletion/submission
-        chip.dataset.value = val; 
-        
-        if (date) {
-          chip.dataset.date = date;
-          chip.dataset.account = a.name;
-          chip.dataset.readableValue = formatMoney(val);
-          
-          chip.addEventListener('dblclick', handleDeleteClick);
-          chip.addEventListener('contextmenu', handleDeleteClick);
-          chip.addEventListener('click', (e) => {
-            if (e.shiftKey || e.ctrlKey || e.altKey) {
-              handleDeleteClick(e);
-            }
-          });
-        } else {
-          chip.classList.add('no-delete');
-          chip.title = "Re-deploy CODE.JS to enable deletion";
-        }
-        
-        vals.appendChild(chip);
-      });
-      right.appendChild(vals);
-
-      const bar = document.createElement('h4');
-      bar.className = 'ratio-bar';
-      
-      const assetSpan = document.createElement('span');
-      assetSpan.style.color = 'var(--c-pos)';
-      
-      const debtSpan = document.createElement('span');
-      debtSpan.style.color = 'var(--c-neg)';
-      
-      if (last >= 0) {
-        assetSpan.textContent = '█'.repeat(10);
-        debtSpan.textContent = '';
-      } else {
-        assetSpan.textContent = '';
-        debtSpan.textContent = '█'.repeat(10);
-      }
-      
-      bar.appendChild(assetSpan);
-      bar.appendChild(debtSpan);
-      right.appendChild(bar);
-
-
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
-    });
-  }
-  
-  function handleDeleteClick(e) {
-    e.preventDefault();
-    if (IS_LOADING) return;
-    
-    const chip = e.currentTarget;
-    const { account, date, value, readableValue } = chip.dataset;
-    
-    if (!date) {
-      showToast('Cannot delete. Data is from an older script version.', 'error');
-      return;
-    }
-    
-    // Pass the full decimal value (value) to the deletion function
-    showDeleteConfirm(account, date, value, readableValue);
-  }
-
-  async function submitAll() {
-    const entries = [];
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      const v = inp.value.trim();
-      if (v !== '') {
-        entries.push({ 
-          account: inp.dataset.accountName, 
-          value: Number(v),
-          inputEl: inp
-        });
-      }
-    });
-    if (entries.length === 0) {
-      showToast('No values entered to submit.', 'info');
-      return;
-    };
-    await submitEntries(entries);
-  }
-
-  async function submitEntries(entries) {
-    if (IS_LOADING) return;
-    setLoading(true, 'Submitting entries…');
-    
-    entries.forEach(e => e.inputEl?.classList.add('submitting'));
-
-    try {
-      const validEntries = entries
-        .map(e => ({ account: e.account, value: e.value }))
-        .filter(e => e.account && !isNaN(e.value));
-
-      if (validEntries.length === 0) {
-        showToast('No valid entries to submit.', 'error');
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
-      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-      const text = await res.text();
-      
-      let j;
-      try { 
-        j = JSON.parse(text); 
-      } catch {
-        console.error('Submit non-JSON:', text);
-        showToast('Submit failed (non-JSON response)', 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-      
-      if (!j.ok) {
-        console.error('Submit JSON error:', j);
-        showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      showToast('Submit successful! Refreshing data…', 'success');
-      entries.forEach(e => {
-        e.inputEl?.classList.add('submitted-ok');
-        e.inputEl.value = '';
-        setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
-      });
-
-      await fetchSnapshot();
-      
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      showToast('Network error submitting data.', 'error', 5000);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-    }
-    
-    setLoading(false);
-  }
-  
-  // FIXED: Removed formatLimit() as it wasn't defined in the user's version. I will redefine it.
-  function formatLimit(n) {
-    const val = Math.abs(Number(n) || 0);
-    const displayValue = Math.trunc(val);
-    
-    if (displayValue <= 0) return null;
-    
-    return `$${displayValue.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    })}`;
-  }
-  
-  // NEW: Logic for Status Bar visualization (Missing from user's code, re-added)
-  function renderStatusBar() {
-    const statusEl = document.getElementById('statusbar');
-    if (!statusEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
-    
-    const lastIndex = SNAP.dateAxis.length - 1;
-    if (lastIndex < 0) {
-        statusEl.innerHTML = '';
-        return;
-    }
-
-    const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-    const totalDebts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0);
-
-    // Calculate Total Magnitude (Assets + Debts) for 100% reference
-    const totalMagnitude = totalAssets + totalDebts;
-    
-    if (totalMagnitude === 0) {
-        // If everything is zero, show a neutral bar (50/50 split)
-        const neutralBlocks = 50;
-        const blocks = `<span class="status-pos">${'█'.repeat(neutralBlocks)}</span><span class="status-neg">${'█'.repeat(100 - neutralBlocks)}</span>`;
-        statusEl.innerHTML = blocks;
-        return;
-    }
-
-    // Calculate percentage and map to 100 blocks
-    const assetPercentage = (totalAssets / totalMagnitude);
-    
-    // Round blocks and ensure they sum exactly to 100
-    const assetBlocks = Math.round(assetPercentage * 100);
-    const debtBlocks = 100 - assetBlocks;
-    
-    let blocks = '';
-    
-    // Assets (Green) first
-    if (assetBlocks > 0) {
-        blocks += `<span class="status-pos">${'█'.repeat(assetBlocks)}</span>`;
-    }
-    // Debts (Red) second
-    if (debtBlocks > 0) {
-        blocks += `<span class="status-neg">${'█'.repeat(debtBlocks)}</span>`;
-    }
-    
-    statusEl.innerHTML = blocks;
-  }
-  
-  // FIXED: Renamed renderAll to include call to renderStatusBar, and updated renderAccounts to show limit
-  // Note: renderAll is already in the file, so I will ensure renderStatusBar is called there.
-  // RENDER ACCOUNTS: UPDATED to match required structure and include limit.
-  function renderAccounts() {
-    const root = document.getElementById('accounts');
-    root.innerHTML = '';
-    
-    if (!SNAP || !SNAP.accounts) {
-        return; 
-    }
-
-    SNAP.accounts.forEach(a => {
-      const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
-
-      const row = document.createElement('div'); row.className = 'row';
-      const left = document.createElement('div'); left.className = 'left';
-      const right = document.createElement('div'); right.className = 'right';
-
-      // Use column flex for correct stacking on desktop/mobile
-      const accountDetails = document.createElement('div');
-      accountDetails.className = 'account-details';
-
-      const identityWrap = document.createElement('div');
-      identityWrap.className = 'identity-wrap'; // Applied fixed layout class
-
-      const lastEl = document.createElement('span');
-      lastEl.className = 'lastval';
-      lastEl.textContent = formatMoney(last); 
-      lastEl.dataset.sign = signOf(last);
-      
-      const nameEl = document.createElement('span');
-      nameEl.className = 'name';
-      nameEl.textContent = a.name;
-      
-      if (a.color) {
-        nameEl.style.color = a.color;
-      }
-      
-      identityWrap.appendChild(lastEl);
-      identityWrap.appendChild(nameEl);
-      
-      // Metadata Stack (APR + Limit)
-      const metadataStack = document.createElement('div');
-      metadataStack.className = 'metadata-stack';
-
-      const aprEl = document.createElement('span');
-      aprEl.className = 'apr';
-      aprEl.textContent = `APR: ${(a.apr * 100).toFixed(2)}%`;
-      metadataStack.appendChild(aprEl);
-
-      const formattedLimit = formatLimit(a.limit);
-      if (formattedLimit) {
-        const limitEl = document.createElement('span');
-        limitEl.className = 'account-limit';
-        limitEl.textContent = `Limit: ${formattedLimit}`;
-        metadataStack.appendChild(limitEl);
-      }
-      
-      accountDetails.appendChild(identityWrap);
-      accountDetails.appendChild(metadataStack); // Append the whole stack
-
-      const inputLine = document.createElement('div');
-      inputLine.className = 'input-line';
-      inputLine.style.flexShrink = '0';
-      
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.placeholder = 'Add new value…';
-      inp.step = '0.01'; 
-      inp.setAttribute('aria-label', `New value for ${a.name}`);
-      inp.dataset.accountName = a.name;
-
-      if (last > 0) {
-        inp.style.backgroundColor = 'var(--c-tint-pos)';
-      } else if (last < 0) {
-        inp.style.backgroundColor = 'var(--c-tint-neg)';
-      } else {
-        inp.style.backgroundColor = 'var(--c-white)';
-      }
-
-      inp.addEventListener('keydown', async (ev) => {
-        if (ev.key === 'Enter') {
-          await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
-        }
-      });
-      inputLine.appendChild(inp);
-      
-      left.appendChild(accountDetails);
-      left.appendChild(inputLine);
-
-      const vals = document.createElement('div'); vals.className = 'values';
-      
-      (s.lastN || []).forEach(v => {
-        const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-        const val = Number(isObject ? v.value : v);
-        const date = isObject ? v.date : null;
-        
-        const readableValue = formatMoney(val);
-        
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.dataset.sign = signOf(val);
-        chip.textContent = readableValue;
-        
-        chip.dataset.value = val; 
-        
-        if (date) {
-          chip.dataset.date = date;
-          chip.dataset.account = a.name;
-          chip.dataset.readableValue = formatMoney(val);
-          
-          chip.addEventListener('dblclick', handleDeleteClick);
-          chip.addEventListener('contextmenu', handleDeleteClick);
-          chip.addEventListener('click', (e) => {
-            if (e.shiftKey || e.ctrlKey || e.altKey) {
-              handleDeleteClick(e);
-            }
-          });
-        } else {
-          chip.classList.add('no-delete');
-          chip.title = "Re-deploy CODE.JS to enable deletion";
-        }
-        
-        vals.appendChild(chip);
-      });
-      right.appendChild(vals);
-
-      const bar = document.createElement('h4');
-      bar.className = 'ratio-bar';
-      
-      const assetSpan = document.createElement('span');
-      assetSpan.style.color = 'var(--c-pos)';
-      
-      const debtSpan = document.createElement('span');
-      debtSpan.style.color = 'var(--c-neg)';
-      
-      if (last >= 0) {
-        assetSpan.textContent = '█'.repeat(10);
-        debtSpan.textContent = '';
-      } else {
-        assetSpan.textContent = '';
-        debtSpan.textContent = '█'.repeat(10);
-      }
-      
-      bar.appendChild(assetSpan);
-      bar.appendChild(debtSpan);
-      right.appendChild(bar);
-
-
-      row.appendChild(left);
-      row.appendChild(right);
-      root.appendChild(row);
-    });
-  }
-  
-  function handleDeleteClick(e) {
-    e.preventDefault();
-    if (IS_LOADING) return;
-    
-    const chip = e.currentTarget;
-    const { account, date, value, readableValue } = chip.dataset;
-    
-    if (!date) {
-      showToast('Cannot delete. Data is from an older script version.', 'error');
-      return;
-    }
-    
-    // Pass the full decimal value (value) to the deletion function
-    showDeleteConfirm(account, date, value, readableValue);
-  }
-
-  async function submitAll() {
-    const entries = [];
-    document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
-      const v = inp.value.trim();
-      if (v !== '') {
-        entries.push({ 
-          account: inp.dataset.accountName, 
-          value: Number(v),
-          inputEl: inp
-        });
-      }
-    });
-    if (entries.length === 0) {
-      showToast('No values entered to submit.', 'info');
-      return;
-    };
-    await submitEntries(entries);
-  }
-
-  async function submitEntries(entries) {
-    if (IS_LOADING) return;
-    setLoading(true, 'Submitting entries…');
-    
-    entries.forEach(e => e.inputEl?.classList.add('submitting'));
-
-    try {
-      const validEntries = entries
-        .map(e => ({ account: e.account, value: e.value }))
-        .filter(e => e.account && !isNaN(e.value));
-
-      if (validEntries.length === 0) {
-        showToast('No valid entries to submit.', 'error');
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
-      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-      const text = await res.text();
-      
-      let j;
-      try { 
-        j = JSON.parse(text); 
-      } catch {
-        console.error('Submit non-JSON:', text);
-        showToast('Submit failed (non-JSON response)', 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-      
-      if (!j.ok) {
-        console.error('Submit JSON error:', j);
-        showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
-        setLoading(false);
-        entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-        return;
-      }
-
-      showToast('Submit successful! Refreshing data…', 'success');
-      entries.forEach(e => {
-        e.inputEl?.classList.add('submitted-ok');
-        e.inputEl.value = '';
-        setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
-      });
-
-      await fetchSnapshot();
-      
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      showToast('Network error submitting data.', 'error', 5000);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-    }
-    
-    setLoading(false);
-  }
-  
-  // ==== INITIALIZATION ====
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('refresh').addEventListener('click', fetchSnapshot);
-    document.getElementById('submitAll').addEventListener('click', submitAll);
-    
-    document.querySelectorAll('input[name="mode"]').forEach(r => {
-      r.addEventListener('change', (e) => { 
-        MODE = e.target.value; 
-        renderChart(); 
-      });
-    });
-    
-    document.getElementById('timeframe').addEventListener('change', (e) => {
-      TIMEFRAME = e.target.value;
-      fetchSnapshot();
-    });
-    
-    document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
-    document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
-    
-    window.addEventListener('resize', renderChart);
-
-    if (window.google && google.charts) {
-      google.charts.load('current', { packages: ['corechart'] });
-      google.charts.setOnLoadCallback(fetchSnapshot);
-    } else {
-      const s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/charts/loader.js';
-      // FIX: Removed duplicate '=' that caused the SyntaxError
-      s.onload = () => { 
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(fetchSnapshot);
-      };
-      document.head.appendChild(s);
-    }
-  });
-  </script>
+<!-- Toast notification -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Delete confirmation modal -->
+<div id="delete-modal-backdrop" class="modal-backdrop"></div>
+<div id="delete-modal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
+<h3 id="delete-modal-title">Delete Entry?</h3>
+<p>Do you really want to delete this entry?</p>
+<span id="delete-modal-details" class="modal-details"></span>
+<div id="delete-modal-buttons" class="modal-buttons">
+<button id="delete-btn-cancel">Cancel</button>
+<button id="delete-btn-confirm">Yes, Delete</button>
+</div>
+</div>
+
+<!-- Edit chip modal -->
+<div id="edit-chip-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-chip-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-chip-modal-title">
+<h3 id="edit-chip-modal-title">Edit Entry</h3>
+<div class="modal-form-group">
+<label for="edit-chip-value">Value:</label>
+<input type="number" id="edit-chip-value" step="0.01" placeholder="Enter value">
+</div>
+<div class="modal-form-group">
+<label for="edit-chip-date">Date:</label>
+<input type="date" id="edit-chip-date">
+</div>
+<span id="edit-chip-details" class="modal-details"></span>
+<div id="edit-chip-buttons" class="modal-buttons">
+<button id="edit-chip-delete">Delete</button>
+<button id="edit-chip-cancel">Cancel</button>
+<button id="edit-chip-save">Save</button>
+</div>
+</div>
+
+<!-- Account menu modal -->
+<div id="account-menu-modal-backdrop" class="modal-backdrop"></div>
+<div id="account-menu-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="account-menu-modal-title">
+<h3 id="account-menu-modal-title">Account Actions</h3>
+<p id="account-menu-account-name" style="font-weight: 600; font-size: 1.2rem; margin-bottom: 1rem;"></p>
+<div id="account-menu-buttons" class="modal-buttons">
+<button id="account-menu-edit">✏️ Edit Account Settings</button>
+<button id="account-menu-delete">🗑️ Delete Account</button>
+<button id="account-menu-add">➕ Add New Account Below</button>
+<button id="account-menu-cancel">Cancel</button>
+</div>
+</div>
+
+<!-- v2.3: Edit Account modal -->
+<div id="edit-account-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-account-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-account-modal-title">
+<h3 id="edit-account-modal-title">Edit Account</h3>
+<p id="edit-account-name" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem;"></p>
+<div class="modal-form-group">
+<label for="edit-account-limit">Credit Limit (for CC accounts):</label>
+<input type="number" id="edit-account-limit" step="1" placeholder="e.g. 5000">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-apr">APR (as decimal, e.g. 0.29 for 29%):</label>
+<input type="number" id="edit-account-apr" step="0.01" placeholder="e.g. 0.29">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-value">Current Value:</label>
+<input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
+</div>
+<div id="edit-account-buttons" class="modal-buttons">
+<button id="edit-account-cancel">Cancel</button>
+<button id="edit-account-save">Save Changes</button>
+</div>
+</div>
+
+<!-- Main header -->
+<header>
+<div class="toolbar">
+<div class="financial-group">
+<div id="financial-summary"></div>
+<div id="interest-summary"></div>
+</div>
+
+<div class="toolbar-controls">
+<label for="timeframe">Timeframe:</label>
+<select id="timeframe">
+<option value="ytd" selected>This Calendar Year</option>
+<option value="today">Today</option>
+<option value="7d">Last 7 Days</option>
+<option value="14d">Last 14 Days</option>
+<option value="30d">Last 30 Days</option>
+<option value="90d">Last 90 Days</option>
+<option value="1y">Last Year (12mo)</option>
+<option value="all">All Time</option>
+</select>
+
+<label><input type="radio" name="mode" value="totals" checked> Totals</label>
+<label><input type="radio" name="mode" value="accounts"> Per-account</label>
+
+<button id="refresh" aria-label="Refresh data">Refresh</button>
+<button id="submitAll">Submit All</button>
+</div>
+</div>
+<hr>
+<div id="chart"></div>
+<hr>
+<!-- v2.0: Statusbar uses █  character -->
+<section id="statusbar"></section>
+</header>
+
+<hr class="wrap divider">
+
+<main class="wrap">
+<section id="accounts" class="accounts"></section>
+
+<!-- v2.2: Type-based category summary -->
+<section id="type-summary-bar">
+<h4></h4>
+</section>
+
+<!-- v2.3: Footer with Google Sheet link -->
+<footer>
+<div class="security-notice">
+🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
+information is stored in this application. All data resides in your Google Sheet. 
+Your financial footprint, your control.
+</div>
+
+<small>
+<b>v2.3 Features:</b> CC limits • Edit account settings • Type summaries • Mute/unmute accounts<br>
+<a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
+</small>
+</footer>
+</main>
+
+<script>
+/* ============================================
+    CONFIGURATION
+    ============================================ */
+const API_BASE = 'https://script.google.com/macros/s/AKfycbw_ZZA6z-PLIkBt3qJwEdOziJOZ9dOzyzrAQEjSLDHfZTOQQ7HUGj7kF7MkFdJOMOIj/exec';
+const SHEET_ID = 'YOUR_SHEET_ID_HERE'; // v2.3: Add your Google Sheet ID here
+
+/* ============================================
+    APPLICATION STATE
+    ============================================ */
+let SNAP = null;
+let MODE = 'totals';
+let TIMEFRAME = 'ytd';
+let IS_LOADING = false;
+let TOAST_TIMER = null;
+let LONG_PRESS_TIMER = null;
+const LONG_PRESS_DURATION = 500;
+
+/* v2.2: Muted accounts state */
+let MUTED_ACCOUNTS = new Set();
+
+/* v2.2: Type mapping */
+const TYPE_LABELS = {
+  'bk': 'Banks',
+  'cc': 'CreditCards',
+  'bill': 'Bills',
+  'ii': 'Investments',
+  'sv': 'Savings'
+};
+
+/* v2.3: Account metadata (limits, etc.) - stored in memory */
+let ACCOUNT_METADATA = new Map();
+
+/* ============================================
+    UI UTILITY FUNCTIONS
+    ============================================ */
+
+function showToast(msg, type = 'info', duration = 3000) {
+const el = document.getElementById('toast');
+if (!el) return;
+
+if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
+
+el.textContent = msg;
+el.dataset.type = type;
+el.classList.add('show');
+
+TOAST_TIMER = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function setLoading(loading, message) {
+IS_LOADING = loading;
+
+document.getElementById('refresh').disabled = loading;
+document.getElementById('submitAll').disabled = loading;
+
+document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+inp.disabled = loading;
+inp.classList.toggle('submitting', loading);
+});
+
+if (message && !document.getElementById('delete-modal-backdrop').classList.contains('show')) {
+showToast(message, 'info', loading ? 10000 : 3000);
+}
+}
+
+/* ============================================
+    DELETE MODAL FUNCTIONS
+    ============================================ */
+
+function showDeleteConfirm(account, date, value, readableValue) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('delete-modal-backdrop');
+const modal = document.getElementById('delete-modal');
+const details = document.getElementById('delete-modal-details');
+const confirmBtn = document.getElementById('delete-btn-confirm');
+
+details.textContent = `${account}: ${readableValue} on ${date}`;
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+confirmBtn.onclick = () => processDelete(account, date, value);
+}
+
+function hideDeleteConfirm() {
+document.getElementById('delete-modal-backdrop').classList.remove('show');
+document.getElementById('delete-modal').classList.remove('show');
+}
+
+async function processDelete(account, date, value) {
+hideDeleteConfirm();
+if (IS_LOADING) return;
+setLoading(true, 'Deleting entry…');
+
+try {
+const body = new URLSearchParams({ 
+payload: JSON.stringify({ account, date, value: Number(value) }) 
+});
+
+const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
+const text = await res.text();
+
+let j;
+try { 
+j = JSON.parse(text); 
+} catch {
+console.error('Delete non-JSON:', text);
+showToast('Delete failed (non-JSON response)', 'error', 5000);
+setLoading(false);
+return;
+}
+
+if (!j.ok) {
+console.error('Delete JSON error:', j);
+showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
+setLoading(false);
+return;
+}
+
+showToast('Entry deleted. Refreshing…', 'success');
+await fetchSnapshot();
+
+} catch (e) {
+console.error(e);
+setLoading(false);
+showToast('Network error deleting entry.', 'error', 5000);
+}
+}
+
+/* ============================================
+    EDIT CHIP MODAL FUNCTIONS
+    ============================================ */
+
+function showEditChipModal(account, date, value, readableValue) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('edit-chip-modal-backdrop');
+const modal = document.getElementById('edit-chip-modal');
+const details = document.getElementById('edit-chip-details');
+const valueInput = document.getElementById('edit-chip-value');
+const dateInput = document.getElementById('edit-chip-date');
+const saveBtn = document.getElementById('edit-chip-save');
+const deleteBtn = document.getElementById('edit-chip-delete');
+
+details.textContent = `Account: ${account}`;
+valueInput.value = Number(value);
+
+const dateParts = date.split('/');
+if (dateParts.length === 3) {
+const [month, day, year] = dateParts;
+dateInput.value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+} else {
+dateInput.value = '';
+}
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+setTimeout(() => valueInput.focus(), 100);
+
+saveBtn.onclick = () => processEditChip(account, date, value);
+deleteBtn.onclick = () => {
+hideEditChipModal();
+showDeleteConfirm(account, date, value, readableValue);
+};
+}
+
+function hideEditChipModal() {
+document.getElementById('edit-chip-modal-backdrop').classList.remove('show');
+document.getElementById('edit-chip-modal').classList.remove('show');
+}
+
+async function processEditChip(originalAccount, originalDate, originalValue) {
+if (IS_LOADING) return;
+
+const valueInput = document.getElementById('edit-chip-value');
+const dateInput = document.getElementById('edit-chip-date');
+
+const newValue = Number(valueInput.value);
+const newDateISO = dateInput.value;
+
+if (isNaN(newValue) || newValue === 0) {
+showToast('Please enter a valid non-zero value', 'error');
+return;
+}
+
+if (!newDateISO) {
+showToast('Please select a date', 'error');
+return;
+}
+
+const [year, month, day] = newDateISO.split('-');
+const newDate = `${parseInt(month)}/${parseInt(day)}/${year}`;
+
+hideEditChipModal();
+setLoading(true, 'Updating entry…');
+
+try {
+const deleteBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+account: originalAccount, 
+date: originalDate, 
+value: Number(originalValue) 
+}) 
+});
+
+const deleteRes = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body: deleteBody });
+const deleteText = await deleteRes.text();
+const deleteJson = JSON.parse(deleteText);
+
+if (!deleteJson.ok) {
+throw new Error('Delete failed: ' + (deleteJson.error || 'Unknown'));
+}
+
+const submitBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+entries: [{ 
+account: originalAccount, 
+value: newValue,
+date: newDate
+}] 
+}) 
+});
+
+const submitRes = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body: submitBody });
+const submitText = await submitRes.text();
+const submitJson = JSON.parse(submitText);
+
+if (!submitJson.ok) {
+throw new Error('Submit failed: ' + (submitJson.error || 'Unknown'));
+}
+
+showToast('Entry updated! Refreshing…', 'success');
+await fetchSnapshot();
+
+} catch (e) {
+console.error('Edit error:', e);
+setLoading(false);
+showToast('Failed to update entry: ' + e.message, 'error', 5000);
+}
+}
+
+/* ============================================
+    ACCOUNT MENU MODAL
+    ============================================ */
+
+function showAccountMenu(accountName) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('account-menu-modal-backdrop');
+const modal = document.getElementById('account-menu-modal');
+const accountNameEl = document.getElementById('account-menu-account-name');
+const deleteBtn = document.getElementById('account-menu-delete');
+const addBtn = document.getElementById('account-menu-add');
+const editBtn = document.getElementById('account-menu-edit');
+
+accountNameEl.textContent = accountName;
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+editBtn.onclick = () => {
+hideAccountMenu();
+showEditAccountModal(accountName);
+};
+
+deleteBtn.onclick = () => {
+hideAccountMenu();
+showToast('Account deletion coming in v2.4!', 'info', 3000);
+};
+
+addBtn.onclick = () => {
+hideAccountMenu();
+showToast('Add account feature coming in v2.4!', 'info', 3000);
+};
+}
+
+function hideAccountMenu() {
+document.getElementById('account-menu-modal-backdrop').classList.remove('show');
+document.getElementById('account-menu-modal').classList.remove('show');
+}
+
+/* ============================================
+    v2.3: EDIT ACCOUNT MODAL
+    ============================================ */
+
+function showEditAccountModal(accountName) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('edit-account-modal-backdrop');
+const modal = document.getElementById('edit-account-modal');
+const nameEl = document.getElementById('edit-account-name');
+const limitInput = document.getElementById('edit-account-limit');
+const aprInput = document.getElementById('edit-account-apr');
+const valueInput = document.getElementById('edit-account-value');
+const saveBtn = document.getElementById('edit-account-save');
+
+nameEl.textContent = accountName;
+
+// Get account data from snapshot
+const account = SNAP?.accounts?.find(a => a.name === accountName);
+if (!account) {
+showToast('Account not found', 'error');
+return;
+}
+
+// Get metadata (limit stored in memory)
+const metadata = ACCOUNT_METADATA.get(accountName) || {};
+limitInput.value = metadata.limit || '';
+aprInput.value = account.apr || 0;
+
+// Get current value
+const series = SNAP?.series?.[accountName];
+const currentValue = series?.last ?? 0;
+valueInput.value = currentValue;
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+setTimeout(() => limitInput.focus(), 100);
+
+saveBtn.onclick = () => processEditAccount(accountName);
+}
+
+function hideEditAccountModal() {
+document.getElementById('edit-account-modal-backdrop').classList.remove('show');
+document.getElementById('edit-account-modal').classList.remove('show');
+}
+
+async function processEditAccount(accountName) {
+if (IS_LOADING) return;
+
+const limitInput = document.getElementById('edit-account-limit');
+const aprInput = document.getElementById('edit-account-apr');
+const valueInput = document.getElementById('edit-account-value');
+
+const newLimit = limitInput.value ? Number(limitInput.value) : null;
+const newAPR = Number(aprInput.value);
+const newValue = Number(valueInput.value);
+
+// Store limit in memory (would need sheet update for persistence)
+if (newLimit !== null) {
+const metadata = ACCOUNT_METADATA.get(accountName) || {};
+metadata.limit = newLimit;
+ACCOUNT_METADATA.set(accountName, metadata);
+}
+
+hideEditAccountModal();
+
+// Submit new value if changed
+const account = SNAP?.accounts?.find(a => a.name === accountName);
+const series = SNAP?.series?.[accountName];
+const currentValue = series?.last ?? 0;
+
+if (newValue !== currentValue) {
+setLoading(true, 'Updating account value…');
+try {
+const body = new URLSearchParams({ 
+payload: JSON.stringify({ 
+entries: [{ account: accountName, value: newValue }] 
+}) 
+});
+
+const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+const text = await res.text();
+const j = JSON.parse(text);
+
+if (!j.ok) {
+throw new Error(j.error || 'Submit failed');
+}
+
+showToast('Account updated! Refreshing…', 'success');
+await fetchSnapshot();
+} catch (e) {
+console.error('Update error:', e);
+setLoading(false);
+showToast('Failed to update: ' + e.message, 'error', 5000);
+}
+} else {
+showToast('Limit and APR updated!', 'success');
+renderAll(); // Re-render to show new limit
+}
+}
+
+/* ============================================
+    DATA FETCHING
+    ============================================ */
+
+async function fetchSnapshot() {
+if (IS_LOADING) return;
+setLoading(true, 'Loading snapshot…');
+
+try {
+const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
+const text = await res.text();
+
+let j;
+try { 
+j = JSON.parse(text); 
+} catch {
+console.error('Non-JSON response:', text); 
+showToast('Error: API returned non-JSON. Check console.', 'error', 5000);
+setLoading(false);
+return;
+}
+
+if (!j.ok) {
+console.error('Snapshot error:', j); 
+showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
+setLoading(false);
+return;
+}
+
+SNAP = j;
+console.log('Snapshot loaded:', SNAP); 
+
+setLoading(false);
+renderAll();
+
+} catch (err) {
+console.error('Fetch failed:', err); 
+setLoading(false);
+showToast('Fetch failed (see console)', 'error', 5000);
+}
+}
+
+/* ============================================
+    RENDERING FUNCTIONS
+    ============================================ */
+
+/* v2.2: URL State Management */
+function loadMutedStateFromURL() {
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const mutedParam = params.get('muted');
+if (mutedParam) {
+MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
+}
+}
+
+function saveMutedStateToURL() {
+const mutedArray = Array.from(MUTED_ACCOUNTS);
+if (mutedArray.length > 0) {
+window.location.hash = `muted=${mutedArray.join(',')}`;
+} else {
+window.location.hash = '';
+}
+}
+
+function toggleAccountMute(accountName) {
+if (MUTED_ACCOUNTS.has(accountName)) {
+MUTED_ACCOUNTS.delete(accountName);
+} else {
+MUTED_ACCOUNTS.add(accountName);
+}
+saveMutedStateToURL();
+renderAll();
+}
+
+function isAccountMuted(accountName) {
+return MUTED_ACCOUNTS.has(accountName);
+}
+
+function renderAll() {
+renderSummary();
+renderInterestSummary();
+renderStatusbar();
+renderChart();
+renderTypeSummary();
+renderAccounts();
+}
+
+function renderSummary() {
+const summaryEl = document.getElementById('financial-summary');
+if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+
+const lastIndex = SNAP.dateAxis.length - 1;
+
+if (lastIndex < 0) {
+summaryEl.innerHTML = 'No Data';
+return;
+}
+
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+if (last >= 0) {
+assets += last;
+} else {
+debts += Math.abs(last);
+}
+}
+});
+
+const assetClass = assets > debts ? 'bold-value' : '';
+const debtClass = debts > assets ? 'bold-value' : '';
+
+const assetString = `<span class="summary-asset ${assetClass}">${formatMoney(assets)}</span>`;
+const debtString = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
+
+summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
+}
+
+function renderInterestSummary() {
+const summaryEl = document.getElementById('interest-summary');
+if (!summaryEl || !SNAP || !SNAP.accounts) return;
+
+let totalEarnings = 0;
+let totalCosts = 0;
+let periodLabel = '';
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;
+
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+const apr = a.apr || 0;
+
+if (apr === 0 || last === 0) return;
+
+const dailyRate = (last * apr) / 365;
+let interestAmount = 0;
+
+switch(TIMEFRAME) {
+case 'today':
+interestAmount = dailyRate * 1;
+periodLabel = '/dy';
+break;
+case '7d':
+interestAmount = dailyRate * 7;
+periodLabel = '/wk';
+break;
+case '14d':
+interestAmount = dailyRate * 14;
+periodLabel = '/2w';
+break;
+case '30d':
+interestAmount = dailyRate * 30;
+periodLabel = '/mo';
+break;
+case '90d':
+interestAmount = dailyRate * 90;
+periodLabel = '/qt';
+break;
+case '1y':
+case 'ytd':
+case 'all':
+interestAmount = last * apr;
+periodLabel = '/yr';
+break;
+}
+
+if (interestAmount > 0) {
+totalEarnings += interestAmount;
+} else {
+totalCosts += interestAmount;
+}
+});
+
+if (Math.abs(totalEarnings) < 0.01 && Math.abs(totalCosts) < 0.01) {
+summaryEl.innerHTML = '';
+return;
+}
+
+const earningsStr = totalEarnings >= 0.01 
+? `<span class="interest-earned">+${formatMoney(totalEarnings)}${periodLabel}</span>` 
+: '';
+
+const costsStr = Math.abs(totalCosts) >= 0.01 
+? `<span class="interest-cost">${formatMoney(totalCosts)}${periodLabel}</span>` 
+: '';
+
+let displayParts = [];
+if (earningsStr) displayParts.push(earningsStr);
+if (costsStr) displayParts.push(costsStr);
+
+if (displayParts.length > 0) {
+summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+} else {
+summaryEl.innerHTML = '';
+}
+}
+
+function renderTypeSummary() {
+const summaryEl = document.querySelector('#type-summary-bar h4');
+if (!summaryEl || !SNAP || !SNAP.accounts) return;
+
+const typeTotals = {
+'bk': 0,
+'cc': 0,
+'bill': 0,
+'ii': 0,
+'sv': 0
+};
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+const type = a.type || 'bk';
+
+if (typeTotals.hasOwnProperty(type)) {
+typeTotals[type] += last;
+}
+});
+
+const typeOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+const parts = [];
+
+typeOrder.forEach(typeKey => {
+const value = typeTotals[typeKey];
+const label = TYPE_LABELS[typeKey] || typeKey;
+const colorClass = (typeKey === 'cc' || typeKey === 'bill') ? 'negative' : 'positive';
+const formattedValue = formatMoney(value);
+const signPrefix = value >= 0 ? '+' : '';
+parts.push(`<span class="type-value ${colorClass}">${signPrefix}${formattedValue}</span>`);
+});
+
+summaryEl.innerHTML = parts.join(' <span class="type-separator">|</span> ');
+}
+
+function renderStatusbar() {
+const statusbarEl = document.getElementById('statusbar');
+if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+
+const lastIndex = SNAP.dateAxis.length - 1;
+
+if (lastIndex < 0) {
+statusbarEl.innerHTML = '';
+return;
+}
+
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+if (last >= 0) {
+assets += last;
+} else {
+debts += Math.abs(last);
+}
+}
+});
+
+const total = assets + debts;
+
+if (total === 0) {
+statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>';
+return;
+}
+
+const totalBlocks = 100;
+const assetBlocks = Math.round((assets / total) * totalBlocks);
+const debtBlocks = totalBlocks - assetBlocks;
+
+const assetBar = '█ '.repeat(assetBlocks);
+const debtBar = '█ '.repeat(debtBlocks);
+
+statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
+}
+
+function renderChart() {
+if (!SNAP || !window.google || !google.visualization) return;
+
+const labels = SNAP.dateAxis; 
+
+if (!labels || labels.length === 0) {
+document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
+return;
+}
+
+const styles = getComputedStyle(document.documentElement);
+const pos = styles.getPropertyValue('--c-pos').trim();
+const neg = styles.getPropertyValue('--c-neg').trim();
+const black = styles.getPropertyValue('--c-black').trim();
+const textStyle = { color: black, fontName: 'system-ui' };
+
+const data = new google.visualization.DataTable();
+data.addColumn('string', 'Date'); 
+let rows = [];
+
+if (MODE === 'totals') {
+data.addColumn('number', 'Assets');
+data.addColumn('number', 'Debts');
+
+for (let i = 0; i < labels.length; i++) { 
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+if (v >= 0) {
+assets += v;
+} else {
+debts += v;
+}
+}
+});
+
+rows.push([labels[i], assets, debts]);
+}
+} else {
+const visibleAccounts = SNAP.accounts.filter(a => !isAccountMuted(a.name));
+visibleAccounts.forEach(a => data.addColumn('number', a.name));
+
+for (let i = 0; i < labels.length; i++) {
+const row = [labels[i]]; 
+visibleAccounts.forEach(a => {
+const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+row.push(Number(v));
+});
+rows.push(row);
+}
+}
+data.addRows(rows);
+
+let minV = 0, maxV = 0;
+for (const r of rows) {
+for (let i = 1; i < r.length; i++) {
+const v = Number(r[i]) || 0;
+if (v < minV) minV = v;
+if (v > maxV) maxV = v;
+}
+}
+const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
+
+let chartColors;
+if (MODE === 'totals') {
+chartColors = [pos, neg];
+} else {
+chartColors = SNAP.accounts.map(a => {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+return last >= 0 ? (a.color || pos) : (a.color || neg);
+});
+}
+
+const options = {
+height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+backgroundColor: { fill: 'transparent' },
+chartArea: { width: '90%', height: '70%' },
+legend: { position: 'top', alignment: 'center', textStyle: textStyle },
+hAxis: { 
+slantedText: false, 
+textStyle: textStyle,
+showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
+},
+vAxis: { 
+viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
+baseline: 0, 
+baselineColor: black,
+gridlines: { color: black, opacity: 0.1 },
+textStyle: textStyle
+},
+isStacked: true,
+colors: chartColors,
+animation: {
+duration: 500,
+easing: 'out'
+}
+};
+
+const chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+chart.draw(data, options);
+}
+
+const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
+
+function formatMoney(n) {
+const val = Number(n) || 0;
+const sign = val < 0 ? '−' : '';
+const abs = Math.abs(val);
+const displayValue = Math.trunc(abs);
+
+return `${sign}${displayValue.toLocaleString(undefined, { 
+       minimumFractionDigits: 0, 
+       maximumFractionDigits: 0 
+   })}`;
+}
+
+function renderAccounts() {
+const root = document.getElementById('accounts');
+root.innerHTML = '';
+
+if (!SNAP || !SNAP.accounts) return;
+
+SNAP.accounts.forEach(a => {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+
+const row = document.createElement('div');
+row.className = 'row';
+
+const left = document.createElement('div');
+left.className = 'left';
+
+const right = document.createElement('div');
+right.className = 'right';
+
+const accountDetails = document.createElement('div');
+accountDetails.className = 'account-details';
+
+const identityWrap = document.createElement('div');
+identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
+
+const lastEl = document.createElement('span');
+lastEl.className = 'lastval';
+lastEl.textContent = formatMoney(last); 
+lastEl.dataset.sign = signOf(last);
+
+const nameEl = document.createElement('span');
+nameEl.className = 'name';
+nameEl.textContent = a.name;
+if (a.color) nameEl.style.color = a.color;
+
+// Long-press handlers
+let pressStartTime = 0;
+
+nameEl.addEventListener('mousedown', (e) => {
+pressStartTime = Date.now();
+LONG_PRESS_TIMER = setTimeout(() => {
+showAccountMenu(a.name);
+}, LONG_PRESS_DURATION);
+});
+
+nameEl.addEventListener('mouseup', (e) => {
+if (LONG_PRESS_TIMER) {
+clearTimeout(LONG_PRESS_TIMER);
+}
+});
+
+nameEl.addEventListener('mouseleave', (e) => {
+if (LONG_PRESS_TIMER) {
+clearTimeout(LONG_PRESS_TIMER);
+}
+});
+
+nameEl.addEventListener('touchstart', (e) => {
+pressStartTime = Date.now();
+LONG_PRESS_TIMER = setTimeout(() => {
+showAccountMenu(a.name);
+}, LONG_PRESS_DURATION);
+});
+
+nameEl.addEventListener('touchend', (e) => {
+if (LONG_PRESS_TIMER) {
+clearTimeout(LONG_PRESS_TIMER);
+}
+});
+
+identityWrap.appendChild(lastEl);
+identityWrap.appendChild(nameEl);
+
+// v2.3: Show credit limit for CC accounts
+const metadata = ACCOUNT_METADATA.get(a.name) || {};
+if (a.type === 'cc' && metadata.limit) {
+const limitEl = document.createElement('span');
+limitEl.className = 'limit';
+const absLast = Math.abs(last);
+limitEl.textContent = `${formatMoney(absLast)} / ${formatMoney(metadata.limit)}`;
+accountDetails.appendChild(identityWrap);
+accountDetails.appendChild(limitEl);
+} else {
+accountDetails.appendChild(identityWrap);
+}
+
+const aprEl = document.createElement('span');
+aprEl.className = 'apr';
+
+const apr = a.apr || 0;
+let interestAmount = 0;
+let periodLabel = '';
+
+if (apr > 0 && last !== 0) {
+const dailyRate = (last * apr) / 365;
+
+switch(TIMEFRAME) {
+case 'today':
+interestAmount = dailyRate * 1;
+periodLabel = '/dy';
+break;
+case '7d':
+interestAmount = dailyRate * 7;
+periodLabel = '/wk';
+break;
+case '14d':
+interestAmount = dailyRate * 14;
+periodLabel = '/2w';
+break;
+case '30d':
+interestAmount = dailyRate * 30;
+periodLabel = '/mo';
+break;
+case '90d':
+interestAmount = dailyRate * 90;
+periodLabel = '/qt';
+break;
+case '1y':
+case 'ytd':
+case 'all':
+interestAmount = last * apr;
+periodLabel = '/yr';
+break;
+}
+}
+
+let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+
+if (Math.abs(interestAmount) >= 0.01) {
+const sign = interestAmount >= 0 ? '+' : '';
+const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
+aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
+}
+
+aprEl.innerHTML = aprHTML;
+accountDetails.appendChild(aprEl);
+
+const inputLine = document.createElement('div');
+inputLine.className = 'input-line';
+
+const inp = document.createElement('input');
+inp.type = 'number';
+inp.placeholder = 'Add new value…';
+inp.step = '0.01';
+inp.setAttribute('aria-label', `New value for ${a.name}`);
+inp.dataset.accountName = a.name;
+
+if (last > 0) {
+inp.style.backgroundColor = 'var(--c-tint-pos)';
+} else if (last < 0) {
+inp.style.backgroundColor = 'var(--c-tint-neg)';
+} else {
+inp.style.backgroundColor = 'var(--c-white)';
+}
+
+inp.addEventListener('keydown', async (ev) => {
+if (ev.key === 'Enter') {
+await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
+}
+});
+
+// v2.2: Add mute toggle checkbox
+const muteWrapper = document.createElement('label');
+muteWrapper.className = 'mute-checkbox';
+muteWrapper.setAttribute('aria-label', `Toggle ${a.name} visibility`);
+muteWrapper.title = `Show/hide ${a.name}`;
+
+const muteCheck = document.createElement('input');
+muteCheck.type = 'checkbox';
+muteCheck.checked = !isAccountMuted(a.name);
+muteCheck.setAttribute('aria-label', `Show ${a.name}`);
+
+muteCheck.addEventListener('change', (e) => {
+toggleAccountMute(a.name);
+});
+
+const muteSlider = document.createElement('span');
+muteSlider.className = 'mute-checkbox-slider';
+
+muteWrapper.appendChild(muteCheck);
+muteWrapper.appendChild(muteSlider);
+
+inputLine.appendChild(inp);
+inputLine.appendChild(muteWrapper);
+
+left.appendChild(accountDetails);
+left.appendChild(inputLine);
+
+if (isAccountMuted(a.name)) {
+row.classList.add('muted');
+}
+
+const vals = document.createElement('div');
+vals.className = 'values';
+
+(s.lastN || []).forEach(v => {
+const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+const val = Number(isObject ? v.value : v);
+const date = isObject ? v.date : null;
+
+const readableValue = formatMoney(val);
+
+const chip = document.createElement('span');
+chip.className = 'chip';
+chip.dataset.sign = signOf(val);
+chip.textContent = readableValue;
+chip.dataset.value = val;
+
+if (date) {
+chip.dataset.date = date;
+chip.dataset.account = a.name;
+chip.dataset.readableValue = readableValue;
+
+chip.addEventListener('click', (e) => {
+showEditChipModal(a.name, date, val, readableValue);
+});
+} else {
+chip.classList.add('no-delete');
+chip.title = "Old data format - re-deploy CODE.JS";
+}
+
+vals.appendChild(chip);
+});
+right.appendChild(vals);
+
+const bar = document.createElement('h4');
+bar.className = 'ratio-bar';
+
+const assetSpan = document.createElement('span');
+assetSpan.style.color = 'var(--c-pos)';
+
+const debtSpan = document.createElement('span');
+debtSpan.style.color = 'var(--c-neg)';
+
+const lastIndex = SNAP.dateAxis.length - 1;
+const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
+const totalDebtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
+const totalDebts = Math.abs(totalDebtsRaw);
+
+if (last >= 0 && totalAssets > 0) {
+const percentage = (last / totalAssets) * 100;
+const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
+assetSpan.textContent = '█ '.repeat(blocks);
+debtSpan.textContent = '';
+} else if (last < 0 && totalDebts > 0) {
+const absLast = Math.abs(last);
+const percentage = (absLast / totalDebts) * 100;
+const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
+assetSpan.textContent = '';
+debtSpan.textContent = '█ '.repeat(blocks);
+} else {
+assetSpan.textContent = '';
+debtSpan.textContent = '';
+}
+
+bar.appendChild(assetSpan);
+bar.appendChild(debtSpan);
+right.appendChild(bar);
+
+row.appendChild(left);
+row.appendChild(right);
+root.appendChild(row);
+});
+}
+
+/* ============================================
+    DATA SUBMISSION
+    ============================================ */
+
+async function submitAll() {
+const entries = [];
+
+document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+const v = inp.value.trim();
+if (v !== '') {
+entries.push({ 
+account: inp.dataset.accountName, 
+value: Number(v),
+inputEl: inp
+});
+}
+});
+
+if (entries.length === 0) {
+showToast('No values entered to submit.', 'info');
+return;
+}
+
+await submitEntries(entries);
+}
+
+async function submitEntries(entries) {
+if (IS_LOADING) return;
+setLoading(true, 'Submitting entries…');
+
+entries.forEach(e => e.inputEl?.classList.add('submitting'));
+
+try {
+const validEntries = entries
+.map(e => ({ account: e.account, value: e.value }))
+.filter(e => e.account && !isNaN(e.value));
+
+if (validEntries.length === 0) {
+showToast('No valid entries to submit.', 'error');
+setLoading(false);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+return;
+}
+
+const body = new URLSearchParams({ 
+payload: JSON.stringify({ entries: validEntries }) 
+});
+const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+const text = await res.text();
+
+let j;
+try { 
+j = JSON.parse(text); 
+} catch {
+console.error('Submit non-JSON:', text);
+showToast('Submit failed (non-JSON response)', 'error', 5000);
+setLoading(false);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+return;
+}
+
+if (!j.ok) {
+console.error('Submit JSON error:', j);
+showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
+setLoading(false);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+return;
+}
+
+showToast('Submit successful! Refreshing…', 'success');
+entries.forEach(e => {
+e.inputEl?.classList.add('submitted-ok');
+e.inputEl.value = '';
+setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
+});
+
+await fetchSnapshot();
+
+} catch (e) {
+console.error(e);
+setLoading(false);
+showToast('Network error submitting data.', 'error', 5000);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+}
+
+setLoading(false);
+}
+
+/* ============================================
+    INITIALIZATION
+    ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+loadMutedStateFromURL();
+
+// Update Google Sheet link in footer
+const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
+if (sheetLink && SHEET_ID && SHEET_ID !== 'YOUR_SHEET_ID_HERE') {
+sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}`;
+}
+
+document.getElementById('refresh').addEventListener('click', fetchSnapshot);
+document.getElementById('submitAll').addEventListener('click', submitAll);
+
+document.querySelectorAll('input[name="mode"]').forEach(r => {
+r.addEventListener('change', (e) => { 
+MODE = e.target.value; 
+renderChart();
+});
+});
+
+document.getElementById('timeframe').addEventListener('change', (e) => {
+TIMEFRAME = e.target.value;
+fetchSnapshot();
+});
+
+document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
+document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
+
+document.getElementById('edit-chip-cancel').addEventListener('click', hideEditChipModal);
+document.getElementById('edit-chip-modal-backdrop').addEventListener('click', hideEditChipModal);
+
+document.getElementById('account-menu-cancel').addEventListener('click', hideAccountMenu);
+document.getElementById('account-menu-modal-backdrop').addEventListener('click', hideAccountMenu);
+
+document.getElementById('edit-account-cancel').addEventListener('click', hideEditAccountModal);
+document.getElementById('edit-account-modal-backdrop').addEventListener('click', hideEditAccountModal);
+
+window.addEventListener('resize', renderChart);
+
+if (window.google && google.charts) {
+google.charts.load('current', { packages: ['corechart'] });
+google.charts.setOnLoadCallback(fetchSnapshot);
+} else {
+const s = document.createElement('script');
+s.src = 'https://www.gstatic.com/charts/loader.js';
+s.onload = () => { 
+google.charts.load('current', { packages: ['corechart'] });
+google.charts.setOnLoadCallback(fetchSnapshot);
+};
+document.head.appendChild(s);
+}
+});
+</script>
 </body>
+</html>
