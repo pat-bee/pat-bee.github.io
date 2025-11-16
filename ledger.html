@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.2)</title>
+<title>Ledger — Accounts & Chart (v2.3)</title>
 
 <style>
 /* ============================================
@@ -20,6 +20,7 @@
 --c-tint-pos: #f7f9f4;
 --c-tint-neg: #f9f4f4;
 --c-muted: #e8e8e8;  /* v2.2: Muted account state */
+--c-overlimit: #d85140;  /* v2.3: Over-limit alert color */
 }
 
 /* ============================================
@@ -166,8 +167,6 @@ padding: 0;
       GLOBAL STATUSBAR (v2.0: Using █  character)
       ============================================ */
 #statusbar {
-     /* font-size: clamp(1rem, 2.5vw, 3rem);
-      font-size: clamp(0.5rem, 1vw, 3rem);*/
 line-height: 3;
 font-size: larger;
 text-align: center;
@@ -264,6 +263,14 @@ opacity: 0.8;
 
 .name:active {
 opacity: 0.6;
+}
+
+/* v2.3: Credit limit display */
+.limit {
+font-weight: 600;
+font-size: 0.75rem;
+flex-shrink: 0;
+padding-top: 0.5rem;
 }
 
 .apr { 
@@ -653,6 +660,18 @@ background: #3d6629;
 border-color: #3d6629;
 }
 
+/* v2.3: Edit account modal */
+#edit-account-save {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#edit-account-save:hover {
+background: #3d6629;
+border-color: #3d6629;
+text-decoration: none;
+}
+
 /* ============================================
       TYPE SUMMARY BAR (v2.2)
       ============================================ */
@@ -695,7 +714,7 @@ opacity: 0.5;
 }
 
 /* ============================================
-      MUTE TOGGLE (v2.2)
+      MUTE TOGGLE (v2.2 - Option 2: No borders)
       ============================================ */
 .mute-toggle-wrapper {
 display: flex;
@@ -720,6 +739,7 @@ z-index: 2;
 margin: 0;
 }
 
+/* v2.3: Option 2 - No borders, subtle shadow */
 .mute-checkbox-slider {
 position: absolute;
 top: 0;
@@ -727,23 +747,25 @@ left: 0;
 right: 0;
 bottom: 0;
 background: var(--c-pos);
-border: 2px solid var(--c-black);
+border: none;
 border-radius: 999px;
 transition: background 0.3s ease;
 pointer-events: none;
+box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .mute-checkbox-slider::before {
 content: '';
 position: absolute;
-height: 20px;
-width: 20px;
-left: 2px;
-bottom: 2px;
+height: 22px;
+width: 22px;
+left: 3px;
+bottom: 3px;
 background: var(--c-white);
-border: 0px solid var(--c-black);
+border: none;
 border-radius: 50%;
 transition: transform 0.3s ease;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
@@ -926,9 +948,33 @@ display: none;
 <h3 id="account-menu-modal-title">Account Actions</h3>
 <p id="account-menu-account-name" style="font-weight: 600; font-size: 1.2rem; margin-bottom: 1rem;"></p>
 <div id="account-menu-buttons" class="modal-buttons">
+<button id="account-menu-edit">✏️ Edit Account Settings</button>
 <button id="account-menu-delete">🗑️ Delete Account</button>
 <button id="account-menu-add">➕ Add New Account Below</button>
 <button id="account-menu-cancel">Cancel</button>
+</div>
+</div>
+
+<!-- v2.3: Edit Account modal -->
+<div id="edit-account-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-account-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-account-modal-title">
+<h3 id="edit-account-modal-title">Edit Account</h3>
+<p id="edit-account-name" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem;"></p>
+<div class="modal-form-group">
+<label for="edit-account-limit">Credit Limit (for CC accounts):</label>
+<input type="number" id="edit-account-limit" step="1" placeholder="e.g. 5000">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-apr">APR (as decimal, e.g. 0.29 for 29%):</label>
+<input type="number" id="edit-account-apr" step="0.01" placeholder="e.g. 0.29">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-value">Current Value:</label>
+<input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
+</div>
+<div id="edit-account-buttons" class="modal-buttons">
+<button id="edit-account-cancel">Cancel</button>
+<button id="edit-account-save">Save Changes</button>
 </div>
 </div>
 
@@ -977,7 +1023,7 @@ display: none;
 <h4></h4>
 </section>
 
-<!-- v2.2: Tiny footer with security notice -->
+<!-- v2.3: Footer with Google Sheet link -->
 <footer>
 <div class="security-notice">
 🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
@@ -986,8 +1032,8 @@ Your financial footprint, your control.
 </div>
 
 <small>
-<b>v2.2 Features:</b> Type summaries • Mute/unmute accounts • Click chip to edit/delete<br>
-Long-press account name for menu • URL-based state persistence • Values shown as whole numbers
+<b>v2.3 Features:</b> CC limits • Edit account settings • Type summaries • Mute/unmute accounts<br>
+<a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
 </small>
 </footer>
 </main>
@@ -997,7 +1043,7 @@ Long-press account name for menu • URL-based state persistence • Values show
     CONFIGURATION
     ============================================ */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbw_ZZA6z-PLIkBt3qJwEdOziJOZ9dOzyzrAQEjSLDHfZTOQQ7HUGj7kF7MkFdJOMOIj/exec';
-
+const SHEET_ID = 'YOUR_SHEET_ID_HERE'; // v2.3: Add your Google Sheet ID here
 
 /* ============================================
     APPLICATION STATE
@@ -1021,6 +1067,9 @@ const TYPE_LABELS = {
   'ii': 'Investments',
   'sv': 'Savings'
 };
+
+/* v2.3: Account metadata (limits, etc.) - stored in memory */
+let ACCOUNT_METADATA = new Map();
 
 /* ============================================
     UI UTILITY FUNCTIONS
@@ -1245,26 +1294,136 @@ const modal = document.getElementById('account-menu-modal');
 const accountNameEl = document.getElementById('account-menu-account-name');
 const deleteBtn = document.getElementById('account-menu-delete');
 const addBtn = document.getElementById('account-menu-add');
+const editBtn = document.getElementById('account-menu-edit');
 
 accountNameEl.textContent = accountName;
 
 backdrop.classList.add('show');
 modal.classList.add('show');
 
+editBtn.onclick = () => {
+hideAccountMenu();
+showEditAccountModal(accountName);
+};
+
 deleteBtn.onclick = () => {
 hideAccountMenu();
-showToast('Account deletion coming in v2.2!', 'info', 3000);
+showToast('Account deletion coming in v2.4!', 'info', 3000);
 };
 
 addBtn.onclick = () => {
 hideAccountMenu();
-showToast('Add account feature coming in v2.2!', 'info', 3000);
+showToast('Add account feature coming in v2.4!', 'info', 3000);
 };
 }
 
 function hideAccountMenu() {
 document.getElementById('account-menu-modal-backdrop').classList.remove('show');
 document.getElementById('account-menu-modal').classList.remove('show');
+}
+
+/* ============================================
+    v2.3: EDIT ACCOUNT MODAL
+    ============================================ */
+
+function showEditAccountModal(accountName) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('edit-account-modal-backdrop');
+const modal = document.getElementById('edit-account-modal');
+const nameEl = document.getElementById('edit-account-name');
+const limitInput = document.getElementById('edit-account-limit');
+const aprInput = document.getElementById('edit-account-apr');
+const valueInput = document.getElementById('edit-account-value');
+const saveBtn = document.getElementById('edit-account-save');
+
+nameEl.textContent = accountName;
+
+// Get account data from snapshot
+const account = SNAP?.accounts?.find(a => a.name === accountName);
+if (!account) {
+showToast('Account not found', 'error');
+return;
+}
+
+// Get metadata (limit stored in memory)
+const metadata = ACCOUNT_METADATA.get(accountName) || {};
+limitInput.value = metadata.limit || '';
+aprInput.value = account.apr || 0;
+
+// Get current value
+const series = SNAP?.series?.[accountName];
+const currentValue = series?.last ?? 0;
+valueInput.value = currentValue;
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+setTimeout(() => limitInput.focus(), 100);
+
+saveBtn.onclick = () => processEditAccount(accountName);
+}
+
+function hideEditAccountModal() {
+document.getElementById('edit-account-modal-backdrop').classList.remove('show');
+document.getElementById('edit-account-modal').classList.remove('show');
+}
+
+async function processEditAccount(accountName) {
+if (IS_LOADING) return;
+
+const limitInput = document.getElementById('edit-account-limit');
+const aprInput = document.getElementById('edit-account-apr');
+const valueInput = document.getElementById('edit-account-value');
+
+const newLimit = limitInput.value ? Number(limitInput.value) : null;
+const newAPR = Number(aprInput.value);
+const newValue = Number(valueInput.value);
+
+// v2.3: Store limit in memory and URL
+if (newLimit !== null && newLimit > 0) {
+const metadata = ACCOUNT_METADATA.get(accountName) || {};
+metadata.limit = newLimit;
+ACCOUNT_METADATA.set(accountName, metadata);
+saveMutedStateToURL(); // Persist to URL
+console.log('Limit saved:', accountName, newLimit);
+}
+
+hideEditAccountModal();
+
+// Submit new value if changed
+const account = SNAP?.accounts?.find(a => a.name === accountName);
+const series = SNAP?.series?.[accountName];
+const currentValue = series?.last ?? 0;
+
+if (newValue !== currentValue) {
+setLoading(true, 'Updating account value…');
+try {
+const body = new URLSearchParams({ 
+payload: JSON.stringify({ 
+entries: [{ account: accountName, value: newValue }] 
+}) 
+});
+
+const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+const text = await res.text();
+const j = JSON.parse(text);
+
+if (!j.ok) {
+throw new Error(j.error || 'Submit failed');
+}
+
+showToast('Account updated! Refreshing…', 'success');
+await fetchSnapshot();
+} catch (e) {
+console.error('Update error:', e);
+setLoading(false);
+showToast('Failed to update: ' + e.message, 'error', 5000);
+}
+} else {
+showToast('Limit and APR updated!', 'success');
+renderAll(); // Re-render to show new limit
+}
 }
 
 /* ============================================
@@ -1321,15 +1480,42 @@ const mutedParam = params.get('muted');
 if (mutedParam) {
 MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
 }
+
+// v2.3: Load limits from URL
+const limitsParam = params.get('limits');
+if (limitsParam) {
+try {
+const limitsData = JSON.parse(decodeURIComponent(limitsParam));
+Object.entries(limitsData).forEach(([account, limit]) => {
+ACCOUNT_METADATA.set(account, { limit: Number(limit) });
+});
+} catch (e) {
+console.error('Failed to parse limits from URL:', e);
+}
+}
 }
 
 function saveMutedStateToURL() {
 const mutedArray = Array.from(MUTED_ACCOUNTS);
+const params = new URLSearchParams();
+
 if (mutedArray.length > 0) {
-window.location.hash = `muted=${mutedArray.join(',')}`;
-} else {
-window.location.hash = '';
+params.set('muted', mutedArray.join(','));
 }
+
+// v2.3: Save limits to URL
+const limitsObj = {};
+ACCOUNT_METADATA.forEach((metadata, accountName) => {
+if (metadata.limit) {
+limitsObj[accountName] = metadata.limit;
+}
+});
+
+if (Object.keys(limitsObj).length > 0) {
+params.set('limits', encodeURIComponent(JSON.stringify(limitsObj)));
+}
+
+window.location.hash = params.toString();
 }
 
 function toggleAccountMute(accountName) {
@@ -1351,15 +1537,10 @@ renderSummary();
 renderInterestSummary();
 renderStatusbar();
 renderChart();
-renderTypeSummary();  // v2.2: New type summary bar
+renderTypeSummary();
 renderAccounts();
 }
 
-/**
-  * v2.2: Smart font weight logic + Muted account filtering
-  * Only the larger absolute value gets bold
-  * Excludes muted accounts from totals
-  */
 function renderSummary() {
 const summaryEl = document.getElementById('financial-summary');
 if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
@@ -1371,7 +1552,6 @@ summaryEl.innerHTML = 'No Data';
 return;
 }
 
-// v2.2: Calculate totals excluding muted accounts
 let assets = 0;
 let debts = 0;
 
@@ -1387,10 +1567,8 @@ debts += Math.abs(last);
 }
 });
 
-// v2.1: Determine which absolute value is larger
 const assetClass = assets > debts ? 'bold-value' : '';
 const debtClass = debts > assets ? 'bold-value' : '';
-// If equal, neither gets bold (both stay light)
 
 const assetString = `<span class="summary-asset ${assetClass}">${formatMoney(assets)}</span>`;
 const debtString = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
@@ -1407,7 +1585,7 @@ let totalCosts = 0;
 let periodLabel = '';
 
 SNAP.accounts.forEach(a => {
-if (isAccountMuted(a.name)) return;  // v2.2: Skip muted accounts
+if (isAccountMuted(a.name)) return;
 
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
@@ -1478,35 +1656,29 @@ summaryEl.innerHTML = '';
 }
 }
 
-/**
- * v2.2: Render type-based category summary bar
- * Shows totals for: Banks, CreditCards, Bills, Investments, Savings
- */
 function renderTypeSummary() {
 const summaryEl = document.querySelector('#type-summary-bar h4');
 if (!summaryEl || !SNAP || !SNAP.accounts) return;
 
-// Calculate totals by type (excluding muted accounts)
 const typeTotals = {
-'bk': 0,     // Banks
-'cc': 0,     // CreditCards
-'bill': 0,   // Bills
-'ii': 0,     // Investments
-'sv': 0      // Savings
+'bk': 0,
+'cc': 0,
+'bill': 0,
+'ii': 0,
+'sv': 0
 };
 
 SNAP.accounts.forEach(a => {
-if (isAccountMuted(a.name)) return;  // Skip muted accounts
+if (isAccountMuted(a.name)) return;
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
-const type = a.type || 'bk';  // Default to 'bk' if no type
+const type = a.type || 'bk';
 
 if (typeTotals.hasOwnProperty(type)) {
 typeTotals[type] += last;
 }
 });
 
-// Build HTML with proper formatting
 const typeOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
 const parts = [];
 
@@ -1533,7 +1705,6 @@ statusbarEl.innerHTML = '';
 return;
 }
 
-// v2.2: Calculate totals excluding muted accounts
 let assets = 0;
 let debts = 0;
 
@@ -1566,10 +1737,6 @@ const debtBar = '█ '.repeat(debtBlocks);
 statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
 }
 
-/**
-  * v2.2: Render chart with bars that properly handle positive/negative split
-  * Bar chart naturally separates positive (above 0) and negative (below 0) values
-  */
 function renderChart() {
 if (!SNAP || !window.google || !google.visualization) return;
 
@@ -1591,7 +1758,6 @@ data.addColumn('string', 'Date');
 let rows = [];
 
 if (MODE === 'totals') {
-// v2.2: Totals mode - calculate assets/debts excluding muted accounts
 data.addColumn('number', 'Assets');
 data.addColumn('number', 'Debts');
 
@@ -1613,7 +1779,6 @@ debts += v;
 rows.push([labels[i], assets, debts]);
 }
 } else {
-// v2.2: Per-account mode - only show non-muted accounts
 const visibleAccounts = SNAP.accounts.filter(a => !isAccountMuted(a.name));
 visibleAccounts.forEach(a => data.addColumn('number', a.name));
 
@@ -1638,10 +1803,9 @@ if (v > maxV) maxV = v;
 }
 const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
 
-// v2.2: Build color array - green for positive, red for negative
 let chartColors;
 if (MODE === 'totals') {
-chartColors = [pos, neg]; // Green for assets, red for debts
+chartColors = [pos, neg];
 } else {
 chartColors = SNAP.accounts.map(a => {
 const s = SNAP.series[a.name] || {};
@@ -1650,7 +1814,6 @@ return last >= 0 ? (a.color || pos) : (a.color || neg);
 });
 }
 
-// v2.2: ColumnChart handles positive/negative stacking correctly
 const options = {
 height: Math.max(240, Math.round(window.innerHeight * 0.30)),
 backgroundColor: { fill: 'transparent' },
@@ -1692,6 +1855,37 @@ return `${sign}${displayValue.toLocaleString(undefined, {
        minimumFractionDigits: 0, 
        maximumFractionDigits: 0 
    })}`;
+}
+
+/**
+ * v2.3: Calculate color for credit limit display based on utilization
+ * Returns color that transitions from green (0% utilization) to red (100% utilization)
+ * Over-limit gets special alert color
+ */
+function getLimitColor(currentBalance, limit) {
+const absBalance = Math.abs(currentBalance);
+const utilization = absBalance / limit;
+
+// Balance is 0 or positive - show green
+if (currentBalance >= 0) {
+return '#4c8036'; // --c-pos
+}
+
+// Over limit - show alert color
+if (utilization > 1.0) {
+return '#d85140'; // --c-overlimit
+}
+
+// Gradient from green to red based on utilization (0% to 100%)
+// 0% = #4c8036 (green), 100% = #a02d2a (red)
+const startColor = { r: 76, g: 128, b: 54 };   // #4c8036
+const endColor = { r: 160, g: 45, b: 42 };     // #a02d2a
+
+const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
+const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
+const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
+
+return `rgb(${r}, ${g}, ${b})`;
 }
 
 function renderAccounts() {
@@ -1767,6 +1961,23 @@ clearTimeout(LONG_PRESS_TIMER);
 identityWrap.appendChild(lastEl);
 identityWrap.appendChild(nameEl);
 
+accountDetails.appendChild(identityWrap);
+
+// v2.3: Show credit limit for CC accounts (stacked: limit, then APR)
+const metadata = ACCOUNT_METADATA.get(a.name) || {};
+if (a.type === 'cc' && metadata.limit) {
+const limitEl = document.createElement('span');
+limitEl.className = 'limit';
+const limitValue = metadata.limit;
+const limitColor = getLimitColor(last, limitValue);
+limitEl.style.color = limitColor;
+limitEl.textContent = `$${limitValue.toLocaleString()}`;
+accountDetails.appendChild(limitEl);
+} else if (a.type === 'cc') {
+// Debug: Log when CC account doesn't have limit
+console.log('CC account without limit:', a.name, 'metadata:', metadata);
+}
+
 const aprEl = document.createElement('span');
 aprEl.className = 'apr';
 
@@ -1816,8 +2027,6 @@ aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmoun
 }
 
 aprEl.innerHTML = aprHTML;
-
-accountDetails.appendChild(identityWrap);
 accountDetails.appendChild(aprEl);
 
 const inputLine = document.createElement('div');
@@ -1852,7 +2061,7 @@ muteWrapper.title = `Show/hide ${a.name}`;
 
 const muteCheck = document.createElement('input');
 muteCheck.type = 'checkbox';
-muteCheck.checked = !isAccountMuted(a.name);  // Checked = visible
+muteCheck.checked = !isAccountMuted(a.name);
 muteCheck.setAttribute('aria-label', `Show ${a.name}`);
 
 muteCheck.addEventListener('change', (e) => {
@@ -1871,7 +2080,6 @@ inputLine.appendChild(muteWrapper);
 left.appendChild(accountDetails);
 left.appendChild(inputLine);
 
-// v2.2: Apply muted state to row
 if (isAccountMuted(a.name)) {
 row.classList.add('muted');
 }
@@ -2041,8 +2249,13 @@ setLoading(false);
     INITIALIZATION
     ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
-// v2.2: Load muted accounts from URL
 loadMutedStateFromURL();
+
+// Update Google Sheet link in footer
+const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
+if (sheetLink && SHEET_ID && SHEET_ID !== 'YOUR_SHEET_ID_HERE') {
+sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}`;
+}
 
 document.getElementById('refresh').addEventListener('click', fetchSnapshot);
 document.getElementById('submitAll').addEventListener('click', submitAll);
@@ -2067,6 +2280,9 @@ document.getElementById('edit-chip-modal-backdrop').addEventListener('click', hi
 
 document.getElementById('account-menu-cancel').addEventListener('click', hideAccountMenu);
 document.getElementById('account-menu-modal-backdrop').addEventListener('click', hideAccountMenu);
+
+document.getElementById('edit-account-cancel').addEventListener('click', hideEditAccountModal);
+document.getElementById('edit-account-modal-backdrop').addEventListener('click', hideEditAccountModal);
 
 window.addEventListener('resize', renderChart);
 
