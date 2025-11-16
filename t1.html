@@ -1,9 +1,10 @@
+
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.3)</title>
+<title>Ledger — Accounts & Chart (v2.4)</title>
 
 <style>
 /* ============================================
@@ -904,6 +905,108 @@ font-size: 1.2rem;
 display: none;
 }
 }
+
+/* ============================================
+      v2.4: TYPE CONTROLS (BOTTOM OF PAGE)
+      ============================================ */
+.type-controls {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--c-black);
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.type-control-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+  text-align: center;
+}
+
+.type-control-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.type-control-label {
+  font-size: 1rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.type-control-checkbox {
+  font-size: 2rem;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.type-control-checkbox.checked::before {
+  content: '✓';
+}
+
+.type-control-checkbox.unchecked::before {
+  content: '○';
+  opacity: 0.3;
+}
+
+.type-control-checkbox:hover {
+  opacity: 0.7;
+}
+
+/* ============================================
+      v2.4: COLOR PICKER IN MODAL
+      ============================================ */
+.color-picker-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.color-picker-group input[type="text"] {
+  flex: 1;
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+.color-picker-group input[type="color"] {
+  width: 50px;
+  height: 38px;
+  border: 1px solid var(--c-black);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ============================================
+      v2.4: MOBILE ADJUSTMENTS
+      ============================================ */
+@media (max-width: 600px) {
+  .type-controls {
+    gap: 1.5rem;
+  }
+  
+  .type-control-item {
+    min-width: 100px;
+  }
+  
+  .type-control-value {
+    font-size: 1.4rem;
+  }
+  
+  .type-control-label {
+    font-size: 0.85rem;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -972,6 +1075,14 @@ display: none;
 <label for="edit-account-value">Current Value:</label>
 <input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
 </div>
+<div class="modal-form-group">
+<label for="edit-account-color">Account Color (Hex):</label>
+<div class="color-picker-group">
+<input type="text" id="edit-account-color" placeholder="#a02d2a" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+<input type="color" id="edit-account-color-picker" value="#a02d2a">
+</div>
+<small style="opacity: 0.7;">Long-press text field to open color picker</small>
+</div>
 <div id="edit-account-buttons" class="modal-buttons">
 <button id="edit-account-cancel">Cancel</button>
 <button id="edit-account-save">Save Changes</button>
@@ -1001,6 +1112,7 @@ display: none;
 
 <label><input type="radio" name="mode" value="totals" checked> Totals</label>
 <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+<label><input type="radio" name="mode" value="types"> Type</label>
 
 <button id="refresh" aria-label="Refresh data">Refresh</button>
 <button id="submitAll">Submit All</button>
@@ -1031,8 +1143,12 @@ information is stored in this application. All data resides in your Google Sheet
 Your financial footprint, your control.
 </div>
 
+<!-- v2.4: Type visibility controls -->
+<section id="type-controls" class="type-controls"></section>
+
+<footer>
 <small>
-<b>v2.3 Features:</b> CC limits • Edit account settings • Type summaries • Mute/unmute accounts<br>
+<b>v2.4 Features:</b> Type visibility controls • Type chart mode • Color picker • Custom types<br>
 <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
 </small>
 </footer>
@@ -1042,7 +1158,7 @@ Your financial footprint, your control.
 /* ============================================
     CONFIGURATION
     ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbzYPZjVT7IpYkEVHOmW_P6DuW2OzAjyRb9Zcb3Q-Slv8zfnuDRd7bMyoHToeRcF3XKwfA/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbzcDWfk4wpjkqx9mmj0PYn5Q_FOv7U0vKUqO4kGdBjfuUfC8bDLUvhAHLdFVKdv9UmxCQ/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/'; // v2.3: Add your Google Sheet ID here
 
 /* ============================================
@@ -1059,6 +1175,9 @@ const LONG_PRESS_DURATION = 500;
 /* v2.2: Muted accounts state */
 let MUTED_ACCOUNTS = new Set();
 
+/* v2.4: Hidden types state */
+let HIDDEN_TYPES = new Set();
+
 /* v2.2: Type mapping */
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1066,6 +1185,15 @@ const TYPE_LABELS = {
   'bill': 'Bills',
   'ii': 'Investments',
   'sv': 'Savings'
+};
+
+/* v2.4: System-wide type colors */
+const SYSTEM_TYPE_COLORS = {
+  'bk': '#4c8036',    // Banks (green)
+  'sv': '#26401b',    // Savings (dark green)
+  'ii': '#355a26',    // Investments (forest green)
+  'cc': '#a02d2a',    // Credit Cards (red)
+  'bill': '#701f1d'   // Bills (dark red)
 };
 
 /* v2.3: Account metadata is now loaded from snapshot, not stored separately */
@@ -1354,6 +1482,39 @@ const series = SNAP?.series?.[accountName];
 const currentValue = series?.last ?? 0;
 valueInput.value = currentValue;
 
+// v2.4: Load account color
+const colorInput = document.getElementById('edit-account-color');
+const colorPicker = document.getElementById('edit-account-color-picker');
+const accountColor = account.color || SYSTEM_TYPE_COLORS[account.type] || '#000000';
+colorInput.value = accountColor;
+colorPicker.value = accountColor;
+
+// Sync color picker and text input
+colorPicker.addEventListener('input', () => {
+colorInput.value = colorPicker.value;
+});
+
+colorInput.addEventListener('input', () => {
+const hex = colorInput.value;
+if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+colorPicker.value = hex;
+}
+});
+
+// Long-press on text input opens color picker
+let longPressTimer;
+colorInput.addEventListener('mousedown', () => {
+longPressTimer = setTimeout(() => {
+colorPicker.click();
+}, 500);
+});
+colorInput.addEventListener('mouseup', () => {
+clearTimeout(longPressTimer);
+});
+colorInput.addEventListener('mouseleave', () => {
+clearTimeout(longPressTimer);
+});
+
 backdrop.classList.add('show');
 modal.classList.add('show');
 
@@ -1373,10 +1534,12 @@ if (IS_LOADING) return;
 const limitInput = document.getElementById('edit-account-limit');
 const aprInput = document.getElementById('edit-account-apr');
 const valueInput = document.getElementById('edit-account-value');
+const colorInput = document.getElementById('edit-account-color');  // v2.4
 
 const newLimit = limitInput.value ? Number(limitInput.value) : 0;
 const newAPR = Number(aprInput.value);
 const newValue = Number(valueInput.value);
+const newColor = colorInput.value.trim();  // v2.4
 
 const account = SNAP?.accounts?.find(a => a.name === accountName);
 const series = SNAP?.series?.[accountName];
@@ -1386,12 +1549,13 @@ hideEditAccountModal();
 setLoading(true, 'Updating account…');
 
 try {
-// v2.3: Update limit and APR in Google Sheets
+// v2.4: Update limit, APR, and color in Google Sheets
 const updateBody = new URLSearchParams({ 
 payload: JSON.stringify({ 
 account: accountName,
 limit: newLimit,
-apr: newAPR
+apr: newAPR,
+color: newColor  // v2.4
 }) 
 });
 
@@ -1485,15 +1649,29 @@ const mutedParam = params.get('muted');
 if (mutedParam) {
 MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
 }
+
+// v2.4: Load hidden types
+const hiddenTypesParam = params.get('hidden_types');
+if (hiddenTypesParam) {
+HIDDEN_TYPES = new Set(hiddenTypesParam.split(',').filter(t => t));
+}
 }
 
 function saveMutedStateToURL() {
+const params = new URLSearchParams();
 const mutedArray = Array.from(MUTED_ACCOUNTS);
 if (mutedArray.length > 0) {
-window.location.hash = `muted=${mutedArray.join(',')}`;
-} else {
-window.location.hash = '';
+params.set('muted', mutedArray.join(','));
 }
+
+// v2.4: Save hidden types
+const hiddenTypesArray = Array.from(HIDDEN_TYPES);
+if (hiddenTypesArray.length > 0) {
+params.set('hidden_types', hiddenTypesArray.join(','));
+}
+
+const hashString = params.toString();
+window.location.hash = hashString || '';
 }
 
 function toggleAccountMute(accountName) {
@@ -1510,6 +1688,28 @@ function isAccountMuted(accountName) {
 return MUTED_ACCOUNTS.has(accountName);
 }
 
+/* v2.4: Type visibility management */
+function toggleTypeVisibility(typeCode) {
+if (HIDDEN_TYPES.has(typeCode)) {
+HIDDEN_TYPES.delete(typeCode);
+} else {
+HIDDEN_TYPES.add(typeCode);
+}
+saveMutedStateToURL();
+renderAll();
+}
+
+function isTypeVisible(typeCode) {
+return !HIDDEN_TYPES.has(typeCode);
+}
+
+function isAccountVisible(account) {
+// Account is visible if: not muted individually AND its type is visible
+if (isAccountMuted(account.name)) return false;
+if (HIDDEN_TYPES.has(account.type)) return false;
+return true;
+}
+
 function renderAll() {
 renderSummary();
 renderInterestSummary();
@@ -1517,6 +1717,7 @@ renderStatusbar();
 renderChart();
 renderTypeSummary();
 renderAccounts();
+renderTypeControls();  // v2.4: Type visibility controls
 }
 
 function renderSummary() {
@@ -1563,7 +1764,7 @@ let totalCosts = 0;
 let periodLabel = '';
 
 SNAP.accounts.forEach(a => {
-if (isAccountMuted(a.name)) return;
+if (!isAccountVisible(a)) return;  // v2.4: Check both mute and type visibility
 
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
@@ -1647,7 +1848,7 @@ const typeTotals = {
 };
 
 SNAP.accounts.forEach(a => {
-if (isAccountMuted(a.name)) return;
+if (!isAccountVisible(a)) return;  // v2.4
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
 const type = a.type || 'bk';
@@ -1687,14 +1888,13 @@ let assets = 0;
 let debts = 0;
 
 SNAP.accounts.forEach(a => {
-if (!isAccountMuted(a.name)) {
+if (!isAccountVisible(a)) return;  // v2.4
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
 if (last >= 0) {
 assets += last;
 } else {
 debts += Math.abs(last);
-}
 }
 });
 
@@ -1744,20 +1944,62 @@ let assets = 0;
 let debts = 0;
 
 SNAP.accounts.forEach(a => {
-if (!isAccountMuted(a.name)) {
+if (!isAccountVisible(a)) return;  // v2.4
 const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
 if (v >= 0) {
 assets += v;
 } else {
 debts += v;
 }
-}
 });
 
 rows.push([labels[i], assets, debts]);
 }
+} else if (MODE === 'types') {
+// v2.4: Type chart mode
+const typeData = {};
+
+// Initialize with visible types
+if (SNAP.types) {
+SNAP.types.forEach(t => {
+if (isTypeVisible(t.code)) {
+typeData[t.code] = {
+label: t.label,
+color: SYSTEM_TYPE_COLORS[t.code] || t.color,
+data: new Array(labels.length).fill(0)
+};
+}
+});
+}
+
+// Aggregate account data by type
+SNAP.accounts.forEach(a => {
+if (!isAccountVisible(a)) return;
+const series = SNAP.series[a.name];
+if (!series || !typeData[a.type]) return;
+
+series.monthly.forEach((val, idx) => {
+typeData[a.type].data[idx] += val;
+});
+});
+
+// Add columns for each type
+Object.values(typeData).forEach(t => {
+data.addColumn('number', t.label);
+});
+
+// Build rows
+for (let i = 0; i < labels.length; i++) {
+const row = [labels[i]];
+Object.values(typeData).forEach(t => {
+row.push(t.data[i]);
+});
+rows.push(row);
+}
+
+chartColors = Object.values(typeData).map(t => t.color);
 } else {
-const visibleAccounts = SNAP.accounts.filter(a => !isAccountMuted(a.name));
+const visibleAccounts = SNAP.accounts.filter(a => isAccountVisible(a));  // v2.4
 visibleAccounts.forEach(a => data.addColumn('number', a.name));
 
 for (let i = 0; i < labels.length; i++) {
@@ -1784,8 +2026,10 @@ const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
 let chartColors;
 if (MODE === 'totals') {
 chartColors = [pos, neg];
+} else if (MODE === 'types') {
+// chartColors already set in types mode block above
 } else {
-chartColors = SNAP.accounts.map(a => {
+chartColors = SNAP.accounts.filter(a => isAccountVisible(a)).map(a => {  // v2.4
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
 return last >= 0 ? (a.color || pos) : (a.color || neg);
@@ -1864,6 +2108,67 @@ const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
 const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
 
 return `rgb(${r}, ${g}, ${b})`;
+}
+
+/* v2.4: Render type visibility controls */
+function renderTypeControls() {
+const container = document.getElementById('type-controls');
+if (!container || !SNAP || !SNAP.types || !SNAP.accounts) return;
+
+container.innerHTML = '';
+
+// Calculate totals per type
+const typeTotals = {};
+SNAP.types.forEach(t => {
+typeTotals[t.code] = 0;
+});
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;
+const series = SNAP.series[a.name];
+const last = series?.last ?? 0;
+if (typeTotals.hasOwnProperty(a.type)) {
+typeTotals[a.type] += last;
+}
+});
+
+// Render each type control
+SNAP.types.forEach(typeObj => {
+const typeCode = typeObj.code;
+const typeLabel = typeObj.label.toUpperCase();
+const typeColor = SYSTEM_TYPE_COLORS[typeCode] || typeObj.color;
+const total = typeTotals[typeCode] || 0;
+const isVisible = isTypeVisible(typeCode);
+
+const item = document.createElement('div');
+item.className = 'type-control-item';
+
+// Value
+const valueEl = document.createElement('div');
+valueEl.className = 'type-control-value';
+valueEl.style.color = typeColor;
+const sign = total >= 0 ? '+' : '';
+valueEl.textContent = sign + formatMoney(total);
+
+// Label
+const labelEl = document.createElement('div');
+labelEl.className = 'type-control-label';
+labelEl.textContent = typeLabel;
+
+// Checkbox
+const checkboxEl = document.createElement('div');
+checkboxEl.className = `type-control-checkbox ${isVisible ? 'checked' : 'unchecked'}`;
+checkboxEl.setAttribute('role', 'checkbox');
+checkboxEl.setAttribute('aria-checked', isVisible);
+checkboxEl.setAttribute('aria-label', `Toggle ${typeLabel} visibility`);
+checkboxEl.addEventListener('click', () => toggleTypeVisibility(typeCode));
+
+item.appendChild(valueEl);
+item.appendChild(labelEl);
+item.appendChild(checkboxEl);
+
+container.appendChild(item);
+});
 }
 
 function renderAccounts() {
@@ -2063,8 +2368,12 @@ inputLine.appendChild(muteWrapper);
 left.appendChild(accountDetails);
 left.appendChild(inputLine);
 
+// v2.4: Style muted or type-hidden accounts
 if (isAccountMuted(a.name)) {
 row.classList.add('muted');
+}
+if (!isAccountVisible(a)) {
+row.style.display = 'none';  // Hide if type is hidden
 }
 
 const vals = document.createElement('div');
