@@ -20,6 +20,7 @@
 --c-tint-pos: #f7f9f4;
 --c-tint-neg: #f9f4f4;
 --c-muted: #e8e8e8;  /* v2.2: Muted account state */
+--c-overlimit: #d85140;  /* v2.3: Over-limit alert color */
 }
 
 /* ============================================
@@ -268,10 +269,8 @@ opacity: 0.6;
 .limit {
 font-weight: 600;
 font-size: 0.75rem;
-opacity: 0.75;
 flex-shrink: 0;
 padding-top: 0.5rem;
-color: var(--c-neg);
 }
 
 .apr { 
@@ -1829,6 +1828,37 @@ return `${sign}${displayValue.toLocaleString(undefined, {
    })}`;
 }
 
+/**
+ * v2.3: Calculate color for credit limit display based on utilization
+ * Returns color that transitions from green (0% utilization) to red (100% utilization)
+ * Over-limit gets special alert color
+ */
+function getLimitColor(currentBalance, limit) {
+const absBalance = Math.abs(currentBalance);
+const utilization = absBalance / limit;
+
+// Balance is 0 or positive - show green
+if (currentBalance >= 0) {
+return '#4c8036'; // --c-pos
+}
+
+// Over limit - show alert color
+if (utilization > 1.0) {
+return '#d85140'; // --c-overlimit
+}
+
+// Gradient from green to red based on utilization (0% to 100%)
+// 0% = #4c8036 (green), 100% = #a02d2a (red)
+const startColor = { r: 76, g: 128, b: 54 };   // #4c8036
+const endColor = { r: 160, g: 45, b: 42 };     // #a02d2a
+
+const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
+const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
+const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
+
+return `rgb(${r}, ${g}, ${b})`;
+}
+
 function renderAccounts() {
 const root = document.getElementById('accounts');
 root.innerHTML = '';
@@ -1902,17 +1932,18 @@ clearTimeout(LONG_PRESS_TIMER);
 identityWrap.appendChild(lastEl);
 identityWrap.appendChild(nameEl);
 
-// v2.3: Show credit limit for CC accounts
+accountDetails.appendChild(identityWrap);
+
+// v2.3: Show credit limit for CC accounts (stacked: limit, then APR)
 const metadata = ACCOUNT_METADATA.get(a.name) || {};
 if (a.type === 'cc' && metadata.limit) {
 const limitEl = document.createElement('span');
 limitEl.className = 'limit';
-const absLast = Math.abs(last);
-limitEl.textContent = `${formatMoney(absLast)} / ${formatMoney(metadata.limit)}`;
-accountDetails.appendChild(identityWrap);
+const limitValue = metadata.limit;
+const limitColor = getLimitColor(last, limitValue);
+limitEl.style.color = limitColor;
+limitEl.textContent = `$${limitValue.toLocaleString()}`;
 accountDetails.appendChild(limitEl);
-} else {
-accountDetails.appendChild(identityWrap);
 }
 
 const aprEl = document.createElement('span');
