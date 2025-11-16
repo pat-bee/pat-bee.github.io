@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -1069,8 +1068,7 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-/* v2.3: Account metadata (limits, etc.) - stored in memory */
-let ACCOUNT_METADATA = new Map();
+/* v2.3: Account metadata is now loaded from snapshot, not stored separately */
 
 /* ============================================
     UI UTILITY FUNCTIONS
@@ -1347,9 +1345,8 @@ showToast('Account not found', 'error');
 return;
 }
 
-// Get metadata (limit stored in memory)
-const metadata = ACCOUNT_METADATA.get(accountName) || {};
-limitInput.value = metadata.limit || '';
+// v2.3: Get limit from account (loaded from sheet column G)
+limitInput.value = account.limit || '';
 aprInput.value = account.apr || 0;
 
 // Get current value
@@ -1377,53 +1374,59 @@ const limitInput = document.getElementById('edit-account-limit');
 const aprInput = document.getElementById('edit-account-apr');
 const valueInput = document.getElementById('edit-account-value');
 
-const newLimit = limitInput.value ? Number(limitInput.value) : null;
+const newLimit = limitInput.value ? Number(limitInput.value) : 0;
 const newAPR = Number(aprInput.value);
 const newValue = Number(valueInput.value);
 
-// v2.3: Store limit in memory and URL
-if (newLimit !== null && newLimit > 0) {
-const metadata = ACCOUNT_METADATA.get(accountName) || {};
-metadata.limit = newLimit;
-ACCOUNT_METADATA.set(accountName, metadata);
-saveMutedStateToURL(); // Persist to URL
-console.log('Limit saved:', accountName, newLimit);
-}
-
-hideEditAccountModal();
-
-// Submit new value if changed
 const account = SNAP?.accounts?.find(a => a.name === accountName);
 const series = SNAP?.series?.[accountName];
 const currentValue = series?.last ?? 0;
 
-if (newValue !== currentValue) {
-setLoading(true, 'Updating account value…');
+hideEditAccountModal();
+setLoading(true, 'Updating account…');
+
 try {
-const body = new URLSearchParams({ 
+// v2.3: Update limit and APR in Google Sheets
+const updateBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+account: accountName,
+limit: newLimit,
+apr: newAPR
+}) 
+});
+
+const updateRes = await fetch(`${API_BASE}?route=updateAccount`, { method: 'POST', body: updateBody });
+const updateText = await updateRes.text();
+const updateJson = JSON.parse(updateText);
+
+if (!updateJson.ok) {
+throw new Error(updateJson.error || 'Failed to update account metadata');
+}
+
+// Update value if changed
+if (newValue !== currentValue) {
+const valueBody = new URLSearchParams({ 
 payload: JSON.stringify({ 
 entries: [{ account: accountName, value: newValue }] 
 }) 
 });
 
-const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-const text = await res.text();
-const j = JSON.parse(text);
+const valueRes = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body: valueBody });
+const valueText = await valueRes.text();
+const valueJson = JSON.parse(valueText);
 
-if (!j.ok) {
-throw new Error(j.error || 'Submit failed');
+if (!valueJson.ok) {
+throw new Error(valueJson.error || 'Failed to update value');
+}
 }
 
 showToast('Account updated! Refreshing…', 'success');
 await fetchSnapshot();
+
 } catch (e) {
 console.error('Update error:', e);
 setLoading(false);
 showToast('Failed to update: ' + e.message, 'error', 5000);
-}
-} else {
-showToast('Limit and APR updated!', 'success');
-renderAll(); // Re-render to show new limit
 }
 }
 
@@ -1481,42 +1484,15 @@ const mutedParam = params.get('muted');
 if (mutedParam) {
 MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
 }
-
-// v2.3: Load limits from URL
-const limitsParam = params.get('limits');
-if (limitsParam) {
-try {
-const limitsData = JSON.parse(decodeURIComponent(limitsParam));
-Object.entries(limitsData).forEach(([account, limit]) => {
-ACCOUNT_METADATA.set(account, { limit: Number(limit) });
-});
-} catch (e) {
-console.error('Failed to parse limits from URL:', e);
-}
-}
 }
 
 function saveMutedStateToURL() {
 const mutedArray = Array.from(MUTED_ACCOUNTS);
-const params = new URLSearchParams();
-
 if (mutedArray.length > 0) {
-params.set('muted', mutedArray.join(','));
+window.location.hash = `muted=${mutedArray.join(',')}`;
+} else {
+window.location.hash = '';
 }
-
-// v2.3: Save limits to URL
-const limitsObj = {};
-ACCOUNT_METADATA.forEach((metadata, accountName) => {
-if (metadata.limit) {
-limitsObj[accountName] = metadata.limit;
-}
-});
-
-if (Object.keys(limitsObj).length > 0) {
-params.set('limits', encodeURIComponent(JSON.stringify(limitsObj)));
-}
-
-window.location.hash = params.toString();
 }
 
 function toggleAccountMute(accountName) {
@@ -1964,19 +1940,19 @@ identityWrap.appendChild(nameEl);
 
 accountDetails.appendChild(identityWrap);
 
-// v2.3: Show credit limit for CC accounts (stacked: limit, then APR)
-const metadata = ACCOUNT_METADATA.get(a.name) || {};
-if (a.type === 'cc' && metadata.limit) {
+// v2.3: Stack limit, APR, and interest together
+const detailsStack = document.createElement('div');
+detailsStack.style.cssText = 'display:flex; flex-direction:column; gap:2px; padding-top:0.5rem;';
+
+// Show credit limit for CC accounts (from sheet column G)
+if (a.type === 'cc' && a.limit) {
 const limitEl = document.createElement('span');
 limitEl.className = 'limit';
-const limitValue = metadata.limit;
+const limitValue = a.limit;
 const limitColor = getLimitColor(last, limitValue);
 limitEl.style.color = limitColor;
 limitEl.textContent = `$${limitValue.toLocaleString()}`;
-accountDetails.appendChild(limitEl);
-} else if (a.type === 'cc') {
-// Debug: Log when CC account doesn't have limit
-console.log('CC account without limit:', a.name, 'metadata:', metadata);
+detailsStack.appendChild(limitEl);
 }
 
 const aprEl = document.createElement('span');
@@ -2028,7 +2004,9 @@ aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmoun
 }
 
 aprEl.innerHTML = aprHTML;
-accountDetails.appendChild(aprEl);
+
+detailsStack.appendChild(aprEl);
+accountDetails.appendChild(detailsStack);
 
 const inputLine = document.createElement('div');
 inputLine.className = 'input-line';
