@@ -1460,7 +1460,8 @@ return;
 }
 
 SNAP = j;
-console.log('Snapshot loaded:', SNAP); 
+console.log('Snapshot loaded:', SNAP);
+console.log('Accounts with limits:', SNAP.accounts.filter(a => a.limit).map(a => ({ name: a.name, limit: a.limit, type: a.type })));
 
 setLoading(false);
 renderAll();
@@ -1946,6 +1947,7 @@ detailsStack.style.cssText = 'display:flex; flex-direction:column; gap:2px; padd
 
 // Show credit limit for CC accounts (from sheet column G)
 if (a.type === 'cc' && a.limit) {
+console.log(`Displaying limit for ${a.name}: $${a.limit}`);
 const limitEl = document.createElement('span');
 limitEl.className = 'limit';
 const limitValue = a.limit;
@@ -1953,6 +1955,8 @@ const limitColor = getLimitColor(last, limitValue);
 limitEl.style.color = limitColor;
 limitEl.textContent = `$${limitValue.toLocaleString()}`;
 detailsStack.appendChild(limitEl);
+} else if (a.type === 'cc') {
+console.log(`CC account ${a.name} missing limit. Type: ${a.type}, Limit: ${a.limit}`);
 }
 
 const aprEl = document.createElement('span');
