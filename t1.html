@@ -1703,16 +1703,92 @@ summaryEl.innerHTML = '';
 }
 
 function renderTypeSummary() {
-const summaryEl = document.querySelector('#type-summary-bar h4');
-if (!summaryEl || !SNAP || !SNAP.accounts) return;
+  // Use the dedicated inner container if present
+  const container = document.getElementById('typeFilterRow');
+  if (!container || !SNAP || !SNAP.accounts) return;
 
-const typeTotals = {
-'bk': 0,
-'cc': 0,
-'bill': 0,
-'ii': 0,
-'sv': 0
-};
+  container.hidden = false;
+  container.innerHTML = '';
+
+  // Prepare totals per Type
+  const typeTotals = {};
+  const typeMeta = SNAP.typeMeta || {};
+
+  // Initialize totals for each known type
+  Object.keys(typeMeta).forEach(code => {
+    typeTotals[code] = 0;
+  });
+
+  // Roll up the latest value for each visible account into its Type
+  SNAP.accounts.forEach(a => {
+    if (isAccountGloballyHidden(a)) return;
+    const s = SNAP.series[a.name] || {};
+    const last = s?.last ?? 0;
+    const typeCode = a.type || 'bk';
+    if (typeTotals[typeCode] == null) typeTotals[typeCode] = 0;
+    typeTotals[typeCode] += last;
+  });
+
+  // Order Types: preferred order first, then any extras
+  const metaKeys = Object.keys(typeTotals);
+  const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+  const orderedCodes = [];
+
+  preferredOrder.forEach(code => {
+    if (metaKeys.includes(code)) orderedCodes.push(code);
+  });
+  metaKeys.forEach(code => {
+    if (!orderedCodes.includes(code)) orderedCodes.push(code);
+  });
+
+  orderedCodes.forEach(typeKey => {
+    const total = typeTotals[typeKey] || 0;
+    const meta = typeMeta[typeKey] || {};
+    const label =
+      (TYPE_LABELS[typeKey] || meta.label || typeKey).toUpperCase();
+    const colorClass = total >= 0 ? 'positive' : 'negative';
+    const signPrefix = total > 0 ? '+' : '';
+
+    // One column per Type
+    const typeItem = document.createElement('div');
+    typeItem.className = 'type-item';
+    if (isTypeMuted(typeKey)) {
+      typeItem.classList.add('muted');
+    }
+
+    // Row 1: value
+    const valueEl = document.createElement('div');
+    valueEl.className = `type-value ${colorClass}`;
+    valueEl.textContent = `${signPrefix}${formatMoney(total)}`;
+    typeItem.appendChild(valueEl);
+
+    // Row 2: TYPE NAME (all caps)
+    const labelEl = document.createElement('div');
+    labelEl.className = 'type-label';
+    labelEl.textContent = label;
+    typeItem.appendChild(labelEl);
+
+    // Row 3: checkbox that controls muting/unmuting this Type
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'type-toggle-label';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.dataset.typeCode = typeKey;
+    cb.checked = !isTypeMuted(typeKey);
+
+    cb.addEventListener('change', () => {
+      toggleTypeMute(typeKey);
+    });
+
+    toggleLabel.appendChild(cb);
+    toggleLabel.appendChild(document.createTextNode(' show'));
+    typeItem.appendChild(toggleLabel);
+
+    container.appendChild(typeItem);
+  });
+}
+
 
 SNAP.accounts.forEach(a => {
 if (isAccountMuted(a.name)) return;
