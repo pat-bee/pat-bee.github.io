@@ -1978,8 +1978,13 @@ rows.push([labels[i], assets, debts]);
 // v2.4: Type chart mode
 const typeData = {};
 
+// Safety check: if no types loaded, fall back to showing message
+if (!SNAP.types || SNAP.types.length === 0) {
+document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No type data available. Make sure Types sheet exists in Google Sheets.</div>';
+return;
+}
+
 // Initialize with visible types
-if (SNAP.types) {
 SNAP.types.forEach(t => {
 if (isTypeVisible(t.code)) {
 typeData[t.code] = {
@@ -1989,6 +1994,11 @@ data: new Array(labels.length).fill(0)
 };
 }
 });
+
+// Check if any types are visible
+if (Object.keys(typeData).length === 0) {
+document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">All types are hidden. Use checkmarks at bottom to show types.</div>';
+return;
 }
 
 // Aggregate account data by type
@@ -2583,11 +2593,15 @@ document.getElementById('submitAll').addEventListener('click', submitAll);
 document.querySelectorAll('input[name="mode"]').forEach(r => {
 r.addEventListener('change', (e) => { 
 MODE = e.target.value;
-// v2.4: When switching to Type mode, re-render everything to respect type visibility
-if (MODE === 'types') {
-renderAll();
-} else {
+console.log('Mode changed to:', MODE);  // Debug
+// v2.4: Just re-render (don't fetch new data)
 renderChart();
+if (MODE === 'types') {
+console.log('Types available:', SNAP?.types?.length || 0);  // Debug
+// Also update type controls in case they need refreshing
+renderTypeControls();
+}
+});
 }
 });
 });
