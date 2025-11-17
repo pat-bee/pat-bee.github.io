@@ -1076,6 +1076,12 @@ display: none;
 <input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
 </div>
 <div class="modal-form-group">
+<label for="edit-account-type">Account Type:</label>
+<select id="edit-account-type">
+<!-- Options populated dynamically from SNAP.types -->
+</select>
+</div>
+<div class="modal-form-group">
 <label for="edit-account-color">Account Color (Hex):</label>
 <div class="color-picker-group">
 <input type="text" id="edit-account-color" placeholder="#a02d2a" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
@@ -1130,10 +1136,8 @@ display: none;
 <main class="wrap">
 <section id="accounts" class="accounts"></section>
 
-<!-- v2.2: Type-based category summary -->
-<section id="type-summary-bar">
-<h4></h4>
-</section>
+<!-- v2.4: Type visibility controls (moved from bottom) -->
+<section id="type-controls" class="type-controls"></section>
 
 <!-- v2.3: Footer with Google Sheet link -->
 <footer>
@@ -1142,9 +1146,6 @@ display: none;
 information is stored in this application. All data resides in your Google Sheet. 
 Your financial footprint, your control.
 </div>
-
-<!-- v2.4: Type visibility controls -->
-<section id="type-controls" class="type-controls"></section>
 
 <footer>
 <small>
@@ -1482,6 +1483,21 @@ const series = SNAP?.series?.[accountName];
 const currentValue = series?.last ?? 0;
 valueInput.value = currentValue;
 
+// v2.4: Populate and set type dropdown
+const typeSelect = document.getElementById('edit-account-type');
+typeSelect.innerHTML = '';
+if (SNAP?.types) {
+SNAP.types.forEach(t => {
+const option = document.createElement('option');
+option.value = t.code;
+option.textContent = t.label;
+if (t.code === account.type) {
+option.selected = true;
+}
+typeSelect.appendChild(option);
+});
+}
+
 // v2.4: Load account color
 const colorInput = document.getElementById('edit-account-color');
 const colorPicker = document.getElementById('edit-account-color-picker');
@@ -1534,11 +1550,13 @@ if (IS_LOADING) return;
 const limitInput = document.getElementById('edit-account-limit');
 const aprInput = document.getElementById('edit-account-apr');
 const valueInput = document.getElementById('edit-account-value');
+const typeSelect = document.getElementById('edit-account-type');  // v2.4
 const colorInput = document.getElementById('edit-account-color');  // v2.4
 
 const newLimit = limitInput.value ? Number(limitInput.value) : 0;
 const newAPR = Number(aprInput.value);
 const newValue = Number(valueInput.value);
+const newType = typeSelect.value;  // v2.4
 const newColor = colorInput.value.trim();  // v2.4
 
 const account = SNAP?.accounts?.find(a => a.name === accountName);
@@ -1549,12 +1567,13 @@ hideEditAccountModal();
 setLoading(true, 'Updating account…');
 
 try {
-// v2.4: Update limit, APR, and color in Google Sheets
+// v2.4: Update limit, APR, type, and color in Google Sheets
 const updateBody = new URLSearchParams({ 
 payload: JSON.stringify({ 
 account: accountName,
 limit: newLimit,
 apr: newAPR,
+type: newType,  // v2.4
 color: newColor  // v2.4
 }) 
 });
@@ -2053,7 +2072,6 @@ baselineColor: black,
 gridlines: { color: black, opacity: 0.1 },
 textStyle: textStyle
 },
-isStacked: true,
 colors: chartColors,
 animation: {
 duration: 500,
@@ -2061,7 +2079,17 @@ easing: 'out'
 }
 };
 
-const chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+// v2.4: Use appropriate chart type based on mode
+let chart;
+if (MODE === 'totals') {
+// Stacked column chart for Totals mode (Assets vs Debts)
+options.isStacked = true;
+chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+} else {
+// Line chart for Per-account and Type modes
+chart = new google.visualization.LineChart(document.getElementById('chart'));
+}
+
 chart.draw(data, options);
 }
 
@@ -2554,8 +2582,13 @@ document.getElementById('submitAll').addEventListener('click', submitAll);
 
 document.querySelectorAll('input[name="mode"]').forEach(r => {
 r.addEventListener('change', (e) => { 
-MODE = e.target.value; 
+MODE = e.target.value;
+// v2.4: When switching to Type mode, re-render everything to respect type visibility
+if (MODE === 'types') {
+renderAll();
+} else {
 renderChart();
+}
 });
 });
 
