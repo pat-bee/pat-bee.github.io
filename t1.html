@@ -694,6 +694,47 @@ align-items: center;
 gap: 1rem;
 flex-wrap: wrap;
 }
+.type-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.type-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 999px;
+  background: #f5f5f5;
+}
+
+.type-item.muted {
+  opacity: 0.4;
+}
+
+.type-item input[type="checkbox"] {
+  margin: 0;
+}
+
+.type-item .type-label {
+  font-weight: 400;
+}
+
+.type-item .type-value {
+  font-weight: 600;
+}
+
+.type-item .type-value.positive {
+  color: var(--c-pos);
+}
+
+.type-item .type-value.negative {
+  color: var(--c-neg);
+}
 
 .type-value {
 font-weight: 600;
@@ -1001,8 +1042,9 @@ display: none;
 </select>
 
 <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-<label><input type="radio" name="dimension" value="types"> Type</label>
+<label><input type="radio" name="mode" value="types"> Type</label>
 <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+
 
 <button id="refresh" aria-label="Refresh data">Refresh</button>
 <button id="submitAll">Submit All</button>
@@ -1022,9 +1064,10 @@ display: none;
 
 <!-- v2.2: Type-based category summary -->
 <section id="type-summary-bar">
-<h4><div id="typeFilterRow" class="type-filter-row" hidden></div>
-</h4>
+  <h4 style="font-weight:300; margin:0;">Types</h4>
+  <div id="typeFilterRow" class="type-filter-row"></div>
 </section>
+
 
 <!-- v2.3: Footer with Google Sheet link -->
 <footer>
