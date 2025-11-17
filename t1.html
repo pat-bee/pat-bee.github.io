@@ -1,603 +1,2792 @@
-<!DOCTYPE html>
-<html>
+
+<!doctype html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LedgerDB</title>
-  <style>
-    /* ------------------------------------------------------------------------------------------------------------------ */
-    /* CSS: Ledger Styling (RESTORED) */
-    /* ------------------------------------------------------------------------------------------------------------------ */
-    :root {
-      --c-black: #2c3e50;
-      --c-white: #ecf0f1;
-      --c-green: #2ecc71;
-      --c-red: #e74c3c;
-      --c-muted: #f7f7f7;
-      --c-modal-bg: rgba(44, 62, 80, 0.9);
-      --c-input-bg: #e0e0e0;
-    }
-    body { font-family: sans-serif; margin: 0; background-color: var(--c-white); color: var(--c-black); }
-    .container { max-width: 900px; margin: 0 auto; padding: 10px; }
-    h1 { margin-top: 0; padding-top: 10px; font-size: 1.5em; border-bottom: 2px solid var(--c-black); }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ledger — Accounts & Chart (v2.4)</title>
 
-    /* Header Controls */
-    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-    .modes, .timeframes { display: flex; gap: 5px; margin-right: 10px; }
+<style>
+/* ============================================
+      CSS VARIABLES & DESIGN TOKENS
+      ============================================ */
+:root {
+--maxw: 1400px;
+--c-pos: #4c8036;
+--c-neg: #a02d2a;
+--c-black: #000000;
+--c-white: #ffffff;
+--radius: 10px;
+--gap: 12px;
+--c-tint-pos: #f7f9f4;
+--c-tint-neg: #f9f4f4;
+--c-muted: #e8e8e8;  /* v2.2: Muted account state */
+--c-overlimit: #d85140;  /* v2.3: Over-limit alert color */
+}
 
-    /* Radio Buttons */
-    .radio input { display: none; }
-    .radio span { 
-      padding: 5px 10px; border: 1px solid var(--c-black); border-radius: 5px; cursor: pointer; font-size: 0.9em; 
-      transition: all 0.2s;
-    }
-    .radio input:checked + span { background-color: var(--c-black); color: var(--c-white); }
-    .radio span:hover { background-color: #bdc3c7; }
+/* ============================================
+      BASE LAYOUT
+      ============================================ */
+html, body { 
+height: 100%; 
+margin: 0; 
+background: var(--c-white); 
+color: var(--c-black); 
+}
 
-    /* Totals & Chart */
-    .summary { display: flex; justify-content: space-between; margin-bottom: 15px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
-    .summary div { text-align: center; }
-    .total-value { font-size: 2em; font-weight: bold; }
-    .total-label { font-size: 0.8em; color: #7f8c8d; }
-    .positive { color: var(--c-green); }
-    .negative { color: var(--c-red); }
-    #chart-container { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+body {
+font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+font-size: 18px;
+line-height: 1.5;
+}
 
-    /* Account/Type Chips */
-    .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-    .chip {
-      padding: 8px 12px; border-radius: 18px; font-size: 0.9em; font-weight: bold; cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s;
-      color: var(--c-white); /* Default for colored chips */
-      background-color: var(--c-black); /* Fallback */
-    }
-    .chip.muted {
-      background-color: var(--c-muted) !important;
-      color: var(--c-black) !important;
-      box-shadow: none;
-      border: 1px dashed #ccc;
-    }
-    .chip:hover:not(.muted) { opacity: 0.9; transform: translateY(-1px); }
-    .chip span { display: block; font-size: 0.7em; font-weight: normal; margin-top: 2px; }
+.wrap { 
+width: 90vw; 
+max-width: var(--maxw); 
+margin: 0 auto; 
+padding: 0px;
+}
 
-    /* Submission Form & Modal */
-    .modal {
-      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-      background-color: var(--c-modal-bg); overflow: auto;
-    }
-    .modal-content {
-      background-color: var(--c-white); margin: 5% auto; padding: 20px; border-radius: 8px;
-      width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .modal h2 { margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-    .modal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .modal-row label { flex-basis: 40%; }
-    .modal-row input { flex-basis: 55%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background-color: var(--c-input-bg); }
-    .submit-btn { padding: 10px 20px; background-color: var(--c-green); color: var(--c-white); border: none; border-radius: 5px; cursor: pointer; }
-    .close-btn, .add-entry-btn { float: right; font-size: 1.5em; font-weight: bold; cursor: pointer; }
-    .close-btn:hover, .add-entry-btn:hover { color: var(--c-red); }
-    .button-group { display: flex; justify-content: space-between; margin-top: 20px; }
+a {
+color: var(--c-black);
+text-decoration: underline;
+}
 
-    /* Log and Status */
-    #status { margin-top: 10px; font-size: 0.9em; }
-    #log { margin-top: 10px; font-size: 0.8em; color: #7f8c8d; }
+/* ============================================
+      HEADER & TOOLBAR
+      ============================================ */
+header { 
+position: sticky; 
+top: 0; 
+background: var(--c-white); 
+z-index: 5; 
+border-bottom: 1px solid var(--c-black);
+padding-bottom: 1rem;
+}
 
-    /* NEW: Type Toggles Styling */
-    .type-toggles { margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    .toggle-item { display: inline-flex; align-items: center; margin-right: 15px; cursor: pointer; font-size: 0.9em; }
-    .toggle-item input[type="checkbox"] { margin-right: 5px; }
+.toolbar { 
+display: flex; 
+gap: var(--gap); 
+align-items: baseline;
+justify-content: space-between;
+padding: 6px 24px;
+flex-wrap: wrap; 
+width: 100%;
+box-sizing: border-box;
+}
 
-    /* NEW: See All Button */
-    #unmute-all-btn { 
-      background-color: #3498db; 
-      margin-left: 10px;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 0.9em;
-      font-weight: normal;
-      cursor: pointer;
-    }
-    #unmute-all-btn:hover { background-color: #2980b9; }
+.financial-group {
+display: flex;
+gap: var(--gap);
+align-items: baseline;
+flex-wrap: wrap;
+min-width: 0;
+flex-shrink: 1;
+}
 
-  </style>
+.toolbar-controls {
+display: flex;
+gap: var(--gap);
+align-items: center;
+flex-wrap: wrap;
+flex-shrink: 0;
+}
+
+.toolbar label { 
+font-size: .85rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+cursor: pointer;
+}
+
+.toolbar select {
+font-size: .85rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+padding: 4px;
+border: 1px solid var(--c-black);
+border-radius: 4px;
+background: var(--c-white);
+color: var(--c-black);
+}
+
+/* ============================================
+      FINANCIAL SUMMARY
+      ============================================
+      v2.1: Smart bolding - only largest absolute value
+      ============================================ */
+#financial-summary {
+font-size: 3.9rem;
+font-weight: 300;  /* v2.1: Default to lighter */
+white-space: nowrap;
+line-height: 1.1;
+flex-shrink: 1;
+min-width: 0;
+}
+
+/* v2.1: Bold class applied dynamically to larger absolute value */
+#financial-summary .bold-value {
+font-weight: 700;
+}
+
+/* v2.1: Interest summary always lighter */
+#interest-summary {
+font-size: 1.95rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+white-space: nowrap;
+line-height: 1.1;
+flex-shrink: 1;
+min-width: 0;
+opacity: 0.9;
+}
+
+.interest-earned {
+color: var(--c-pos);
+}
+
+.interest-cost {
+color: var(--c-neg);
+}
+
+.summary-debt {
+color: var(--c-neg);
+}
+
+.summary-asset {
+color: var(--c-pos);
+}
+
+/* ============================================
+      CHART CONTAINER
+      ============================================ */
+#chart { 
+height: 30vh; 
+width: 100%; 
+margin: 0;
+padding: 0;
+}
+
+/* ============================================
+      GLOBAL STATUSBAR (v2.0: Using █  character)
+      ============================================ */
+#statusbar {
+line-height: 3;
+font-size: larger;
+text-align: center;
+padding: 0.5rem 12px 0 12px;
+letter-spacing: -0.15em;
+overflow-x: auto;
+overflow-y: hidden;
+white-space: nowrap;
+word-break: keep-all;
+background: var(--c-white);
+width: 100%;
+box-sizing: border-box;
+}
+
+.status-positive {
+color: var(--c-pos);
+}
+
+.status-negative {
+color: var(--c-neg);
+}
+
+hr.divider {
+border: none;
+border-top: 1px solid var(--c-black);
+margin-top: 1rem;
+}
+
+/* ============================================
+      ACCOUNT ROWS
+      ============================================ */
+.accounts { 
+display: grid; 
+grid-template-columns: 1fr; 
+gap: var(--gap); 
+}
+
+.row { 
+display: flex; 
+align-items: flex-start; 
+justify-content: space-between; 
+border-bottom: 1px solid var(--c-black);
+padding: 12px 0; 
+gap: 12px; 
+}
+
+.left { 
+flex: 1 1 auto; 
+padding-right: 12px; 
+min-width: 0; 
+display: flex;
+flex-wrap: wrap;
+align-items: flex-start; 
+justify-content: space-between; 
+gap: var(--gap);
+}
+
+.right { 
+flex: 0 1 auto; 
+min-width: 40%; 
+text-align: right; 
+font-size: .9rem; 
+}
+
+.account-details {
+display: flex;
+flex-wrap: wrap;
+align-items: flex-start;
+gap: var(--gap);
+min-width: 0;
+}
+
+.lastval { 
+font-weight: 600; 
+font-size: 2.6rem; 
+white-space: nowrap;
+}
+
+.name { 
+font-weight: lighter; 
+color: var(--c-black); 
+font-size: 2.2rem; 
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+cursor: pointer;
+user-select: none;
+position: relative;
+}
+
+.name:hover {
+opacity: 0.8;
+}
+
+.name:active {
+opacity: 0.6;
+}
+
+/* v2.3: Credit limit display */
+.limit {
+font-weight: 600;
+font-size: 0.75rem;
+flex-shrink: 0;
+padding-top: 0.5rem;
+}
+
+.apr { 
+font-weight: 400; 
+font-size: 0.75rem;
+opacity: .75; 
+flex-shrink: 0;
+padding-top: 0.5rem;
+}
+
+.input-line { 
+display: flex; 
+gap: 10px; 
+align-items: center; 
+flex-shrink: 0;
+padding-top: 0.25rem;
+}
+
+/* ============================================
+      INPUT FIELDS
+      ============================================ */
+input[type="number"], input[type="date"], input[type="text"] {
+width: 10rem;
+max-width: 10rem;
+padding: .7rem .8rem;
+font-size: 1.1rem;
+border: 2px solid var(--c-black);
+border-radius: var(--radius);
+background: var(--c-white);
+color: var(--c-black);
+outline: none;
+transition: background-color 0.3s ease;
+}
+
+input[type="number"]::placeholder,
+input[type="date"]::placeholder,
+input[type="text"]::placeholder {
+color: var(--c-black);
+opacity: 0.6;
+}
+
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="text"]:focus {
+border-color: var(--c-black);
+box-shadow: 0 0 0 2px var(--c-black) inset;
+}
+
+input[type="number"].submitting,
+input[type="date"].submitting,
+input[type="text"].submitting {
+opacity: 0.5;
+pointer-events: none;
+}
+
+input[type="number"].submitted-ok,
+input[type="date"].submitted-ok,
+input[type="text"].submitted-ok {
+animation: flash-green 0.8s ease-out;
+}
+
+@keyframes flash-green {
+0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
+100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
+}
+
+.values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
+.values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
+
+/* ============================================
+      BUTTONS
+      ============================================ */
+button {
+padding: .7rem 1rem;
+font-size: 1rem;
+font-weight: 300;  /* v2.1: Lighter weight */
+border: 2px solid var(--c-black);
+color: var(--c-black);
+background: var(--c-white);
+cursor: pointer;
+border-radius: var(--radius);
+}
+
+button:hover { 
+background: var(--c-white);
+text-decoration: underline;
+}
+
+button:focus-visible { 
+outline: 3px solid var(--c-black); 
+outline-offset: 2px; 
+}
+
+button:disabled {
+opacity: 0.4;
+cursor: not-allowed;
+}
+
+/* ============================================
+      VALUE CHIPS (v2.0: Editable!)
+      ============================================ */
+.values { 
+display: flex; 
+justify-content: flex-end;
+gap: .6rem; 
+overflow-x: auto;
+width: 100%;
+}
+
+.chip {
+padding: .25rem .6rem;
+border-radius: 999px;
+border: 1px solid var(--c-black);
+font-variant-numeric: tabular-nums;
+font-size: .95rem;
+cursor: pointer;
+user-select: none;
+flex-shrink: 0;
+transition: all 0.2s ease;
+}
+
+.chip:hover {
+background: var(--c-black);
+color: var(--c-white);
+transform: scale(1.05);
+}
+
+.chip.no-delete {
+cursor: default;
+opacity: 0.7;
+background: transparent;
+color: var(--c-black);
+}
+.chip.no-delete:hover {
+background: transparent;
+transform: none;
+}
+
+/* ============================================
+      MOBILE RATIO BARS
+      ============================================ */
+.ratio-bar {
+display: none;
+font-size: 1.5rem;
+margin: 0;
+padding: 0;
+white-space: nowrap;
+letter-spacing: -1px;
+}
+.ratio-bar span {
+display: inline-block;
+}
+
+/* ============================================
+      FOOTER (v2.1: Tiny and elegant)
+      ============================================ */
+footer { 
+padding: 16px 24px 24px;
+text-align: center;
+font-size: 0.7rem;
+line-height: 1.6;
+opacity: 0.8;
+color: var(--c-black);
+}
+
+footer small {
+font-size: 0.7rem;
+display: block;
+margin-bottom: 8px;
+}
+
+footer a {
+font-size: 0.7rem;
+color: var(--c-black);
+text-decoration: underline;
+opacity: 0.9;
+}
+
+footer a:hover {
+opacity: 1;
+text-decoration: none;
+}
+
+footer b {
+font-weight: 600;
+}
+
+/* v2.1: Security notice */
+.security-notice {
+font-size: 0.7rem;
+background: #f8f8f8;
+padding: 10px 14px;
+border-radius: 8px;
+margin: 16px auto 8px;
+max-width: 900px;
+border-left: 3px solid var(--c-pos);
+text-align: left;
+line-height: 1.5;
+}
+
+.security-notice strong {
+font-weight: 700;
+color: var(--c-pos);
+}
+
+/* ============================================
+      TOAST NOTIFICATIONS
+      ============================================ */
+#toast {
+position: fixed;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+padding: 12px 24px;
+border-radius: var(--radius);
+background: var(--c-black);
+color: var(--c-white);
+border: 2px solid var(--c-white);
+font-weight: 500;
+z-index: 100;
+opacity: 0;
+visibility: hidden;
+transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
+}
+
+#toast.show {
+opacity: 1;
+visibility: visible;
+bottom: 30px;
+}
+
+#toast[data-type="error"] {
+background: var(--c-neg);
+color: var(--c-white);
+border-color: var(--c-white);
+}
+
+#toast[data-type="success"] {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-white);
+}
+
+/* ============================================
+      MODALS (Shared styles)
+      ============================================ */
+.modal-backdrop {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.6);
+z-index: 200;
+display: none;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+
+.modal {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: var(--c-white);
+color: var(--c-black);
+border: 2px solid var(--c-black);
+border-radius: var(--radius);
+z-index: 201;
+padding: 24px;
+width: 90vw;
+max-width: 400px;
+display: none;
+opacity: 0;
+transition: opacity 0.3s ease, top 0.3s ease;
+}
+
+.modal-backdrop.show,
+.modal.show {
+display: block;
+opacity: 1;
+}
+
+.modal h3 {
+margin-top: 0;
+}
+
+.modal p {
+margin-top: 0;
+line-height: 1.4;
+}
+
+.modal-details {
+font-weight: 600;
+display: block;
+margin: 12px 0;
+font-size: 1.1rem;
+}
+
+.modal-buttons {
+display: flex;
+gap: 12px;
+justify-content: flex-end;
+margin-top: 20px;
+}
+
+.modal-form-group {
+margin-bottom: 16px;
+}
+
+.modal-form-group label {
+display: block;
+margin-bottom: 6px;
+font-weight: 600;
+font-size: 0.9rem;
+}
+
+.modal-form-group input {
+width: 100%;
+max-width: 100%;
+box-sizing: border-box;
+}
+
+/* Delete modal */
+#delete-btn-confirm {
+background: var(--c-neg);
+color: var(--c-white);
+border-color: var(--c-neg);
+}
+#delete-btn-confirm:hover {
+background: #802421;
+border-color: #802421;
+text-decoration: none;
+}
+
+/* Edit chip modal */
+#edit-chip-modal .modal-form-group input[type="number"] {
+font-size: 1.2rem;
+padding: 0.8rem;
+}
+
+#edit-chip-modal .modal-form-group input[type="date"] {
+font-size: 1rem;
+padding: 0.8rem;
+}
+
+#edit-chip-save {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#edit-chip-save:hover {
+background: #3d6629;
+border-color: #3d6629;
+text-decoration: none;
+}
+
+/* Account menu modal */
+#account-menu-modal .modal-buttons {
+flex-direction: column;
+}
+
+#account-menu-modal .modal-buttons button {
+width: 100%;
+text-align: left;
+padding: 1rem;
+font-size: 1.1rem;
+}
+
+#account-menu-delete {
+background: var(--c-neg);
+color: var(--c-white);
+border-color: var(--c-neg);
+}
+#account-menu-delete:hover {
+background: #802421;
+border-color: #802421;
+}
+
+#account-menu-add {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#account-menu-add:hover {
+background: #3d6629;
+border-color: #3d6629;
+}
+
+/* v2.3: Edit account modal */
+#edit-account-save {
+background: var(--c-pos);
+color: var(--c-white);
+border-color: var(--c-pos);
+}
+#edit-account-save:hover {
+background: #3d6629;
+border-color: #3d6629;
+text-decoration: none;
+}
+
+/* ============================================
+      TYPE SUMMARY BAR (v2.2)
+      ============================================ */
+#type-summary-bar {
+text-align: center;
+padding: 2rem 0 1rem 0;
+margin: 2rem auto 0 auto;
+border-top: 1px solid var(--c-black);
+max-width: var(--maxw);
+}
+
+#type-summary-bar h4 {
+font-size: 1.5rem;
+font-weight: 300;
+margin: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 1rem;
+flex-wrap: wrap;
+}
+
+.type-value {
+font-weight: 600;
+white-space: nowrap;
+}
+
+.type-value.positive {
+color: var(--c-pos);
+}
+
+.type-value.negative {
+color: var(--c-neg);
+}
+
+.type-separator {
+font-weight: 300;
+color: var(--c-black);
+opacity: 0.5;
+}
+
+/* ============================================
+      MUTE TOGGLE (v2.2 - Option 2: No borders)
+      ============================================ */
+.mute-toggle-wrapper {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+
+.mute-checkbox {
+position: relative;
+width: 48px;
+height: 28px;
+flex-shrink: 0;
+}
+
+.mute-checkbox input[type="checkbox"] {
+position: absolute;
+opacity: 0;
+width: 100%;
+height: 100%;
+cursor: pointer;
+z-index: 2;
+margin: 0;
+}
+
+/* v2.3: Option 2 - No borders, subtle shadow */
+.mute-checkbox-slider {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: var(--c-pos);
+border: none;
+border-radius: 999px;
+transition: background 0.3s ease;
+pointer-events: none;
+box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.mute-checkbox-slider::before {
+content: '';
+position: absolute;
+height: 22px;
+width: 22px;
+left: 3px;
+bottom: 3px;
+background: var(--c-white);
+border: none;
+border-radius: 50%;
+transition: transform 0.3s ease;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
+background: var(--c-muted);
+}
+
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before {
+transform: translateX(20px);
+}
+
+.mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
+outline: 3px solid var(--c-black);
+outline-offset: 2px;
+}
+
+/* ============================================
+      MUTED ACCOUNT STATE (v2.2)
+      ============================================ */
+.row.muted {
+opacity: 0.5;
+}
+
+.row.muted * {
+color: var(--c-muted) !important;
+border-color: var(--c-muted) !important;
+background-color: transparent !important;
+}
+
+.row.muted input[type="number"] {
+background: transparent !important;
+color: var(--c-muted) !important;
+}
+
+.row.muted .mute-checkbox-slider {
+background: var(--c-muted) !important;
+border-color: var(--c-muted) !important;
+}
+
+.row.muted .mute-checkbox-slider::before {
+background: var(--c-white) !important;
+border-color: var(--c-muted) !important;
+}
+
+/* ============================================
+      MOBILE RESPONSIVE
+      ============================================ */
+@media (max-width: 650px) {
+.row {
+flex-direction: column;
+}
+
+.right { 
+min-width: unset; 
+text-align: left; 
+align-self: flex-start;
+padding-top: 0.5rem; 
+}
+
+.right .values {
+display: none;
+}
+.right .ratio-bar {
+display: block;
+}
+
+.left {
+gap: 8px;
+width: 100%;
+padding-right: 0;
+}
+
+input[type="number"], input[type="date"], input[type="text"] { 
+width: 100%; 
+max-width: 100%;
+}
+
+.input-line {
+width: 100%;
+margin-left: 0;
+padding-top: 0;
+}
+
+.apr {
+padding-top: 0;
+}
+
+.toolbar { 
+flex-direction: column; 
+align-items: flex-start;
+justify-content: flex-start;
+padding: 6px 24px;
+}
+
+.financial-group {
+flex-direction: column;
+align-items: center;
+width: 100%;
+}
+
+#financial-summary {
+font-size: 3.9rem;
+padding-bottom: 8px;
+width: 100%;
+text-align: center;
+}
+
+#interest-summary {
+font-size: 1.95rem;
+width: 100%;
+text-align: center;
+padding-bottom: 8px;
+}
+
+.toolbar-controls {
+justify-content: space-around;
+width: 100%;
+}
+
+.lastval, .name {
+font-size: 2rem;
+}
+
+/* v2.1: Slightly larger footer on mobile for readability */
+footer, footer small, footer a, .security-notice {
+font-size: 0.75rem;
+}
+
+/* v2.2: Type summary bar mobile stacking */
+#type-summary-bar h4 {
+flex-direction: column;
+gap: 0.5rem;
+font-size: 1.2rem;
+}
+
+.type-separator {
+display: none;
+}
+}
+
+/* ============================================
+      v2.4: COLOR PICKER IN MODAL
+      ============================================ */
+.color-picker-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.color-picker-group input[type="text"] {
+  flex: 1;
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+.color-picker-group input[type="color"] {
+  width: 50px;
+  height: 38px;
+  border: 1px solid var(--c-black);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ============================================
+      v2.4: SHOW ALL BUTTON
+      ============================================ */
+.show-all-btn {
+  margin-top: 1.5rem;
+  padding: 0.9rem 1.75rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: var(--c-pos);
+  color: var(--c-white);
+  border-color: var(--c-pos);
+  width: 100%;
+  max-width: 400px;
+}
+
+.show-all-btn:hover {
+  background: #3d6629;
+  border-color: #3d6629;
+  text-decoration: none;
+}
+
+/* ============================================
+      v2.4: TYPE CONTROLS (BOTTOM OF PAGE)
+      ============================================ */
+.type-controls {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--c-black);
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+}
+
+.type-controls-grid {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.type-control-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+  text-align: center;
+}
+
+.type-control-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.type-control-label {
+  font-size: 1rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.type-control-checkbox {
+  font-size: 2rem;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.type-control-checkbox.checked::before {
+  content: '✓';
+}
+
+.type-control-checkbox.unchecked::before {
+  content: '○';
+  opacity: 0.3;
+}
+
+.type-control-checkbox:hover {
+  opacity: 0.7;
+}
+
+/* ============================================
+      v2.4: MOBILE ADJUSTMENTS
+      ============================================ */
+@media (max-width: 600px) {
+  .type-controls-grid {
+    gap: 1.5rem;
+  }
+  
+  .type-control-item {
+    min-width: 100px;
+  }
+  
+  .type-control-value {
+    font-size: 1.4rem;
+  }
+  
+  .type-control-label {
+    font-size: 0.85rem;
+  }
+  
+  .show-all-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.5rem;
+  }
+}
+</style>
 </head>
 <body>
+<!-- Toast notification -->
+<div id="toast" role="status" aria-live="polite"></div>
 
-  <div class="container">
-    <h1>LedgerDB Financial Snapshot</h1>
+<!-- Delete confirmation modal -->
+<div id="delete-modal-backdrop" class="modal-backdrop"></div>
+<div id="delete-modal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
+<h3 id="delete-modal-title">Delete Entry?</h3>
+<p>Do you really want to delete this entry?</p>
+<span id="delete-modal-details" class="modal-details"></span>
+<div id="delete-modal-buttons" class="modal-buttons">
+<button id="delete-btn-cancel">Cancel</button>
+<button id="delete-btn-confirm">Yes, Delete</button>
+</div>
+</div>
 
-    <div class="controls">
-      <div style="display: flex; align-items: center;">
-        <div class="modes">
-          <label class="radio">
-            <input type="radio" name="mode" value="totals" checked />
-            <span>Totals</span>
-          </label>
-          <label class="radio">
-            <input type="radio" name="mode" value="peraccount" />
-            <span>Per-Account</span>
-          </label>
-          <label class="radio">
-            <input type="radio" name="mode" value="pertype" />
-            <span>Per-Type</span>
-          </label>
-        </div>
-        <div id="unmute-all-btn" class="chip">See All</div>
-      </div>
+<!-- Edit chip modal -->
+<div id="edit-chip-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-chip-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-chip-modal-title">
+<h3 id="edit-chip-modal-title">Edit Entry</h3>
+<div class="modal-form-group">
+<label for="edit-chip-value">Value:</label>
+<input type="number" id="edit-chip-value" step="0.01" placeholder="Enter value">
+</div>
+<div class="modal-form-group">
+<label for="edit-chip-date">Date:</label>
+<input type="date" id="edit-chip-date">
+</div>
+<span id="edit-chip-details" class="modal-details"></span>
+<div id="edit-chip-buttons" class="modal-buttons">
+<button id="edit-chip-delete">Delete</button>
+<button id="edit-chip-cancel">Cancel</button>
+<button id="edit-chip-save">Save</button>
+</div>
+</div>
 
-      <div class="timeframes">
-        <label class="radio">
-          <input type="radio" name="timeframe" value="today" />
-          <span>Today</span>
-        </label>
-        <label class="radio">
-          <input type="radio" name="timeframe" value="7d" />
-          <span>7D</span>
-        </label>
-        <label class="radio">
-          <input type="radio" name="timeframe" value="30d" />
-          <span>30D</span>
-        </label>
-        <label class="radio">
-          <input type="radio" name="timeframe" value="ytd" checked />
-          <span>YTD</span>
-        </label>
-        <label class="radio">
-          <input type="radio" name="timeframe" value="1y" />
-          <span>1Y</span>
-        </label>
-        <label class="radio">
-          <input type="radio" name="timeframe" value="all" />
-          <span>ALL</span>
-        </label>
-      </div>
-    </div>
+<!-- Account menu modal -->
+<div id="account-menu-modal-backdrop" class="modal-backdrop"></div>
+<div id="account-menu-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="account-menu-modal-title">
+<h3 id="account-menu-modal-title">Account Actions</h3>
+<p id="account-menu-account-name" style="font-weight: 600; font-size: 1.2rem; margin-bottom: 1rem;"></p>
+<div id="account-menu-buttons" class="modal-buttons">
+<button id="account-menu-edit">✏️ Edit Account Settings</button>
+<button id="account-menu-delete">🗑️ Delete Account</button>
+<button id="account-menu-add">➕ Add New Account Below</button>
+<button id="account-menu-cancel">Cancel</button>
+</div>
+</div>
 
-    <div id="type-toggles-container" class="type-toggles" style="display: none;">
-      <p style="margin-top: 0; font-weight: bold;">Filter by Type (Toggle to Mute):</p>
-      <div id="type-toggles" style="display: flex; flex-wrap: wrap; gap: 10px;">
-        </div>
-    </div>
-    
-    <div id="status">Loading data...</div>
+<!-- v2.3: Edit Account modal -->
+<div id="edit-account-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-account-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-account-modal-title">
+<h3 id="edit-account-modal-title">Edit Account</h3>
+<p id="edit-account-name" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem;"></p>
+<div class="modal-form-group">
+<label for="edit-account-limit">Credit Limit (for CC accounts):</label>
+<input type="number" id="edit-account-limit" step="1" placeholder="e.g. 5000">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-apr">APR (as decimal, e.g. 0.29 for 29%):</label>
+<input type="number" id="edit-account-apr" step="0.01" placeholder="e.g. 0.29">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-value">Current Value:</label>
+<input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
+</div>
+<div class="modal-form-group">
+<label for="edit-account-type">Account Type:</label>
+<select id="edit-account-type">
+<!-- Options populated dynamically from SNAP.types -->
+</select>
+</div>
+<div class="modal-form-group">
+<label for="edit-account-color">Account Color (Hex):</label>
+<div class="color-picker-group">
+<input type="text" id="edit-account-color" placeholder="#a02d2a" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+<input type="color" id="edit-account-color-picker" value="#a02d2a">
+</div>
+<small style="opacity: 0.7;">Long-press text field to open color picker</small>
+</div>
+<div class="modal-form-group">
+<label for="edit-account-login-url">Login URL (optional):</label>
+<div style="display: flex; gap: 8px; align-items: center;">
+<input type="url" id="edit-account-login-url" placeholder="https://example.com/login" style="flex: 1;">
+<button type="button" id="edit-account-open-login" style="padding: 0.7rem 1rem;" title="Open login page">🔗</button>
+</div>
+<small style="opacity: 0.7;">Click 🔗 to open in new tab</small>
+</div>
+<div id="edit-account-buttons" class="modal-buttons">
+<button id="edit-account-cancel">Cancel</button>
+<button id="edit-account-save">Save Changes</button>
+</div>
+</div>
 
-    <div class="summary">
-      <div>
-        <div id="net-worth" class="total-value positive">$0.00</div>
-        <div class="total-label">Net Worth</div>
-      </div>
-      <div>
-        <div id="total-assets" class="total-value positive">$0.00</div>
-        <div class="total-label">Total Assets</div>
-      </div>
-      <div>
-        <div id="total-debts" class="total-value negative">$0.00</div>
-        <div class="total-label">Total Debts</div>
-      </div>
-    </div>
+<!-- Main header -->
+<header>
+<div class="toolbar">
+<div class="financial-group">
+<div id="financial-summary"></div>
+<div id="interest-summary"></div>
+</div>
 
-    <div id="chart-container">
-      <div id="chart" style="width: 100%; height: 300px;"></div>
-    </div>
+<div class="toolbar-controls">
+<label for="timeframe">Timeframe:</label>
+<select id="timeframe">
+<option value="ytd" selected>This Calendar Year</option>
+<option value="today">Today</option>
+<option value="7d">Last 7 Days</option>
+<option value="14d">Last 14 Days</option>
+<option value="30d">Last 30 Days</option>
+<option value="90d">Last 90 Days</option>
+<option value="1y">Last Year (12mo)</option>
+<option value="all">All Time</option>
+</select>
 
-    <div id="account-list" class="chip-list">
-      </div>
-    
-    <button class="submit-btn" onclick="document.getElementById('modal').style.display='block'">+ Add Entry</button>
+<label><input type="radio" name="mode" value="totals" checked> Totals</label>
+<label><input type="radio" name="mode" value="accounts"> Per-account</label>
+<label><input type="radio" name="mode" value="types"> Type</label>
 
-    <div id="log"></div>
+<button id="refresh" aria-label="Refresh data">Refresh</button>
+<button id="submitAll">Submit All</button>
+</div>
+</div>
+<hr>
+<div id="chart"></div>
+<hr>
+<!-- v2.0: Statusbar uses █  character -->
+<section id="statusbar"></section>
+</header>
 
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <span class="close-btn" onclick="document.getElementById('modal').style.display='none'">&times;</span>
-        <h2>Add New Entry</h2>
-        
-        <form id="submission-form">
-          <div id="entry-fields">
-            <div class="modal-row">
-              <label for="account-select-0">Account:</label>
-              <select id="account-select-0" required style="flex-basis: 55%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background-color: var(--c-input-bg);"></select>
-            </div>
-            <div class="modal-row">
-              <label for="value-input-0">Value:</label>
-              <input type="number" id="value-input-0" step="0.01" required placeholder="0.00">
-            </div>
-          </div>
-          
-          <div style="text-align: right;">
-            <button type="button" class="add-entry-btn" onclick="addEntryField()">+ Add Account</button>
-          </div>
-          
-          <div class="button-group">
-            <button type="submit" class="submit-btn">Submit Values</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+<hr class="wrap divider">
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<main class="wrap">
+<section id="accounts" class="accounts"></section>
+
+<!-- v2.2: Type-based category summary -->
+<section id="type-summary-bar">
+<h4></h4>
+</section>
+
+<!-- v2.4: Type visibility controls -->
+<section id="type-controls" class="type-controls">
+<div id="type-controls-grid" class="type-controls-grid"></div>
+<button id="show-all-btn" class="show-all-btn">👁️ Show All Accounts & Types</button>
+</section>
+
+<!-- v2.3: Footer with Google Sheet link -->
+<footer>
+<div class="security-notice">
+🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
+information is stored in this application. All data resides in your Google Sheet. 
+Your financial footprint, your control.
+</div>
+
+<small>
+<b>v2.4 Features:</b> Type mode • Stacked area charts • Login URLs • Type controls • Show All button<br>
+<a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
+</small>
+</footer>
+</main>
+
 <script>
-  /* ------------------------------------------------------------------------------------------------------------------ */
-  /* JAVASCRIPT: Ledger Logic  */
+/* ============================================
+    CONFIGURATION
+    ============================================ */
+const API_BASE = 'https://script.google.com/macros/s/AKfycbzXlG2ZOb0xdHo_JjZeP2C9gql6jV7L6u_Jyc4762RB2cQ7VyNqo_2Z46FR1NclbMh8VA/exec';
+const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/'; // v2.3: Add your Google Sheet ID here
 
-  /* ------------------------------------------------------------------------------------------------------------------ */
+/* ============================================
+    APPLICATION STATE
+    ============================================ */
+let SNAP = null;
+let MODE = 'totals';
+let TIMEFRAME = 'ytd';
+let IS_LOADING = false;
+let TOAST_TIMER = null;
+let LONG_PRESS_TIMER = null;
+const LONG_PRESS_DURATION = 500;
 
-  // Replace with your deployed Apps Script URL
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx36Q0uk9cAK9tmh5fH5d0x6iZnH2etfWFEOgQaww2tNH8jlOArzxJs2IyElvNqCO2Gdg/exec';
-  // Global state variables
-  let ACCOUNTS = [];
-  let HISTORY = {};
-  let SUMMARY = {};
-  let TIMEFRAME = 'ytd';
-  let MODE = 'totals'; // 'totals', 'peraccount', 'pertype'
-  let CHART = null;
-  let LOCALE_FORMATTER = null;
-  
-  let MUTED_ACCOUNTS = new Set();
-  let MUTED_TYPES = new Set();
-  let TYPES_MAP = new Map();
+/* v2.2: Muted accounts state */
+let MUTED_ACCOUNTS = new Set();
 
-  google.charts.load('current', { 'packages': ['corechart'] });
-  google.charts.setOnLoadCallback(initialize);
+/* v2.4: Hidden types state */
+let HIDDEN_TYPES = new Set();
 
-  function initialize() {
-    CHART = new google.visualization.LineChart(document.getElementById('chart'));
-    LOCALE_FORMATTER = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
-    
-    // Set up listeners for timeframe and mode
-    document.querySelectorAll('input[name="timeframe"]').forEach(r => {
-      r.addEventListener('change', (e) => { TIMEFRAME = e.target.value; fetchSnapshot(); });
-      if (r.checked) TIMEFRAME = r.value;
-    });
+/* v2.2: Type mapping */
+const TYPE_LABELS = {
+  'bk': 'Banks',
+  'cc': 'CreditCards',
+  'bill': 'Bills',
+  'ii': 'Investments',
+  'sv': 'Savings'
+};
 
-    document.querySelectorAll('input[name="mode"]').forEach(r => {
-      r.addEventListener('change', (e) => { 
-          MODE = e.target.value; 
-          // Reset filters and toggle display of filter sections when mode changes
-          MUTED_ACCOUNTS.clear();
-          MUTED_TYPES.clear();
-          document.getElementById('type-toggles-container').style.display = (MODE === 'pertype' ? 'block' : 'none');
-          renderChart();
-          renderAccounts(); 
-      });
-      if (r.checked) MODE = r.value;
-    });
-    
-    document.getElementById('unmute-all-btn').addEventListener('click', unmuteAll);
+/* v2.4: System-wide type colors */
+const SYSTEM_TYPE_COLORS = {
+  'bk': '#4c8036',    // Banks (green)
+  'sv': '#26401b',    // Savings (dark green)
+  'ii': '#355a26',    // Investments (forest green)
+  'cc': '#a02d2a',    // Credit Cards (red)
+  'bill': '#701f1d',  // Bills (dark red)
+  'other': '#999999'  // Other/Unknown (gray)
+};
 
-    fetchSnapshot();
-  }
-  
-  /**
-   * Resets all muted filters for the "See All" functionality.
-   */
-  function unmuteAll() {
-    MUTED_ACCOUNTS.clear();
-    MUTED_TYPES.clear();
-    // Uncheck all type toggles
-    document.querySelectorAll('#type-toggles input[type="checkbox"]').forEach(cb => cb.checked = false);
-    
-    renderChart();
-    renderAccounts();
-  }
+/* v2.4: Type code mapping for backwards compatibility */
+const TYPE_CODE_MAPPING = {
+  'cash': 'bk',     // Old code → New code
+  'loot': 'sv',     // Old code → New code
+  'banking': 'bk',  // Alias
+  'savings': 'sv',  // Alias
+  'debt': 'cc',     // Alias
+  'credit': 'cc'    // Alias
+};
 
-  /**
-   * Generates type-aggregated history data for the chart.
-   */
-  function getAggregatedHistoryByType(filteredAccounts) {
-      const historyByType = new Map();
-      const typeCodes = new Set(filteredAccounts.map(a => a.type).filter(t => t));
+/* v2.4: Normalize type code with mapping */
+function normalizeTypeCode(typeCode) {
+  if (!typeCode) return 'bk';
+  const code = String(typeCode).toLowerCase().trim();
+  return TYPE_CODE_MAPPING[code] || code;
+}
 
-      // 1. Group and sum values by type and timestamp
-      for (const acct of filteredAccounts) {
-          // 'series[acct.name].monthly' is the array returned by Apps Script that maps to dateAxis
-          const monthlySeries = HISTORY.series[acct.name]?.monthly;
-          if (!monthlySeries || !acct.type || !TYPES_MAP.has(acct.type)) continue;
+/* v2.3: Account metadata is now loaded from snapshot, not stored separately */
 
-          monthlySeries.forEach((value, idx) => {
-              const timestamp = HISTORY.dateAxis[idx]; // Use the index to map to timestamp
-              const typeHistory = historyByType.get(acct.type) || new Map();
-              
-              const currentValue = typeHistory.get(timestamp) || 0;
-              typeHistory.set(timestamp, currentValue + value);
-              historyByType.set(acct.type, typeHistory);
-          });
-      }
+/* ============================================
+    UI UTILITY FUNCTIONS
+    ============================================ */
 
-      // 2. Prepare data for Google Charts DataTable
-      const sortedTypeCodes = Array.from(typeCodes).sort();
-      const header = ['Date'].concat(sortedTypeCodes.map(code => TYPES_MAP.get(code).label));
-      const chartData = [header];
-      
-      const lastValue = {};
-      for (const timestamp of HISTORY.dateAxis) {
-          const row = [timestamp];
-          
-          for (const typeCode of sortedTypeCodes) {
-              const typeHistory = historyByType.get(typeCode);
-              const value = typeHistory ? typeHistory.get(timestamp) : undefined;
-              
-              // Fill forward logic
-              const valueToUse = (value !== undefined) ? value : lastValue[typeCode] || null;
-              row.push(valueToUse);
-              if (value !== undefined) {
-                  lastValue[typeCode] = value;
-              }
-          }
-          chartData.push(row);
-      }
+function showToast(msg, type = 'info', duration = 3000) {
+const el = document.getElementById('toast');
+if (!el) return;
 
-      return { chartData, sortedTypeCodes };
-  }
+if (TOAST_TIMER) clearTimeout(TOAST_TIMER);
 
-  /**
-   * Renders the show/hide checkboxes for each unique Type.
-   */
-  function renderTypeToggles() {
-    const toggleContainer = document.getElementById('type-toggles');
-    toggleContainer.innerHTML = '';
+el.textContent = msg;
+el.dataset.type = type;
+el.classList.add('show');
 
-    // Get all unique types present in the accounts
-    const uniqueTypes = new Map();
-    ACCOUNTS.forEach(a => {
-        if (TYPES_MAP.has(a.type)) {
-            uniqueTypes.set(a.type, TYPES_MAP.get(a.type).label);
-        }
-    });
+TOAST_TIMER = setTimeout(() => el.classList.remove('show'), duration);
+}
 
-    Array.from(uniqueTypes.keys()).sort().forEach(code => {
-        const label = uniqueTypes.get(code);
-        const isMuted = MUTED_TYPES.has(code);
-        const color = TYPES_MAP.get(code).color;
+function setLoading(loading, message) {
+IS_LOADING = loading;
 
-        const toggleItem = document.createElement('div');
-        toggleItem.classList.add('toggle-item');
-        toggleItem.innerHTML = `
-            <input type="checkbox" id="toggle-${code}" data-type-code="${code}" ${isMuted ? 'checked' : ''}>
-            <label for="toggle-${code}" style="color: ${color};">${label}</label>
-        `;
-        
-        toggleItem.querySelector('input').addEventListener('change', (e) => {
-            if (e.target.checked) {
-                MUTED_TYPES.add(code);
-            } else {
-                MUTED_TYPES.delete(code);
-            }
-            renderChart();
-            renderAccounts();
-        });
+document.getElementById('refresh').disabled = loading;
+document.getElementById('submitAll').disabled = loading;
 
-        toggleContainer.appendChild(toggleItem);
-    });
-  }
+document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+inp.disabled = loading;
+inp.classList.toggle('submitting', loading);
+});
 
-  function fetchSnapshot() {
-    document.getElementById('status').textContent = 'Loading data...';
-    
-    document.getElementById('log').textContent = '';
+if (message && !document.getElementById('delete-modal-backdrop').classList.contains('show')) {
+showToast(message, 'info', loading ? 10000 : 3000);
+}
+}
 
-    const url = SCRIPT_URL + `?route=snapshot&timeframe=${TIMEFRAME}`;
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        if (!data.ok) {
-          throw new Error(data.error || 'Unknown API error');
-        }
-        
-        ACCOUNTS = data.accounts;
-        HISTORY = data;
-        SUMMARY = data.totals;
+/* ============================================
+    DELETE MODAL FUNCTIONS
+    ============================================ */
 
-        TYPES_MAP.clear();
-        data.types.forEach(t => TYPES_MAP.set(t.code, { label: t.label, color: t.color }));
+function showDeleteConfirm(account, date, value, readableValue) {
+if (IS_LOADING) return;
 
-        document.getElementById('status').textContent = `Data as of ${data.as_of}.`;
-        
-        renderChart();
-        renderAccounts();
-        
-        renderTypeToggles();
-        document.getElementById('type-toggles-container').style.display = (MODE === 'pertype' ? 'block' : 'none');
+const backdrop = document.getElementById('delete-modal-backdrop');
+const modal = document.getElementById('delete-modal');
+const details = document.getElementById('delete-modal-details');
+const confirmBtn = document.getElementById('delete-btn-confirm');
 
-        const select = document.getElementById('account-select-0');
-        select.innerHTML = ACCOUNTS.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
-        
-      })
-      .catch(err => {
-        document.getElementById('status').textContent = 'Error fetching data: ' + err.message;
-        document.getElementById('log').textContent = '';
-        console.error('Fetch Error:', err);
-      });
-  }
+details.textContent = `${account}: ${readableValue} on ${date}`;
 
-  function renderChart() {
-    if (!CHART || !HISTORY.dateAxis || ACCOUNTS.length === 0) return;
+backdrop.classList.add('show');
+modal.classList.add('show');
 
-    let filteredAccounts = ACCOUNTS;
-    if (MODE === 'peraccount' || MODE === 'totals') {
-        filteredAccounts = ACCOUNTS.filter(a => !MUTED_ACCOUNTS.has(a.name));
-    } else if (MODE === 'pertype') {
-        filteredAccounts = ACCOUNTS.filter(a => !MUTED_TYPES.has(a.type));
-    }
+confirmBtn.onclick = () => processDelete(account, date, value);
+}
 
-    let chartData = [];
-    let options = {
-      title: 'Net Worth History',
-      legend: { position: 'bottom' },
-      hAxis: { title: 'Date' },
-      vAxis: { title: 'Value', format: LOCALE_FORMATTER.format(0).replace('0', '') },
-      series: {}
-    };
+function hideDeleteConfirm() {
+document.getElementById('delete-modal-backdrop').classList.remove('show');
+document.getElementById('delete-modal').classList.remove('show');
+}
 
-    if (MODE === 'totals') {
-      const totalSeries = HISTORY.totals.assets.map((v, i) => v + HISTORY.totals.debts[i]);
-      chartData.push(['Date', 'Net Worth']);
-      totalSeries.forEach((v, i) => {
-        chartData.push([HISTORY.dateAxis[i], v]);
-      });
-      options.series[0] = { color: 'var(--c-black)' };
+async function processDelete(account, date, value) {
+hideDeleteConfirm();
+if (IS_LOADING) return;
+setLoading(true, 'Deleting entry…');
 
-    } else if (MODE === 'peraccount') {
-      const header = ['Date'].concat(filteredAccounts.map(a => a.name));
-      chartData.push(header);
-      
-      filteredAccounts.forEach((a, seriesIdx) => {
-        options.series[seriesIdx] = { color: a.color || 'var(--c-black)' };
-        const monthlySeries = HISTORY.series[a.name]?.monthly || [];
-        // Populate the series map with the correct history data
-        a.monthlySeries = monthlySeries; 
-      });
+try {
+const body = new URLSearchParams({ 
+payload: JSON.stringify({ account, date, value: Number(value) }) 
+});
 
-      HISTORY.dateAxis.forEach((d, i) => {
-        const row = [d].concat(filteredAccounts.map(a => a.monthlySeries[i]));
-        chartData.push(row);
-      });
-      options.title = 'Account History';
+const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
+const text = await res.text();
 
-    } else if (MODE === 'pertype') {
-        const { chartData: typeChartData, sortedTypeCodes } = getAggregatedHistoryByType(filteredAccounts);
-        chartData = typeChartData;
+let j;
+try { 
+j = JSON.parse(text); 
+} catch {
+console.error('Delete non-JSON:', text);
+showToast('Delete failed (non-JSON response)', 'error', 5000);
+setLoading(false);
+return;
+}
 
-        options.series = sortedTypeCodes.reduce((acc, code, index) => {
-            acc[index] = { color: TYPES_MAP.get(code)?.color || 'var(--c-black)' };
-            return acc;
-        }, {});
-        options.title = 'Type History (Aggregated)';
-    }
+if (!j.ok) {
+console.error('Delete JSON error:', j);
+showToast(`Delete failed: ${j.error || 'Unknown'}`, 'error', 5000);
+setLoading(false);
+return;
+}
 
-    try {
-      if (chartData.length > 1) {
-        const dataTable = google.visualization.arrayToDataTable(chartData);
-        CHART.draw(dataTable, options);
-      } else {
-        document.getElementById('chart').innerHTML = 'No data to display.';
-      }
-    } catch (e) {
-        document.getElementById('chart').innerHTML = 'Error rendering chart. Check console for details.';
-        console.error('Chart Error:', e);
-    }
-    
-    renderSummary(filteredAccounts);
-  }
+showToast('Entry deleted. Refreshing…', 'success');
+await fetchSnapshot();
 
-  function renderSummary(filteredAccounts) {
-    // FIX: Use 'last' property which is now available on the account object
-    const totalAssets = filteredAccounts.filter(a => a.kind === 'asset').reduce((sum, a) => sum + (a.last || 0), 0);
-    const totalDebts = filteredAccounts.filter(a => a.kind === 'debt').reduce((sum, a) => sum + (a.last || 0), 0);
-    const netWorth = totalAssets + totalDebts;
+} catch (e) {
+console.error(e);
+setLoading(false);
+showToast('Network error deleting entry.', 'error', 5000);
+}
+}
 
-    document.getElementById('net-worth').textContent = LOCALE_FORMATTER.format(netWorth);
-    document.getElementById('net-worth').className = 'total-value ' + (netWorth >= 0 ? 'positive' : 'negative');
+/* ============================================
+    EDIT CHIP MODAL FUNCTIONS
+    ============================================ */
 
-    document.getElementById('total-assets').textContent = LOCALE_FORMATTER.format(totalAssets);
-    document.getElementById('total-assets').className = 'total-value positive';
+function showEditChipModal(account, date, value, readableValue) {
+if (IS_LOADING) return;
 
-    document.getElementById('total-debts').textContent = LOCALE_FORMATTER.format(totalDebts);
-    document.getElementById('total-debts').className = 'total-value negative';
-  }
+const backdrop = document.getElementById('edit-chip-modal-backdrop');
+const modal = document.getElementById('edit-chip-modal');
+const details = document.getElementById('edit-chip-details');
+const valueInput = document.getElementById('edit-chip-value');
+const dateInput = document.getElementById('edit-chip-date');
+const saveBtn = document.getElementById('edit-chip-save');
+const deleteBtn = document.getElementById('edit-chip-delete');
 
-  function renderAccounts() {
-    const accountListEl = document.getElementById('account-list');
-    accountListEl.innerHTML = '';
+details.textContent = `Account: ${account}`;
+valueInput.value = Number(value);
 
-    if (MODE === 'pertype') {
-      const types = new Map();
+const dateParts = date.split('/');
+if (dateParts.length === 3) {
+const [month, day, year] = dateParts;
+dateInput.value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+} else {
+dateInput.value = '';
+}
 
-      // Aggregate latest values by type
-      ACCOUNTS.forEach(acct => {
-          const typeCode = acct.type;
-          if (!typeCode || !TYPES_MAP.has(typeCode)) return;
+backdrop.classList.add('show');
+modal.classList.add('show');
 
-          const latestValue = acct.last || 0; 
-          const typeInfo = TYPES_MAP.get(typeCode);
+setTimeout(() => valueInput.focus(), 100);
 
-          const info = types.get(typeCode) || {
-              code: typeCode,
-              label: typeInfo.label,
-              color: typeInfo.color,
-              value: 0,
-          };
-          info.value += latestValue;
-          types.set(typeCode, info);
-      });
-      
-      // Render Type Chips
-      Array.from(types.values()).sort((a, b) => b.value - a.value).forEach(typeInfo => {
-          const isMuted = MUTED_TYPES.has(typeInfo.code);
-          
-          const chip = document.createElement('div');
-          chip.dataset.code = typeInfo.code;
-          chip.classList.add('chip');
-          if (isMuted) chip.classList.add('muted');
-          
-          chip.style.backgroundColor = isMuted ? 'var(--c-muted)' : typeInfo.color;
-          chip.style.color = isMuted ? 'var(--c-black)' : 'var(--c-white)';
+saveBtn.onclick = () => processEditChip(account, date, value);
+deleteBtn.onclick = () => {
+hideEditChipModal();
+showDeleteConfirm(account, date, value, readableValue);
+};
+}
 
-          const fmtValue = LOCALE_FORMATTER.format(typeInfo.value);
-          chip.innerHTML = `<strong>${typeInfo.label}</strong><span>${fmtValue}</span>`;
+function hideEditChipModal() {
+document.getElementById('edit-chip-modal-backdrop').classList.remove('show');
+document.getElementById('edit-chip-modal').classList.remove('show');
+}
 
-          chip.addEventListener('click', () => {
-              if (MUTED_TYPES.has(typeInfo.code)) {
-                  MUTED_TYPES.delete(typeInfo.code);
-                  const toggle = document.getElementById(`toggle-${typeInfo.code}`);
-                  if (toggle) toggle.checked = false;
-              } else {
-                  MUTED_TYPES.add(typeInfo.code);
-                  const toggle = document.getElementById(`toggle-${typeInfo.code}`);
-                  if (toggle) toggle.checked = true;
-              }
-              renderChart();
-              renderAccounts();
-          });
-          accountListEl.appendChild(chip);
-      });
-      
-    } else {
-        // Existing per-account rendering logic
-        ACCOUNTS.sort((a, b) => a.kind === 'debt' ? 1 : -1).forEach(acct => {
-            const isMuted = MUTED_ACCOUNTS.has(acct.name);
-            const chip = document.createElement('div');
-            chip.dataset.name = acct.name;
-            chip.classList.add('chip');
-            if (isMuted) chip.classList.add('muted');
-            
-            const color = acct.color || (acct.kind === 'asset' ? 'var(--c-green)' : 'var(--c-red)');
-            chip.style.backgroundColor = isMuted ? 'var(--c-muted)' : color;
-            chip.style.color = isMuted ? 'var(--c-black)' : 'var(--c-white)';
+async function processEditChip(originalAccount, originalDate, originalValue) {
+if (IS_LOADING) return;
 
-            const fmtValue = LOCALE_FORMATTER.format(acct.last || 0);
-            chip.innerHTML = `<strong>${acct.name}</strong><span>${fmtValue}</span>`;
+const valueInput = document.getElementById('edit-chip-value');
+const dateInput = document.getElementById('edit-chip-date');
 
-            chip.addEventListener('click', () => {
-                if (MUTED_ACCOUNTS.has(acct.name)) {
-                    MUTED_ACCOUNTS.delete(acct.name);
-                } else {
-                    MUTED_ACCOUNTS.add(acct.name);
-                }
-                renderChart();
-                renderAccounts();
-            });
-            accountListEl.appendChild(chip);
-        });
-    }
-  }
+const newValue = Number(valueInput.value);
+const newDateISO = dateInput.value;
 
-  // --- Submission Form Logic (Unchanged) ---
-  function addEntryField() {
-    // ... Existing addEntryField logic
-  }
+if (isNaN(newValue) || newValue === 0) {
+showToast('Please enter a valid non-zero value', 'error');
+return;
+}
 
-  document.getElementById('submission-form').addEventListener('submit', (e) => {
-    // ... Existing form submission logic
-  });
-  
-  window.onclick = function(event) {
-    const modal = document.getElementById('modal');
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  }
+if (!newDateISO) {
+showToast('Please select a date', 'error');
+return;
+}
+
+const [year, month, day] = newDateISO.split('-');
+const newDate = `${parseInt(month)}/${parseInt(day)}/${year}`;
+
+hideEditChipModal();
+setLoading(true, 'Updating entry…');
+
+try {
+const deleteBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+account: originalAccount, 
+date: originalDate, 
+value: Number(originalValue) 
+}) 
+});
+
+const deleteRes = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body: deleteBody });
+const deleteText = await deleteRes.text();
+const deleteJson = JSON.parse(deleteText);
+
+if (!deleteJson.ok) {
+throw new Error('Delete failed: ' + (deleteJson.error || 'Unknown'));
+}
+
+const submitBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+entries: [{ 
+account: originalAccount, 
+value: newValue,
+date: newDate
+}] 
+}) 
+});
+
+const submitRes = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body: submitBody });
+const submitText = await submitRes.text();
+const submitJson = JSON.parse(submitText);
+
+if (!submitJson.ok) {
+throw new Error('Submit failed: ' + (submitJson.error || 'Unknown'));
+}
+
+showToast('Entry updated! Refreshing…', 'success');
+await fetchSnapshot();
+
+} catch (e) {
+console.error('Edit error:', e);
+setLoading(false);
+showToast('Failed to update entry: ' + e.message, 'error', 5000);
+}
+}
+
+/* ============================================
+    ACCOUNT MENU MODAL
+    ============================================ */
+
+function showAccountMenu(accountName) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('account-menu-modal-backdrop');
+const modal = document.getElementById('account-menu-modal');
+const accountNameEl = document.getElementById('account-menu-account-name');
+const deleteBtn = document.getElementById('account-menu-delete');
+const addBtn = document.getElementById('account-menu-add');
+const editBtn = document.getElementById('account-menu-edit');
+
+accountNameEl.textContent = accountName;
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+editBtn.onclick = () => {
+hideAccountMenu();
+showEditAccountModal(accountName);
+};
+
+deleteBtn.onclick = () => {
+hideAccountMenu();
+showToast('Account deletion coming in v2.4!', 'info', 3000);
+};
+
+addBtn.onclick = () => {
+hideAccountMenu();
+showToast('Add account feature coming in v2.4!', 'info', 3000);
+};
+}
+
+function hideAccountMenu() {
+document.getElementById('account-menu-modal-backdrop').classList.remove('show');
+document.getElementById('account-menu-modal').classList.remove('show');
+}
+
+/* ============================================
+    v2.3: EDIT ACCOUNT MODAL
+    ============================================ */
+
+function showEditAccountModal(accountName) {
+if (IS_LOADING) return;
+
+const backdrop = document.getElementById('edit-account-modal-backdrop');
+const modal = document.getElementById('edit-account-modal');
+const nameEl = document.getElementById('edit-account-name');
+const limitInput = document.getElementById('edit-account-limit');
+const aprInput = document.getElementById('edit-account-apr');
+const valueInput = document.getElementById('edit-account-value');
+const typeSelect = document.getElementById('edit-account-type');
+const colorInput = document.getElementById('edit-account-color');
+const colorPicker = document.getElementById('edit-account-color-picker');
+const loginURLInput = document.getElementById('edit-account-login-url');
+const openLoginBtn = document.getElementById('edit-account-open-login');
+const saveBtn = document.getElementById('edit-account-save');
+
+nameEl.textContent = accountName;
+
+// Get account data from snapshot
+const account = SNAP?.accounts?.find(a => a.name === accountName);
+if (!account) {
+showToast('Account not found', 'error');
+return;
+}
+
+// Load values
+limitInput.value = account.limit || '';
+aprInput.value = account.apr || 0;
+
+// Get current value
+const series = SNAP?.series?.[accountName];
+const currentValue = series?.last ?? 0;
+valueInput.value = currentValue;
+
+// v2.4: Populate type dropdown
+typeSelect.innerHTML = '';
+if (SNAP?.types) {
+SNAP.types.forEach(t => {
+if (t.code === 'other') return; // Skip "Other" type
+const option = document.createElement('option');
+option.value = t.code;
+option.textContent = t.label;
+// Normalize account type for comparison
+const normalizedAccountType = normalizeTypeCode(account.type);
+if (t.code === normalizedAccountType) {
+option.selected = true;
+}
+typeSelect.appendChild(option);
+});
+}
+
+// v2.4: Load account color
+const accountColor = account.color || SYSTEM_TYPE_COLORS[normalizeTypeCode(account.type)] || '#000000';
+colorInput.value = accountColor;
+colorPicker.value = accountColor;
+
+// Sync color picker and text input
+colorPicker.addEventListener('input', () => {
+colorInput.value = colorPicker.value;
+});
+
+colorInput.addEventListener('input', () => {
+const hex = colorInput.value;
+if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+colorPicker.value = hex;
+}
+});
+
+// Long-press on text input opens color picker
+let longPressTimer;
+colorInput.addEventListener('mousedown', () => {
+longPressTimer = setTimeout(() => {
+colorPicker.click();
+}, 500);
+});
+colorInput.addEventListener('mouseup', () => clearTimeout(longPressTimer));
+colorInput.addEventListener('mouseleave', () => clearTimeout(longPressTimer));
+
+// v2.4: Load login URL
+loginURLInput.value = account.loginURL || '';
+
+// v2.4: Open login URL handler
+openLoginBtn.onclick = () => {
+const url = loginURLInput.value.trim();
+if (url) {
+window.open(url, '_blank', 'noopener,noreferrer');
+} else {
+showToast('No login URL set', 'info');
+}
+};
+
+backdrop.classList.add('show');
+modal.classList.add('show');
+
+setTimeout(() => limitInput.focus(), 100);
+
+saveBtn.onclick = () => processEditAccount(accountName);
+}
+
+function hideEditAccountModal() {
+document.getElementById('edit-account-modal-backdrop').classList.remove('show');
+document.getElementById('edit-account-modal').classList.remove('show');
+}
+
+async function processEditAccount(accountName) {
+if (IS_LOADING) return;
+
+const limitInput = document.getElementById('edit-account-limit');
+const aprInput = document.getElementById('edit-account-apr');
+const valueInput = document.getElementById('edit-account-value');
+const typeSelect = document.getElementById('edit-account-type');
+const colorInput = document.getElementById('edit-account-color');
+const loginURLInput = document.getElementById('edit-account-login-url');
+
+const newLimit = limitInput.value ? Number(limitInput.value) : 0;
+const newAPR = Number(aprInput.value);
+const newValue = Number(valueInput.value);
+const newType = typeSelect.value;
+const newColor = colorInput.value.trim();
+const newLoginURL = loginURLInput.value.trim();
+
+const account = SNAP?.accounts?.find(a => a.name === accountName);
+const series = SNAP?.series?.[accountName];
+const currentValue = series?.last ?? 0;
+
+hideEditAccountModal();
+setLoading(true, 'Updating account…');
+
+try {
+// v2.4: Update limit, APR, type, color, and loginURL
+const updateBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+account: accountName,
+limit: newLimit,
+apr: newAPR,
+type: newType,
+color: newColor,
+loginURL: newLoginURL
+}) 
+});
+
+const updateRes = await fetch(`${API_BASE}?route=updateAccount`, { method: 'POST', body: updateBody });
+const updateText = await updateRes.text();
+const updateJson = JSON.parse(updateText);
+
+if (!updateJson.ok) {
+throw new Error(updateJson.error || 'Failed to update account metadata');
+}
+
+// Update value if changed
+if (newValue !== currentValue) {
+const valueBody = new URLSearchParams({ 
+payload: JSON.stringify({ 
+entries: [{ account: accountName, value: newValue }] 
+}) 
+});
+
+const valueRes = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body: valueBody });
+const valueText = await valueRes.text();
+const valueJson = JSON.parse(valueText);
+
+if (!valueJson.ok) {
+throw new Error(valueJson.error || 'Failed to update value');
+}
+}
+
+showToast('Account updated! Refreshing…', 'success');
+await fetchSnapshot();
+
+} catch (e) {
+console.error('Update error:', e);
+setLoading(false);
+showToast('Failed to update: ' + e.message, 'error', 5000);
+}
+}
+const valueText = await valueRes.text();
+const valueJson = JSON.parse(valueText);
+
+if (!valueJson.ok) {
+throw new Error(valueJson.error || 'Failed to update value');
+}
+}
+
+showToast('Account updated! Refreshing…', 'success');
+await fetchSnapshot();
+
+} catch (e) {
+console.error('Update error:', e);
+setLoading(false);
+showToast('Failed to update: ' + e.message, 'error', 5000);
+}
+}
+
+/* ============================================
+    DATA FETCHING
+    ============================================ */
+
+async function fetchSnapshot() {
+if (IS_LOADING) return;
+setLoading(true, 'Loading snapshot…');
+
+console.log('🔍 Fetching from API_BASE:', API_BASE);
+console.log('🔍 Timeframe:', TIMEFRAME);
+
+try {
+const url = `${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`;
+console.log('🔍 Full URL:', url);
+const res = await fetch(url);
+console.log('🔍 Response status:', res.status, res.statusText);
+const text = await res.text();
+console.log('🔍 Response text (first 200 chars):', text.substring(0, 200));
+
+let j;
+try { 
+j = JSON.parse(text); 
+} catch (parseErr) {
+console.error('❌ JSON Parse Error:', parseErr); 
+console.error('❌ Full response text:', text);
+showToast('Error: API returned non-JSON. Check console for details.', 'error', 5000);
+setLoading(false);
+return;
+}
+
+console.log('✅ JSON parsed successfully');
+console.log('🔍 Response object keys:', Object.keys(j));
+
+if (!j.ok) {
+console.error('❌ Snapshot error response:', j); 
+const errorMsg = j.error || 'snapshot failed';
+showToast('Error: ' + errorMsg, 'error', 5000);
+// Show error on page too
+document.getElementById('chart').innerHTML = `
+<div style="text-align:center; padding: 40px 20px; color: #a02d2a;">
+<h2>⚠️ Error Loading Data</h2>
+<p style="margin: 20px 0; font-size: 1.1rem;">${errorMsg}</p>
+<p style="margin: 20px 0; font-size: 0.9rem;">Check browser console (F12) for details</p>
+<button onclick="fetchSnapshot()" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem;">Retry</button>
+</div>
+`;
+setLoading(false);
+return;
+}
+
+SNAP = j;
+console.log('✅ Snapshot loaded successfully');
+console.log('🔍 Accounts count:', SNAP.accounts ? SNAP.accounts.length : 0);
+console.log('🔍 Types count:', SNAP.types ? SNAP.types.length : 0);
+console.log('🔍 Date axis length:', SNAP.dateAxis ? SNAP.dateAxis.length : 0);
+console.log('🔍 First 3 accounts:', SNAP.accounts ? SNAP.accounts.slice(0, 3) : []);
+
+setLoading(false);
+renderAll();
+
+} catch (err) {
+console.error('Fetch failed:', err); 
+setLoading(false);
+showToast('Fetch failed (see console)', 'error', 5000);
+}
+}
+
+/* ============================================
+    RENDERING FUNCTIONS
+    ============================================ */
+
+/* v2.2: URL State Management */
+function loadMutedStateFromURL() {
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const mutedParam = params.get('muted');
+if (mutedParam) {
+MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
+}
+
+// v2.4: Load hidden types
+const hiddenTypesParam = params.get('hidden_types');
+if (hiddenTypesParam) {
+HIDDEN_TYPES = new Set(hiddenTypesParam.split(',').filter(t => t));
+}
+}
+
+function saveMutedStateToURL() {
+const params = new URLSearchParams();
+const mutedArray = Array.from(MUTED_ACCOUNTS);
+if (mutedArray.length > 0) {
+params.set('muted', mutedArray.join(','));
+}
+
+// v2.4: Save hidden types
+const hiddenTypesArray = Array.from(HIDDEN_TYPES);
+if (hiddenTypesArray.length > 0) {
+params.set('hidden_types', hiddenTypesArray.join(','));
+}
+
+const hashString = params.toString();
+window.location.hash = hashString || '';
+}
+
+function toggleAccountMute(accountName) {
+if (MUTED_ACCOUNTS.has(accountName)) {
+MUTED_ACCOUNTS.delete(accountName);
+} else {
+MUTED_ACCOUNTS.add(accountName);
+}
+saveMutedStateToURL();
+renderAll();
+}
+
+function isAccountMuted(accountName) {
+return MUTED_ACCOUNTS.has(accountName);
+}
+
+/* v2.4: Type visibility management */
+function toggleTypeVisibility(typeCode) {
+if (HIDDEN_TYPES.has(typeCode)) {
+HIDDEN_TYPES.delete(typeCode);
+} else {
+HIDDEN_TYPES.add(typeCode);
+}
+saveMutedStateToURL();
+renderAll();
+}
+
+function isTypeVisible(typeCode) {
+return !HIDDEN_TYPES.has(typeCode);
+}
+
+function isAccountVisible(account) {
+// Account is visible if: not muted individually AND its type is visible
+if (isAccountMuted(account.name)) return false;
+const normalizedType = normalizeTypeCode(account.type);
+if (HIDDEN_TYPES.has(normalizedType)) return false;
+return true;
+}
+
+function renderAll() {
+renderSummary();
+renderInterestSummary();
+renderStatusbar();
+renderChart();
+renderTypeSummary();
+renderAccounts();
+renderTypeControls();  // v2.4: Type visibility controls
+}
+
+function renderSummary() {
+const summaryEl = document.getElementById('financial-summary');
+if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+
+const lastIndex = SNAP.dateAxis.length - 1;
+
+if (lastIndex < 0) {
+summaryEl.innerHTML = 'No Data';
+return;
+}
+
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+if (last >= 0) {
+assets += last;
+} else {
+debts += Math.abs(last);
+}
+}
+});
+
+const assetClass = assets > debts ? 'bold-value' : '';
+const debtClass = debts > assets ? 'bold-value' : '';
+
+const assetString = `<span class="summary-asset ${assetClass}">${formatMoney(assets)}</span>`;
+const debtString = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
+
+summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
+}
+
+function renderInterestSummary() {
+const summaryEl = document.getElementById('interest-summary');
+if (!summaryEl || !SNAP || !SNAP.accounts) return;
+
+let totalEarnings = 0;
+let totalCosts = 0;
+let periodLabel = '';
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;
+
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+const apr = a.apr || 0;
+
+if (apr === 0 || last === 0) return;
+
+const dailyRate = (last * apr) / 365;
+let interestAmount = 0;
+
+switch(TIMEFRAME) {
+case 'today':
+interestAmount = dailyRate * 1;
+periodLabel = '/dy';
+break;
+case '7d':
+interestAmount = dailyRate * 7;
+periodLabel = '/wk';
+break;
+case '14d':
+interestAmount = dailyRate * 14;
+periodLabel = '/2w';
+break;
+case '30d':
+interestAmount = dailyRate * 30;
+periodLabel = '/mo';
+break;
+case '90d':
+interestAmount = dailyRate * 90;
+periodLabel = '/qt';
+break;
+case '1y':
+case 'ytd':
+case 'all':
+interestAmount = last * apr;
+periodLabel = '/yr';
+break;
+}
+
+if (interestAmount > 0) {
+totalEarnings += interestAmount;
+} else {
+totalCosts += interestAmount;
+}
+});
+
+if (Math.abs(totalEarnings) < 0.01 && Math.abs(totalCosts) < 0.01) {
+summaryEl.innerHTML = '';
+return;
+}
+
+const earningsStr = totalEarnings >= 0.01 
+? `<span class="interest-earned">+${formatMoney(totalEarnings)}${periodLabel}</span>` 
+: '';
+
+const costsStr = Math.abs(totalCosts) >= 0.01 
+? `<span class="interest-cost">${formatMoney(totalCosts)}${periodLabel}</span>` 
+: '';
+
+let displayParts = [];
+if (earningsStr) displayParts.push(earningsStr);
+if (costsStr) displayParts.push(costsStr);
+
+if (displayParts.length > 0) {
+summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+} else {
+summaryEl.innerHTML = '';
+}
+}
+
+function renderTypeSummary() {
+const summaryEl = document.querySelector('#type-summary-bar h4');
+if (!summaryEl || !SNAP || !SNAP.accounts) return;
+
+const typeTotals = {
+'bk': 0,
+'cc': 0,
+'bill': 0,
+'ii': 0,
+'sv': 0
+};
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+const type = a.type || 'bk';
+
+if (typeTotals.hasOwnProperty(type)) {
+typeTotals[type] += last;
+}
+});
+
+const typeOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+const parts = [];
+
+typeOrder.forEach(typeKey => {
+const value = typeTotals[typeKey];
+const label = TYPE_LABELS[typeKey] || typeKey;
+const colorClass = (typeKey === 'cc' || typeKey === 'bill') ? 'negative' : 'positive';
+const formattedValue = formatMoney(value);
+const signPrefix = value >= 0 ? '+' : '';
+parts.push(`<span class="type-value ${colorClass}">${signPrefix}${formattedValue}</span>`);
+});
+
+summaryEl.innerHTML = parts.join(' <span class="type-separator">|</span> ');
+}
+
+function renderStatusbar() {
+const statusbarEl = document.getElementById('statusbar');
+if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+
+const lastIndex = SNAP.dateAxis.length - 1;
+
+if (lastIndex < 0) {
+statusbarEl.innerHTML = '';
+return;
+}
+
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountMuted(a.name)) {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+if (last >= 0) {
+assets += last;
+} else {
+debts += Math.abs(last);
+}
+}
+});
+
+const total = assets + debts;
+
+if (total === 0) {
+statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>';
+return;
+}
+
+const totalBlocks = 100;
+const assetBlocks = Math.round((assets / total) * totalBlocks);
+const debtBlocks = totalBlocks - assetBlocks;
+
+const assetBar = '█ '.repeat(assetBlocks);
+const debtBar = '█ '.repeat(debtBlocks);
+
+statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
+}
+
+function renderChart() {
+if (!SNAP || !window.google || !google.visualization) return;
+
+const labels = SNAP.dateAxis; 
+
+if (!labels || labels.length === 0) {
+document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
+return;
+}
+
+const styles = getComputedStyle(document.documentElement);
+const pos = styles.getPropertyValue('--c-pos').trim();
+const neg = styles.getPropertyValue('--c-neg').trim();
+const black = styles.getPropertyValue('--c-black').trim();
+const textStyle = { color: black, fontName: 'system-ui' };
+
+const data = new google.visualization.DataTable();
+data.addColumn('string', 'Date'); 
+let rows = [];
+let chartColors = [];
+
+if (MODE === 'totals') {
+// ========== TOTALS MODE: Stacked Column Chart ==========
+data.addColumn('number', 'Assets');
+data.addColumn('number', 'Debts');
+
+for (let i = 0; i < labels.length; i++) { 
+let assets = 0;
+let debts = 0;
+
+SNAP.accounts.forEach(a => {
+if (!isAccountVisible(a)) return;
+const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+if (v >= 0) {
+assets += v;
+} else {
+debts += v;
+}
+});
+
+rows.push([labels[i], assets, debts]);
+}
+
+chartColors = [pos, neg];
+
+} else if (MODE === 'types') {
+// ========== TYPE MODE: Stacked Area Chart ==========
+const typeData = {};
+
+// Safety check
+if (!SNAP.types || SNAP.types.length === 0) {
+document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">No type data available. Make sure Types sheet exists.</div>';
+return;
+}
+
+// Initialize visible types (including "other")
+SNAP.types.forEach(t => {
+if (isTypeVisible(t.code)) {
+typeData[t.code] = {
+label: t.label,
+color: SYSTEM_TYPE_COLORS[t.code] || t.color,
+data: new Array(labels.length).fill(0)
+};
+}
+});
+
+// Check if any types are visible
+if (Object.keys(typeData).length === 0) {
+document.getElementById('chart').innerHTML = '<div style="text-align:center; padding-top: 20px; color: #888;">All types are hidden. Use checkmarks below to show types.</div>';
+return;
+}
+
+// Aggregate account data by type
+SNAP.accounts.forEach(a => {
+if (!isAccountVisible(a)) return;
+const series = SNAP.series[a.name];
+if (!series) return;
+
+// Normalize type code
+const normalizedType = normalizeTypeCode(a.type);
+const typeKey = typeData[normalizedType] ? normalizedType : 'other';
+
+if (!typeData[typeKey]) return;
+
+series.monthly.forEach((val, idx) => {
+typeData[typeKey].data[idx] += val;
+});
+});
+
+// Add columns for each visible type
+Object.values(typeData).forEach(t => {
+data.addColumn('number', t.label);
+});
+
+// Build rows
+for (let i = 0; i < labels.length; i++) {
+const row = [labels[i]];
+Object.values(typeData).forEach(t => {
+row.push(t.data[i]);
+});
+rows.push(row);
+}
+
+chartColors = Object.values(typeData).map(t => t.color);
+
+} else {
+// ========== PER-ACCOUNT MODE: Line Chart ==========
+const visibleAccounts = SNAP.accounts.filter(a => isAccountVisible(a));
+visibleAccounts.forEach(a => data.addColumn('number', a.name));
+
+for (let i = 0; i < labels.length; i++) {
+const row = [labels[i]]; 
+visibleAccounts.forEach(a => {
+const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+row.push(Number(v));
+});
+rows.push(row);
+}
+
+chartColors = visibleAccounts.map(a => {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+return a.color || (last >= 0 ? pos : neg);
+});
+}
+
+data.addRows(rows);
+
+// Calculate axis range
+let minV = 0, maxV = 0;
+for (const r of rows) {
+for (let i = 1; i < r.length; i++) {
+const v = Number(r[i]) || 0;
+if (v < minV) minV = v;
+if (v > maxV) maxV = v;
+}
+}
+const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
+
+// Base chart options
+const options = {
+height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+backgroundColor: { fill: 'transparent' },
+chartArea: { width: '90%', height: '70%' },
+legend: { position: 'top', alignment: 'center', textStyle: textStyle },
+hAxis: { 
+slantedText: false, 
+textStyle: textStyle,
+showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
+},
+vAxis: { 
+viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
+baseline: 0, 
+baselineColor: black,
+gridlines: { color: black, opacity: 0.1 },
+textStyle: textStyle
+},
+colors: chartColors,
+animation: {
+duration: 500,
+easing: 'out'
+}
+};
+
+// v2.4: Select appropriate chart type based on mode
+let chart;
+if (MODE === 'totals') {
+// Stacked column chart for Totals
+options.isStacked = true;
+chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+} else if (MODE === 'types') {
+// Stacked area chart for Types
+options.isStacked = true;
+options.areaOpacity = 0.7;
+chart = new google.visualization.AreaChart(document.getElementById('chart'));
+} else {
+// Line chart for Per-account
+chart = new google.visualization.LineChart(document.getElementById('chart'));
+}
+
+chart.draw(data, options);
+}
+
+const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
+
+function formatMoney(n) {
+const val = Number(n) || 0;
+const sign = val < 0 ? '−' : '';
+const abs = Math.abs(val);
+const displayValue = Math.trunc(abs);
+
+return `${sign}${displayValue.toLocaleString(undefined, { 
+       minimumFractionDigits: 0, 
+       maximumFractionDigits: 0 
+   })}`;
+}
+
+/**
+ * v2.3: Calculate color for credit limit display based on utilization
+ * Returns color that transitions from green (0% utilization) to red (100% utilization)
+ * Over-limit gets special alert color
+ */
+function getLimitColor(currentBalance, limit) {
+const absBalance = Math.abs(currentBalance);
+const utilization = absBalance / limit;
+
+// Balance is 0 or positive - show green
+if (currentBalance >= 0) {
+return '#4c8036'; // --c-pos
+}
+
+// Over limit - show alert color
+if (utilization > 1.0) {
+return '#d85140'; // --c-overlimit
+}
+
+// Gradient from green to red based on utilization (0% to 100%)
+// 0% = #4c8036 (green), 100% = #a02d2a (red)
+const startColor = { r: 76, g: 128, b: 54 };   // #4c8036
+const endColor = { r: 160, g: 45, b: 42 };     // #a02d2a
+
+const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
+const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
+const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
+
+return `rgb(${r}, ${g}, ${b})`;
+}
+
+/* v2.4: Render type visibility controls */
+function renderTypeControls() {
+const container = document.getElementById('type-controls-grid');
+if (!container || !SNAP || !SNAP.types || !SNAP.accounts) return;
+
+container.innerHTML = '';
+
+// Calculate totals per type
+const typeTotals = {};
+SNAP.types.forEach(t => {
+typeTotals[t.code] = 0;
+});
+
+SNAP.accounts.forEach(a => {
+if (isAccountMuted(a.name)) return;
+const series = SNAP.series[a.name];
+const last = series?.last ?? 0;
+const normalizedType = normalizeTypeCode(a.type);
+const typeKey = typeTotals.hasOwnProperty(normalizedType) ? normalizedType : 'other';
+if (typeTotals.hasOwnProperty(typeKey)) {
+typeTotals[typeKey] += last;
+}
+});
+
+// Render each type control (skip "other" in display)
+SNAP.types.forEach(typeObj => {
+const typeCode = typeObj.code;
+if (typeCode === 'other') return; // Skip "Other" from controls
+
+const typeLabel = typeObj.label.toUpperCase();
+const typeColor = SYSTEM_TYPE_COLORS[typeCode] || typeObj.color;
+const total = typeTotals[typeCode] || 0;
+const isVisible = isTypeVisible(typeCode);
+
+const item = document.createElement('div');
+item.className = 'type-control-item';
+
+// Value
+const valueEl = document.createElement('div');
+valueEl.className = 'type-control-value';
+valueEl.style.color = typeColor;
+const sign = total >= 0 ? '+' : '';
+valueEl.textContent = sign + formatMoney(total);
+
+// Label
+const labelEl = document.createElement('div');
+labelEl.className = 'type-control-label';
+labelEl.textContent = typeLabel;
+
+// Checkbox
+const checkboxEl = document.createElement('div');
+checkboxEl.className = `type-control-checkbox ${isVisible ? 'checked' : 'unchecked'}`;
+checkboxEl.setAttribute('role', 'checkbox');
+checkboxEl.setAttribute('aria-checked', isVisible);
+checkboxEl.setAttribute('aria-label', `Toggle ${typeLabel} visibility`);
+checkboxEl.addEventListener('click', () => toggleTypeVisibility(typeCode));
+
+item.appendChild(valueEl);
+item.appendChild(labelEl);
+item.appendChild(checkboxEl);
+
+container.appendChild(item);
+});
+}
+
+/* v2.4: Show all accounts and types */
+function showAllAccountsAndTypes() {
+MUTED_ACCOUNTS.clear();
+HIDDEN_TYPES.clear();
+saveMutedStateToURL();
+showToast('All accounts and types now visible', 'success');
+renderAll();
+}
+
+function renderAccounts() {
+const root = document.getElementById('accounts');
+root.innerHTML = '';
+
+if (!SNAP || !SNAP.accounts) return;
+
+SNAP.accounts.forEach(a => {
+const s = SNAP.series[a.name] || {};
+const last = s?.last ?? 0;
+
+const row = document.createElement('div');
+row.className = 'row';
+
+const left = document.createElement('div');
+left.className = 'left';
+
+const right = document.createElement('div');
+right.className = 'right';
+
+const accountDetails = document.createElement('div');
+accountDetails.className = 'account-details';
+
+const identityWrap = document.createElement('div');
+identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
+
+const lastEl = document.createElement('span');
+lastEl.className = 'lastval';
+lastEl.textContent = formatMoney(last); 
+lastEl.dataset.sign = signOf(last);
+
+const nameEl = document.createElement('span');
+nameEl.className = 'name';
+nameEl.textContent = a.name;
+if (a.color) nameEl.style.color = a.color;
+
+// Long-press handlers
+let pressStartTime = 0;
+
+nameEl.addEventListener('mousedown', (e) => {
+pressStartTime = Date.now();
+LONG_PRESS_TIMER = setTimeout(() => {
+showAccountMenu(a.name);
+}, LONG_PRESS_DURATION);
+});
+
+nameEl.addEventListener('mouseup', (e) => {
+if (LONG_PRESS_TIMER) {
+clearTimeout(LONG_PRESS_TIMER);
+}
+});
+
+nameEl.addEventListener('mouseleave', (e) => {
+if (LONG_PRESS_TIMER) {
+clearTimeout(LONG_PRESS_TIMER);
+}
+});
+
+nameEl.addEventListener('touchstart', (e) => {
+pressStartTime = Date.now();
+LONG_PRESS_TIMER = setTimeout(() => {
+showAccountMenu(a.name);
+}, LONG_PRESS_DURATION);
+});
+
+nameEl.addEventListener('touchend', (e) => {
+if (LONG_PRESS_TIMER) {
+clearTimeout(LONG_PRESS_TIMER);
+}
+});
+
+identityWrap.appendChild(lastEl);
+identityWrap.appendChild(nameEl);
+
+accountDetails.appendChild(identityWrap);
+
+// v2.3: Stack limit, APR, and interest together
+const detailsStack = document.createElement('div');
+detailsStack.style.cssText = 'display:flex; flex-direction:column; gap:2px; padding-top:0.5rem;';
+
+// Show credit limit for CC accounts (from sheet column G)
+if (a.type === 'cc' && a.limit) {
+console.log(`Displaying limit for ${a.name}: $${a.limit}`);
+const limitEl = document.createElement('span');
+limitEl.className = 'limit';
+const limitValue = a.limit;
+const limitColor = getLimitColor(last, limitValue);
+limitEl.style.color = limitColor;
+limitEl.textContent = `$${limitValue.toLocaleString()}`;
+detailsStack.appendChild(limitEl);
+} else if (a.type === 'cc') {
+console.log(`CC account ${a.name} missing limit. Type: ${a.type}, Limit: ${a.limit}`);
+}
+
+const aprEl = document.createElement('span');
+aprEl.className = 'apr';
+
+const apr = a.apr || 0;
+let interestAmount = 0;
+let periodLabel = '';
+
+if (apr > 0 && last !== 0) {
+const dailyRate = (last * apr) / 365;
+
+switch(TIMEFRAME) {
+case 'today':
+interestAmount = dailyRate * 1;
+periodLabel = '/dy';
+break;
+case '7d':
+interestAmount = dailyRate * 7;
+periodLabel = '/wk';
+break;
+case '14d':
+interestAmount = dailyRate * 14;
+periodLabel = '/2w';
+break;
+case '30d':
+interestAmount = dailyRate * 30;
+periodLabel = '/mo';
+break;
+case '90d':
+interestAmount = dailyRate * 90;
+periodLabel = '/qt';
+break;
+case '1y':
+case 'ytd':
+case 'all':
+interestAmount = last * apr;
+periodLabel = '/yr';
+break;
+}
+}
+
+let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+
+if (Math.abs(interestAmount) >= 0.01) {
+const sign = interestAmount >= 0 ? '+' : '';
+const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
+aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
+}
+
+aprEl.innerHTML = aprHTML;
+
+detailsStack.appendChild(aprEl);
+accountDetails.appendChild(detailsStack);
+
+const inputLine = document.createElement('div');
+inputLine.className = 'input-line';
+
+const inp = document.createElement('input');
+inp.type = 'number';
+inp.placeholder = 'Add new value…';
+inp.step = '0.01';
+inp.setAttribute('aria-label', `New value for ${a.name}`);
+inp.dataset.accountName = a.name;
+
+if (last > 0) {
+inp.style.backgroundColor = 'var(--c-tint-pos)';
+} else if (last < 0) {
+inp.style.backgroundColor = 'var(--c-tint-neg)';
+} else {
+inp.style.backgroundColor = 'var(--c-white)';
+}
+
+inp.addEventListener('keydown', async (ev) => {
+if (ev.key === 'Enter') {
+await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
+}
+});
+
+// v2.2: Add mute toggle checkbox
+const muteWrapper = document.createElement('label');
+muteWrapper.className = 'mute-checkbox';
+muteWrapper.setAttribute('aria-label', `Toggle ${a.name} visibility`);
+muteWrapper.title = `Show/hide ${a.name}`;
+
+const muteCheck = document.createElement('input');
+muteCheck.type = 'checkbox';
+muteCheck.checked = !isAccountMuted(a.name);
+muteCheck.setAttribute('aria-label', `Show ${a.name}`);
+
+muteCheck.addEventListener('change', (e) => {
+toggleAccountMute(a.name);
+});
+
+const muteSlider = document.createElement('span');
+muteSlider.className = 'mute-checkbox-slider';
+
+muteWrapper.appendChild(muteCheck);
+muteWrapper.appendChild(muteSlider);
+
+inputLine.appendChild(inp);
+inputLine.appendChild(muteWrapper);
+
+left.appendChild(accountDetails);
+left.appendChild(inputLine);
+
+if (isAccountMuted(a.name)) {
+row.classList.add('muted');
+}
+
+const vals = document.createElement('div');
+vals.className = 'values';
+
+(s.lastN || []).forEach(v => {
+const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+const val = Number(isObject ? v.value : v);
+const date = isObject ? v.date : null;
+
+const readableValue = formatMoney(val);
+
+const chip = document.createElement('span');
+chip.className = 'chip';
+chip.dataset.sign = signOf(val);
+chip.textContent = readableValue;
+chip.dataset.value = val;
+
+if (date) {
+chip.dataset.date = date;
+chip.dataset.account = a.name;
+chip.dataset.readableValue = readableValue;
+
+chip.addEventListener('click', (e) => {
+showEditChipModal(a.name, date, val, readableValue);
+});
+} else {
+chip.classList.add('no-delete');
+chip.title = "Old data format - re-deploy CODE.JS";
+}
+
+vals.appendChild(chip);
+});
+right.appendChild(vals);
+
+const bar = document.createElement('h4');
+bar.className = 'ratio-bar';
+
+const assetSpan = document.createElement('span');
+assetSpan.style.color = 'var(--c-pos)';
+
+const debtSpan = document.createElement('span');
+debtSpan.style.color = 'var(--c-neg)';
+
+const lastIndex = SNAP.dateAxis.length - 1;
+const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
+const totalDebtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
+const totalDebts = Math.abs(totalDebtsRaw);
+
+if (last >= 0 && totalAssets > 0) {
+const percentage = (last / totalAssets) * 100;
+const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
+assetSpan.textContent = '█ '.repeat(blocks);
+debtSpan.textContent = '';
+} else if (last < 0 && totalDebts > 0) {
+const absLast = Math.abs(last);
+const percentage = (absLast / totalDebts) * 100;
+const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
+assetSpan.textContent = '';
+debtSpan.textContent = '█ '.repeat(blocks);
+} else {
+assetSpan.textContent = '';
+debtSpan.textContent = '';
+}
+
+bar.appendChild(assetSpan);
+bar.appendChild(debtSpan);
+right.appendChild(bar);
+
+row.appendChild(left);
+row.appendChild(right);
+root.appendChild(row);
+});
+}
+
+/* ============================================
+    DATA SUBMISSION
+    ============================================ */
+
+async function submitAll() {
+const entries = [];
+
+document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
+const v = inp.value.trim();
+if (v !== '') {
+entries.push({ 
+account: inp.dataset.accountName, 
+value: Number(v),
+inputEl: inp
+});
+}
+});
+
+if (entries.length === 0) {
+showToast('No values entered to submit.', 'info');
+return;
+}
+
+await submitEntries(entries);
+}
+
+async function submitEntries(entries) {
+if (IS_LOADING) return;
+setLoading(true, 'Submitting entries…');
+
+entries.forEach(e => e.inputEl?.classList.add('submitting'));
+
+try {
+const validEntries = entries
+.map(e => ({ account: e.account, value: e.value }))
+.filter(e => e.account && !isNaN(e.value));
+
+if (validEntries.length === 0) {
+showToast('No valid entries to submit.', 'error');
+setLoading(false);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+return;
+}
+
+const body = new URLSearchParams({ 
+payload: JSON.stringify({ entries: validEntries }) 
+});
+const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+const text = await res.text();
+
+let j;
+try { 
+j = JSON.parse(text); 
+} catch {
+console.error('Submit non-JSON:', text);
+showToast('Submit failed (non-JSON response)', 'error', 5000);
+setLoading(false);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+return;
+}
+
+if (!j.ok) {
+console.error('Submit JSON error:', j);
+showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
+setLoading(false);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+return;
+}
+
+showToast('Submit successful! Refreshing…', 'success');
+entries.forEach(e => {
+e.inputEl?.classList.add('submitted-ok');
+e.inputEl.value = '';
+setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
+});
+
+await fetchSnapshot();
+
+} catch (e) {
+console.error(e);
+setLoading(false);
+showToast('Network error submitting data.', 'error', 5000);
+entries.forEach(e => e.inputEl?.classList.remove('submitting'));
+}
+
+setLoading(false);
+}
+
+/* ============================================
+    INITIALIZATION
+    ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+loadMutedStateFromURL();
+
+// Update Google Sheet link in footer
+const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
+if (sheetLink && SHEET_ID && SHEET_ID !== 'YOUR_SHEET_ID_HERE') {
+sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}`;
+}
+
+document.getElementById('refresh').addEventListener('click', fetchSnapshot);
+document.getElementById('submitAll').addEventListener('click', submitAll);
+
+// v2.4: Show All button
+document.getElementById('show-all-btn')?.addEventListener('click', showAllAccountsAndTypes);
+
+document.querySelectorAll('input[name="mode"]').forEach(r => {
+r.addEventListener('change', (e) => { 
+MODE = e.target.value;
+console.log('Mode changed to:', MODE);  // v2.4: Debug
+renderChart();
+if (MODE === 'types') {
+// Update type controls when switching to Type mode
+renderTypeControls();
+}
+});
+});
+
+document.getElementById('timeframe').addEventListener('change', (e) => {
+TIMEFRAME = e.target.value;
+fetchSnapshot();
+});
+
+document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
+document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
+
+document.getElementById('edit-chip-cancel').addEventListener('click', hideEditChipModal);
+document.getElementById('edit-chip-modal-backdrop').addEventListener('click', hideEditChipModal);
+
+document.getElementById('account-menu-cancel').addEventListener('click', hideAccountMenu);
+document.getElementById('account-menu-modal-backdrop').addEventListener('click', hideAccountMenu);
+
+document.getElementById('edit-account-cancel').addEventListener('click', hideEditAccountModal);
+document.getElementById('edit-account-modal-backdrop').addEventListener('click', hideEditAccountModal);
+
+window.addEventListener('resize', renderChart);
+
+if (window.google && google.charts) {
+google.charts.load('current', { packages: ['corechart'] });
+google.charts.setOnLoadCallback(fetchSnapshot);
+} else {
+const s = document.createElement('script');
+s.src = 'https://www.gstatic.com/charts/loader.js';
+s.onload = () => { 
+google.charts.load('current', { packages: ['corechart'] });
+google.charts.setOnLoadCallback(fetchSnapshot);
+};
+document.head.appendChild(s);
+}
+});
 </script>
-
 </body>
 </html>
