@@ -1162,6 +1162,7 @@ Your financial footprint, your control.
 const API_BASE = 'https://script.google.com/macros/s/AKfycbzcDWfk4wpjkqx9mmj0PYn5Q_FOv7U0vKUqO4kGdBjfuUfC8bDLUvhAHLdFVKdv9UmxCQ/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/'; // v2.3: Add your Google Sheet ID here
 
+
 /* ============================================
     APPLICATION STATE
     ============================================ */
@@ -1754,14 +1755,13 @@ let assets = 0;
 let debts = 0;
 
 SNAP.accounts.forEach(a => {
-if (!isAccountMuted(a.name)) {
+if (!isAccountVisible(a)) return;  // v2.4: Use isAccountVisible
 const s = SNAP.series[a.name] || {};
 const last = s?.last ?? 0;
 if (last >= 0) {
 assets += last;
 } else {
 debts += Math.abs(last);
-}
 }
 });
 
