@@ -111,8 +111,9 @@ header {
   justify-content: flex-end;
 }
 /* NEEEEEEEEEEEEEEEEEEEEEEW */
-      .type-toggle-label input[type="checkbox"] {
-  /* 1. Hide the default checkbox */
+/* Brutalist Option 1: The Heavy Concrete Block */
+.type-toggle-label input[type="checkbox"] {
+  /* 1. Hide the default checkbox and define the block */
   appearance: none;
   -webkit-appearance: none;
   margin: 0;
@@ -122,19 +123,19 @@ header {
   
   /* 2. Define the outer block/container */
   position: relative;
-  width: 18px; /* Heavy, square size */
+  width: 18px; 
   height: 18px;
-  background-color: #FFFFFF; /* Stark white background */
+  background-color: #FFFFFF; 
   border: 3px solid #000000; /* Brutally thick black border */
   box-sizing: border-box;
   vertical-align: middle;
-  transition: none; /* No smooth transitions allowed */
+  transition: none; 
 }
 
 /* Unchecked State: Just the heavy, empty block */
 .type-toggle-label input[type="checkbox"]::before {
   content: '';
-  display: none; /* Nothing inside when unchecked */
+  display: none; 
 }
 
 /* Checked State: Massive, geometric black square */
@@ -144,9 +145,9 @@ header {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 6px; /* A smaller, solid inset square */
+  width: 6px; 
   height: 6px;
-  background-color: #000000; /* Solid, uncompromising black */
+  background-color: #000000; 
   transform: scale(2); /* Brutally scale up the mark to fill most of the space */
   transform-origin: top left;
 }
