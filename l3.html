@@ -1,1267 +1,765 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.5)</title>
-
-<style>
-/* ============================================
-      CSS VARIABLES & DESIGN TOKENS
-   ============================================ */
-:root {
-  --maxw: 1400px;
-  --c-pos: #4c8036;
-  --c-neg: #a02d2a;
-  --c-black: #000000;
-  --c-white: #ffffff;
-  --radius: 10px;
-  --gap: 12px;
-  --c-tint-pos: #f7f9f4;
-  --c-tint-neg: #f9f4f4;
-  --c-muted: #e8e8e8;  /* Muted account state */
-  --c-overlimit: #d85140;  /* Over-limit alert color */
-}
-/* v2.6: Dark theme overrides (auto + toggle) */
-:root[data-theme="dark"] {
-  /* Invert base canvas + text */
-  --c-black: #f5f5f5;
-  --c-white: #050505;
-
-  /* Keep your green/red but brighten a bit on dark */
-  --c-pos: #8bd46d;
-  --c-neg: #ff7b7b;
-
-  /* Tints for input backgrounds etc. */
-  --c-tint-pos: #152418;
-  --c-tint-neg: #241515;
-
-  /* Muted / disabled */
-  --c-muted: #555555;
-
-  /* Over-limit alert on dark */
-  --c-overlimit: #ff8a80;
-}
-
-/* Optional: tighten toolbar control sizing so it all fits nicely */
-.toolbar-controls label,
-.toolbar-controls select,
-.toolbar-controls button {
-  font-size: 0.8rem;
-}
-
-.toolbar-controls button {
-  padding: 0.45rem 0.7rem;
-}
-
-/* Tiny theme toggle button can be a bit more compact */
-#theme-toggle-btn {
-  padding-inline: 0.6rem;
-  font-size: 0.85rem;
-}
-
-/* ============================================
-      BASE LAYOUT
-   ============================================ */
-html, body { 
-  height: 100%; 
-  margin: 0; 
-  background: var(--c-white); 
-  color: var(--c-black); 
-}
-
-body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 18px;
-  line-height: 1.5;
-}
-
-.wrap { 
-  width: 90vw; 
-  max-width: var(--maxw); 
-  margin: 0 auto; 
-  padding: 0px;
-}
-
-a {
-  color: var(--c-black);
-  text-decoration: underline;
-}
-
-/* ============================================
-      HEADER & TOOLBAR
-   ============================================ */
-header { 
-  position: sticky; 
-  top: 0; 
-  background: var(--c-white); 
-  z-index: 5; 
-  border-bottom: 1px solid var(--c-black);
-  padding-bottom: 1rem;
-}
-
-.toolbar { 
-  display: flex; 
-  gap: var(--gap); 
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 6px 24px 10px 24px;
-  flex-wrap: nowrap; 
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Left side: big numbers */
-.financial-group {
-  display: flex;
-  gap: var(--gap);
-  align-items: baseline;
-  flex-wrap: wrap;
-  min-width: 0;
-  flex-shrink: 1;
-}
-
-/* Right side: type filters + controls */
-.toolbar-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  flex-shrink: 0;
-  max-width: 60%;
-}
-
-/* Type filter row now lives in the toolbar */
-.type-filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.35rem;
-}
-
-/* Controls row under type filters */
-.toolbar-controls {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-/* NEEEEEEEEEEEEEEEEEEEEEEW */
-/* Brutalist Option 1: The Heavy Concrete Block */
-* Brutalist Option 1: The Heavy Concrete Block */
-.type-toggle-label input[type="checkbox"] {
-  /* 1. Hide the default checkbox and define the block */
-  appearance: none;
-  -webkit-appearance: none;
-  margin: 0;
-  padding: 0;
-  display: inline-block;
-  cursor: pointer;
-  
-  /* 2. Define the outer block/container */
-  position: relative;
-  width: 18px; 
-  height: 18px;
-  background-color: #FFFFFF; 
-  border: 3px solid #000000; /* Brutally thick black border */
-  box-sizing: border-box;
-  vertical-align: middle;
-  transition: none; 
-}
-
-/* Unchecked State: Just the heavy, empty block */
-.type-toggle-label input[type="checkbox"]::before {
-  content: '';
-  display: none; 
-}
-
-/* Checked State: Massive, geometric black square */
-.type-toggle-label input[type="checkbox"]:checked::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 6px; 
-  height: 6px;
-  background-color: #000000; 
-  transform: scale(2); /* Brutally scale up the mark to fill most of the space */
-  transform-origin: top left;
-}
-
-/* WTFFFFFFFFF */
-      /* Accessibility technique to hide text while keeping it readable for screen readers */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LedgerDB</title>
+  <style>
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /* CSS: Ledger Styling */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    :root {
+      /* DAYLIGHT MODE (Default) */
+      --c-bg: #ecf0f1;       /* Light Gray/White Background */
+      --c-text: #2c3e50;     /* Dark Black/Blue Text */
+      --c-border: #bdc3c7;   /* Light Border */
+      --c-input-bg: #e0e0e0; /* Light Input Background */
+      --c-muted-bg: #f7f7f7; /* Very Light Muted Chip Background */
+      --c-modal-bg: rgba(44, 62, 80, 0.9); /* Dark Modal Overlay */
       
-  /* 2. Define the outer block/container */
-  position: relative;
-  width: 18px; 
-  height: 18px;
-  background-color: #FFFFFF; 
-  border: 3px solid #000000; /* Brutally thick black border */
-  box-sizing: border-box;
-  vertical-align: middle;
-  transition: none; 
-}
-
-/* Unchecked State: Just the heavy, empty block */
-.type-toggle-label input[type="checkbox"]::before {
-  content: '';
-  display: none; 
-}
-
-/* Checked State: Massive, geometric black square */
-.type-toggle-label input[type="checkbox"]:checked::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 6px; 
-  height: 6px;
-  background-color: #000000; 
-  transform: scale(2); /* Brutally scale up the mark to fill most of the space */
-  transform-origin: top left;
-}
-/* Make the controls fonts compact */
-.toolbar label { 
-  font-size: 0.8rem;
-  font-weight: 300;
-  cursor: pointer;
-}
-
-.toolbar select {
-  font-size: 0.8rem;
-  font-weight: 300;
-  padding: 4px 6px;
-  border: 1px solid var(--c-black);
-  border-radius: 4px;
-  background: var(--c-white);
-  color: var(--c-black);
-}
-
-/* ============================================
-      FINANCIAL SUMMARY
-   ============================================ */
-#financial-summary {
-  font-size: 5rem;
-  font-weight: 300;
-  white-space: nowrap;
-  line-height: 1.1;
-  flex-shrink: 1;
-  min-width: 0;
-}
-
-#financial-summary .bold-value {
-  font-weight: 700;
-}
-
-#interest-summary {
-  font-size: 2rem;
-  font-weight: 300;
-  white-space: nowrap;
-  line-height: 1.1;
-  flex-shrink: 1;
-  min-width: 0;
-  opacity: 0.9;
-}
-
-.interest-earned {
-  color: var(--c-pos);
-}
-
-.interest-cost {
-  color: var(--c-neg);
-}
-
-.summary-debt {
-  color: var(--c-neg);
-}
-
-.summary-asset {
-  color: var(--c-pos);
-}
-
-/* ============================================
-      CHART CONTAINER
-   ============================================ */
-#chart { 
-  height: 30vh; 
-  width: 100%; 
-  margin: 0;
-  padding: 0;
-}
-
-/* ============================================
-      GLOBAL STATUSBAR (█ character)
-   ============================================ */
-#statusbar {
-  line-height: 3;
-  font-size: larger;
-  text-align: center;
-  padding: 0.5rem 12px 0 12px;
-  letter-spacing: -0.15em;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  word-break: keep-all;
-  background: var(--c-white);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.status-positive {
-  color: var(--c-pos);
-}
-
-.status-negative {
-  color: var(--c-neg);
-}
-
-hr.divider {
-  border: none;
-  border-top: 1px solid var(--c-black);
-  margin-top: 1rem;
-}
-
-/* ============================================
-      ACCOUNT ROWS
-   ============================================ */
-.accounts { 
-  display: grid; 
-  grid-template-columns: 1fr; 
-  gap: var(--gap); 
-}
-
-.row { 
-  display: flex; 
-  align-items: flex-start; 
-  justify-content: space-between; 
-  border-bottom: 1px solid var(--c-black);
-  padding: 12px 0; 
-  gap: 12px; 
-}
-
-.left { 
-  flex: 1 1 auto; 
-  padding-right: 12px; 
-  min-width: 0; 
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start; 
-  justify-content: space-between; 
-  gap: var(--gap);
-}
-
-.right { 
-  flex: 0 1 auto; 
-  min-width: 40%; 
-  text-align: right; 
-  font-size: .9rem; 
-}
-
-.account-details {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--gap);
-  min-width: 0;
-}
-
-.lastval { 
-  font-weight: 600; 
-  font-size: 2.6rem; 
-  white-space: nowrap;
-}
-
-.name { 
-  font-weight: lighter; 
-  color: var(--c-black); 
-  font-size: 2.2rem; 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-}
-
-.name:hover {
-  opacity: 0.8;
-}
-
-.name:active {
-  opacity: 0.6;
-}
-
-/* Credit limit display */
-.limit {
-  font-weight: 600;
-  font-size: 0.75rem;
-  flex-shrink: 0;
-  padding-top: 0.5rem;
-}
-
-.apr { 
-  font-weight: 400; 
-  font-size: 0.75rem;
-  opacity: .75; 
-  flex-shrink: 0;
-  padding-top: 0.5rem;
-}
-
-.input-line { 
-  display: flex; 
-  gap: 10px; 
-  align-items: center; 
-  flex-shrink: 0;
-  padding-top: 0.25rem;
-}
-
-/* ============================================
-      INPUT FIELDS
-   ============================================ */
-input[type="number"], input[type="date"], input[type="text"], input[type="url"] {
-  width: 10rem;
-  max-width: 10rem;
-  padding: .7rem .8rem;
-  font-size: 1.1rem;
-  border: 2px solid var(--c-black);
-  border-radius: var(--radius);
-  background: var(--c-white);
-  color: var(--c-black);
-  outline: none;
-  transition: background-color 0.3s ease;
-}
-
-input[type="number"]::placeholder,
-input[type="date"]::placeholder,
-input[type="text"]::placeholder,
-input[type="url"]::placeholder {
-  color: var(--c-black);
-  opacity: 0.6;
-}
-
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="text"]:focus,
-input[type="url"]:focus {
-  border-color: var(--c-black);
-  box-shadow: 0 0 0 2px var(--c-black) inset;
-}
-
-input[type="number"].submitting,
-input[type="date"].submitting,
-input[type="text"].submitting,
-input[type="url"].submitting {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-input[type="number"].submitted-ok,
-input[type="date"].submitted-ok,
-input[type="text"].submitted-ok,
-input[type="url"].submitted-ok {
-  animation: flash-green 0.8s ease-out;
-}
-
-@keyframes flash-green {
-  0% { box-shadow: 0 0 0 2px var(--c-pos) inset; }
-  100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
-}
-
-.values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
-.values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
-
-/* ============================================
-      BUTTONS
-   ============================================ */
-button {
-  padding: .7rem 1rem;
-  font-size: 1rem;
-  font-weight: 300;
-  border: 2px solid var(--c-black);
-  color: var(--c-black);
-  background: var(--c-white);
-  cursor: pointer;
-  border-radius: var(--radius);
-}
-
-button:hover { 
-  background: var(--c-white);
-  text-decoration: underline;
-}
-
-button:focus-visible { 
-  outline: 3px solid var(--c-black); 
-  outline-offset: 2px; 
-}
-
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Compact buttons in the toolbar controls */
-.toolbar-controls button {
-  font-size: 0.8rem;
-  padding: 0.4rem 0.75rem;
-}
-
-/* ============================================
-      VALUE CHIPS (editable)
-   ============================================ */
-.values { 
-  display: flex; 
-  justify-content: flex-end;
-  gap: .6rem; 
-  overflow-x: auto;
-  width: 100%;
-}
-
-.chip {
-  padding: .25rem .6rem;
-  border-radius: 999px;
-  border: 1px solid var(--c-black);
-  font-variant-numeric: tabular-nums;
-  font-size: .95rem;
-  cursor: pointer;
-  user-select: none;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-}
-
-.chip:hover {
-  background: var(--c-black);
-  color: var(--c-white);
-  transform: scale(1.05);
-}
-
-.chip.no-delete {
-  cursor: default;
-  opacity: 0.7;
-  background: transparent;
-  color: var(--c-black);
-}
-.chip.no-delete:hover {
-  background: transparent;
-  transform: none;
-}
-
-/* ============================================
-      MOBILE RATIO BARS
-   ============================================ */
-.ratio-bar {
-  display: none;
-  font-size: 1.5rem;
-  margin: 0;
-  padding: 0;
-  white-space: nowrap;
-  letter-spacing: -1px;
-}
-.ratio-bar span {
-  display: inline-block;
-}
-
-/* ============================================
-      FOOTER
-   ============================================ */
-footer { 
-  padding: 16px 24px 24px;
-  text-align: center;
-  font-size: 0.7rem;
-  line-height: 1.6;
-  opacity: 0.8;
-  color: var(--c-black);
-}
-
-footer small {
-  font-size: 0.7rem;
-  display: block;
-  margin-bottom: 8px;
-}
-
-footer a {
-  font-size: 0.7rem;
-  color: var(--c-black);
-  text-decoration: underline;
-  opacity: 0.9;
-}
-
-footer a:hover {
-  opacity: 1;
-  text-decoration: none;
-}
-
-footer b {
-  font-weight: 600;
-}
-
-.security-notice {
-  font-size: 0.7rem;
-  background: #f8f8f8;
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin: 16px auto 8px;
-  max-width: 900px;
-  border-left: 3px solid var(--c-pos);
-  text-align: left;
-  line-height: 1.5;
-}
-
-.security-notice strong {
-  font-weight: 700;
-  color: var(--c-pos);
-}
-
-/* ============================================
-      TOAST
-   ============================================ */
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  border-radius: var(--radius);
-  background: var(--c-black);
-  color: var(--c-white);
-  border: 2px solid var(--c-white);
-  font-weight: 500;
-  z-index: 100;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
-}
-
-#toast.show {
-  opacity: 1;
-  visibility: visible;
-  bottom: 30px;
-}
-
-#toast[data-type="error"] {
-  background: var(--c-neg);
-  color: var(--c-white);
-  border-color: var(--c-white);
-}
-
-#toast[data-type="success"] {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-white);
-}
-
-/* ============================================
-      MODALS (Shared)
-   ============================================ */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 200;
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--c-white);
-  color: var(--c-black);
-  border: 2px solid var(--c-black);
-  border-radius: var(--radius);
-  z-index: 201;
-  padding: 24px;
-  width: 90vw;
-  max-width: 400px;
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease, top 0.3s ease;
-}
-
-.modal-backdrop.show,
-.modal.show {
-  display: block;
-  opacity: 1;
-}
-
-.modal h3 {
-  margin-top: 0;
-}
-
-.modal p {
-  margin-top: 0;
-  line-height: 1.4;
-}
-
-.modal-details {
-  font-weight: 600;
-  display: block;
-  margin: 12px 0;
-  font-size: 1.1rem;
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
-
-.modal-form-group {
-  margin-bottom: 16px;
-}
-
-.modal-form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.modal-form-group input,
-.modal-form-group select {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Delete modal */
-#delete-btn-confirm {
-  background: var(--c-neg);
-  color: var(--c-white);
-  border-color: var(--c-neg);
-}
-#delete-btn-confirm:hover {
-  background: #802421;
-  border-color: #802421;
-  text-decoration: none;
-}
-
-/* Edit chip modal */
-#edit-chip-modal .modal-form-group input[type="number"] {
-  font-size: 1.2rem;
-  padding: 0.8rem;
-}
-
-#edit-chip-modal .modal-form-group input[type="date"] {
-  font-size: 1rem;
-  padding: 0.8rem;
-}
-
-#edit-chip-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-chip-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
-
-/* Account menu modal */
-#account-menu-modal .modal-buttons {
-  flex-direction: column;
-}
-
-#account-menu-modal .modal-buttons button {
-  width: 100%;
-  text-align: left;
-  padding: 1rem;
-  font-size: 1.1rem;
-}
-
-#account-menu-delete {
-  background: var(--c-neg);
-  color: var(--c-white);
-  border-color: var(--c-neg);
-}
-#account-menu-delete:hover {
-  background: #802421;
-  border-color: #802421;
-}
-
-#account-menu-add {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#account-menu-add:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-}
-
-/* Edit account modal */
-#edit-account-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-account-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
-
-/* Edit type modal */
-#edit-type-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-type-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
-
-/* ============================================
-      TYPE SUMMARY ITEMS (in toolbar)
-   ============================================ */
-.type-item {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.08rem;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.4rem;
-  border-radius: 12px;
-  min-width: 96px;
-}
-
-.type-item.muted {
-  opacity: 0.4;
-}
-
-.type-item .type-value {
-  font-weight: 600;
-  white-space: nowrap;
-  font-size: 0.8rem;
-}
-
-.type-item .type-value.positive {
-  color: var(--c-pos);
-}
-
-.type-item .type-value.negative {
-  color: var(--c-neg);
-}
-
-.type-item .type-label {
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  font-size: 0.7rem;
-  cursor: pointer;
-}
-
-.type-toggle-label {
-  font-size: 0.65rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.type-toggle-label input[type="checkbox"] {
-  margin: 0;
-}
-
-/* ============================================
-      MUTE TOGGLE (per-account)
-   ============================================ */
-.mute-checkbox {
-  position: relative;
-  width: 48px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.mute-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 2;
-  margin: 0;
-}
-
-.mute-checkbox-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--c-pos);
-  border: none;
-  border-radius: 999px;
-  transition: background 0.3s ease;
-  pointer-events: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.mute-checkbox-slider::before {
-  content: '';
-  position: absolute;
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background: var(--c-white);
-  border: none;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
-  background: var(--c-muted);
-}
-
-.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before {
-  transform: translateX(20px);
-}
-
-.mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
-  outline: 3px solid var(--c-black);
-  outline-offset: 2px;
-}
-
-/* ============================================
-      MUTED ACCOUNT STATE
-   ============================================ */
-.row.muted {
-  opacity: 0.5;
-}
-
-.row.muted * {
-  color: var(--c-muted) !important;
-  border-color: var(--c-muted) !important;
-  background-color: transparent !important;
-}
-
-.row.muted input[type="number"] {
-  background: transparent !important;
-  color: var(--c-muted) !important;
-}
-
-.row.muted .mute-checkbox-slider {
-  background: var(--c-muted) !important;
-  border-color: var(--c-muted) !important;
-}
-
-.row.muted .mute-checkbox-slider::before {
-  background: var(--c-white) !important;
-  border-color: var(--c-muted) !important;
-}
-
-/* ============================================
-      MOBILE RESPONSIVE
-   ============================================ */
-@media (max-width: 650px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .right { 
-    min-width: unset; 
-    text-align: left; 
-    align-self: flex-start;
-    padding-top: 0.5rem; 
-  }
-
-  .right .values {
-    display: none;
-  }
-  .right .ratio-bar {
-    display: block;
-  }
-
-  .left {
-    gap: 8px;
-    width: 100%;
-    padding-right: 0;
-  }
-
-  input[type="number"], input[type="date"], input[type="text"], input[type="url"] { 
-    width: 100%; 
-    max-width: 100%;
-  }
-
-  .input-line {
-    width: 100%;
-    margin-left: 0;
-    padding-top: 0;
-  }
-
-  .apr {
-    padding-top: 0;
-  }
-
-  .toolbar { 
-    flex-direction: column; 
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 6px 16px 10px 16px;
-  }
-
-  .financial-group {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  #financial-summary {
-    font-size: 4.2rem;
-    padding-bottom: 4px;
-    width: 100%;
-    text-align: center;
-  }
-
-  #interest-summary {
-    font-size: 1.8rem;
-    width: 100%;
-    text-align: center;
-    padding-bottom: 4px;
-  }
-
-  .toolbar-right {
-    align-items: center;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .type-filter-row {
-    justify-content: center;
-  }
-
-  .toolbar-controls {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .lastval, .name {
-    font-size: 2rem;
-  }
-
-  footer, footer small, footer a, .security-notice {
-    font-size: 0.75rem;
-  }
-}
-</style>
+      /* DATA COLORS (Kept consistent in both modes) */
+      --c-asset: #2ecc71;    /* Bright Green (Positive) */
+      --c-debt: #e74c3c;     /* Bright Red (Negative) */
+    }
+
+    /* NIGHT MODE (Inverted Palette) */
+    .night-mode {
+      --c-bg: #1e1e1e;       /* Deep Dark Gray Background */
+      --c-text: #ecf0f1;     /* Stark White/Light Text */
+      --c-border: #444444;   /* Dark Border */
+      --c-input-bg: #333333; /* Dark Input Background */
+      --c-muted-bg: #2a2a2a; /* Darker Muted Chip Background */
+      --c-modal-bg: rgba(30, 30, 30, 0.95); /* Extremely Dark Modal Overlay */
+    }
+
+    body { 
+      font-family: 'Courier New', monospace; /* More Brutalist Font */
+      margin: 0; 
+      background-color: var(--c-bg); 
+      color: var(--c-text); 
+      transition: background-color 0.5s, color 0.5s; /* Smooth Mode Transition */
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 10px; }
+    h1 { margin-top: 0; padding-top: 10px; font-size: 1.5em; border-bottom: 2px solid var(--c-text); }
+
+    /* Header Controls */
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .modes, .timeframes { display: flex; gap: 5px; margin-right: 10px; }
+
+    /* Radio Buttons (Sharp, boxy style) */
+    .radio input { display: none; }
+    .radio span { 
+      padding: 5px 10px; border: 1px solid var(--c-text); border-radius: 0px; cursor: pointer; font-size: 0.9em; 
+      transition: all 0.2s;
+    }
+    .radio input:checked + span { 
+      background-color: var(--c-text); 
+      color: var(--c-bg); /* Inverse Text/BG for checked state */
+    }
+    .radio span:hover { background-color: var(--c-border); }
+
+    /* Totals & Chart */
+    .summary { display: flex; justify-content: space-between; margin-bottom: 15px; border: 1px solid var(--c-border); padding: 10px; border-radius: 0px; }
+    .summary div { text-align: center; }
+    .total-value { font-size: 2em; font-weight: bold; }
+    .total-label { font-size: 0.8em; color: var(--c-border); }
+    .positive { color: var(--c-asset); }
+    .negative { color: var(--c-debt); }
+    #chart-container { margin-bottom: 20px; border: 1px solid var(--c-border); padding: 10px; border-radius: 0px; }
+
+    /* Account/Type Chips */
+    .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+    .chip {
+      padding: 8px 12px; border-radius: 0px; font-size: 0.9em; font-weight: bold; cursor: pointer;
+      box-shadow: 0 2px 0px rgba(0,0,0,0.5); /* Stark drop shadow */
+      color: var(--c-white); 
+    }
+    .chip.muted {
+      background-color: var(--c-muted-bg) !important;
+      color: var(--c-text) !important;
+      box-shadow: none;
+      border: 1px dashed var(--c-border);
+    }
+    .chip:hover:not(.muted) { opacity: 0.8; transform: translateY(-1px); }
+    .chip span { display: block; font-size: 0.7em; font-weight: normal; margin-top: 2px; }
+
+    /* Submission Form & Modal */
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: var(--c-modal-bg); overflow: auto;
+    }
+    .modal-content {
+      background-color: var(--c-bg); margin: 5% auto; padding: 20px; border-radius: 0px;
+      width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      border: 2px solid var(--c-text); /* Brutal modal border */
+    }
+    .modal h2 { margin-top: 0; border-bottom: 1px solid var(--c-border); padding-bottom: 10px; }
+    .modal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .modal-row label { flex-basis: 40%; }
+    .modal-row input, .modal-row select { 
+      flex-basis: 55%; padding: 8px; border: 1px solid var(--c-text); border-radius: 0px; 
+      background-color: var(--c-input-bg); color: var(--c-text); 
+    }
+    .submit-btn { 
+      padding: 10px 20px; background-color: var(--c-asset); color: var(--c-text); 
+      border: 1px solid var(--c-text); border-radius: 0px; cursor: pointer; 
+    }
+    .close-btn, .add-entry-btn { float: right; font-size: 1.5em; font-weight: bold; cursor: pointer; color: var(--c-text); }
+    .close-btn:hover, .add-entry-btn:hover { color: var(--c-debt); }
+    .button-group { display: flex; justify-content: space-between; margin-top: 20px; }
+
+    /* Log and Status */
+    #status { margin-top: 10px; font-size: 0.9em; }
+    #log { margin-top: 10px; font-size: 0.8em; color: var(--c-border); }
+
+    /* Type Toggles Section */
+    .type-toggles { margin-bottom: 15px; padding: 10px; border: 1px solid var(--c-border); border-radius: 0px; }
+    .toggle-item { display: inline-flex; align-items: center; margin-right: 15px; cursor: pointer; font-size: 0.9em; }
+    .toggle-item input[type="checkbox"] { margin-right: 5px; }
+
+    /* See All Button (Brutalist Style) */
+    #unmute-all-btn { 
+      background-color: #3498db; /* Keep the distinct blue/cyan */
+      margin-left: 10px;
+      padding: 5px 10px;
+      border-radius: 0px;
+      font-size: 0.9em;
+      font-weight: normal;
+      cursor: pointer;
+      color: var(--c-text); /* Use main text color for contrast */
+      border: 1px solid var(--c-text);
+    }
+    .night-mode #unmute-all-btn { 
+       background-color: #0088AA; /* Sharper Cyan for night */
+    }
+    #unmute-all-btn:hover { opacity: 0.8; }
+    
+    /* Type Toggle Brutalist Checkbox (Monochrome) */
+    .toggle-item input[type="checkbox"] {
+      /* Hide the default checkbox */
+      appearance: none;
+      -webkit-appearance: none;
+      margin: 0 5px 0 0;
+      padding: 0;
+      display: inline-block;
+      cursor: pointer;
+      
+      /* Define the outer block/container */
+      position: relative;
+      width: 16px; 
+      height: 16px;
+      background-color: var(--c-bg); 
+      border: 2px solid var(--c-text); /* Heavy border using main text color */
+      box-sizing: border-box;
+      vertical-align: middle;
+      transition: none; 
+    }
+
+    /* Checked State: Solid inner square */
+    .toggle-item input[type="checkbox"]:checked::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 8px; 
+      height: 8px;
+      background-color: var(--c-text); /* Fills with main text color */
+      transform: scale(1);
+      transition: none;
+    }
+    
+    /* Hide label text when toggling */
+    .toggle-item label span.visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+  </style>
 </head>
 <body>
-<!-- Toast notification -->
-<div id="toast" role="status" aria-live="polite"></div>
 
-<!-- Delete confirmation modal -->
-<div id="delete-modal-backdrop" class="modal-backdrop"></div>
-<div id="delete-modal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-modal-title">
-  <h3 id="delete-modal-title">Delete Entry?</h3>
-  <p>Do you really want to delete this entry?</p>
-  <span id="delete-modal-details" class="modal-details"></span>
-  <div id="delete-modal-buttons" class="modal-buttons">
-    <button id="delete-btn-cancel">Cancel</button>
-    <button id="delete-btn-confirm">Yes, Delete</button>
-  </div>
-</div>
+  <div class="container">
+    <h1>LedgerDB Financial Snapshot</h1>
 
-<!-- Edit chip modal -->
-<div id="edit-chip-modal-backdrop" class="modal-backdrop"></div>
-<div id="edit-chip-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-chip-modal-title">
-  <h3 id="edit-chip-modal-title">Edit Entry</h3>
-  <div class="modal-form-group">
-    <label for="edit-chip-value">Value:</label>
-    <input type="number" id="edit-chip-value" step="0.01" placeholder="Enter value">
-  </div>
-  <div class="modal-form-group">
-    <label for="edit-chip-date">Date:</label>
-    <input type="date" id="edit-chip-date">
-  </div>
-  <span id="edit-chip-details" class="modal-details"></span>
-  <div id="edit-chip-buttons" class="modal-buttons">
-    <button id="edit-chip-delete">Delete</button>
-    <button id="edit-chip-cancel">Cancel</button>
-    <button id="edit-chip-save">Save</button>
-  </div>
-</div>
+    <div class="controls">
+      <div style="display: flex; align-items: center;">
+        <div class="modes">
+          <label class="radio">
+            <input type="radio" name="mode" value="totals" checked />
+            <span>Totals</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="mode" value="peraccount" />
+            <span>Per-Account</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="mode" value="pertype" />
+            <span>Per-Type</span>
+          </label>
+        </div>
+        <div id="unmute-all-btn" class="chip">See All</div>
+      </div>
 
-<!-- Account menu modal -->
-<div id="account-menu-modal-backdrop" class="modal-backdrop"></div>
-<div id="account-menu-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="account-menu-modal-title">
-  <h3 id="account-menu-modal-title">Account Actions</h3>
-  <p id="account-menu-account-name" style="font-weight: 600; font-size: 1.2rem; margin-bottom: 1rem;"></p>
-  <div id="account-menu-buttons" class="modal-buttons">
-    <button id="account-menu-edit">✏️ Edit Account Settings</button>
-    <button id="account-menu-delete">🗑️ Delete Account</button>
-    <button id="account-menu-add">➕ Add New Account Below</button>
-    <button id="account-menu-cancel">Cancel</button>
-  </div>
-</div>
-
-<!-- Edit Account modal -->
-<div id="edit-account-modal-backdrop" class="modal-backdrop"></div>
-<div id="edit-account-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-account-modal-title">
-  <h3 id="edit-account-modal-title">Edit Account</h3>
-  <p id="edit-account-name" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem;"></p>
-
-  <div class="modal-form-group">
-    <label for="edit-account-type">Type:</label>
-    <select id="edit-account-type">
-      <option value="bk">Banks</option>
-      <option value="cc">CreditCards</option>
-      <option value="bill">Bills</option>
-      <option value="ii">Investments</option>
-      <option value="sv">Savings</option>
-    </select>
-  </div>
-
-  <div class="modal-form-group">
-    <label for="edit-account-color">Account Color (hex):</label>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <input type="color" id="edit-account-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-black); height:40px;">
-      <input type="text" id="edit-account-color" placeholder="#4c8036" style="flex:1;">
-    </div>
-  </div>
-
-  <div class="modal-form-group">
-    <label for="edit-account-link">Account Link (login URL, etc.):</label>
-    <input type="url" id="edit-account-link" placeholder="https://...">
-  </div>
-
-  <div class="modal-form-group">
-    <label for="edit-account-limit">Credit Limit (for CC accounts):</label>
-    <input type="number" id="edit-account-limit" step="1" placeholder="e.g. 5000">
-  </div>
-
-  <div class="modal-form-group">
-    <label for="edit-account-apr">APR (as decimal, e.g. 0.29 for 29%):</label>
-    <input type="number" id="edit-account-apr" step="0.01" placeholder="e.g. 0.29">
-  </div>
-
-  <div class="modal-form-group">
-    <label for="edit-account-value">Current Value:</label>
-    <input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
-  </div>
-
-  <div id="edit-account-buttons" class="modal-buttons">
-    <button id="edit-account-cancel">Cancel</button>
-    <button id="edit-account-save">Save Changes</button>
-  </div>
-</div>
-
-<!-- Edit Type Color modal -->
-<div id="edit-type-modal-backdrop" class="modal-backdrop"></div>
-<div id="edit-type-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-type-modal-title">
-  <h3 id="edit-type-modal-title">Edit Type Color</h3>
-  <p id="edit-type-name" style="font-weight:600; font-size:1.0rem; margin-bottom:1rem;"></p>
-  <div class="modal-form-group">
-    <label for="edit-type-color">Type Color (hex):</label>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <input type="color" id="edit-type-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-black); height:40px;">
-      <input type="text" id="edit-type-color" placeholder="#4c8036" style="flex:1;">
-    </div>
-  </div>
-  <div class="modal-buttons">
-    <button id="edit-type-cancel">Cancel</button>
-    <button id="edit-type-save">Save</button>
-  </div>
-</div>
-
-<!-- Main header -->
-<header>
-  <div class="toolbar">
-    <div class="financial-group">
-      <div id="financial-summary"></div>
-      <div id="interest-summary"></div>
+      <div class="timeframes">
+        <label class="radio">
+          <input type="radio" name="timeframe" value="today" />
+          <span>Today</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="timeframe" value="7d" />
+          <span>7D</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="timeframe" value="30d" />
+          <span>30D</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="timeframe" value="ytd" checked />
+          <span>YTD</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="timeframe" value="1y" />
+          <span>1Y</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="timeframe" value="all" />
+          <span>ALL</span>
+        </label>
+      </div>
     </div>
 
-    <div class="toolbar-right">
-      <!-- Type filters now in the top toolbar, no "Types" title -->
-      <div id="typeFilterRow" class="type-filter-row"></div>
+    <div id="type-toggles-container" class="type-toggles" style="display: none;">
+      <p style="margin-top: 0; font-weight: bold;">Filter by Type (Toggle to Mute):</p>
+      <div id="type-toggles" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        </div>
+    </div>
+    
+    <div id="status">Loading data...</div>
 
-      <div class="toolbar-controls">
-        <label for="timeframe">Timeframe:</label>
-        <select id="timeframe">
-          <option value="ytd" selected>This Calendar Year</option>
-          <option value="today">Today</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="14d">Last 14 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year (12mo)</option>
-          <option value="all">All Time</option>
-        </select>
+    <div class="summary">
+      <div>
+        <div id="net-worth" class="total-value positive">$0.00</div>
+        <div class="total-label">Net Worth</div>
+      </div>
+      <div>
+        <div id="total-assets" class="total-value positive">$0.00</div>
+        <div class="total-label">Total Assets</div>
+      </div>
+      <div>
+        <div id="total-debts" class="total-value negative">$0.00</div>
+        <div class="total-label">Total Debts</div>
+      </div>
+    </div>
 
-        <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-        <label><input type="radio" name="mode" value="types"> Type</label>
-        <label><input type="radio" name="mode" value="accounts"> Per-account</label>
-  <button
-    id="theme-toggle-btn"
-    type="button"
-    aria-label="Toggle dark mode"
-    title="Toggle dark mode"
-  >
-    ☾
-  </button>
-        <button id="refresh" aria-label="Refresh data">Refresh</button>
-        <button id="submitAll">Submit All</button>
+    <div id="chart-container">
+      <div id="chart" style="width: 100%; height: 300px;"></div>
+    </div>
+
+    <div id="account-list" class="chip-list">
+      </div>
+    
+    <button class="submit-btn" onclick="document.getElementById('modal').style.display='block'">+ Add Entry</button>
+
+    <div id="log"></div>
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="document.getElementById('modal').style.display='none'">&times;</span>
+        <h2>Add New Entry</h2>
+        
+        <form id="submission-form">
+          <div id="entry-fields">
+            <div class="modal-row">
+              <label for="account-select-0">Account:</label>
+              <select id="account-select-0" required style="flex-basis: 55%; padding: 8px; border: 1px solid var(--c-text); border-radius: 0px; background-color: var(--c-input-bg); color: var(--c-text);"></select>
+            </div>
+            <div class="modal-row">
+              <label for="value-input-0">Value:</label>
+              <input type="number" id="value-input-0" step="0.01" required placeholder="0.00">
+            </div>
+          </div>
+          
+          <div style="text-align: right;">
+            <button type="button" class="add-entry-btn" onclick="addEntryField()">+ Add Account</button>
+          </div>
+          
+          <div class="button-group">
+            <button type="submit" class="submit-btn">Submit Values</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
-  <hr>
-  <div id="chart"></div>
-  <hr>
-  <!-- Statusbar -->
-  <section id="statusbar"></section>
-</header>
 
-<hr class="wrap divider">
-
-<main class="wrap">
-  <section id="accounts" class="accounts"></section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="security-notice">
-      🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
-      information is stored in this application. All data resides in your Google Sheet. 
-      Your financial footprint, your control.
-    </div>
-
-    <small>
-      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types<br>
-      <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
-    </small>
-  </footer>
-</main>
-
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-/* ============================================
-    CONFIGURATION
-   ============================================ */
+  /* ------------------------------------------------------------------------------------------------------------------ */
+  /* JAVASCRIPT: Ledger Logic */
+  /* ------------------------------------------------------------------------------------------------------------------ */
+
+  // Replace with your deployed Apps Script URL GEMINI
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWd8KkkoQf6eqXOpC42TRGeByhmY2d4s6ag4KH7iUDPt6txr5pu41E0F7qar6kVjSmWg/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbzWd8KkkoQf6eqXOpC42TRGeByhmY2d4s6ag4KH7iUDPt6txr5pu41E0F7qar6kVjSmWg/exec';
+const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
+  // Global state variables
+  let ACCOUNTS = [];
+  let HISTORY = {};
+  let SUMMARY = {};
+  let TIMEFRAME = 'ytd';
+  let MODE = 'totals'; 
+  let CHART = null;
+  let LOCALE_FORMATTER = null;
+  
+  let MUTED_ACCOUNTS = new Set();
+  let MUTED_TYPES = new Set();
+  let TYPES_MAP = new Map();
+
+  // --- DAY/NIGHT MODE LOGIC (NEW) ---
+  function applyNightMode() {
+      const now = new Date();
+      const hour = now.getHours();
+      // Night mode is active between 7 PM (19:00) and 6 AM (06:00)
+      if (hour >= 19 || hour < 6) {
+          document.body.classList.add('night-mode');
+      } else {
+          document.body.classList.remove('night-mode');
+      }
+      // Re-draw chart on mode change to refresh Google Charts background color
+      if (CHART) renderChart();
+  }
+  // --- END DAY/NIGHT MODE LOGIC ---
+
+  google.charts.load('current', { 'packages': ['corechart'] });
+  google.charts.setOnLoadCallback(initialize);
+
+  function initialize() {
+    // Apply initial Day/Night mode setting
+    applyNightMode();
+    
+    CHART = new google.visualization.LineChart(document.getElementById('chart'));
+    LOCALE_FORMATTER = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+    
+    // Set up listeners for timeframe and mode
+    document.querySelectorAll('input[name="timeframe"]').forEach(r => {
+      r.addEventListener('change', (e) => { TIMEFRAME = e.target.value; fetchSnapshot(); });
+      if (r.checked) TIMEFRAME = r.value;
+    });
+
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', (e) => { 
+          MODE = e.target.value; 
+          MUTED_ACCOUNTS.clear();
+          MUTED_TYPES.clear();
+          document.getElementById('type-toggles-container').style.display = (MODE === 'pertype' ? 'block' : 'none');
+          renderChart();
+          renderAccounts(); 
+      });
+      if (r.checked) MODE = r.value;
+    });
+    
+    document.getElementById('unmute-all-btn').addEventListener('click', unmuteAll);
+
+    fetchSnapshot();
+  }
+  
+  function unmuteAll() {
+    MUTED_ACCOUNTS.clear();
+    MUTED_TYPES.clear();
+    document.querySelectorAll('#type-toggles input[type="checkbox"]').forEach(cb => cb.checked = false);
+    renderChart();
+    renderAccounts();
+  }
+
+  function getAggregatedHistoryByType(filteredAccounts) {
+      const historyByType = new Map();
+      const typeCodes = new Set(filteredAccounts.map(a => a.type).filter(t => t));
+
+      for (const acct of filteredAccounts) {
+          const monthlySeries = HISTORY.series[acct.name]?.monthly;
+          if (!monthlySeries || !acct.type || !TYPES_MAP.has(acct.type)) continue;
+
+          monthlySeries.forEach((value, idx) => {
+              const timestamp = HISTORY.dateAxis[idx]; 
+              const typeHistory = historyByType.get(acct.type) || new Map();
+              
+              const currentValue = typeHistory.get(timestamp) || 0;
+              typeHistory.set(timestamp, currentValue + value);
+              historyByType.set(acct.type, typeHistory);
+          });
+      }
+
+      const sortedTypeCodes = Array.from(typeCodes).sort();
+      const header = ['Date'].concat(sortedTypeCodes.map(code => TYPES_MAP.get(code).label));
+      const chartData = [header];
+      
+      const lastValue = {};
+      for (const timestamp of HISTORY.dateAxis) {
+          const row = [timestamp];
+          
+          for (const typeCode of sortedTypeCodes) {
+              const typeHistory = historyByType.get(typeCode);
+              const value = typeHistory ? typeHistory.get(timestamp) : undefined;
+              
+              const valueToUse = (value !== undefined) ? value : lastValue[typeCode] || null;
+              row.push(valueToUse);
+              if (value !== undefined) {
+                  lastValue[typeCode] = value;
+              }
+          }
+          chartData.push(row);
+      }
+
+      return { chartData, sortedTypeCodes };
+  }
+
+  function renderTypeToggles() {
+    const toggleContainer = document.getElementById('type-toggles');
+    toggleContainer.innerHTML = '';
+
+    const uniqueTypes = new Map();
+    ACCOUNTS.forEach(a => {
+        if (TYPES_MAP.has(a.type)) {
+            uniqueTypes.set(a.type, TYPES_MAP.get(a.type).label);
+        }
+    });
+
+    Array.from(uniqueTypes.keys()).sort().forEach(code => {
+        const label = uniqueTypes.get(code);
+        const isMuted = MUTED_TYPES.has(code);
+        const color = TYPES_MAP.get(code).color;
+
+        const toggleItem = document.createElement('label');
+        toggleItem.classList.add('toggle-item');
+        toggleItem.innerHTML = `
+            <input type="checkbox" id="toggle-${code}" data-type-code="${code}" ${isMuted ? 'checked' : ''}>
+            <span style="color: ${color};">${label}</span>
+        `;
+        
+        toggleItem.querySelector('input').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                MUTED_TYPES.add(code);
+            } else {
+                MUTED_TYPES.delete(code);
+            }
+            renderChart();
+            renderAccounts();
+        });
+
+        toggleContainer.appendChild(toggleItem);
+    });
+  }
+
+  function fetchSnapshot() {
+    document.getElementById('status').textContent = 'Loading data...';
+    document.getElementById('log').textContent = '';
+
+    const url = SCRIPT_URL + `?route=snapshot&timeframe=${TIMEFRAME}`;
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.ok) {
+          throw new Error(data.error || 'Unknown API error');
+        }
+        
+        ACCOUNTS = data.accounts;
+        HISTORY = data;
+        SUMMARY = data.totals;
+
+        TYPES_MAP.clear();
+        data.types.forEach(t => TYPES_MAP.set(t.code, { label: t.label, color: t.color }));
+
+        document.getElementById('status').textContent = `Data as of ${data.as_of}.`;
+        
+        renderChart();
+        renderAccounts();
+        
+        renderTypeToggles();
+        document.getElementById('type-toggles-container').style.display = (MODE === 'pertype' ? 'block' : 'none');
+
+        const select = document.getElementById('account-select-0');
+        select.innerHTML = ACCOUNTS.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+        
+      })
+      .catch(err => {
+        document.getElementById('status').textContent = 'Error fetching data: ' + err.message;
+        document.getElementById('log').textContent = '';
+        console.error('Fetch Error:', err);
+      });
+  }
+
+  function renderChart() {
+    if (!CHART || !HISTORY.dateAxis || ACCOUNTS.length === 0) return;
+
+    let filteredAccounts = ACCOUNTS;
+    if (MODE === 'peraccount' || MODE === 'totals') {
+        filteredAccounts = ACCOUNTS.filter(a => !MUTED_ACCOUNTS.has(a.name));
+    } else if (MODE === 'pertype') {
+        filteredAccounts = ACCOUNTS.filter(a => !MUTED_TYPES.has(a.type));
+    }
+
+    let chartData = [];
+    const isNightMode = document.body.classList.contains('night-mode');
+    
+    // Get CSS variables in real-time
+    const style = getComputedStyle(document.body);
+    const text_color = style.getPropertyValue('--c-text').trim();
+    const bg_color = style.getPropertyValue('--c-bg').trim();
+    
+    let options = {
+      title: 'Net Worth History',
+      legend: { position: 'bottom', textStyle: { color: text_color } },
+      hAxis: { title: 'Date', textStyle: { color: text_color }, titleTextStyle: { color: text_color } },
+      vAxis: { title: 'Value', format: LOCALE_FORMATTER.format(0).replace('0', ''), textStyle: { color: text_color }, titleTextStyle: { color: text_color } },
+      series: {},
+      backgroundColor: { fill: bg_color }, // Dynamic background
+      chartArea: { backgroundColor: { fill: bg_color } },
+      titleTextStyle: { color: text_color }
+    };
+
+    if (MODE === 'totals') {
+      const totalSeries = HISTORY.totals.assets.map((v, i) => v + HISTORY.totals.debts[i]);
+      chartData.push(['Date', 'Net Worth']);
+      totalSeries.forEach((v, i) => {
+        chartData.push([HISTORY.dateAxis[i], v]);
+      });
+      options.series[0] = { color: text_color }; // Use text color for total line
+
+    } else if (MODE === 'peraccount') {
+      const header = ['Date'].concat(filteredAccounts.map(a => a.name));
+      chartData.push(header);
+      
+      filteredAccounts.forEach((a, seriesIdx) => {
+        options.series[seriesIdx] = { color: a.color || (a.kind === 'asset' ? style.getPropertyValue('--c-asset') : style.getPropertyValue('--c-debt')) };
+        const monthlySeries = HISTORY.series[a.name]?.monthly || [];
+        a.monthlySeries = monthlySeries; 
+      });
+
+      HISTORY.dateAxis.forEach((d, i) => {
+        const row = [d].concat(filteredAccounts.map(a => a.monthlySeries[i]));
+        chartData.push(row);
+      });
+      options.title = 'Account History';
+
+    } else if (MODE === 'pertype') {
+        const { chartData: typeChartData, sortedTypeCodes } = getAggregatedHistoryByType(filteredAccounts);
+        chartData = typeChartData;
+
+        options.series = sortedTypeCodes.reduce((acc, code, index) => {
+            acc[index] = { color: TYPES_MAP.get(code)?.color || text_color };
+            return acc;
+        }, {});
+        options.title = 'Type History (Aggregated)';
+    }
+
+    try {
+      if (chartData.length > 1) {
+        const dataTable = google.visualization.arrayToDataTable(chartData);
+        CHART.draw(dataTable, options);
+      } else {
+        document.getElementById('chart').innerHTML = 'No data to display.';
+      }
+    } catch (e) {
+        document.getElementById('chart').innerHTML = 'Error rendering chart. Check console for details.';
+        console.error('Chart Error:', e);
+    }
+    
+    renderSummary(filteredAccounts);
+  }
+
+  function renderSummary(filteredAccounts) {
+    const totalAssets = filteredAccounts.filter(a => a.kind === 'asset').reduce((sum, a) => sum + (a.last || 0), 0);
+    const totalDebts = filteredAccounts.filter(a => a.kind === 'debt').reduce((sum, a) => sum + (a.last || 0), 0);
+    const netWorth = totalAssets + totalDebts;
+
+    document.getElementById('net-worth').textContent = LOCALE_FORMATTER.format(netWorth);
+    document.getElementById('net-worth').className = 'total-value ' + (netWorth >= 0 ? 'positive' : 'negative');
+
+    document.getElementById('total-assets').textContent = LOCALE_FORMATTER.format(totalAssets);
+    document.getElementById('total-assets').className = 'total-value positive';
+
+    document.getElementById('total-debts').textContent = LOCALE_FORMATTER.format(totalDebts);
+    document.getElementById('total-debts').className = 'total-value negative';
+  }
+
+  function renderAccounts() {
+    const accountListEl = document.getElementById('account-list');
+    accountListEl.innerHTML = '';
+
+    const style = getComputedStyle(document.body);
+    const default_asset_color = style.getPropertyValue('--c-asset').trim();
+    const default_debt_color = style.getPropertyValue('--c-debt').trim();
+
+
+    if (MODE === 'pertype') {
+      const types = new Map();
+
+      ACCOUNTS.forEach(acct => {
+          const typeCode = acct.type;
+          if (!typeCode || !TYPES_MAP.has(typeCode)) return;
+
+          const latestValue = acct.last || 0; 
+          const typeInfo = TYPES_MAP.get(typeCode);
+
+          const info = types.get(typeCode) || {
+              code: typeCode,
+              label: typeInfo.label,
+              color: typeInfo.color,
+              value: 0,
+          };
+          info.value += latestValue;
+          types.set(typeCode, info);
+      });
+      
+      Array.from(types.values()).sort((a, b) => b.value - a.value).forEach(typeInfo => {
+          const isMuted = MUTED_TYPES.has(typeInfo.code);
+          
+          const chip = document.createElement('div');
+          chip.dataset.code = typeInfo.code;
+          chip.classList.add('chip');
+          if (isMuted) chip.classList.add('muted');
+          
+          chip.style.backgroundColor = isMuted ? 'var(--c-muted-bg)' : typeInfo.color;
+          chip.style.color = isMuted ? 'var(--c-text)' : 'var(--c-bg)';
+
+          const fmtValue = LOCALE_FORMATTER.format(typeInfo.value);
+          chip.innerHTML = `<strong>${typeInfo.label}</strong><span>${fmtValue}</span>`;
+
+          chip.addEventListener('click', () => {
+              if (MUTED_TYPES.has(typeInfo.code)) {
+                  MUTED_TYPES.delete(typeInfo.code);
+                  const toggle = document.getElementById(`toggle-${typeInfo.code}`);
+                  if (toggle) toggle.checked = false;
+              } else {
+                  MUTED_TYPES.add(typeInfo.code);
+                  const toggle = document.getElementById(`toggle-${typeInfo.code}`);
+                  if (toggle) toggle.checked = true;
+              }
+              renderChart();
+              renderAccounts();
+          });
+          accountListEl.appendChild(chip);
+      });
+      
+    } else {
+        // Existing per-account rendering logic
+        ACCOUNTS.sort((a, b) => a.kind === 'debt' ? 1 : -1).forEach(acct => {
+            const isMuted = MUTED_ACCOUNTS.has(acct.name);
+            const chip = document.createElement('div');
+            chip.dataset.name = acct.name;
+            chip.classList.add('chip');
+            if (isMuted) chip.classList.add('muted');
+            
+            const color = acct.color || (acct.kind === 'asset' ? default_asset_color : default_debt_color);
+            chip.style.backgroundColor = isMuted ? 'var(--c-muted-bg)' : color;
+            chip.style.color = isMuted ? 'var(--c-text)' : 'var(--c-bg)';
+
+            const fmtValue = LOCALE_FORMATTER.format(acct.last || 0);
+            chip.innerHTML = `<strong>${acct.name}</strong><span>${fmtValue}</span>`;
+
+            chip.addEventListener('click', () => {
+                if (MUTED_ACCOUNTS.has(acct.name)) {
+                    MUTED_ACCOUNTS.delete(acct.name);
+                } else {
+                    MUTED_ACCOUNTS.add(acct.name);
+                }
+                renderChart();
+                renderAccounts();
+            });
+            accountListEl.appendChild(chip);
+        });
+    }
+  }
+
+  // --- Submission Form Logic (Unchanged) ---
+  function addEntryField() {
+    const entryFields = document.getElementById('entry-fields');
+    const index = entryFields.children.length / 2;
+    
+    const accountRow = document.createElement('div');
+    accountRow.classList.add('modal-row');
+    accountRow.innerHTML = `
+      <label for="account-select-${index}">Account:</label>
+      <select id="account-select-${index}" required style="flex-basis: 55%; padding: 8px; border: 1px solid var(--c-text); border-radius: 0px; background-color: var(--c-input-bg); color: var(--c-text);">${ACCOUNTS.map(a => `<option value="${a.name}">${a.name}</option>`).join('')}</select>
+    `;
+    entryFields.appendChild(accountRow);
+    
+    const valueRow = document.createElement('div');
+    valueRow.classList.add('modal-row');
+    valueRow.innerHTML = `
+      <label for="value-input-${index}">Value:</label>
+      <input type="number" id="value-input-${index}" step="0.01" required placeholder="0.00">
+    `;
+    entryFields.appendChild(valueRow);
+  }
+
+  document.getElementById('submission-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('status').textContent = 'Submitting entries...';
+    document.getElementById('log').textContent = '';
+
+    const entries = [];
+    const entryFields = document.getElementById('entry-fields');
+    const numEntries = entryFields.children.length / 2;
+
+    for (let i = 0; i < numEntries; i++) {
+        const account = document.getElementById(`account-select-${i}`).value;
+        const value = document.getElementById(`value-input-${i}`).value;
+
+        if (account && value !== '') {
+            entries.push({ account, value: parseFloat(value) });
+        }
+    }
+
+    if (entries.length === 0) {
+        document.getElementById('status').textContent = 'Error: No valid entries to submit.';
+        return;
+    }
+
+    fetch(SCRIPT_URL + '?route=submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entries })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            document.getElementById('status').textContent = `Submission successful. Updated: ${data.updated}, Copied: ${data.copied_forward}.`;
+            document.getElementById('modal').style.display = 'none';
+            // Reset form fields
+            document.getElementById('submission-form').reset();
+            // Refetch data to update chart
+            fetchSnapshot();
+        } else {
+            document.getElementById('status').textContent = 'Submission failed: ' + (data.error || 'Unknown error');
+        }
+        document.getElementById('log').textContent = JSON.stringify(data);
+    })
+    .catch(err => {
+        document.getElementById('status').textContent = 'Network error during submission: ' + err.message;
+        console.error('Submission Error:', err);
+    });
+  });
+  
+  window.onclick = function(event) {
+    const modal = document.getElementById('modal');
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
+
+</body>
+</html>
 const API_BASE = 'https://script.google.com/macros/s/AKfycbzWd8KkkoQf6eqXOpC42TRGeByhmY2d4s6ag4KH7iUDPt6txr5pu41E0F7qar6kVjSmWg/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
+const API_BASE = 'https://script.google.com/macros/s/AKfycbzWd8KkkoQf6eqXOpC42TRGeByhmY2d4s6ag4KH7iUDPt6txr5pu41E0F7qar6kVjSmWg/exec';
+const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
     
     
