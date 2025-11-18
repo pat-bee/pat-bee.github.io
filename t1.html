@@ -112,6 +112,7 @@ header {
 }
 /* NEEEEEEEEEEEEEEEEEEEEEEW */
 /* Brutalist Option 1: The Heavy Concrete Block */
+* Brutalist Option 1: The Heavy Concrete Block */
 .type-toggle-label input[type="checkbox"] {
   /* 1. Hide the default checkbox and define the block */
   appearance: none;
@@ -121,6 +122,52 @@ header {
   display: inline-block;
   cursor: pointer;
   
+  /* 2. Define the outer block/container */
+  position: relative;
+  width: 18px; 
+  height: 18px;
+  background-color: #FFFFFF; 
+  border: 3px solid #000000; /* Brutally thick black border */
+  box-sizing: border-box;
+  vertical-align: middle;
+  transition: none; 
+}
+
+/* Unchecked State: Just the heavy, empty block */
+.type-toggle-label input[type="checkbox"]::before {
+  content: '';
+  display: none; 
+}
+
+/* Checked State: Massive, geometric black square */
+.type-toggle-label input[type="checkbox"]:checked::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px; 
+  height: 6px;
+  background-color: #000000; 
+  transform: scale(2); /* Brutally scale up the mark to fill most of the space */
+  transform-origin: top left;
+}
+
+/* WTFFFFFFFFF */
+      /* Accessibility technique to hide text while keeping it readable for screen readers */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+
+      
   /* 2. Define the outer block/container */
   position: relative;
   width: 18px; 
