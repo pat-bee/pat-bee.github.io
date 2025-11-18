@@ -8,7 +8,7 @@
 <style>
 /* ============================================
       CSS VARIABLES & DESIGN TOKENS
-      ============================================ */
+   ============================================ */
 :root {
   --maxw: 1400px;
   --c-pos: #4c8036;
@@ -25,7 +25,7 @@
 
 /* ============================================
       BASE LAYOUT
-      ============================================ */
+   ============================================ */
 html, body { 
   height: 100%; 
   margin: 0; 
@@ -53,7 +53,7 @@ a {
 
 /* ============================================
       HEADER & TOOLBAR
-      ============================================ */
+   ============================================ */
 header { 
   position: sticky; 
   top: 0; 
@@ -66,14 +66,15 @@ header {
 .toolbar { 
   display: flex; 
   gap: var(--gap); 
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 6px 24px;
-  flex-wrap: wrap; 
+  padding: 6px 24px 10px 24px;
+  flex-wrap: nowrap; 
   width: 100%;
   box-sizing: border-box;
 }
 
+/* Left side: big numbers */
 .financial-group {
   display: flex;
   gap: var(--gap);
@@ -83,24 +84,44 @@ header {
   flex-shrink: 1;
 }
 
-.toolbar-controls {
+/* Right side: type filters + controls */
+.toolbar-right {
   display: flex;
-  gap: var(--gap);
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
   flex-shrink: 0;
+  max-width: 60%;
 }
 
+/* Type filter row now lives in the toolbar */
+.type-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+/* Controls row under type filters */
+.toolbar-controls {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Make the controls fonts compact */
 .toolbar label { 
-  font-size: .85rem;
+  font-size: 0.8rem;
   font-weight: 300;
   cursor: pointer;
 }
 
 .toolbar select {
-  font-size: .85rem;
+  font-size: 0.8rem;
   font-weight: 300;
-  padding: 4px;
+  padding: 4px 6px;
   border: 1px solid var(--c-black);
   border-radius: 4px;
   background: var(--c-white);
@@ -109,9 +130,9 @@ header {
 
 /* ============================================
       FINANCIAL SUMMARY
-      ============================================ */
+   ============================================ */
 #financial-summary {
-  font-size: 4.6rem;
+  font-size: 5rem;
   font-weight: 300;
   white-space: nowrap;
   line-height: 1.1;
@@ -124,7 +145,7 @@ header {
 }
 
 #interest-summary {
-  font-size: 1.95rem;
+  font-size: 2rem;
   font-weight: 300;
   white-space: nowrap;
   line-height: 1.1;
@@ -133,14 +154,25 @@ header {
   opacity: 0.9;
 }
 
-.interest-earned { color: var(--c-pos); }
-.interest-cost { color: var(--c-neg); }
-.summary-debt { color: var(--c-neg); }
-.summary-asset { color: var(--c-pos); }
+.interest-earned {
+  color: var(--c-pos);
+}
+
+.interest-cost {
+  color: var(--c-neg);
+}
+
+.summary-debt {
+  color: var(--c-neg);
+}
+
+.summary-asset {
+  color: var(--c-pos);
+}
 
 /* ============================================
       CHART CONTAINER
-      ============================================ */
+   ============================================ */
 #chart { 
   height: 30vh; 
   width: 100%; 
@@ -149,8 +181,8 @@ header {
 }
 
 /* ============================================
-      GLOBAL STATUSBAR (█)
-      ============================================ */
+      GLOBAL STATUSBAR (█ character)
+   ============================================ */
 #statusbar {
   line-height: 3;
   font-size: larger;
@@ -166,8 +198,13 @@ header {
   box-sizing: border-box;
 }
 
-.status-positive { color: var(--c-pos); }
-.status-negative { color: var(--c-neg); }
+.status-positive {
+  color: var(--c-pos);
+}
+
+.status-negative {
+  color: var(--c-neg);
+}
 
 hr.divider {
   border: none;
@@ -177,7 +214,7 @@ hr.divider {
 
 /* ============================================
       ACCOUNT ROWS
-      ============================================ */
+   ============================================ */
 .accounts { 
   display: grid; 
   grid-template-columns: 1fr; 
@@ -237,9 +274,15 @@ hr.divider {
   position: relative;
 }
 
-.name:hover { opacity: 0.8; }
-.name:active { opacity: 0.6; }
+.name:hover {
+  opacity: 0.8;
+}
 
+.name:active {
+  opacity: 0.6;
+}
+
+/* Credit limit display */
 .limit {
   font-weight: 600;
   font-size: 0.75rem;
@@ -265,7 +308,7 @@ hr.divider {
 
 /* ============================================
       INPUT FIELDS
-      ============================================ */
+   ============================================ */
 input[type="number"], input[type="date"], input[type="text"], input[type="url"] {
   width: 10rem;
   max-width: 10rem;
@@ -320,7 +363,7 @@ input[type="url"].submitted-ok {
 
 /* ============================================
       BUTTONS
-      ============================================ */
+   ============================================ */
 button {
   padding: .7rem 1rem;
   font-size: 1rem;
@@ -347,9 +390,15 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Compact buttons in the toolbar controls */
+.toolbar-controls button {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+}
+
 /* ============================================
-      VALUE CHIPS
-      ============================================ */
+      VALUE CHIPS (editable)
+   ============================================ */
 .values { 
   display: flex; 
   justify-content: flex-end;
@@ -389,7 +438,7 @@ button:disabled {
 
 /* ============================================
       MOBILE RATIO BARS
-      ============================================ */
+   ============================================ */
 .ratio-bar {
   display: none;
   font-size: 1.5rem;
@@ -404,7 +453,7 @@ button:disabled {
 
 /* ============================================
       FOOTER
-      ============================================ */
+   ============================================ */
 footer { 
   padding: 16px 24px 24px;
   text-align: center;
@@ -455,7 +504,7 @@ footer b {
 
 /* ============================================
       TOAST
-      ============================================ */
+   ============================================ */
 #toast {
   position: fixed;
   bottom: 20px;
@@ -492,8 +541,8 @@ footer b {
 }
 
 /* ============================================
-      MODALS
-      ============================================ */
+      MODALS (Shared)
+   ============================================ */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -531,8 +580,14 @@ footer b {
   opacity: 1;
 }
 
-.modal h3 { margin-top: 0; }
-.modal p { margin-top: 0; line-height: 1.4; }
+.modal h3 {
+  margin-top: 0;
+}
+
+.modal p {
+  margin-top: 0;
+  line-height: 1.4;
+}
 
 .modal-details {
   font-weight: 600;
@@ -583,10 +638,12 @@ footer b {
   font-size: 1.2rem;
   padding: 0.8rem;
 }
+
 #edit-chip-modal .modal-form-group input[type="date"] {
   font-size: 1rem;
   padding: 0.8rem;
 }
+
 #edit-chip-save {
   background: var(--c-pos);
   color: var(--c-white);
@@ -602,12 +659,14 @@ footer b {
 #account-menu-modal .modal-buttons {
   flex-direction: column;
 }
+
 #account-menu-modal .modal-buttons button {
   width: 100%;
   text-align: left;
   padding: 1rem;
   font-size: 1.1rem;
 }
+
 #account-menu-delete {
   background: var(--c-neg);
   color: var(--c-white);
@@ -617,6 +676,7 @@ footer b {
   background: #802421;
   border-color: #802421;
 }
+
 #account-menu-add {
   background: var(--c-pos);
   color: var(--c-white);
@@ -639,105 +699,79 @@ footer b {
   text-decoration: none;
 }
 
-/* Type color modal save */
-#type-color-save {
+/* Edit type modal */
+#edit-type-save {
   background: var(--c-pos);
   color: var(--c-white);
   border-color: var(--c-pos);
 }
-#type-color-save:hover {
+#edit-type-save:hover {
   background: #3d6629;
   border-color: #3d6629;
   text-decoration: none;
 }
 
-/* Color input row for account + type color UIs */
-.color-input-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.color-input-row input[type="color"] {
-  width: 40px;
-  height: 32px;
-  padding: 0;
-  border-radius: 6px;
-  border: 1px solid var(--c-black);
-  background: transparent;
-}
-
 /* ============================================
-      TYPE SUMMARY BAR
-      ============================================ */
-#type-summary-bar {
-  text-align: center;
-  padding: 2rem 0 1rem 0;
-  margin: 2rem auto 0 auto;
-  border-top: 1px solid var(--c-black);
-  max-width: var(--maxw);
-}
-
-#type-summary-bar h4 {
-  font-size: 1.5rem;
-  font-weight: 300;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.type-filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 0.75rem;
-}
-
+      TYPE SUMMARY ITEMS (in toolbar)
+   ============================================ */
 .type-item {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.95rem;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
+  gap: 0.08rem;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 12px;
   background: #f5f5f5;
+  min-width: 96px;
 }
 
 .type-item.muted {
   opacity: 0.4;
 }
 
-.type-item .type-label {
-  font-weight: 500;
-  cursor: pointer;
-  user-select: none;
-}
-
 .type-item .type-value {
   font-weight: 600;
   white-space: nowrap;
-}
-
-.type-value.positive { color: var(--c-pos); }
-.type-value.negative { color: var(--c-neg); }
-
-.type-toggle-label {
   font-size: 0.8rem;
 }
 
+.type-item .type-value.positive {
+  color: var(--c-pos);
+}
+
+.type-item .type-value.negative {
+  color: var(--c-neg);
+}
+
+.type-item .type-label {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.type-toggle-label {
+  font-size: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.type-toggle-label input[type="checkbox"] {
+  margin: 0;
+}
+
 /* ============================================
-      MUTE TOGGLE
-      ============================================ */
+      MUTE TOGGLE (per-account)
+   ============================================ */
 .mute-checkbox {
   position: relative;
   width: 48px;
   height: 28px;
   flex-shrink: 0;
 }
+
 .mute-checkbox input[type="checkbox"] {
   position: absolute;
   opacity: 0;
@@ -747,6 +781,7 @@ footer b {
   z-index: 2;
   margin: 0;
 }
+
 .mute-checkbox-slider {
   position: absolute;
   top: 0;
@@ -754,11 +789,13 @@ footer b {
   right: 0;
   bottom: 0;
   background: var(--c-pos);
+  border: none;
   border-radius: 999px;
   transition: background 0.3s ease;
   pointer-events: none;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
 .mute-checkbox-slider::before {
   content: '';
   position: absolute;
@@ -767,16 +804,20 @@ footer b {
   left: 3px;
   bottom: 3px;
   background: var(--c-white);
+  border: none;
   border-radius: 50%;
   transition: transform 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
+
 .mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
   background: var(--c-muted);
 }
+
 .mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before {
   transform: translateX(20px);
 }
+
 .mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
   outline: 3px solid var(--c-black);
   outline-offset: 2px;
@@ -784,23 +825,27 @@ footer b {
 
 /* ============================================
       MUTED ACCOUNT STATE
-      ============================================ */
+   ============================================ */
 .row.muted {
   opacity: 0.5;
 }
+
 .row.muted * {
   color: var(--c-muted) !important;
   border-color: var(--c-muted) !important;
   background-color: transparent !important;
 }
+
 .row.muted input[type="number"] {
   background: transparent !important;
   color: var(--c-muted) !important;
 }
+
 .row.muted .mute-checkbox-slider {
   background: var(--c-muted) !important;
   border-color: var(--c-muted) !important;
 }
+
 .row.muted .mute-checkbox-slider::before {
   background: var(--c-white) !important;
   border-color: var(--c-muted) !important;
@@ -808,7 +853,7 @@ footer b {
 
 /* ============================================
       MOBILE RESPONSIVE
-      ============================================ */
+   ============================================ */
 @media (max-width: 650px) {
   .row {
     flex-direction: column;
@@ -853,7 +898,7 @@ footer b {
     flex-direction: column; 
     align-items: flex-start;
     justify-content: flex-start;
-    padding: 6px 24px;
+    padding: 6px 16px 10px 16px;
   }
 
   .financial-group {
@@ -863,21 +908,31 @@ footer b {
   }
 
   #financial-summary {
-    font-size: 3.9rem;
-    padding-bottom: 8px;
+    font-size: 4.2rem;
+    padding-bottom: 4px;
     width: 100%;
     text-align: center;
   }
 
   #interest-summary {
-    font-size: 1.95rem;
+    font-size: 1.8rem;
     width: 100%;
     text-align: center;
-    padding-bottom: 8px;
+    padding-bottom: 4px;
+  }
+
+  .toolbar-right {
+    align-items: center;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .type-filter-row {
+    justify-content: center;
   }
 
   .toolbar-controls {
-    justify-content: space-around;
+    justify-content: center;
     width: 100%;
   }
 
@@ -887,12 +942,6 @@ footer b {
 
   footer, footer small, footer a, .security-notice {
     font-size: 0.75rem;
-  }
-
-  #type-summary-bar h4 {
-    flex-direction: column;
-    gap: 0.5rem;
-    font-size: 1.2rem;
   }
 }
 </style>
@@ -955,12 +1004,25 @@ footer b {
   <div class="modal-form-group">
     <label for="edit-account-type">Type:</label>
     <select id="edit-account-type">
-      <option value="bk">BANK</option>
-      <option value="cc">CREDIT</option>
-      <option value="bill">BILLS / DEBT</option>
-      <option value="ii">INVEST</option>
-      <option value="sv">SAVE</option>
+      <option value="bk">Banks</option>
+      <option value="cc">CreditCards</option>
+      <option value="bill">Bills</option>
+      <option value="ii">Investments</option>
+      <option value="sv">Savings</option>
     </select>
+  </div>
+
+  <div class="modal-form-group">
+    <label for="edit-account-color">Account Color (hex):</label>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input type="color" id="edit-account-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-black); height:40px;">
+      <input type="text" id="edit-account-color" placeholder="#4c8036" style="flex:1;">
+    </div>
+  </div>
+
+  <div class="modal-form-group">
+    <label for="edit-account-link">Account Link (login URL, etc.):</label>
+    <input type="url" id="edit-account-link" placeholder="https://...">
   </div>
 
   <div class="modal-form-group">
@@ -974,19 +1036,6 @@ footer b {
   </div>
 
   <div class="modal-form-group">
-    <label>Account Color:</label>
-    <div class="color-input-row">
-      <input type="color" id="edit-account-color-picker">
-      <input type="text" id="edit-account-color" placeholder="#4c8036">
-    </div>
-  </div>
-
-  <div class="modal-form-group">
-    <label for="edit-account-link">Account Link (optional):</label>
-    <input type="url" id="edit-account-link" placeholder="https://example.com/login">
-  </div>
-
-  <div class="modal-form-group">
     <label for="edit-account-value">Current Value:</label>
     <input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
   </div>
@@ -997,21 +1046,21 @@ footer b {
   </div>
 </div>
 
-<!-- Type Color modal -->
-<div id="type-color-modal-backdrop" class="modal-backdrop"></div>
-<div id="type-color-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="type-color-modal-title">
-  <h3 id="type-color-modal-title">Edit Type Color</h3>
-  <p id="type-color-type-name" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem;"></p>
+<!-- Edit Type Color modal -->
+<div id="edit-type-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-type-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-type-modal-title">
+  <h3 id="edit-type-modal-title">Edit Type Color</h3>
+  <p id="edit-type-name" style="font-weight:600; font-size:1.0rem; margin-bottom:1rem;"></p>
   <div class="modal-form-group">
-    <label>Type Color:</label>
-    <div class="color-input-row">
-      <input type="color" id="type-color-picker">
-      <input type="text" id="type-color-hex" placeholder="#4c8036">
+    <label for="edit-type-color">Type Color (hex):</label>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input type="color" id="edit-type-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-black); height:40px;">
+      <input type="text" id="edit-type-color" placeholder="#4c8036" style="flex:1;">
     </div>
   </div>
   <div class="modal-buttons">
-    <button id="type-color-cancel">Cancel</button>
-    <button id="type-color-save">Save Color</button>
+    <button id="edit-type-cancel">Cancel</button>
+    <button id="edit-type-save">Save</button>
   </div>
 </div>
 
@@ -1023,30 +1072,36 @@ footer b {
       <div id="interest-summary"></div>
     </div>
 
-    <div class="toolbar-controls">
-      <label for="timeframe">Timeframe:</label>
-      <select id="timeframe">
-        <option value="ytd" selected>This Calendar Year</option>
-        <option value="today">Today</option>
-        <option value="7d">Last 7 Days</option>
-        <option value="14d">Last 14 Days</option>
-        <option value="30d">Last 30 Days</option>
-        <option value="90d">Last 90 Days</option>
-        <option value="1y">Last Year (12mo)</option>
-        <option value="all">All Time</option>
-      </select>
+    <div class="toolbar-right">
+      <!-- Type filters now in the top toolbar, no "Types" title -->
+      <div id="typeFilterRow" class="type-filter-row"></div>
 
-      <label><input type="radio" name="mode" value="totals" checked> Totals</label>
-      <label><input type="radio" name="mode" value="types"> Type</label>
-      <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+      <div class="toolbar-controls">
+        <label for="timeframe">Timeframe:</label>
+        <select id="timeframe">
+          <option value="ytd" selected>This Calendar Year</option>
+          <option value="today">Today</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="14d">Last 14 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="90d">Last 90 Days</option>
+          <option value="1y">Last Year (12mo)</option>
+          <option value="all">All Time</option>
+        </select>
 
-      <button id="refresh" aria-label="Refresh data">Refresh</button>
-      <button id="submitAll">Submit All</button>
+        <label><input type="radio" name="mode" value="totals" checked> Totals</label>
+        <label><input type="radio" name="mode" value="types"> Type</label>
+        <label><input type="radio" name="mode" value="accounts"> Per-account</label>
+
+        <button id="refresh" aria-label="Refresh data">Refresh</button>
+        <button id="submitAll">Submit All</button>
+      </div>
     </div>
   </div>
   <hr>
   <div id="chart"></div>
   <hr>
+  <!-- Statusbar -->
   <section id="statusbar"></section>
 </header>
 
@@ -1055,12 +1110,7 @@ footer b {
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
-  <!-- Type-based category summary -->
-  <section id="type-summary-bar">
-    <h4 style="font-weight:300; margin:0;">Types</h4>
-    <div id="typeFilterRow" class="type-filter-row"></div>
-  </section>
-
+  <!-- Footer -->
   <footer>
     <div class="security-notice">
       🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
@@ -1069,7 +1119,7 @@ footer b {
     </div>
 
     <small>
-      <b>v2.4 Features:</b> CC limits • Edit account settings • Type summaries • Per-type colors • Mute/unmute accounts & types<br>
+      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types<br>
       <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
@@ -1078,13 +1128,13 @@ footer b {
 <script>
 /* ============================================
     CONFIGURATION
-    ============================================ */
+   ============================================ */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbzWd8KkkoQf6eqXOpC42TRGeByhmY2d4s6ag4KH7iUDPt6txr5pu41E0F7qar6kVjSmWg/exec';
-const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
+const SHEET_ID = 'YOUR_SHEET_ID_HERE';
 
 /* ============================================
     APPLICATION STATE
-    ============================================ */
+   ============================================ */
 let SNAP = null;
 let MODE = 'totals';
 let TIMEFRAME = 'ytd';
@@ -1096,7 +1146,6 @@ const LONG_PRESS_DURATION = 500;
 let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
 
-/* v2.4: In-memory metadata */
 const TYPE_LABELS = {
   'bk': 'Banks',
   'cc': 'CreditCards',
@@ -1105,19 +1154,12 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-/* Account metadata: {limit, type, color, link} */
-let ACCOUNT_METADATA = new Map();
-
-/* Type color overrides: code -> #rrggbb */
-let TYPE_COLOR_OVERRIDES = new Map();
-
-/* Active type for color modal */
-let ACTIVE_TYPE_FOR_COLOR = null;
+let ACCOUNT_METADATA = new Map();  // accountName -> { limit, color, link }
+let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
 
 /* ============================================
-    UTILITY FUNCTIONS
-    ============================================ */
-
+    UI UTILITIES
+   ============================================ */
 function showToast(msg, type = 'info', duration = 3000) {
   const el = document.getElementById('toast');
   if (!el) return;
@@ -1134,10 +1176,8 @@ function showToast(msg, type = 'info', duration = 3000) {
 function setLoading(loading, message) {
   IS_LOADING = loading;
 
-  const refreshBtn = document.getElementById('refresh');
-  const submitAllBtn = document.getElementById('submitAll');
-  if (refreshBtn) refreshBtn.disabled = loading;
-  if (submitAllBtn) submitAllBtn.disabled = loading;
+  document.getElementById('refresh').disabled = loading;
+  document.getElementById('submitAll').disabled = loading;
 
   document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
     inp.disabled = loading;
@@ -1149,99 +1189,9 @@ function setLoading(loading, message) {
   }
 }
 
-const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
-
-function formatMoney(n) {
-  const val = Number(n) || 0;
-  const sign = val < 0 ? '−' : '';
-  const abs = Math.abs(val);
-  const displayValue = Math.trunc(abs);
-
-  return `${sign}${displayValue.toLocaleString(undefined, { 
-    minimumFractionDigits: 0, 
-    maximumFractionDigits: 0 
-  })}`;
-}
-
-/* Gradient credit-limit color helper */
-function getLimitColor(currentBalance, limit) {
-  const absBalance = Math.abs(currentBalance);
-  const utilization = absBalance / limit;
-
-  if (currentBalance >= 0) {
-    return '#4c8036'; // positive
-  }
-
-  if (utilization > 1.0) {
-    return '#d85140'; // over-limit alert
-  }
-
-  const startColor = { r: 76, g: 128, b: 54 };   // #4c8036
-  const endColor = { r: 160, g: 45, b: 42 };     // #a02d2a
-
-  const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
-  const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
-  const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
-
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
-/* Effective type and color helpers */
-function getAccountEffectiveType(account) {
-  const meta = ACCOUNT_METADATA.get(account.name);
-  return (meta && meta.type) || account.type || 'bk';
-}
-
-function getAccountColor(account) {
-  const meta = ACCOUNT_METADATA.get(account.name);
-  return (meta && meta.color) || account.color || null;
-}
-
-function isTypeMuted(typeCode) {
-  return MUTED_TYPES.has(typeCode);
-}
-
-function toggleTypeMute(typeCode) {
-  if (MUTED_TYPES.has(typeCode)) {
-    MUTED_TYPES.delete(typeCode);
-  } else {
-    MUTED_TYPES.add(typeCode);
-  }
-  saveStateToURL();
-  renderAll();
-}
-
-function isAccountMuted(accountName) {
-  return MUTED_ACCOUNTS.has(accountName);
-}
-
-function toggleAccountMute(accountName) {
-  if (MUTED_ACCOUNTS.has(accountName)) {
-    MUTED_ACCOUNTS.delete(accountName);
-  } else {
-    MUTED_ACCOUNTS.add(accountName);
-  }
-  saveStateToURL();
-  renderAll();
-}
-
-function isAccountGloballyHidden(a) {
-  const typeCode = getAccountEffectiveType(a);
-  return isAccountMuted(a.name) || isTypeMuted(typeCode);
-}
-
-function getTypeColor(typeCode) {
-  const override = TYPE_COLOR_OVERRIDES.get(typeCode);
-  if (override) return override;
-  const meta = SNAP?.typeMeta?.[typeCode];
-  if (meta && meta.color) return meta.color;
-  return null;
-}
-
 /* ============================================
     DELETE MODAL
-    ============================================ */
-
+   ============================================ */
 function showDeleteConfirm(account, date, value, readableValue) {
   if (IS_LOADING) return;
 
@@ -1305,8 +1255,7 @@ async function processDelete(account, date, value) {
 
 /* ============================================
     EDIT CHIP MODAL
-    ============================================ */
-
+   ============================================ */
 function showEditChipModal(account, date, value, readableValue) {
   if (IS_LOADING) return;
 
@@ -1417,9 +1366,8 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
 }
 
 /* ============================================
-    ACCOUNT MENU & EDIT ACCOUNT MODAL
-    ============================================ */
-
+    ACCOUNT MENU MODAL
+   ============================================ */
 function showAccountMenu(accountName) {
   if (IS_LOADING) return;
 
@@ -1442,12 +1390,12 @@ function showAccountMenu(accountName) {
 
   deleteBtn.onclick = () => {
     hideAccountMenu();
-    showToast('Account deletion coming in v2.5!', 'info', 3000);
+    showToast('Account deletion coming in a future version.', 'info', 3000);
   };
 
   addBtn.onclick = () => {
     hideAccountMenu();
-    showToast('Add account feature coming in v2.5!', 'info', 3000);
+    showToast('Add account feature coming in a future version.', 'info', 3000);
   };
 }
 
@@ -1456,20 +1404,32 @@ function hideAccountMenu() {
   document.getElementById('account-menu-modal').classList.remove('show');
 }
 
+/* ============================================
+    EDIT ACCOUNT MODAL
+   ============================================ */
+function normalizeHexColor(value) {
+  if (!value) return null;
+  let v = value.trim();
+  if (!v) return null;
+  if (v[0] !== '#') v = '#' + v;
+  if (!/^#[0-9A-Fa-f]{6}$/.test(v)) return null;
+  return v.toUpperCase();
+}
+
 function showEditAccountModal(accountName) {
   if (IS_LOADING) return;
 
-  const backdrop = document.getElementById('edit-account-modal-backdrop');
-  const modal = document.getElementById('edit-account-modal');
-  const nameEl = document.getElementById('edit-account-name');
-  const limitInput = document.getElementById('edit-account-limit');
-  const aprInput = document.getElementById('edit-account-apr');
-  const valueInput = document.getElementById('edit-account-value');
+  const backdrop   = document.getElementById('edit-account-modal-backdrop');
+  const modal      = document.getElementById('edit-account-modal');
+  const nameEl     = document.getElementById('edit-account-name');
   const typeSelect = document.getElementById('edit-account-type');
+  const limitInput = document.getElementById('edit-account-limit');
+  const aprInput   = document.getElementById('edit-account-apr');
+  const valueInput = document.getElementById('edit-account-value');
   const colorInput = document.getElementById('edit-account-color');
   const colorPicker = document.getElementById('edit-account-color-picker');
-  const linkInput = document.getElementById('edit-account-link');
-  const saveBtn = document.getElementById('edit-account-save');
+  const linkInput  = document.getElementById('edit-account-link');
+  const saveBtn    = document.getElementById('edit-account-save');
 
   nameEl.textContent = accountName;
 
@@ -1481,40 +1441,27 @@ function showEditAccountModal(accountName) {
 
   const metadata = ACCOUNT_METADATA.get(accountName) || {};
 
-  const effectiveType = metadata.type || account.type || 'bk';
-  if (typeSelect) {
-    typeSelect.value = effectiveType;
-  }
-
+  typeSelect.value = account.type || 'bk';
   limitInput.value = metadata.limit || '';
-
-  aprInput.value = account.apr || 0;
-
-  const colorHex = (metadata.color || account.color || '').trim();
-  if (colorHex && /^#?[0-9a-fA-F]{6}$/.test(colorHex.replace('#',''))) {
-    const normalized = colorHex.startsWith('#') ? colorHex : ('#' + colorHex);
-    colorInput.value = normalized;
-    colorPicker.value = normalized;
-  } else {
-    colorInput.value = '';
-    colorPicker.value = '#4c8036';
-  }
-
-  linkInput.value = metadata.link || '';
+  aprInput.value   = account.apr || 0;
 
   const series = SNAP?.series?.[accountName];
   const currentValue = series?.last ?? 0;
   valueInput.value = currentValue;
 
+  const effectiveColor = metadata.color || account.color || '';
+  const normalized = normalizeHexColor(effectiveColor) || '#4c8036';
+  colorInput.value = normalized;
+  colorPicker.value = normalized;
+
+  linkInput.value = metadata.link || '';
+
   colorPicker.oninput = () => {
     colorInput.value = colorPicker.value;
   };
   colorInput.oninput = () => {
-    let v = colorInput.value.trim();
-    if (v && !v.startsWith('#')) v = '#' + v;
-    if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-      colorPicker.value = v;
-    }
+    const norm = normalizeHexColor(colorInput.value);
+    if (norm) colorPicker.value = norm;
   };
 
   backdrop.classList.add('show');
@@ -1533,56 +1480,31 @@ function hideEditAccountModal() {
 async function processEditAccount(accountName) {
   if (IS_LOADING) return;
 
-  const limitInput = document.getElementById('edit-account-limit');
-  const aprInput = document.getElementById('edit-account-apr');
-  const valueInput = document.getElementById('edit-account-value');
   const typeSelect = document.getElementById('edit-account-type');
+  const limitInput = document.getElementById('edit-account-limit');
+  const aprInput   = document.getElementById('edit-account-apr');
+  const valueInput = document.getElementById('edit-account-value');
   const colorInput = document.getElementById('edit-account-color');
-  const linkInput = document.getElementById('edit-account-link');
+  const linkInput  = document.getElementById('edit-account-link');
 
+  const newType  = (typeSelect.value || 'bk').trim();
   const newLimit = limitInput.value ? Number(limitInput.value) : null;
-  const newAPR = Number(aprInput.value);
+  const newAPR   = Number(aprInput.value);
   const newValue = Number(valueInput.value);
-  const newType = typeSelect.value || 'bk';
+  const newLink  = linkInput.value ? linkInput.value.trim() : '';
 
-  let colorHex = colorInput.value.trim();
-  if (colorHex && !colorHex.startsWith('#')) colorHex = '#' + colorHex;
-  if (colorHex && !/^#[0-9a-fA-F]{6}$/.test(colorHex)) {
-    colorHex = '';
-  }
+  const newColor = normalizeHexColor(colorInput.value);
 
-  const newLink = linkInput.value.trim();
-
-  const metadata = ACCOUNT_METADATA.get(accountName) || {};
-  if (newLimit !== null && newLimit > 0) {
-    metadata.limit = newLimit;
-  } else {
-    delete metadata.limit;
-  }
-
-  if (newType) {
-    metadata.type = newType;
-  }
-
-  if (colorHex) {
-    metadata.color = colorHex;
-  } else {
-    delete metadata.color;
-  }
-
-  if (newLink) {
-    metadata.link = newLink;
-  } else {
-    delete metadata.link;
-  }
-
-  ACCOUNT_METADATA.set(accountName, metadata);
+  const meta = ACCOUNT_METADATA.get(accountName) || {};
+  meta.limit = (newLimit && newLimit > 0) ? newLimit : null;
+  meta.color = newColor || null;
+  meta.link  = newLink || null;
+  ACCOUNT_METADATA.set(accountName, meta);
 
   const account = SNAP?.accounts?.find(a => a.name === accountName);
   if (account) {
-    account.apr = isNaN(newAPR) ? (account.apr || 0) : newAPR;
     account.type = newType;
-    if (colorHex) account.color = colorHex;
+    account.apr  = isNaN(newAPR) ? account.apr : newAPR;
   }
 
   saveStateToURL();
@@ -1622,79 +1544,72 @@ async function processEditAccount(accountName) {
 }
 
 /* ============================================
-    TYPE COLOR MODAL
-    ============================================ */
+    EDIT TYPE COLOR MODAL
+   ============================================ */
+function getTypeEffectiveColor(typeCode) {
+  const override = TYPE_META_OVERRIDES.get(typeCode);
+  if (override && override.color) return override.color;
 
-function showTypeColorModal(typeCode) {
-  if (!SNAP || !SNAP.typeMeta) return;
+  const metaAPI = SNAP?.typeMeta?.[typeCode];
+  if (metaAPI && metaAPI.color) return normalizeHexColor(metaAPI.color) || null;
 
-  ACTIVE_TYPE_FOR_COLOR = typeCode;
+  if (typeCode === 'cc' || typeCode === 'bill') return '#a02d2a';
+  return '#4c8036';
+}
 
-  const backdrop = document.getElementById('type-color-modal-backdrop');
-  const modal = document.getElementById('type-color-modal');
-  const typeNameEl = document.getElementById('type-color-type-name');
-  const colorPicker = document.getElementById('type-color-picker');
-  const colorHexInput = document.getElementById('type-color-hex');
-  const saveBtn = document.getElementById('type-color-save');
+function showEditTypeModal(typeCode, labelText) {
+  if (IS_LOADING) return;
 
-  const label = (TYPE_LABELS[typeCode] || SNAP.typeMeta[typeCode]?.label || typeCode).toUpperCase();
-  typeNameEl.textContent = label;
+  const backdrop = document.getElementById('edit-type-modal-backdrop');
+  const modal    = document.getElementById('edit-type-modal');
+  const nameEl   = document.getElementById('edit-type-name');
+  const picker   = document.getElementById('edit-type-color-picker');
+  const input    = document.getElementById('edit-type-color');
+  const saveBtn  = document.getElementById('edit-type-save');
 
-  let hex = TYPE_COLOR_OVERRIDES.get(typeCode) ||
-            SNAP.typeMeta[typeCode]?.color || '#4c8036';
-  if (!hex.startsWith('#')) hex = '#' + hex;
+  nameEl.textContent = `${labelText} (${typeCode})`;
 
-  colorPicker.value = /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : '#4c8036';
-  colorHexInput.value = colorPicker.value;
+  const current = getTypeEffectiveColor(typeCode) || '#4c8036';
+  const norm = normalizeHexColor(current) || '#4c8036';
+  picker.value = norm;
+  input.value  = norm;
 
-  colorPicker.oninput = () => {
-    colorHexInput.value = colorPicker.value;
-  };
-  colorHexInput.oninput = () => {
-    let v = colorHexInput.value.trim();
-    if (v && !v.startsWith('#')) v = '#' + v;
-    if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-      colorPicker.value = v;
-    }
+  picker.oninput = () => { input.value = picker.value; };
+  input.oninput  = () => {
+    const norm = normalizeHexColor(input.value);
+    if (norm) picker.value = norm;
   };
 
   backdrop.classList.add('show');
   modal.classList.add('show');
 
-  setTimeout(() => colorPicker.focus(), 100);
-
-  saveBtn.onclick = processTypeColorSave;
+  saveBtn.onclick = () => processEditType(typeCode);
 }
 
-function hideTypeColorModal() {
-  document.getElementById('type-color-modal-backdrop').classList.remove('show');
-  document.getElementById('type-color-modal').classList.remove('show');
-  ACTIVE_TYPE_FOR_COLOR = null;
+function hideEditTypeModal() {
+  document.getElementById('edit-type-modal-backdrop').classList.remove('show');
+  document.getElementById('edit-type-modal').classList.remove('show');
 }
 
-function processTypeColorSave() {
-  if (!ACTIVE_TYPE_FOR_COLOR) {
-    hideTypeColorModal();
-    return;
-  }
-  const colorHexInput = document.getElementById('type-color-hex');
-  let v = colorHexInput.value.trim();
-  if (v && !v.startsWith('#')) v = '#' + v;
-  if (!/^#[0-9a-fA-F]{6}$/.test(v)) {
-    showToast('Please enter a valid 6-digit hex color', 'error');
+function processEditType(typeCode) {
+  const input = document.getElementById('edit-type-color');
+  const color = normalizeHexColor(input.value);
+
+  if (!color) {
+    showToast('Please enter a valid 6-digit hex color (e.g. #4C8036).', 'error', 4000);
     return;
   }
 
-  TYPE_COLOR_OVERRIDES.set(ACTIVE_TYPE_FOR_COLOR, v);
+  TYPE_META_OVERRIDES.set(typeCode, { color });
   saveStateToURL();
-  hideTypeColorModal();
+  hideEditTypeModal();
+  showToast('Type color updated!', 'success', 2000);
   renderAll();
 }
 
 /* ============================================
     DATA FETCHING
-    ============================================ */
-
+   ============================================ */
 async function fetchSnapshot() {
   if (IS_LOADING) return;
   setLoading(true, 'Loading snapshot…');
@@ -1721,6 +1636,8 @@ async function fetchSnapshot() {
     }
 
     SNAP = j;
+    console.log('Snapshot loaded:', SNAP); 
+
     setLoading(false);
     renderAll();
 
@@ -1732,13 +1649,10 @@ async function fetchSnapshot() {
 }
 
 /* ============================================
-    URL STATE LOAD & SAVE
-    ============================================ */
-
+    URL STATE (muted + metadata)
+   ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
-  if (!hash) return;
-
   const params = new URLSearchParams(hash);
 
   const mutedParam = params.get('muted');
@@ -1751,44 +1665,47 @@ function loadStateFromURL() {
     MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
   }
 
-  const metaParam = params.get('meta');
-  if (metaParam) {
+  const limitsParam = params.get('limits');
+  const accountMetaParam = params.get('acctMeta');
+  const typeMetaParam = params.get('typeMeta');
+
+  ACCOUNT_METADATA = new Map();
+  if (accountMetaParam) {
     try {
-      const metaData = JSON.parse(decodeURIComponent(metaParam));
-      Object.entries(metaData).forEach(([accountName, meta]) => {
-        ACCOUNT_METADATA.set(accountName, {
-          limit: meta.limit != null ? Number(meta.limit) : undefined,
-          type: meta.type || undefined,
-          color: meta.color || undefined,
-          link: meta.link || undefined
+      const metaObj = JSON.parse(decodeURIComponent(accountMetaParam));
+      Object.entries(metaObj).forEach(([account, meta]) => {
+        ACCOUNT_METADATA.set(account, {
+          limit: typeof meta.limit === 'number' ? meta.limit : null,
+          color: meta.color ? normalizeHexColor(meta.color) : null,
+          link: meta.link || null
         });
       });
     } catch (e) {
-      console.error('Failed to parse meta from URL:', e);
+      console.error('Failed to parse acctMeta from URL:', e);
     }
-  } else {
-    const limitsParam = params.get('limits');
-    if (limitsParam) {
-      try {
-        const limitsData = JSON.parse(decodeURIComponent(limitsParam));
-        Object.entries(limitsData).forEach(([account, limit]) => {
-          ACCOUNT_METADATA.set(account, { limit: Number(limit) });
-        });
-      } catch (e) {
-        console.error('Failed to parse limits from URL:', e);
-      }
+  } else if (limitsParam) {
+    try {
+      const limitsData = JSON.parse(decodeURIComponent(limitsParam));
+      Object.entries(limitsData).forEach(([account, limit]) => {
+        ACCOUNT_METADATA.set(account, { limit: Number(limit) });
+      });
+    } catch (e) {
+      console.error('Failed to parse limits from URL:', e);
     }
   }
 
-  const typeColorsParam = params.get('typeColors');
-  if (typeColorsParam) {
+  TYPE_META_OVERRIDES = new Map();
+  if (typeMetaParam) {
     try {
-      const colorData = JSON.parse(decodeURIComponent(typeColorsParam));
-      Object.entries(colorData).forEach(([code, hex]) => {
-        TYPE_COLOR_OVERRIDES.set(code, hex);
+      const typeObj = JSON.parse(decodeURIComponent(typeMetaParam));
+      Object.entries(typeObj).forEach(([code, meta]) => {
+        if (meta && meta.color) {
+          const norm = normalizeHexColor(meta.color);
+          if (norm) TYPE_META_OVERRIDES.set(code, { color: norm });
+        }
       });
     } catch (e) {
-      console.error('Failed to parse typeColors from URL:', e);
+      console.error('Failed to parse typeMeta from URL:', e);
     }
   }
 }
@@ -1806,38 +1723,70 @@ function saveStateToURL() {
     params.set('mutedTypes', mutedTypesArray.join(','));
   }
 
-  const metaObj = {};
-  ACCOUNT_METADATA.forEach((metadata, accountName) => {
-    const cleaned = {};
-    if (metadata.limit != null) cleaned.limit = metadata.limit;
-    if (metadata.type) cleaned.type = metadata.type;
-    if (metadata.color) cleaned.color = metadata.color;
-    if (metadata.link) cleaned.link = metadata.link;
-
-    if (Object.keys(cleaned).length > 0) {
-      metaObj[accountName] = cleaned;
+  const acctMetaObj = {};
+  ACCOUNT_METADATA.forEach((meta, accountName) => {
+    const m = {};
+    if (meta.limit) m.limit = meta.limit;
+    if (meta.color) m.color = meta.color;
+    if (meta.link)  m.link  = meta.link;
+    if (Object.keys(m).length > 0) {
+      acctMetaObj[accountName] = m;
     }
   });
-
-  if (Object.keys(metaObj).length > 0) {
-    params.set('meta', encodeURIComponent(JSON.stringify(metaObj)));
+  if (Object.keys(acctMetaObj).length > 0) {
+    params.set('acctMeta', encodeURIComponent(JSON.stringify(acctMetaObj)));
   }
 
-  const typeColorObj = {};
-  TYPE_COLOR_OVERRIDES.forEach((hex, code) => {
-    typeColorObj[code] = hex;
+  const typeMetaObj = {};
+  TYPE_META_OVERRIDES.forEach((meta, typeCode) => {
+    if (meta.color) {
+      typeMetaObj[typeCode] = { color: meta.color };
+    }
   });
-  if (Object.keys(typeColorObj).length > 0) {
-    params.set('typeColors', encodeURIComponent(JSON.stringify(typeColorObj)));
+  if (Object.keys(typeMetaObj).length > 0) {
+    params.set('typeMeta', encodeURIComponent(JSON.stringify(typeMetaObj)));
   }
 
   window.location.hash = params.toString();
 }
 
+function toggleAccountMute(accountName) {
+  if (MUTED_ACCOUNTS.has(accountName)) {
+    MUTED_ACCOUNTS.delete(accountName);
+  } else {
+    MUTED_ACCOUNTS.add(accountName);
+  }
+  saveStateToURL();
+  renderAll();
+}
+
+function isAccountMuted(accountName) {
+  return MUTED_ACCOUNTS.has(accountName);
+}
+
+function toggleTypeMute(typeCode) {
+  if (MUTED_TYPES.has(typeCode)) {
+    MUTED_TYPES.delete(typeCode);
+  } else {
+    MUTED_TYPES.add(typeCode);
+  }
+  saveStateToURL();
+  renderAll();
+}
+
+function isTypeMuted(typeCode) {
+  return MUTED_TYPES.has(typeCode);
+}
+
+function isAccountGloballyHidden(account) {
+  if (isAccountMuted(account.name)) return true;
+  const t = account.type || 'bk';
+  return isTypeMuted(t);
+}
+
 /* ============================================
     RENDERING
-    ============================================ */
-
+   ============================================ */
 function renderAll() {
   renderSummary();
   renderInterestSummary();
@@ -1849,11 +1798,9 @@ function renderAll() {
 
 function renderSummary() {
   const summaryEl = document.getElementById('financial-summary');
-  if (!summaryEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+  if (!summaryEl || !SNAP || !SNAP.accounts) return;
 
-  const lastIndex = SNAP.dateAxis.length - 1;
-
-  if (lastIndex < 0) {
+  if (!SNAP.dateAxis || SNAP.dateAxis.length === 0) {
     summaryEl.innerHTML = 'No Data';
     return;
   }
@@ -1862,19 +1809,18 @@ function renderSummary() {
   let debts = 0;
 
   SNAP.accounts.forEach(a => {
-    if (!isAccountGloballyHidden(a)) {
-      const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
-      if (last >= 0) {
-        assets += last;
-      } else {
-        debts += Math.abs(last);
-      }
+    if (isAccountGloballyHidden(a)) return;
+    const s = SNAP.series[a.name] || {};
+    const last = s?.last ?? 0;
+    if (last >= 0) {
+      assets += last;
+    } else {
+      debts += Math.abs(last);
     }
   });
 
   const assetClass = assets > debts ? 'bold-value' : '';
-  const debtClass = debts > assets ? 'bold-value' : '';
+  const debtClass  = debts > assets ? 'bold-value' : '';
 
   const assetString = `<span class="summary-asset ${assetClass}">${formatMoney(assets)}</span>`;
   const debtString  = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
@@ -1902,15 +1848,33 @@ function renderInterestSummary() {
     const dailyRate = (last * apr) / 365;
     let interestAmount = 0;
 
-    switch(TIMEFRAME) {
-      case 'today': interestAmount = dailyRate * 1;  periodLabel = '/dy'; break;
-      case '7d':    interestAmount = dailyRate * 7;  periodLabel = '/wk'; break;
-      case '14d':   interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
-      case '30d':   interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
-      case '90d':   interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+    switch (TIMEFRAME) {
+      case 'today':
+        interestAmount = dailyRate * 1;
+        periodLabel = '/dy';
+        break;
+      case '7d':
+        interestAmount = dailyRate * 7;
+        periodLabel = '/wk';
+        break;
+      case '14d':
+        interestAmount = dailyRate * 14;
+        periodLabel = '/2w';
+        break;
+      case '30d':
+        interestAmount = dailyRate * 30;
+        periodLabel = '/mo';
+        break;
+      case '90d':
+        interestAmount = dailyRate * 90;
+        periodLabel = '/qt';
+        break;
       case '1y':
       case 'ytd':
-      case 'all':   interestAmount = last * apr;     periodLabel = '/yr'; break;
+      case 'all':
+        interestAmount = last * apr;
+        periodLabel = '/yr';
+        break;
     }
 
     if (interestAmount > 0) {
@@ -1933,7 +1897,7 @@ function renderInterestSummary() {
     ? `<span class="interest-cost">${formatMoney(totalCosts)}${periodLabel}</span>` 
     : '';
 
-  let displayParts = [];
+  const displayParts = [];
   if (earningsStr) displayParts.push(earningsStr);
   if (costsStr) displayParts.push(costsStr);
 
@@ -1959,11 +1923,11 @@ function renderTypeSummary() {
   });
 
   SNAP.accounts.forEach(a => {
-    if (isAccountGloballyHidden(a)) return;
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
-    const typeCode = getAccountEffectiveType(a);
+    const typeCode = a.type || 'bk';
     if (typeTotals[typeCode] == null) typeTotals[typeCode] = 0;
+    if (isAccountMuted(a.name)) return; // account mute removes from type total
     typeTotals[typeCode] += last;
   });
 
@@ -1981,35 +1945,29 @@ function renderTypeSummary() {
   orderedCodes.forEach(typeKey => {
     const total = typeTotals[typeKey] || 0;
     const meta = typeMeta[typeKey] || {};
-    const label = (TYPE_LABELS[typeKey] || meta.label || typeKey).toUpperCase();
+    const labelBase = TYPE_LABELS[typeKey] || meta.label || typeKey;
+    const label = labelBase.toUpperCase();
     const colorClass = total >= 0 ? 'positive' : 'negative';
     const signPrefix = total > 0 ? '+' : '';
-    const typeColor = getTypeColor(typeKey);
+    const typeColor = getTypeEffectiveColor(typeKey);
 
     const typeItem = document.createElement('div');
     typeItem.className = 'type-item';
-    if (isTypeMuted(typeKey)) {
-      typeItem.classList.add('muted');
-    }
+    if (isTypeMuted(typeKey)) typeItem.classList.add('muted');
 
     const valueEl = document.createElement('div');
     valueEl.className = `type-value ${colorClass}`;
     valueEl.textContent = `${signPrefix}${formatMoney(total)}`;
-    if (typeColor) {
-      valueEl.style.color = typeColor;
-    }
     typeItem.appendChild(valueEl);
 
     const labelEl = document.createElement('div');
     labelEl.className = 'type-label';
     labelEl.textContent = label;
-    labelEl.dataset.typeCode = typeKey;
-    labelEl.title = 'Double-click to change Type color';
-
+    labelEl.style.color = typeColor;
+    labelEl.title = 'Double-click to change this Type color';
     labelEl.addEventListener('dblclick', () => {
-      showTypeColorModal(typeKey);
+      showEditTypeModal(typeKey, label);
     });
-
     typeItem.appendChild(labelEl);
 
     const toggleLabel = document.createElement('label');
@@ -2036,9 +1994,7 @@ function renderStatusbar() {
   const statusbarEl = document.getElementById('statusbar');
   if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
 
-  const lastIndex = SNAP.dateAxis.length - 1;
-
-  if (lastIndex < 0) {
+  if (SNAP.dateAxis.length === 0) {
     statusbarEl.innerHTML = '';
     return;
   }
@@ -2047,14 +2003,13 @@ function renderStatusbar() {
   let debts = 0;
 
   SNAP.accounts.forEach(a => {
-    if (!isAccountGloballyHidden(a)) {
-      const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
-      if (last >= 0) {
-        assets += last;
-      } else {
-        debts += Math.abs(last);
-      }
+    if (isAccountGloballyHidden(a)) return;
+    const s = SNAP.series[a.name] || {};
+    const last = s?.last ?? 0;
+    if (last >= 0) {
+      assets += last;
+    } else {
+      debts += Math.abs(last);
     }
   });
 
@@ -2070,7 +2025,7 @@ function renderStatusbar() {
   const debtBlocks = totalBlocks - assetBlocks;
 
   const assetBar = '█ '.repeat(assetBlocks);
-  const debtBar = '█ '.repeat(debtBlocks);
+  const debtBar  = '█ '.repeat(debtBlocks);
 
   statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
 }
@@ -2086,15 +2041,14 @@ function renderChart() {
   }
 
   const styles = getComputedStyle(document.documentElement);
-  const pos = styles.getPropertyValue('--c-pos').trim();
-  const neg = styles.getPropertyValue('--c-neg').trim();
+  const pos   = styles.getPropertyValue('--c-pos').trim();
+  const neg   = styles.getPropertyValue('--c-neg').trim();
   const black = styles.getPropertyValue('--c-black').trim();
   const textStyle = { color: black, fontName: 'system-ui' };
 
   const data = new google.visualization.DataTable();
   data.addColumn('string', 'Date'); 
   let rows = [];
-  let chartColors = [];
 
   if (MODE === 'totals') {
     data.addColumn('number', 'Assets');
@@ -2105,67 +2059,49 @@ function renderChart() {
       let debts = 0;
 
       SNAP.accounts.forEach(a => {
-        if (!isAccountGloballyHidden(a)) {
-          const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-          if (v >= 0) {
-            assets += v;
-          } else {
-            debts += v;
-          }
+        if (isAccountGloballyHidden(a)) return;
+        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+        if (v >= 0) {
+          assets += v;
+        } else {
+          debts += v;
         }
       });
 
       rows.push([labels[i], assets, debts]);
     }
-    chartColors = [pos, neg];
-
   } else if (MODE === 'types') {
+    const typeSeries = SNAP.typeSeries || {};
     const typeMeta = SNAP.typeMeta || {};
-    const allTypes = Object.keys(typeMeta);
-    if (allTypes.length === 0) {
-      document.getElementById('chart').innerHTML =
-        '<div style="text-align:center; padding-top: 20px; color: #888;">No type data available.</div>';
-      return;
-    }
+    const seriesKeys = Object.keys(typeSeries);
 
-    const seriesCodes = allTypes.filter(code => !isTypeMuted(code));
-    if (seriesCodes.length === 0) {
-      document.getElementById('chart').innerHTML =
-        '<div style="text-align:center; padding-top: 20px; color: #888;">All types muted.</div>';
-      return;
-    }
+    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+    const orderedCodes = [];
+    preferredOrder.forEach(code => {
+      if (seriesKeys.includes(code)) orderedCodes.push(code);
+    });
+    seriesKeys.forEach(code => {
+      if (!orderedCodes.includes(code)) orderedCodes.push(code);
+    });
 
-    seriesCodes.forEach(code => {
-      const label = (TYPE_LABELS[code] || typeMeta[code]?.label || code).toUpperCase();
-      data.addColumn('number', label);
+    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
+
+    visibleTypes.forEach(code => {
+      const baseLabel = TYPE_LABELS[code] || typeMeta[code]?.label || code;
+      data.addColumn('number', baseLabel);
     });
 
     for (let i = 0; i < labels.length; i++) {
       const row = [labels[i]];
-      seriesCodes.forEach(code => {
-        const seriesArr = SNAP.typeSeries?.[code] || [];
-        const v = seriesArr[i] ?? 0;
-        row.push(Number(v));
+      visibleTypes.forEach(code => {
+        const seriesArr = typeSeries[code] || [];
+        const v = Number(seriesArr[i] ?? 0);
+        row.push(v);
       });
       rows.push(row);
     }
-
-    chartColors = seriesCodes.map(code => {
-      const col = getTypeColor(code);
-      if (col) return col;
-      const seriesArr = SNAP.typeSeries?.[code] || [];
-      const lastVal = seriesArr.length ? seriesArr[seriesArr.length - 1] : 0;
-      return lastVal >= 0 ? pos : neg;
-    });
-
-  } else { // MODE === 'accounts'
+  } else {
     const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
-    if (visibleAccounts.length === 0) {
-      document.getElementById('chart').innerHTML =
-        '<div style="text-align:center; padding-top: 20px; color: #888;">All accounts muted.</div>';
-      return;
-    }
-
     visibleAccounts.forEach(a => data.addColumn('number', a.name));
 
     for (let i = 0; i < labels.length; i++) {
@@ -2176,14 +2112,6 @@ function renderChart() {
       });
       rows.push(row);
     }
-
-    chartColors = visibleAccounts.map(a => {
-      const s = SNAP.series[a.name] || {};
-      const last = s?.last ?? 0;
-      const color = getAccountColor(a);
-      if (color) return color;
-      return last >= 0 ? pos : neg;
-    });
   }
 
   data.addRows(rows);
@@ -2197,6 +2125,32 @@ function renderChart() {
     }
   }
   const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
+
+  let chartColors;
+  if (MODE === 'totals') {
+    chartColors = [pos, neg];
+  } else if (MODE === 'types') {
+    const typeSeries = SNAP.typeSeries || {};
+    const seriesKeys = Object.keys(typeSeries);
+    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+    const orderedCodes = [];
+    preferredOrder.forEach(code => {
+      if (seriesKeys.includes(code)) orderedCodes.push(code);
+    });
+    seriesKeys.forEach(code => {
+      if (!orderedCodes.includes(code)) orderedCodes.push(code);
+    });
+    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
+    chartColors = visibleTypes.map(code => getTypeEffectiveColor(code));
+  } else {
+    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
+    chartColors = visibleAccounts.map(a => {
+      const meta = ACCOUNT_METADATA.get(a.name) || {};
+      const baseColor = meta.color || a.color;
+      if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
+      return a.kind === 'debt' ? neg : pos;
+    });
+  }
 
   const options = {
     height: Math.max(240, Math.round(window.innerHeight * 0.30)),
@@ -2227,17 +2181,53 @@ function renderChart() {
   chart.draw(data, options);
 }
 
+const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
+
+function formatMoney(n) {
+  const val = Number(n) || 0;
+  const sign = val < 0 ? '−' : '';
+  const abs = Math.abs(val);
+  const displayValue = Math.trunc(abs);
+
+  return `${sign}${displayValue.toLocaleString(undefined, { 
+    minimumFractionDigits: 0, 
+    maximumFractionDigits: 0 
+  })}`;
+}
+
+/* Limit color helper (for CC limit visualization) */
+function getLimitColor(currentBalance, limit) {
+  const absBalance = Math.abs(currentBalance);
+  const utilization = absBalance / limit;
+
+  if (currentBalance >= 0) {
+    return '#4c8036';
+  }
+
+  if (utilization > 1.0) {
+    return '#d85140';
+  }
+
+  const startColor = { r: 76, g: 128, b: 54 };   // green
+  const endColor   = { r: 160, g: 45,  b: 42 };  // red
+
+  const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
+  const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
+  const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function renderAccounts() {
   const root = document.getElementById('accounts');
   root.innerHTML = '';
-
   if (!SNAP || !SNAP.accounts) return;
 
   SNAP.accounts.forEach(a => {
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
 
-    const row = document.createElement('div');
+    const row  = document.createElement('div');
     row.className = 'row';
 
     const left = document.createElement('div');
@@ -2250,7 +2240,8 @@ function renderAccounts() {
     accountDetails.className = 'account-details';
 
     const identityWrap = document.createElement('div');
-    identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
+    identityWrap.style.cssText =
+      'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
     const lastEl = document.createElement('span');
     lastEl.className = 'lastval';
@@ -2259,65 +2250,57 @@ function renderAccounts() {
 
     const nameEl = document.createElement('span');
     nameEl.className = 'name';
-    nameEl.textContent = a.name;
 
-    const effectiveColor = getAccountColor(a);
+    const meta = ACCOUNT_METADATA.get(a.name) || {};
+    const effectiveColor = meta.color || a.color;
     if (effectiveColor) {
-      nameEl.style.color = effectiveColor;
+      const norm = normalizeHexColor(effectiveColor);
+      if (norm) nameEl.style.color = norm;
+    }
+
+    nameEl.textContent = a.name;
+    if (meta.link) {
+      nameEl.style.textDecoration = 'underline';
+      nameEl.style.textDecorationStyle = 'dotted';
+      nameEl.title = 'Open account link in new tab';
+      nameEl.addEventListener('click', (e) => {
+        if (LONG_PRESS_TIMER) {
+          clearTimeout(LONG_PRESS_TIMER);
+        }
+        window.open(meta.link, '_blank', 'noopener');
+      });
     }
 
     let pressStartTime = 0;
 
-    nameEl.addEventListener('mousedown', () => {
+    const startLongPress = () => {
       pressStartTime = Date.now();
       LONG_PRESS_TIMER = setTimeout(() => {
         showAccountMenu(a.name);
       }, LONG_PRESS_DURATION);
-    });
+    };
 
-    nameEl.addEventListener('mouseup', () => {
-      if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
-    });
+    const clearLongPress = () => {
+      if (LONG_PRESS_TIMER) {
+        clearTimeout(LONG_PRESS_TIMER);
+        LONG_PRESS_TIMER = null;
+      }
+    };
 
-    nameEl.addEventListener('mouseleave', () => {
-      if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
-    });
-
-    nameEl.addEventListener('touchstart', () => {
-      pressStartTime = Date.now();
-      LONG_PRESS_TIMER = setTimeout(() => {
-        showAccountMenu(a.name);
-      }, LONG_PRESS_DURATION);
-    });
-
-    nameEl.addEventListener('touchend', () => {
-      if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
-    });
+    nameEl.addEventListener('mousedown', startLongPress);
+    nameEl.addEventListener('mouseup', clearLongPress);
+    nameEl.addEventListener('mouseleave', clearLongPress);
+    nameEl.addEventListener('touchstart', startLongPress);
+    nameEl.addEventListener('touchend', clearLongPress);
 
     identityWrap.appendChild(lastEl);
     identityWrap.appendChild(nameEl);
-
-    const metadata = ACCOUNT_METADATA.get(a.name) || {};
-    if (metadata.link) {
-      const linkEl = document.createElement('a');
-      linkEl.href = metadata.link;
-      linkEl.target = '_blank';
-      linkEl.rel = 'noopener noreferrer';
-      linkEl.textContent = '↗';
-      linkEl.style.fontSize = '0.9rem';
-      linkEl.style.textDecoration = 'none';
-      linkEl.style.marginLeft = '4px';
-      linkEl.title = `Open ${a.name} link`;
-      identityWrap.appendChild(linkEl);
-    }
-
     accountDetails.appendChild(identityWrap);
 
-    const effectiveType = getAccountEffectiveType(a);
-    if (effectiveType === 'cc' && metadata.limit) {
+    if (a.type === 'cc' && meta.limit) {
       const limitEl = document.createElement('span');
       limitEl.className = 'limit';
-      const limitValue = metadata.limit;
+      const limitValue = meta.limit;
       const limitColor = getLimitColor(last, limitValue);
       limitEl.style.color = limitColor;
       limitEl.textContent = `$${limitValue.toLocaleString()}`;
@@ -2333,19 +2316,39 @@ function renderAccounts() {
 
     if (apr > 0 && last !== 0) {
       const dailyRate = (last * apr) / 365;
-      switch(TIMEFRAME) {
-        case 'today': interestAmount = dailyRate * 1;  periodLabel = '/dy'; break;
-        case '7d':    interestAmount = dailyRate * 7;  periodLabel = '/wk'; break;
-        case '14d':   interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
-        case '30d':   interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
-        case '90d':   interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+
+      switch (TIMEFRAME) {
+        case 'today':
+          interestAmount = dailyRate * 1;
+          periodLabel = '/dy';
+          break;
+        case '7d':
+          interestAmount = dailyRate * 7;
+          periodLabel = '/wk';
+          break;
+        case '14d':
+          interestAmount = dailyRate * 14;
+          periodLabel = '/2w';
+          break;
+        case '30d':
+          interestAmount = dailyRate * 30;
+          periodLabel = '/mo';
+          break;
+        case '90d':
+          interestAmount = dailyRate * 90;
+          periodLabel = '/qt';
+          break;
         case '1y':
         case 'ytd':
-        case 'all':   interestAmount = last * apr;     periodLabel = '/yr'; break;
+        case 'all':
+          interestAmount = last * apr;
+          periodLabel = '/yr';
+          break;
       }
     }
 
     let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+
     if (Math.abs(interestAmount) >= 0.01) {
       const sign = interestAmount >= 0 ? '+' : '';
       const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
@@ -2405,7 +2408,7 @@ function renderAccounts() {
     left.appendChild(accountDetails);
     left.appendChild(inputLine);
 
-    if (isAccountGloballyHidden(a)) {
+    if (isAccountMuted(a.name)) {
       row.classList.add('muted');
     }
 
@@ -2458,14 +2461,16 @@ function renderAccounts() {
     const totalDebts = Math.abs(totalDebtsRaw);
 
     if (last >= 0 && totalAssets > 0) {
-      const blocks = Math.max(0, Math.round((last / totalAssets) * 10));
-      assetSpan.textContent = blocks >= 1 ? '█ '.repeat(blocks) : '';
+      const percentage = (last / totalAssets) * 100;
+      const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
+      assetSpan.textContent = '█ '.repeat(blocks);
       debtSpan.textContent = '';
     } else if (last < 0 && totalDebts > 0) {
       const absLast = Math.abs(last);
-      const blocks = Math.max(0, Math.round((absLast / totalDebts) * 10));
+      const percentage = (absLast / totalDebts) * 100;
+      const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
       assetSpan.textContent = '';
-      debtSpan.textContent = blocks >= 1 ? '█ '.repeat(blocks) : '';
+      debtSpan.textContent = '█ '.repeat(blocks);
     } else {
       assetSpan.textContent = '';
       debtSpan.textContent = '';
@@ -2482,9 +2487,8 @@ function renderAccounts() {
 }
 
 /* ============================================
-    DATA SUBMISSION
-    ============================================ */
-
+    SUBMISSION
+   ============================================ */
 async function submitAll() {
   const entries = [];
 
@@ -2571,8 +2575,7 @@ async function submitEntries(entries) {
 
 /* ============================================
     INITIALIZATION
-    ============================================ */
-
+   ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
 
@@ -2608,8 +2611,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-account-cancel').addEventListener('click', hideEditAccountModal);
   document.getElementById('edit-account-modal-backdrop').addEventListener('click', hideEditAccountModal);
 
-  document.getElementById('type-color-cancel').addEventListener('click', hideTypeColorModal);
-  document.getElementById('type-color-modal-backdrop').addEventListener('click', hideTypeColorModal);
+  document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
+  document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
   window.addEventListener('resize', renderChart);
 
