@@ -94,8 +94,8 @@ header {
   top: 0; 
   background: var(--c-header-bg); 
   z-index: 5; 
-  border-bottom: 1px solid var(--c-border);
-  padding-bottom: 1rem;
+  border-: 1px solid var(--c-border);
+  padding-: 1rem;
   transition: background-color 0.3s ease;
 }
 
@@ -539,7 +539,7 @@ button:disabled {
   transform: scale(0.98);
 }
 
-.bottom--mode-toggle {
+.bottom-dark-mode-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1402,7 +1402,30 @@ function initDarkMode() {
     checkbox.checked = true;
   }
 }
+/* ============================================
+    AUTO DARK MODE DETECTION
+   ============================================ */
+function shouldAutoEnableDarkMode() {
+  const hour = new Date().getHours();
+  // Enable dark mode between 8 PM (20:00) and 6 AM
+  return hour >= 20 || hour < 6;
+}
 
+function initializeTheme() {
+  // Check URL first (user preference takes priority)
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const darkModeParam = params.get('darkMode');
+  
+  if (darkModeParam === 'true') {
+    DARK_MODE = true;
+  } else if (darkModeParam === 'false') {
+    DARK_MODE = false;
+  } else {
+    // Auto-detect based on time if no preference saved
+    DARK_MODE = shouldAutoEnableDarkMode();
+  }
+}
 /* ============================================
     SCORE MANAGEMENT
    ============================================ */
@@ -2946,6 +2969,7 @@ async function submitEntries(entries) {
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
+  initializeTheme();  // Use new function
   initDarkMode();
 
   const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
