@@ -130,79 +130,6 @@ header {
   max-width: 60%;
 }
 
-/* Dark mode toggle */
-.dark-mode-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dark-mode-toggle label {
-  font-size: 0.75rem;
-  font-weight: 300;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* Toggle switch */
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 2;
-  margin: 0;
-}
-
-.toggle-switch-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--c-border);
-  border: none;
-  border-radius: 999px;
-  transition: background 0.3s ease;
-  pointer-events: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.toggle-switch-slider::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background: var(--c-black);
-  border: none;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider {
-  background: var(--c-pos);
-}
-
-.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider::before {
-  transform: translateX(20px);
-}
-
-.toggle-switch input[type="checkbox"]:focus + .toggle-switch-slider {
-  outline: 2px solid var(--c-pos);
-  outline-offset: 1px;
-}
-
 /* Type filter row now lives in the toolbar */
 .type-filter-row {
   display: flex;
@@ -581,14 +508,14 @@ button:disabled {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
-  padding: 3rem 2rem;
+  gap: 1.5rem;
+  padding: 2rem 2rem 1rem;
   width: 100%;
   box-sizing: border-box;
 }
 
 #score-display {
-  font-size: 5rem;
+  font-size: 80px;
   font-weight: 300;
   color: #b5a8a8;
   font-family: 'Courier New', monospace;
@@ -596,7 +523,9 @@ button:disabled {
   cursor: pointer;
   user-select: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  padding: 1rem;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
 }
 
 #score-display:hover {
@@ -605,10 +534,6 @@ button:disabled {
 
 #score-display:active {
   transform: scale(0.98);
-}
-
-#score-display.long-press-active {
-  opacity: 0.6;
 }
 
 .bottom-dark-mode-toggle {
@@ -623,6 +548,65 @@ button:disabled {
   font-weight: 300;
   cursor: pointer;
   white-space: nowrap;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.toggle-switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--c-border);
+  border: none;
+  border-radius: 999px;
+  transition: background 0.3s ease;
+  pointer-events: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--c-black);
+  border: none;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider {
+  background: var(--c-pos);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-switch input[type="checkbox"]:focus + .toggle-switch-slider {
+  outline: 2px solid var(--c-pos);
+  outline-offset: 1px;
 }
 
 /* ============================================
@@ -839,29 +823,6 @@ footer b {
   border-color: var(--c-pos);
 }
 #edit-chip-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
-
-/* Edit score modal */
-#edit-score-modal .modal-form-group input[type="number"] {
-  font-size: 1.2rem;
-  padding: 0.8rem;
-  font-family: 'Courier New', monospace;
-}
-
-#edit-score-modal .modal-form-group input[type="date"] {
-  font-size: 1rem;
-  padding: 0.8rem;
-}
-
-#edit-score-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-score-save:hover {
   background: #3d6629;
   border-color: #3d6629;
   text-decoration: none;
@@ -1158,12 +1119,12 @@ footer b {
   }
 
   #score-display {
-    font-size: 4rem;
+    font-size: 60px;
   }
 
   .bottom-section {
-    padding: 2rem 1rem;
-    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+    gap: 1rem;
   }
 }
 </style>
@@ -1201,25 +1162,6 @@ footer b {
     <button id="edit-chip-delete">Delete</button>
     <button id="edit-chip-cancel">Cancel</button>
     <button id="edit-chip-save">Save</button>
-  </div>
-</div>
-
-<!-- Edit score modal -->
-<div id="edit-score-modal-backdrop" class="modal-backdrop"></div>
-<div id="edit-score-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-score-modal-title">
-  <h3 id="edit-score-modal-title">Edit Score</h3>
-  <div class="modal-form-group">
-    <label for="edit-score-value">Score (0-999):</label>
-    <input type="number" id="edit-score-value" min="0" max="999" step="1" placeholder="000">
-  </div>
-  <div class="modal-form-group">
-    <label for="edit-score-date">Date:</label>
-    <input type="date" id="edit-score-date">
-  </div>
-  <span id="edit-score-details" class="modal-details"></span>
-  <div id="edit-score-buttons" class="modal-buttons">
-    <button id="edit-score-cancel">Cancel</button>
-    <button id="edit-score-save">Save</button>
   </div>
 </div>
 
@@ -1353,7 +1295,7 @@ footer b {
 
   <!-- Bottom section with Score and Dark Mode toggle -->
   <div class="bottom-section">
-    <h5 id="score-display">000</h5>
+    <div id="score-display">000</div>
     <div class="bottom-dark-mode-toggle">
       <label for="dark-mode-checkbox">Dark</label>
       <label class="toggle-switch">
@@ -1382,7 +1324,7 @@ footer b {
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbzWd8KkkoQf6eqXOpC42TRGeByhmY2d4s6ag4KH7iUDPt6txr5pu41E0F7qar6kVjSmWg/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbwTaLjSiM3puS38R1045wXyJa9na_diVK88Wuy41OWUJxpL1b3GtU0HRq-TUmKr5eHP4Q/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
@@ -1400,7 +1342,6 @@ let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
 let DARK_MODE = false;
 let SCORE = 0;
-let SCORE_DATE = null;
 
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1410,8 +1351,8 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-let ACCOUNT_METADATA = new Map();
-let TYPE_META_OVERRIDES = new Map();
+let ACCOUNT_METADATA = new Map();  // accountName -> { limit, color, link }
+let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
 
 /* ============================================
     DARK MODE
@@ -1451,112 +1392,6 @@ function renderScore() {
   const scoreDisplay = document.getElementById('score-display');
   if (scoreDisplay) {
     scoreDisplay.textContent = formatScore(SCORE);
-  }
-}
-
-function showEditScoreModal() {
-  if (IS_LOADING) return;
-
-  const backdrop = document.getElementById('edit-score-modal-backdrop');
-  const modal = document.getElementById('edit-score-modal');
-  const valueInput = document.getElementById('edit-score-value');
-  const dateInput = document.getElementById('edit-score-date');
-  const saveBtn = document.getElementById('edit-score-save');
-
-  valueInput.value = SCORE;
-
-  if (SCORE_DATE) {
-    const dateParts = SCORE_DATE.split('/');
-    if (dateParts.length === 3) {
-      const [month, day, year] = dateParts;
-      dateInput.value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    } else {
-      const today = new Date();
-      dateInput.value = today.toISOString().split('T')[0];
-    }
-  } else {
-    const today = new Date();
-    dateInput.value = today.toISOString().split('T')[0];
-  }
-
-  backdrop.classList.add('show');
-  modal.classList.add('show');
-
-  setTimeout(() => valueInput.focus(), 100);
-
-  saveBtn.onclick = () => processEditScore();
-}
-
-function hideEditScoreModal() {
-  document.getElementById('edit-score-modal-backdrop').classList.remove('show');
-  document.getElementById('edit-score-modal').classList.remove('show');
-}
-
-async function processEditScore() {
-  if (IS_LOADING) return;
-
-  const valueInput = document.getElementById('edit-score-value');
-  const dateInput = document.getElementById('edit-score-date');
-
-  let newValue = Number(valueInput.value);
-
-  if (isNaN(newValue) || newValue < 0 || newValue > 999) {
-    showToast('Please enter a valid score between 0 and 999', 'error');
-    return;
-  }
-
-  const newDateISO = dateInput.value;
-  if (!newDateISO) {
-    showToast('Please select a date', 'error');
-    return;
-  }
-
-  const [year, month, day] = newDateISO.split('-');
-  const newDate = `${parseInt(month)}/${parseInt(day)}/${year}`;
-
-  hideEditScoreModal();
-  setLoading(true, 'Updating score…');
-
-  try {
-    const body = new URLSearchParams({
-      payload: JSON.stringify({
-        score: newValue,
-        scoreDate: newDate
-      })
-    });
-
-    const res = await fetch(`${API_BASE}?route=updateScore`, { method: 'POST', body });
-    const text = await res.text();
-
-    let j;
-    try {
-      j = JSON.parse(text);
-    } catch {
-      console.error('Update score non-JSON:', text);
-      showToast('Update failed (non-JSON response)', 'error', 5000);
-      setLoading(false);
-      return;
-    }
-
-    if (!j.ok) {
-      console.error('Update score JSON error:', j);
-      showToast(`Update failed: ${j.error || 'Unknown'}`, 'error', 5000);
-      setLoading(false);
-      return;
-    }
-
-    SCORE = newValue;
-    SCORE_DATE = newDate;
-    saveStateToURL();
-    renderScore();
-
-    showToast('Score updated!', 'success');
-    setLoading(false);
-
-  } catch (e) {
-    console.error('Score update error:', e);
-    setLoading(false);
-    showToast('Failed to update score: ' + e.message, 'error', 5000);
   }
 }
 
@@ -2073,14 +1908,7 @@ function loadStateFromURL() {
 
   const scoreParam = params.get('score');
   if (scoreParam) {
-    SCORE = Number(scoreParam);
-  } else {
-    SCORE = 0;
-  }
-
-  const scoreDateParam = params.get('scoreDate');
-  if (scoreDateParam) {
-    SCORE_DATE = decodeURIComponent(scoreDateParam);
+    SCORE = Number(scoreParam) || 0;
   }
 
   const limitsParam = params.get('limits');
@@ -2147,10 +1975,6 @@ function saveStateToURL() {
 
   if (SCORE !== 0) {
     params.set('score', SCORE);
-  }
-
-  if (SCORE_DATE) {
-    params.set('scoreDate', encodeURIComponent(SCORE_DATE));
   }
 
   const acctMetaObj = {};
@@ -3036,9 +2860,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-chip-cancel').addEventListener('click', hideEditChipModal);
   document.getElementById('edit-chip-modal-backdrop').addEventListener('click', hideEditChipModal);
 
-  document.getElementById('edit-score-cancel').addEventListener('click', hideEditScoreModal);
-  document.getElementById('edit-score-modal-backdrop').addEventListener('click', hideEditScoreModal);
-
   document.getElementById('account-menu-cancel').addEventListener('click', hideAccountMenu);
   document.getElementById('account-menu-modal-backdrop').addEventListener('click', hideAccountMenu);
 
@@ -3047,43 +2868,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
-
-  // Score long-press handler
-  const scoreDisplay = document.getElementById('score-display');
-  let scorePressTi mer = null;
-
-  scoreDisplay.addEventListener('mousedown', () => {
-    scorePressTimer = setTimeout(() => {
-      showEditScoreModal();
-    }, LONG_PRESS_DURATION);
-  });
-
-  scoreDisplay.addEventListener('mouseup', () => {
-    if (scorePressTimer) {
-      clearTimeout(scorePressTimer);
-      scorePressTimer = null;
-    }
-  });
-
-  scoreDisplay.addEventListener('mouseleave', () => {
-    if (scorePressTimer) {
-      clearTimeout(scorePressTimer);
-      scorePressTimer = null;
-    }
-  });
-
-  scoreDisplay.addEventListener('touchstart', () => {
-    scorePressTimer = setTimeout(() => {
-      showEditScoreModal();
-    }, LONG_PRESS_DURATION);
-  });
-
-  scoreDisplay.addEventListener('touchend', () => {
-    if (scorePressTimer) {
-      clearTimeout(scorePressTimer);
-      scorePressTimer = null;
-    }
-  });
 
   window.addEventListener('resize', renderChart);
 
