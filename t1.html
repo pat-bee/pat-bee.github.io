@@ -15,12 +15,46 @@
   --c-neg: #a02d2a;
   --c-black: #000000;
   --c-white: #ffffff;
+  --c-bg: #ffffff;
+  --c-fg: #000000;
+  --c-border: #000000;
   --radius: 10px;
   --gap: 12px;
   --c-tint-pos: #f7f9f4;
   --c-tint-neg: #f9f4f4;
-  --c-muted: #e8e8e8;  /* Muted account state */
-  --c-overlimit: #d85140;  /* Over-limit alert color */
+  --c-muted: #e8e8e8;
+  --c-overlimit: #d85140;
+  --c-input-bg: #ffffff;
+  --c-input-border: #000000;
+  --c-header-bg: #ffffff;
+  --c-statusbar-bg: #ffffff;
+  --c-toast-bg: #000000;
+  --c-toast-fg: #ffffff;
+  --c-modal-bg: #ffffff;
+  --c-modal-border: #000000;
+  --c-modal-fg: #000000;
+}
+
+:root.dark-mode {
+  --c-pos: #7cbf5f;
+  --c-neg: #ff6b5f;
+  --c-black: #ffffff;
+  --c-white: #1a1a1a;
+  --c-bg: #1a1a1a;
+  --c-fg: #e0e0e0;
+  --c-border: #404040;
+  --c-tint-pos: #1a3a0f;
+  --c-tint-neg: #3a1a1a;
+  --c-muted: #333333;
+  --c-input-bg: #2a2a2a;
+  --c-input-border: #505050;
+  --c-header-bg: #222222;
+  --c-statusbar-bg: #222222;
+  --c-toast-bg: #333333;
+  --c-toast-fg: #e0e0e0;
+  --c-modal-bg: #2a2a2a;
+  --c-modal-border: #505050;
+  --c-modal-fg: #e0e0e0;
 }
 
 /* ============================================
@@ -29,14 +63,15 @@
 html, body { 
   height: 100%; 
   margin: 0; 
-  background: var(--c-white); 
-  color: var(--c-black); 
+  background: var(--c-bg); 
+  color: var(--c-fg); 
 }
 
 body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 18px;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .wrap { 
@@ -57,10 +92,11 @@ a {
 header { 
   position: sticky; 
   top: 0; 
-  background: var(--c-white); 
+  background: var(--c-header-bg); 
   z-index: 5; 
-  border-bottom: 1px solid var(--c-black);
+  border-bottom: 1px solid var(--c-border);
   padding-bottom: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .toolbar { 
@@ -94,6 +130,79 @@ header {
   max-width: 60%;
 }
 
+/* Dark mode toggle */
+.dark-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dark-mode-toggle label {
+  font-size: 0.75rem;
+  font-weight: 300;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.toggle-switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--c-border);
+  border: none;
+  border-radius: 999px;
+  transition: background 0.3s ease;
+  pointer-events: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--c-black);
+  border: none;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider {
+  background: var(--c-pos);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-switch input[type="checkbox"]:focus + .toggle-switch-slider {
+  outline: 2px solid var(--c-pos);
+  outline-offset: 1px;
+}
+
 /* Type filter row now lives in the toolbar */
 .type-filter-row {
   display: flex;
@@ -116,16 +225,18 @@ header {
   font-size: 0.8rem;
   font-weight: 300;
   cursor: pointer;
+  color: var(--c-fg);
 }
 
 .toolbar select {
   font-size: 0.8rem;
   font-weight: 300;
   padding: 4px 6px;
-  border: 1px solid var(--c-black);
+  border: 1px solid var(--c-input-border);
   border-radius: 4px;
-  background: var(--c-white);
-  color: var(--c-black);
+  background: var(--c-input-bg);
+  color: var(--c-fg);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ============================================
@@ -138,6 +249,7 @@ header {
   line-height: 1.1;
   flex-shrink: 1;
   min-width: 0;
+  color: var(--c-fg);
 }
 
 #financial-summary .bold-value {
@@ -193,9 +305,10 @@ header {
   overflow-y: hidden;
   white-space: nowrap;
   word-break: keep-all;
-  background: var(--c-white);
+  background: var(--c-statusbar-bg);
   width: 100%;
   box-sizing: border-box;
+  transition: background-color 0.3s ease;
 }
 
 .status-positive {
@@ -208,8 +321,9 @@ header {
 
 hr.divider {
   border: none;
-  border-top: 1px solid var(--c-black);
+  border-top: 1px solid var(--c-border);
   margin-top: 1rem;
+  transition: border-color 0.3s ease;
 }
 
 /* ============================================
@@ -225,9 +339,10 @@ hr.divider {
   display: flex; 
   align-items: flex-start; 
   justify-content: space-between; 
-  border-bottom: 1px solid var(--c-black);
+  border-bottom: 1px solid var(--c-border);
   padding: 12px 0; 
   gap: 12px; 
+  transition: opacity 0.3s ease;
 }
 
 .left { 
@@ -260,6 +375,7 @@ hr.divider {
   font-weight: 600; 
   font-size: 2.6rem; 
   white-space: nowrap;
+  color: var(--c-fg);
 }
 
 .name { 
@@ -288,14 +404,16 @@ hr.divider {
   font-size: 0.75rem;
   flex-shrink: 0;
   padding-top: 0.5rem;
+  color: var(--c-fg);
 }
 
 .apr { 
   font-weight: 400; 
   font-size: 0.75rem;
-  opacity: .75; 
+  opacity: .75;
   flex-shrink: 0;
   padding-top: 0.5rem;
+  color: var(--c-fg);
 }
 
 .input-line { 
@@ -314,19 +432,19 @@ input[type="number"], input[type="date"], input[type="text"], input[type="url"] 
   max-width: 10rem;
   padding: .7rem .8rem;
   font-size: 1.1rem;
-  border: 2px solid var(--c-black);
+  border: 2px solid var(--c-input-border);
   border-radius: var(--radius);
-  background: var(--c-white);
-  color: var(--c-black);
+  background: var(--c-input-bg);
+  color: var(--c-fg);
   outline: none;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 input[type="number"]::placeholder,
 input[type="date"]::placeholder,
 input[type="text"]::placeholder,
 input[type="url"]::placeholder {
-  color: var(--c-black);
+  color: var(--c-fg);
   opacity: 0.6;
 }
 
@@ -334,8 +452,8 @@ input[type="number"]:focus,
 input[type="date"]:focus,
 input[type="text"]:focus,
 input[type="url"]:focus {
-  border-color: var(--c-black);
-  box-shadow: 0 0 0 2px var(--c-black) inset;
+  border-color: var(--c-pos);
+  box-shadow: 0 0 0 2px var(--c-pos) inset;
 }
 
 input[type="number"].submitting,
@@ -368,20 +486,21 @@ button {
   padding: .7rem 1rem;
   font-size: 1rem;
   font-weight: 300;
-  border: 2px solid var(--c-black);
-  color: var(--c-black);
-  background: var(--c-white);
+  border: 2px solid var(--c-input-border);
+  color: var(--c-fg);
+  background: var(--c-input-bg);
   cursor: pointer;
   border-radius: var(--radius);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 button:hover { 
-  background: var(--c-white);
+  background: var(--c-input-bg);
   text-decoration: underline;
 }
 
 button:focus-visible { 
-  outline: 3px solid var(--c-black); 
+  outline: 3px solid var(--c-pos); 
   outline-offset: 2px; 
 }
 
@@ -410,17 +529,19 @@ button:disabled {
 .chip {
   padding: .25rem .6rem;
   border-radius: 999px;
-  border: 1px solid var(--c-black);
+  border: 1px solid var(--c-input-border);
   font-variant-numeric: tabular-nums;
   font-size: .95rem;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
   transition: all 0.2s ease;
+  color: var(--c-fg);
+  background: var(--c-input-bg);
 }
 
 .chip:hover {
-  background: var(--c-black);
+  background: var(--c-pos);
   color: var(--c-white);
   transform: scale(1.05);
 }
@@ -429,10 +550,11 @@ button:disabled {
   cursor: default;
   opacity: 0.7;
   background: transparent;
-  color: var(--c-black);
+  color: var(--c-fg);
 }
 .chip.no-delete:hover {
   background: transparent;
+  color: var(--c-fg);
   transform: none;
 }
 
@@ -452,6 +574,58 @@ button:disabled {
 }
 
 /* ============================================
+      BOTTOM SECTION (Score & Dark Mode)
+   ============================================ */
+.bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 3rem 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#score-display {
+  font-size: 5rem;
+  font-weight: 300;
+  color: #b5a8a8;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  padding: 1rem;
+}
+
+#score-display:hover {
+  opacity: 0.8;
+}
+
+#score-display:active {
+  transform: scale(0.98);
+}
+
+#score-display.long-press-active {
+  opacity: 0.6;
+}
+
+.bottom-dark-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.bottom-dark-mode-toggle label {
+  font-size: 0.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ============================================
       FOOTER
    ============================================ */
 footer { 
@@ -460,7 +634,7 @@ footer {
   font-size: 0.7rem;
   line-height: 1.6;
   opacity: 0.8;
-  color: var(--c-black);
+  color: var(--c-fg);
 }
 
 footer small {
@@ -487,7 +661,7 @@ footer b {
 
 .security-notice {
   font-size: 0.7rem;
-  background: #f8f8f8;
+  background: var(--c-tint-pos);
   padding: 10px 14px;
   border-radius: 8px;
   margin: 16px auto 8px;
@@ -495,6 +669,8 @@ footer b {
   border-left: 3px solid var(--c-pos);
   text-align: left;
   line-height: 1.5;
+  color: var(--c-fg);
+  transition: background-color 0.3s ease;
 }
 
 .security-notice strong {
@@ -512,9 +688,9 @@ footer b {
   transform: translateX(-50%);
   padding: 12px 24px;
   border-radius: var(--radius);
-  background: var(--c-black);
-  color: var(--c-white);
-  border: 2px solid var(--c-white);
+  background: var(--c-toast-bg);
+  color: var(--c-toast-fg);
+  border: 2px solid var(--c-pos);
   font-weight: 500;
   z-index: 100;
   opacity: 0;
@@ -529,15 +705,15 @@ footer b {
 }
 
 #toast[data-type="error"] {
-  background: var(--c-neg);
-  color: var(--c-white);
-  border-color: var(--c-white);
+  background: var(--c-toast-bg);
+  color: var(--c-toast-fg);
+  border-color: var(--c-neg);
 }
 
 #toast[data-type="success"] {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-white);
+  background: var(--c-toast-bg);
+  color: var(--c-toast-fg);
+  border-color: var(--c-pos);
 }
 
 /* ============================================
@@ -556,14 +732,18 @@ footer b {
   transition: opacity 0.3s ease;
 }
 
+:root.dark-mode .modal-backdrop {
+  background: rgba(0, 0, 0, 0.8);
+}
+
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--c-white);
-  color: var(--c-black);
-  border: 2px solid var(--c-black);
+  background: var(--c-modal-bg);
+  color: var(--c-modal-fg);
+  border: 2px solid var(--c-modal-border);
   border-radius: var(--radius);
   z-index: 201;
   padding: 24px;
@@ -582,11 +762,13 @@ footer b {
 
 .modal h3 {
   margin-top: 0;
+  color: var(--c-modal-fg);
 }
 
 .modal p {
   margin-top: 0;
   line-height: 1.4;
+  color: var(--c-modal-fg);
 }
 
 .modal-details {
@@ -594,6 +776,7 @@ footer b {
   display: block;
   margin: 12px 0;
   font-size: 1.1rem;
+  color: var(--c-modal-fg);
 }
 
 .modal-buttons {
@@ -612,6 +795,7 @@ footer b {
   margin-bottom: 6px;
   font-weight: 600;
   font-size: 0.9rem;
+  color: var(--c-modal-fg);
 }
 
 .modal-form-group input,
@@ -619,6 +803,11 @@ footer b {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  background: var(--c-input-bg);
+  color: var(--c-fg);
+  border: 1px solid var(--c-input-border);
+  padding: 8px;
+  border-radius: 4px;
 }
 
 /* Delete modal */
@@ -650,6 +839,29 @@ footer b {
   border-color: var(--c-pos);
 }
 #edit-chip-save:hover {
+  background: #3d6629;
+  border-color: #3d6629;
+  text-decoration: none;
+}
+
+/* Edit score modal */
+#edit-score-modal .modal-form-group input[type="number"] {
+  font-size: 1.2rem;
+  padding: 0.8rem;
+  font-family: 'Courier New', monospace;
+}
+
+#edit-score-modal .modal-form-group input[type="date"] {
+  font-size: 1rem;
+  padding: 0.8rem;
+}
+
+#edit-score-save {
+  background: var(--c-pos);
+  color: var(--c-white);
+  border-color: var(--c-pos);
+}
+#edit-score-save:hover {
   background: #3d6629;
   border-color: #3d6629;
   text-decoration: none;
@@ -723,6 +935,7 @@ footer b {
   padding: 0.25rem 0.4rem;
   border-radius: 12px;
   min-width: 96px;
+  color: var(--c-fg);
 }
 
 .type-item.muted {
@@ -755,6 +968,7 @@ footer b {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  color: var(--c-fg);
 }
 
 .type-toggle-label input[type="checkbox"] {
@@ -818,7 +1032,7 @@ footer b {
 }
 
 .mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
-  outline: 3px solid var(--c-black);
+  outline: 3px solid var(--c-pos);
   outline-offset: 2px;
 }
 
@@ -942,6 +1156,15 @@ footer b {
   footer, footer small, footer a, .security-notice {
     font-size: 0.75rem;
   }
+
+  #score-display {
+    font-size: 4rem;
+  }
+
+  .bottom-section {
+    padding: 2rem 1rem;
+    gap: 1.5rem;
+  }
 }
 </style>
 </head>
@@ -981,6 +1204,25 @@ footer b {
   </div>
 </div>
 
+<!-- Edit score modal -->
+<div id="edit-score-modal-backdrop" class="modal-backdrop"></div>
+<div id="edit-score-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-score-modal-title">
+  <h3 id="edit-score-modal-title">Edit Score</h3>
+  <div class="modal-form-group">
+    <label for="edit-score-value">Score (0-999):</label>
+    <input type="number" id="edit-score-value" min="0" max="999" step="1" placeholder="000">
+  </div>
+  <div class="modal-form-group">
+    <label for="edit-score-date">Date:</label>
+    <input type="date" id="edit-score-date">
+  </div>
+  <span id="edit-score-details" class="modal-details"></span>
+  <div id="edit-score-buttons" class="modal-buttons">
+    <button id="edit-score-cancel">Cancel</button>
+    <button id="edit-score-save">Save</button>
+  </div>
+</div>
+
 <!-- Account menu modal -->
 <div id="account-menu-modal-backdrop" class="modal-backdrop"></div>
 <div id="account-menu-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="account-menu-modal-title">
@@ -1014,7 +1256,7 @@ footer b {
   <div class="modal-form-group">
     <label for="edit-account-color">Account Color (hex):</label>
     <div style="display:flex; gap:8px; align-items:center;">
-      <input type="color" id="edit-account-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-black); height:40px;">
+      <input type="color" id="edit-account-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-input-border); height:40px;">
       <input type="text" id="edit-account-color" placeholder="#4c8036" style="flex:1;">
     </div>
   </div>
@@ -1053,7 +1295,7 @@ footer b {
   <div class="modal-form-group">
     <label for="edit-type-color">Type Color (hex):</label>
     <div style="display:flex; gap:8px; align-items:center;">
-      <input type="color" id="edit-type-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-black); height:40px;">
+      <input type="color" id="edit-type-color-picker" style="flex:0 0 40px; padding:0; border-radius:50%; border:1px solid var(--c-input-border); height:40px;">
       <input type="text" id="edit-type-color" placeholder="#4c8036" style="flex:1;">
     </div>
   </div>
@@ -1109,6 +1351,18 @@ footer b {
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
+  <!-- Bottom section with Score and Dark Mode toggle -->
+  <div class="bottom-section">
+    <h5 id="score-display">000</h5>
+    <div class="bottom-dark-mode-toggle">
+      <label for="dark-mode-checkbox">Dark</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
+        <span class="toggle-switch-slider"></span>
+      </label>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div class="security-notice">
@@ -1118,7 +1372,7 @@ footer b {
     </div>
 
     <small>
-      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types<br>
+      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types • Dark mode 🌙 • Score tracker 📊<br>
       <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
@@ -1144,6 +1398,9 @@ const LONG_PRESS_DURATION = 500;
 
 let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
+let DARK_MODE = false;
+let SCORE = 0;
+let SCORE_DATE = null;
 
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1153,8 +1410,155 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-let ACCOUNT_METADATA = new Map();  // accountName -> { limit, color, link }
-let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
+let ACCOUNT_METADATA = new Map();
+let TYPE_META_OVERRIDES = new Map();
+
+/* ============================================
+    DARK MODE
+   ============================================ */
+function toggleDarkMode() {
+  DARK_MODE = !DARK_MODE;
+  const root = document.documentElement;
+  
+  if (DARK_MODE) {
+    root.classList.add('dark-mode');
+  } else {
+    root.classList.remove('dark-mode');
+  }
+  
+  document.getElementById('dark-mode-checkbox').checked = DARK_MODE;
+  saveStateToURL();
+}
+
+function initDarkMode() {
+  const checkbox = document.getElementById('dark-mode-checkbox');
+  checkbox.addEventListener('change', toggleDarkMode);
+  
+  if (DARK_MODE) {
+    document.documentElement.classList.add('dark-mode');
+    checkbox.checked = true;
+  }
+}
+
+/* ============================================
+    SCORE MANAGEMENT
+   ============================================ */
+function formatScore(num) {
+  return String(num).padStart(3, '0');
+}
+
+function renderScore() {
+  const scoreDisplay = document.getElementById('score-display');
+  if (scoreDisplay) {
+    scoreDisplay.textContent = formatScore(SCORE);
+  }
+}
+
+function showEditScoreModal() {
+  if (IS_LOADING) return;
+
+  const backdrop = document.getElementById('edit-score-modal-backdrop');
+  const modal = document.getElementById('edit-score-modal');
+  const valueInput = document.getElementById('edit-score-value');
+  const dateInput = document.getElementById('edit-score-date');
+  const saveBtn = document.getElementById('edit-score-save');
+
+  valueInput.value = SCORE;
+
+  if (SCORE_DATE) {
+    const dateParts = SCORE_DATE.split('/');
+    if (dateParts.length === 3) {
+      const [month, day, year] = dateParts;
+      dateInput.value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    } else {
+      const today = new Date();
+      dateInput.value = today.toISOString().split('T')[0];
+    }
+  } else {
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
+  }
+
+  backdrop.classList.add('show');
+  modal.classList.add('show');
+
+  setTimeout(() => valueInput.focus(), 100);
+
+  saveBtn.onclick = () => processEditScore();
+}
+
+function hideEditScoreModal() {
+  document.getElementById('edit-score-modal-backdrop').classList.remove('show');
+  document.getElementById('edit-score-modal').classList.remove('show');
+}
+
+async function processEditScore() {
+  if (IS_LOADING) return;
+
+  const valueInput = document.getElementById('edit-score-value');
+  const dateInput = document.getElementById('edit-score-date');
+
+  let newValue = Number(valueInput.value);
+
+  if (isNaN(newValue) || newValue < 0 || newValue > 999) {
+    showToast('Please enter a valid score between 0 and 999', 'error');
+    return;
+  }
+
+  const newDateISO = dateInput.value;
+  if (!newDateISO) {
+    showToast('Please select a date', 'error');
+    return;
+  }
+
+  const [year, month, day] = newDateISO.split('-');
+  const newDate = `${parseInt(month)}/${parseInt(day)}/${year}`;
+
+  hideEditScoreModal();
+  setLoading(true, 'Updating score…');
+
+  try {
+    const body = new URLSearchParams({
+      payload: JSON.stringify({
+        score: newValue,
+        scoreDate: newDate
+      })
+    });
+
+    const res = await fetch(`${API_BASE}?route=updateScore`, { method: 'POST', body });
+    const text = await res.text();
+
+    let j;
+    try {
+      j = JSON.parse(text);
+    } catch {
+      console.error('Update score non-JSON:', text);
+      showToast('Update failed (non-JSON response)', 'error', 5000);
+      setLoading(false);
+      return;
+    }
+
+    if (!j.ok) {
+      console.error('Update score JSON error:', j);
+      showToast(`Update failed: ${j.error || 'Unknown'}`, 'error', 5000);
+      setLoading(false);
+      return;
+    }
+
+    SCORE = newValue;
+    SCORE_DATE = newDate;
+    saveStateToURL();
+    renderScore();
+
+    showToast('Score updated!', 'success');
+    setLoading(false);
+
+  } catch (e) {
+    console.error('Score update error:', e);
+    setLoading(false);
+    showToast('Failed to update score: ' + e.message, 'error', 5000);
+  }
+}
 
 /* ============================================
     UI UTILITIES
@@ -1648,7 +2052,7 @@ async function fetchSnapshot() {
 }
 
 /* ============================================
-    URL STATE (muted + metadata)
+    URL STATE (muted + metadata + dark mode + score)
    ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
@@ -1662,6 +2066,21 @@ function loadStateFromURL() {
   const mutedTypesParam = params.get('mutedTypes');
   if (mutedTypesParam) {
     MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
+  }
+
+  const darkModeParam = params.get('darkMode');
+  DARK_MODE = darkModeParam === 'true';
+
+  const scoreParam = params.get('score');
+  if (scoreParam) {
+    SCORE = Number(scoreParam);
+  } else {
+    SCORE = 0;
+  }
+
+  const scoreDateParam = params.get('scoreDate');
+  if (scoreDateParam) {
+    SCORE_DATE = decodeURIComponent(scoreDateParam);
   }
 
   const limitsParam = params.get('limits');
@@ -1720,6 +2139,18 @@ function saveStateToURL() {
   const mutedTypesArray = Array.from(MUTED_TYPES);
   if (mutedTypesArray.length > 0) {
     params.set('mutedTypes', mutedTypesArray.join(','));
+  }
+
+  if (DARK_MODE) {
+    params.set('darkMode', 'true');
+  }
+
+  if (SCORE !== 0) {
+    params.set('score', SCORE);
+  }
+
+  if (SCORE_DATE) {
+    params.set('scoreDate', encodeURIComponent(SCORE_DATE));
   }
 
   const acctMetaObj = {};
@@ -1793,6 +2224,7 @@ function renderAll() {
   renderChart();
   renderTypeSummary();
   renderAccounts();
+  renderScore();
 }
 
 function renderSummary() {
@@ -1926,7 +2358,7 @@ function renderTypeSummary() {
     const last = s?.last ?? 0;
     const typeCode = a.type || 'bk';
     if (typeTotals[typeCode] == null) typeTotals[typeCode] = 0;
-    if (isAccountMuted(a.name)) return; // account mute removes from type total
+    if (isAccountMuted(a.name)) return;
     typeTotals[typeCode] += last;
   });
 
@@ -2035,15 +2467,15 @@ function renderChart() {
   const labels = SNAP.dateAxis; 
   if (!labels || labels.length === 0) {
     document.getElementById('chart').innerHTML =
-      '<div style="text-align:center; padding-top: 20px; color: #888;">No data for this timeframe.</div>';
+      '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data for this timeframe.</div>';
     return;
   }
 
   const styles = getComputedStyle(document.documentElement);
   const pos   = styles.getPropertyValue('--c-pos').trim();
   const neg   = styles.getPropertyValue('--c-neg').trim();
-  const black = styles.getPropertyValue('--c-black').trim();
-  const textStyle = { color: black, fontName: 'system-ui' };
+  const fg    = styles.getPropertyValue('--c-fg').trim();
+  const textStyle = { color: fg, fontName: 'system-ui' };
 
   const data = new google.visualization.DataTable();
   data.addColumn('string', 'Date'); 
@@ -2164,8 +2596,8 @@ function renderChart() {
     vAxis: { 
       viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
       baseline: 0, 
-      baselineColor: black,
-      gridlines: { color: black, opacity: 0.1 },
+      baselineColor: fg,
+      gridlines: { color: fg, opacity: 0.1 },
       textStyle: textStyle
     },
     isStacked: true,
@@ -2194,7 +2626,6 @@ function formatMoney(n) {
   })}`;
 }
 
-/* Limit color helper (for CC limit visualization) */
 function getLimitColor(currentBalance, limit) {
   const absBalance = Math.abs(currentBalance);
   const utilization = absBalance / limit;
@@ -2207,8 +2638,8 @@ function getLimitColor(currentBalance, limit) {
     return '#d85140';
   }
 
-  const startColor = { r: 76, g: 128, b: 54 };   // green
-  const endColor   = { r: 160, g: 45,  b: 42 };  // red
+  const startColor = { r: 76, g: 128, b: 54 };
+  const endColor   = { r: 160, g: 45,  b: 42 };
 
   const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
   const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
@@ -2372,7 +2803,7 @@ function renderAccounts() {
     } else if (last < 0) {
       inp.style.backgroundColor = 'var(--c-tint-neg)';
     } else {
-      inp.style.backgroundColor = 'var(--c-white)';
+      inp.style.backgroundColor = 'var(--c-input-bg)';
     }
 
     inp.addEventListener('keydown', async (ev) => {
@@ -2577,6 +3008,7 @@ async function submitEntries(entries) {
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
+  initDarkMode();
 
   const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
   if (sheetLink && SHEET_ID && SHEET_ID !== 'YOUR_SHEET_ID_HERE') {
@@ -2604,6 +3036,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-chip-cancel').addEventListener('click', hideEditChipModal);
   document.getElementById('edit-chip-modal-backdrop').addEventListener('click', hideEditChipModal);
 
+  document.getElementById('edit-score-cancel').addEventListener('click', hideEditScoreModal);
+  document.getElementById('edit-score-modal-backdrop').addEventListener('click', hideEditScoreModal);
+
   document.getElementById('account-menu-cancel').addEventListener('click', hideAccountMenu);
   document.getElementById('account-menu-modal-backdrop').addEventListener('click', hideAccountMenu);
 
@@ -2613,7 +3048,46 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
+  // Score long-press handler
+  const scoreDisplay = document.getElementById('score-display');
+  let scorePressTi mer = null;
+
+  scoreDisplay.addEventListener('mousedown', () => {
+    scorePressTimer = setTimeout(() => {
+      showEditScoreModal();
+    }, LONG_PRESS_DURATION);
+  });
+
+  scoreDisplay.addEventListener('mouseup', () => {
+    if (scorePressTimer) {
+      clearTimeout(scorePressTimer);
+      scorePressTimer = null;
+    }
+  });
+
+  scoreDisplay.addEventListener('mouseleave', () => {
+    if (scorePressTimer) {
+      clearTimeout(scorePressTimer);
+      scorePressTimer = null;
+    }
+  });
+
+  scoreDisplay.addEventListener('touchstart', () => {
+    scorePressTimer = setTimeout(() => {
+      showEditScoreModal();
+    }, LONG_PRESS_DURATION);
+  });
+
+  scoreDisplay.addEventListener('touchend', () => {
+    if (scorePressTimer) {
+      clearTimeout(scorePressTimer);
+      scorePressTimer = null;
+    }
+  });
+
   window.addEventListener('resize', renderChart);
+
+  renderScore();
 
   if (window.google && google.charts) {
     google.charts.load('current', { packages: ['corechart'] });
