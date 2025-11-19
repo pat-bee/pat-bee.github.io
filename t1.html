@@ -1280,15 +1280,16 @@ footer b {
       <div class="toolbar-controls">
         <label for="timeframe">Timeframe:</label>
         <select id="timeframe">
-          <option value="ytd" selected>This Calendar Year</option>
-          <option value="today">Today</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="14d">Last 14 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year (12mo)</option>
-          <option value="all">All Time</option>
-        </select>
+  <option value="3d" selected>Last 3 Days</option>
+  <option value="today">Today</option>
+  <option value="7d">Last 7 Days</option>
+  <option value="14d">Last 14 Days</option>
+  <option value="30d">Last 30 Days</option>
+  <option value="90d">Last 90 Days</option>
+  <option value="1y">Last Year (12mo)</option>
+  <option value="ytd">This Calendar Year</option>
+  <option value="all">All Time</option>
+</select>
 
         <label><input type="radio" name="mode" value="totals" checked> Totals</label>
         <label><input type="radio" name="mode" value="types"> Type</label>
@@ -1350,7 +1351,7 @@ const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing'
    ============================================ */
 let SNAP = null;
 let MODE = 'totals';
-let TIMEFRAME = 'ytd';
+let TIMEFRAME = '3d';
 let IS_LOADING = false;
 let TOAST_TIMER = null;
 let LONG_PRESS_TIMER = null;
