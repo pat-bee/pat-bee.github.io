@@ -35,7 +35,7 @@
   --c-modal-fg: #000000;
 }
 
-:root.dark-mode {
+:root.-mode {
   --c-pos: #7cbf5f;
   --c-neg: #ff6b5f;
   --c-black: #ffffff;
@@ -501,7 +501,7 @@ button:disabled {
 }
 
 /* ============================================
-      BOTTOM SECTION (Score & Dark Mode)
+      BOTTOM SECTION (Score &  Mode)
    ============================================ */
 .bottom-section {
   display: flex;
@@ -539,14 +539,14 @@ button:disabled {
   transform: scale(0.98);
 }
 
-.bottom-dark-mode-toggle {
+.bottom--mode-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
   justify-content: center;
 }
 
-.bottom-dark-mode-toggle label {
+.bottom--mode-toggle label {
   font-size: 0.8rem;
   font-weight: 300;
   cursor: pointer;
@@ -719,7 +719,7 @@ footer b {
   transition: opacity 0.3s ease;
 }
 
-:root.dark-mode .modal-backdrop {
+:root.-mode .modal-backdrop {
   background: rgba(0, 0, 0, 0.8);
 }
 
@@ -1315,11 +1315,11 @@ footer b {
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
-  <!-- Bottom section with Score and Dark Mode toggle -->
+  <!-- Bottom section with Score and  Mode toggle -->
   <div class="bottom-section">
     <div id="score-display">000</div>
     <div class="bottom-dark-mode-toggle">
-      <label for="dark-mode-checkbox">Dark</label>
+      <label for="dark-mode-checkbox"></label>
       <label class="toggle-switch">
         <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
         <span class="toggle-switch-slider"></span>
