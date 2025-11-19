@@ -57,6 +57,7 @@
   --c-modal-fg: #e0e0e0;
 }
 
+
 /* ============================================
       BASE LAYOUT
    ============================================ */
@@ -94,8 +95,8 @@ header {
   top: 0; 
   background: var(--c-header-bg); 
   z-index: 5; 
-  border-bottom: 1px solid var(--c-border);
-  padding-bottom: 1rem;
+  border-: 1px solid var(--c-border);
+  padding-: 1rem;
   transition: background-color 0.3s ease;
 }
 
@@ -501,7 +502,7 @@ button:disabled {
 }
 
 /* ============================================
-      BOTTOM SECTION (Score & Dark Mode)
+      BOTTOM SECTION (Score &  Mode)
    ============================================ */
 .bottom-section {
   display: flex;
@@ -515,10 +516,10 @@ button:disabled {
 }
 
 #score-display {
-  font-size: 80px;
+  font-size: 50px;
   font-weight: 300;
   color: #b5a8a8;
-  font-family: 'Courier New', monospace;
+  font-family: monospace;
   letter-spacing: 0.2em;
   cursor: pointer;
   user-select: none;
@@ -526,6 +527,9 @@ button:disabled {
   padding: 0;
   margin: 0;
   line-height: 1;
+ /*  min-width: 300px; */
+      align-items: center;
+      align: center;
 }
 
 #score-display:hover {
@@ -536,14 +540,14 @@ button:disabled {
   transform: scale(0.98);
 }
 
-.bottom-dark-mode-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
+.bottom-dark-mode-toggle label {
+  font-size: 0.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.bottom-dark-mode-toggle label {
+.bottom--mode-toggle label {
   font-size: 0.8rem;
   font-weight: 300;
   cursor: pointer;
@@ -930,10 +934,28 @@ footer b {
   align-items: center;
   gap: 0.25rem;
   color: var(--c-fg);
+  cursor: pointer;
 }
 
 .type-toggle-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
   margin: 0;
+  cursor: pointer;
+  background: white;
+  border: 1.5px solid black;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.type-toggle-label input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 /* ============================================
@@ -1126,6 +1148,21 @@ footer b {
     padding: 1.5rem 1rem;
     gap: 1rem;
   }
+
+.dark-mode-toggle-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--c-fg);
+  user-select: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon {
+  transform: rotate(180deg);
+  opacity: 0.9;
+}
+
+      
 }
 </style>
 </head>
@@ -1262,15 +1299,16 @@ footer b {
       <div class="toolbar-controls">
         <label for="timeframe">Timeframe:</label>
         <select id="timeframe">
-          <option value="ytd" selected>This Calendar Year</option>
-          <option value="today">Today</option>
-          <option value="7d">Last 7 Days</option>
-          <option value="14d">Last 14 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year (12mo)</option>
-          <option value="all">All Time</option>
-        </select>
+  <option value="3d" selected>Last 3 Days</option>
+  <option value="today">Today</option>
+  <option value="7d">Last 7 Days</option>
+  <option value="14d">Last 14 Days</option>
+  <option value="30d">Last 30 Days</option>
+  <option value="90d">Last 90 Days</option>
+  <option value="1y">Last Year (12mo)</option>
+  <option value="ytd">This Calendar Year</option>
+  <option value="all">All Time</option>
+</select>
 
         <label><input type="radio" name="mode" value="totals" checked> Totals</label>
         <label><input type="radio" name="mode" value="types"> Type</label>
@@ -1325,14 +1363,14 @@ footer b {
     CONFIGURATION
    ============================================ */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbwTaLjSiM3puS38R1045wXyJa9na_diVK88Wuy41OWUJxpL1b3GtU0HRq-TUmKr5eHP4Q/exec';
-const SHEET_ID = '/1UzOEys7DGhSVMJjoU-VfNo54qeoUjJfKlxXW2Lhcb-s/edit?usp=sharing';
+const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
     APPLICATION STATE
    ============================================ */
 let SNAP = null;
 let MODE = 'totals';
-let TIMEFRAME = 'ytd';
+let TIMEFRAME = '3d';
 let IS_LOADING = false;
 let TOAST_TIMER = null;
 let LONG_PRESS_TIMER = null;
@@ -1360,13 +1398,16 @@ let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
 function toggleDarkMode() {
   DARK_MODE = !DARK_MODE;
   const root = document.documentElement;
-  
+  const icon = document.querySelector('.dark-mode-toggle-icon');
+
   if (DARK_MODE) {
     root.classList.add('dark-mode');
+    icon.textContent = "◑";     // ← Switch to dark symbol
   } else {
     root.classList.remove('dark-mode');
+    icon.textContent = "◐";     // ← Switch back to light symbol
   }
-  
+
   document.getElementById('dark-mode-checkbox').checked = DARK_MODE;
   saveStateToURL();
 }
@@ -1380,7 +1421,30 @@ function initDarkMode() {
     checkbox.checked = true;
   }
 }
+/* ============================================
+    AUTO DARK MODE DETECTION
+   ============================================ */
+function shouldAutoEnableDarkMode() {
+  const hour = new Date().getHours();
+  // Enable dark mode between 8 PM (20:00) and 6 AM
+  return hour >= 20 || hour < 6;
+}
 
+function initializeTheme() {
+  // Check URL first (user preference takes priority)
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const darkModeParam = params.get('darkMode');
+  
+  if (darkModeParam === 'true') {
+    DARK_MODE = true;
+  } else if (darkModeParam === 'false') {
+    DARK_MODE = false;
+  } else {
+    // Auto-detect based on time if no preference saved
+    DARK_MODE = shouldAutoEnableDarkMode();
+  }
+}
 /* ============================================
     SCORE MANAGEMENT
    ============================================ */
@@ -1394,7 +1458,100 @@ function renderScore() {
     scoreDisplay.textContent = formatScore(SCORE);
   }
 }
+/* ============================================
+    SCORE EDITING
+   ============================================ */
+function showEditScoreModal() {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop show';
+  backdrop.id = 'score-edit-backdrop';
 
+  const modal = document.createElement('div');
+  modal.className = 'modal show';
+  modal.id = 'score-edit-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  modal.innerHTML = `
+    <h3>Edit Score</h3>
+    <div class="modal-form-group">
+      <label for="score-input">New Score (0-999):</label>
+      <input type="number" id="score-input" min="0" max="999" step="1" placeholder="000">
+    </div>
+    <div class="modal-buttons">
+      <button id="score-cancel">Cancel</button>
+      <button id="score-save">Save</button>
+    </div>
+  `;
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(modal);
+
+  const input = document.getElementById('score-input');
+  input.value = SCORE;
+  setTimeout(() => input.focus(), 100);
+
+  document.getElementById('score-cancel').addEventListener('click', () => {
+    backdrop.remove();
+    modal.remove();
+  });
+
+  document.getElementById('score-save').addEventListener('click', () => {
+    processUpdateScore(input.value, backdrop, modal);
+  });
+
+  backdrop.addEventListener('click', () => {
+    backdrop.remove();
+    modal.remove();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      processUpdateScore(input.value, backdrop, modal);
+    }
+  });
+}
+
+async function processUpdateScore(newValue, backdrop, modal) {
+  const val = Number(newValue);
+  if (isNaN(val) || val < 0 || val > 999) {
+    showToast('Please enter a score between 0 and 999', 'error');
+    return;
+  }
+
+  backdrop.remove();
+  modal.remove();
+
+  setLoading(true, 'Updating score…');
+
+  try {
+    const body = new URLSearchParams({
+      payload: JSON.stringify({ score: val })
+    });
+
+    const res = await fetch(`${API_BASE}?route=updateScore`, { 
+      method: 'POST', 
+      body 
+    });
+    const text = await res.text();
+    const j = JSON.parse(text);
+
+    if (!j.ok) {
+      throw new Error(j.error || 'Update failed');
+    }
+
+    SCORE = val;
+    saveStateToURL();
+    renderScore();
+    setLoading(false);
+    showToast('Score updated!', 'success');
+
+  } catch (e) {
+    console.error('Score update error:', e);
+    setLoading(false);
+    showToast('Failed to update score: ' + e.message, 'error', 5000);
+  }
+}
 /* ============================================
     UI UTILITIES
    ============================================ */
@@ -2238,7 +2395,6 @@ function renderTypeSummary() {
     });
 
     toggleLabel.appendChild(cb);
-    toggleLabel.appendChild(document.createTextNode(' show'));
     typeItem.appendChild(toggleLabel);
 
     container.appendChild(typeItem);
@@ -2832,6 +2988,7 @@ async function submitEntries(entries) {
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
+  initializeTheme();  // Use new function
   initDarkMode();
 
   const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
@@ -2871,7 +3028,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', renderChart);
 
-  renderScore();
+renderScore();
+
+  // Make score clickable to edit
+  document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
   if (window.google && google.charts) {
     google.charts.load('current', { packages: ['corechart'] });
