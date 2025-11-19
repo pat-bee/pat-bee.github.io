@@ -515,7 +515,7 @@ button:disabled {
 }
 
 #score-display {
-  font-size: 80px;
+  font-size: 60px;
   font-weight: 300;
   color: #b5a8a8;
   font-family: 'Courier New', monospace;
@@ -526,6 +526,7 @@ button:disabled {
   padding: 0;
   margin: 0;
   line-height: 1;
+  min-width: 300px;
 }
 
 #score-display:hover {
@@ -1343,7 +1344,7 @@ footer b {
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbzbAl6mmCZ2i7rfEBkbFmfRB41Gx0Tc2G99-zuR6P8jRSTTvHKKKqeNnoqaFTSHcAgUMQ/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbwNXyO8zqc0sNk0_dW7zr6n4LjgTq6rmt0aN7iyWZ2QjQgKrBseSsOKcn034vq-xjtRiQ/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
@@ -1413,7 +1414,100 @@ function renderScore() {
     scoreDisplay.textContent = formatScore(SCORE);
   }
 }
+/* ============================================
+    SCORE EDITING
+   ============================================ */
+function showEditScoreModal() {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop show';
+  backdrop.id = 'score-edit-backdrop';
 
+  const modal = document.createElement('div');
+  modal.className = 'modal show';
+  modal.id = 'score-edit-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  modal.innerHTML = `
+    <h3>Edit Score</h3>
+    <div class="modal-form-group">
+      <label for="score-input">New Score (0-999):</label>
+      <input type="number" id="score-input" min="0" max="999" step="1" placeholder="000">
+    </div>
+    <div class="modal-buttons">
+      <button id="score-cancel">Cancel</button>
+      <button id="score-save">Save</button>
+    </div>
+  `;
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(modal);
+
+  const input = document.getElementById('score-input');
+  input.value = SCORE;
+  setTimeout(() => input.focus(), 100);
+
+  document.getElementById('score-cancel').addEventListener('click', () => {
+    backdrop.remove();
+    modal.remove();
+  });
+
+  document.getElementById('score-save').addEventListener('click', () => {
+    processUpdateScore(input.value, backdrop, modal);
+  });
+
+  backdrop.addEventListener('click', () => {
+    backdrop.remove();
+    modal.remove();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      processUpdateScore(input.value, backdrop, modal);
+    }
+  });
+}
+
+async function processUpdateScore(newValue, backdrop, modal) {
+  const val = Number(newValue);
+  if (isNaN(val) || val < 0 || val > 999) {
+    showToast('Please enter a score between 0 and 999', 'error');
+    return;
+  }
+
+  backdrop.remove();
+  modal.remove();
+
+  setLoading(true, 'Updating score…');
+
+  try {
+    const body = new URLSearchParams({
+      payload: JSON.stringify({ score: val })
+    });
+
+    const res = await fetch(`${API_BASE}?route=updateScore`, { 
+      method: 'POST', 
+      body 
+    });
+    const text = await res.text();
+    const j = JSON.parse(text);
+
+    if (!j.ok) {
+      throw new Error(j.error || 'Update failed');
+    }
+
+    SCORE = val;
+    saveStateToURL();
+    renderScore();
+    setLoading(false);
+    showToast('Score updated!', 'success');
+
+  } catch (e) {
+    console.error('Score update error:', e);
+    setLoading(false);
+    showToast('Failed to update score: ' + e.message, 'error', 5000);
+  }
+}
 /* ============================================
     UI UTILITIES
    ============================================ */
@@ -2889,7 +2983,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', renderChart);
 
-  renderScore();
+renderScore();
+
+  // Make score clickable to edit
+  document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
   if (window.google && google.charts) {
     google.charts.load('current', { packages: ['corechart'] });
