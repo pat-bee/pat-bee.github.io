@@ -35,7 +35,7 @@
   --c-modal-fg: #000000;
 }
 
-:root.-mode {
+:root.dark-mode {
   --c-pos: #7cbf5f;
   --c-neg: #ff6b5f;
   --c-black: #ffffff;
@@ -56,6 +56,7 @@
   --c-modal-border: #505050;
   --c-modal-fg: #e0e0e0;
 }
+
 
 /* ============================================
       BASE LAYOUT
@@ -539,11 +540,11 @@ button:disabled {
   transform: scale(0.98);
 }
 
-.bottom-dark-mode-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
+.bottom-dark-mode-toggle label {
+  font-size: 0.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .bottom--mode-toggle label {
@@ -719,7 +720,7 @@ footer b {
   transition: opacity 0.3s ease;
 }
 
-:root.-mode .modal-backdrop {
+:root.dark-mode .modal-backdrop {
   background: rgba(0, 0, 0, 0.8);
 }
 
