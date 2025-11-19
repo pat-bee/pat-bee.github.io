@@ -1148,6 +1148,21 @@ footer b {
     padding: 1.5rem 1rem;
     gap: 1rem;
   }
+
+.dark-mode-toggle-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--c-fg);
+  user-select: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon {
+  transform: rotate(180deg);
+  opacity: 0.9;
+}
+
+      
 }
 </style>
 </head>
@@ -1383,13 +1398,16 @@ let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
 function toggleDarkMode() {
   DARK_MODE = !DARK_MODE;
   const root = document.documentElement;
-  
+  const icon = document.querySelector('.dark-mode-toggle-icon');
+
   if (DARK_MODE) {
     root.classList.add('dark-mode');
+    icon.textContent = "◑";     // ← Switch to dark symbol
   } else {
     root.classList.remove('dark-mode');
+    icon.textContent = "◐";     // ← Switch back to light symbol
   }
-  
+
   document.getElementById('dark-mode-checkbox').checked = DARK_MODE;
   saveStateToURL();
 }
