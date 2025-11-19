@@ -130,79 +130,6 @@ header {
   max-width: 60%;
 }
 
-/* Dark mode toggle */
-.dark-mode-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dark-mode-toggle label {
-  font-size: 0.75rem;
-  font-weight: 300;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* Toggle switch */
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 2;
-  margin: 0;
-}
-
-.toggle-switch-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--c-border);
-  border: none;
-  border-radius: 999px;
-  transition: background 0.3s ease;
-  pointer-events: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.toggle-switch-slider::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background: var(--c-black);
-  border: none;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider {
-  background: var(--c-pos);
-}
-
-.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider::before {
-  transform: translateX(20px);
-}
-
-.toggle-switch input[type="checkbox"]:focus + .toggle-switch-slider {
-  outline: 2px solid var(--c-pos);
-  outline-offset: 1px;
-}
-
 /* Type filter row now lives in the toolbar */
 .type-filter-row {
   display: flex;
@@ -571,6 +498,115 @@ button:disabled {
 }
 .ratio-bar span {
   display: inline-block;
+}
+
+/* ============================================
+      BOTTOM SECTION (Score & Dark Mode)
+   ============================================ */
+.bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 2rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#score-display {
+  font-size: 80px;
+  font-weight: 300;
+  color: #b5a8a8;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+#score-display:hover {
+  opacity: 0.8;
+}
+
+#score-display:active {
+  transform: scale(0.98);
+}
+
+.bottom-dark-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.bottom-dark-mode-toggle label {
+  font-size: 0.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.toggle-switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--c-border);
+  border: none;
+  border-radius: 999px;
+  transition: background 0.3s ease;
+  pointer-events: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--c-black);
+  border: none;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider {
+  background: var(--c-pos);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-switch input[type="checkbox"]:focus + .toggle-switch-slider {
+  outline: 2px solid var(--c-pos);
+  outline-offset: 1px;
 }
 
 /* ============================================
@@ -1082,10 +1118,13 @@ footer b {
     font-size: 0.75rem;
   }
 
-  .dark-mode-toggle {
-    width: 100%;
-    justify-content: center;
-    margin-bottom: 8px;
+  #score-display {
+    font-size: 60px;
+  }
+
+  .bottom-section {
+    padding: 1.5rem 1rem;
+    gap: 1rem;
   }
 }
 </style>
@@ -1217,15 +1256,6 @@ footer b {
     </div>
 
     <div class="toolbar-right">
-      <!-- Dark mode toggle -->
-      <div class="dark-mode-toggle">
-        <label for="dark-mode-checkbox">Dark</label>
-        <label class="toggle-switch">
-          <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
-          <span class="toggle-switch-slider"></span>
-        </label>
-      </div>
-
       <!-- Type filters now in the top toolbar, no "Types" title -->
       <div id="typeFilterRow" class="type-filter-row"></div>
 
@@ -1263,6 +1293,18 @@ footer b {
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
+  <!-- Bottom section with Score and Dark Mode toggle -->
+  <div class="bottom-section">
+    <div id="score-display">000</div>
+    <div class="bottom-dark-mode-toggle">
+      <label for="dark-mode-checkbox">Dark</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
+        <span class="toggle-switch-slider"></span>
+      </label>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div class="security-notice">
@@ -1272,7 +1314,7 @@ footer b {
     </div>
 
     <small>
-      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types • Dark mode 🌙<br>
+      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types • Dark mode 🌙 • Score tracker 📊<br>
       <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
@@ -1299,6 +1341,7 @@ const LONG_PRESS_DURATION = 500;
 let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
 let DARK_MODE = false;
+let SCORE = 0;
 
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1335,6 +1378,20 @@ function initDarkMode() {
   if (DARK_MODE) {
     document.documentElement.classList.add('dark-mode');
     checkbox.checked = true;
+  }
+}
+
+/* ============================================
+    SCORE MANAGEMENT
+   ============================================ */
+function formatScore(num) {
+  return String(num).padStart(3, '0');
+}
+
+function renderScore() {
+  const scoreDisplay = document.getElementById('score-display');
+  if (scoreDisplay) {
+    scoreDisplay.textContent = formatScore(SCORE);
   }
 }
 
@@ -1830,7 +1887,7 @@ async function fetchSnapshot() {
 }
 
 /* ============================================
-    URL STATE (muted + metadata + dark mode)
+    URL STATE (muted + metadata + dark mode + score)
    ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
@@ -1848,6 +1905,11 @@ function loadStateFromURL() {
 
   const darkModeParam = params.get('darkMode');
   DARK_MODE = darkModeParam === 'true';
+
+  const scoreParam = params.get('score');
+  if (scoreParam) {
+    SCORE = Number(scoreParam) || 0;
+  }
 
   const limitsParam = params.get('limits');
   const accountMetaParam = params.get('acctMeta');
@@ -1909,6 +1971,10 @@ function saveStateToURL() {
 
   if (DARK_MODE) {
     params.set('darkMode', 'true');
+  }
+
+  if (SCORE !== 0) {
+    params.set('score', SCORE);
   }
 
   const acctMetaObj = {};
@@ -1982,6 +2048,7 @@ function renderAll() {
   renderChart();
   renderTypeSummary();
   renderAccounts();
+  renderScore();
 }
 
 function renderSummary() {
@@ -2804,6 +2871,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', renderChart);
 
+  renderScore();
+
   if (window.google && google.charts) {
     google.charts.load('current', { packages: ['corechart'] });
     google.charts.setOnLoadCallback(fetchSnapshot);
@@ -2820,4 +2889,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
