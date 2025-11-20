@@ -202,12 +202,12 @@ header {
       CHART CONTAINER
    ============================================ */
 #chart { 
-  min-height: 30vh; /* Changed from fixed height to min-height for responsiveness */
+  min-height: 30vh; 
   width: 100%; 
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Safeguard overflow */
-  display: flex;    /* Centering Safeguard */
+  overflow: hidden; 
+  display: flex;    
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -219,7 +219,7 @@ header {
 /* ============================================
       GLOBAL STATUSBAR (█ character)
    ============================================ */
-#statusbar {
+#statusbar, #statusbar-secondary {
   line-height: 3;
   font-size: larger;
   text-align: center;
@@ -243,6 +243,29 @@ hr.divider {
   border-top: 1px solid var(--c-border);
   margin-top: 1rem;
   transition: border-color 0.3s ease;
+}
+
+/* ============================================
+      VISUAL RATIO BAR (New Feature)
+   ============================================ */
+#visual-ratio-bar {
+  width: 100%;
+  height: 30px; /* Approx finger width */
+  display: flex;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+#ratio-asset {
+  background-color: var(--c-pos);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+#ratio-debt {
+  background-color: var(--c-neg);
+  height: 100%;
+  transition: width 0.5s ease;
 }
 
 /* ============================================
@@ -953,6 +976,14 @@ footer b { font-weight: 600; }
   <hr>
   <!-- Statusbar -->
   <section id="statusbar"></section>
+  <!-- Second statusbar placeholder (reserved) -->
+  <section id="statusbar-secondary"></section>
+  <hr>
+  <!-- NEW: Visual Ratio Bar (Asset vs Debt) -->
+  <div id="visual-ratio-bar">
+    <div id="ratio-asset"></div>
+    <div id="ratio-debt"></div>
+  </div>
 </header>
 
 
@@ -1853,6 +1884,11 @@ function renderTypeSummary() {
 function renderStatusbar() {
   const statusbarEl = document.getElementById('statusbar');
   if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+  
+  // Also grab the new visual bar elements
+  const ratioAsset = document.getElementById('ratio-asset');
+  const ratioDebt = document.getElementById('ratio-debt');
+
   if (SNAP.dateAxis.length === 0) { statusbarEl.innerHTML = ''; return; }
 
   let assets = 0, debts = 0;
@@ -1865,14 +1901,28 @@ function renderStatusbar() {
   });
 
   const total = assets + debts;
-  if (total === 0) { statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>'; return; }
+  if (total === 0) { 
+    statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>'; 
+    if(ratioAsset) ratioAsset.style.width = '100%';
+    if(ratioDebt) ratioDebt.style.width = '0%';
+    return; 
+  }
 
+  // Text Bar Logic (Existing)
   const totalBlocks = 100;
   const assetBlocks = Math.round((assets / total) * totalBlocks);
   const debtBlocks = totalBlocks - assetBlocks;
   const assetBar = '█ '.repeat(assetBlocks);
   const debtBar = '█ '.repeat(debtBlocks);
   statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
+
+  // NEW: Visual Bar Logic
+  if (ratioAsset && ratioDebt) {
+    const assetPct = (assets / total) * 100;
+    const debtPct = (debts / total) * 100;
+    ratioAsset.style.width = `${assetPct}%`;
+    ratioDebt.style.width = `${debtPct}%`;
+  }
 }
 
 /* ============================================
