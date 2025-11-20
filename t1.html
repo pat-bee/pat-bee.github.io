@@ -202,10 +202,15 @@ header {
       CHART CONTAINER
    ============================================ */
 #chart { 
-  height: 30vh; 
+  min-height: 30vh; /* Changed from fixed height to min-height for responsiveness */
   width: 100%; 
   margin: 0;
   padding: 0;
+  overflow: hidden; /* Safeguard overflow */
+  display: flex;    /* Centering Safeguard */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 #chart-pager {
   text-align: center;
@@ -1005,8 +1010,8 @@ let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
 let DARK_MODE = false;
 let SCORE = 0;
-let CHART_SLIDE = 0;          // 0..3
-const MAX_CHART_SLIDE = 3;    // 4 chart views total
+let CHART_SLIDE = 0;          // 0..2
+const MAX_CHART_SLIDE = 2;    // 3 chart views total
 
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1820,7 +1825,7 @@ function renderTypeSummary() {
     if (isTypeMuted(typeKey)) typeItem.classList.add('muted');
 
     const valueEl = document.createElement('div');
-    valueEl.className = `type-value ${colorClass}`;
+    valueEl.className = 'type-value ' + colorClass;
     valueEl.textContent = `${signPrefix}${formatMoney(total)}`;
     typeItem.appendChild(valueEl);
 
@@ -1889,8 +1894,8 @@ function renderChart() {
   switch (CHART_SLIDE) {
     case 0: renderBarChart(chartContainer, labels); break;
     case 1: renderLineChartAllAccounts(chartContainer, labels); break;
-    case 2: renderLineChartsPosNeg(chartContainer, labels); break;
-    case 3: renderDonutCharts(chartContainer); break;
+    // Slide 2 is now Donuts (removed pos/neg line chart)
+    case 2: renderDonutCharts(chartContainer); break;
   }
   renderChartPager();
 
@@ -2061,73 +2066,31 @@ function renderLineChartAllAccounts(container, labels) {
   chart.draw(data, options);
 }
 
-// Slide 3: Line Charts Pos/Neg
-function renderLineChartsPosNeg(container, labels) {
-  const posAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a) && (SNAP.series[a.name]?.last ?? 0) >= 0);
-  const negAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a) && (SNAP.series[a.name]?.last ?? 0) < 0);
-
-  container.innerHTML = '';
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = 'display:flex; flex-direction:column; gap:12px; width:100%';
-  const topDiv = document.createElement('div');
-  const bottomDiv = document.createElement('div');
-  topDiv.style.width = bottomDiv.style.width = '100%';
-  topDiv.style.height = bottomDiv.style.height = '220px';
-  wrapper.appendChild(topDiv);
-  wrapper.appendChild(bottomDiv);
-  container.appendChild(wrapper);
-
-  const drawLineSet = (targetEl, accounts, title) => {
-    if (accounts.length === 0) { targetEl.innerHTML = '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data.</div>'; return; }
-    const data = new google.visualization.DataTable();
-    data.addColumn('string', 'Date');
-    accounts.forEach(a => data.addColumn('number', a.name));
-    const rows = [];
-    for (let i = 0; i < labels.length; i++) {
-      const row = [labels[i]];
-      accounts.forEach(a => { const v = SNAP.series[a.name]?.monthly?.[i] ?? 0; row.push(Number(v)); });
-      rows.push(row);
-    }
-    data.addRows(rows);
-    const styles = getComputedStyle(document.documentElement);
-    const pos = styles.getPropertyValue('--c-pos').trim();
-    const neg = styles.getPropertyValue('--c-neg').trim();
-    const fg = styles.getPropertyValue('--c-fg').trim();
-    const textStyle = { color: fg, fontName: 'system-ui' };
-    const colors = accounts.map(a => {
-      const meta = ACCOUNT_METADATA.get(a.name) || {};
-      const baseColor = meta.color || a.color;
-      const isDebt = title.toLowerCase().includes('debt');
-      if (baseColor) return normalizeHexColor(baseColor) || (isDebt ? neg : pos);
-      return isDebt ? neg : pos;
-    });
-    const options = {
-      title, titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
-      backgroundColor: { fill: 'transparent' },
-      chartArea: { width: '88%', height: '65%' },
-      legend: { position: 'top', textStyle },
-      hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
-      vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
-      colors, curveType: 'function', lineWidth: 2, pointSize: 0, animation: { duration: 500, easing: 'out' }
-    };
-    const chart = new google.visualization.LineChart(targetEl);
-    chart.draw(data, options);
-  };
-  drawLineSet(topDiv, posAccounts, 'Positive accounts');
-  drawLineSet(bottomDiv, negAccounts, 'Negative accounts');
-}
-
-// Slide 4: Donuts
+// Slide 3: Donuts
 function renderDonutCharts(container) {
   const styles = getComputedStyle(document.documentElement);
   const fg = styles.getPropertyValue('--c-fg').trim();
   container.innerHTML = '';
+  
+  // Updated wrapper styling for robust centering
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; align-items:stretch; justify-items:center; width:100%';
+  wrap.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:12px; width:100%;';
+  
   const typeDiv = document.createElement('div');
   const allDiv = document.createElement('div');
   const debtDiv = document.createElement('div');
-  [typeDiv, allDiv, debtDiv].forEach(div => { div.style.width = '100%'; div.style.height = '260px'; wrap.appendChild(div); });
+  
+  // Ensure charts have enough size but flex comfortably
+  const commonStyle = 'flex: 1 1 260px; min-width: 260px; max-width: 400px; height: 260px;';
+  typeDiv.style.cssText = commonStyle;
+  allDiv.style.cssText = commonStyle;
+  debtDiv.style.cssText = commonStyle;
+  
+  // Append in order. On wider screens, this places "All Accounts" (allDiv) in the visual center of 3 items.
+  wrap.appendChild(typeDiv);
+  wrap.appendChild(allDiv);
+  wrap.appendChild(debtDiv);
+  
   container.appendChild(wrap);
 
   const typeData = new google.visualization.DataTable();
