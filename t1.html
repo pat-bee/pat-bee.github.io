@@ -219,6 +219,9 @@ header {
   margin: 0;
   padding: 0;
 }
+#chart-pager {
+  text-align: center;
+}
 
 /* ============================================
       GLOBAL STATUSBAR (█ character)
@@ -540,18 +543,77 @@ button:disabled {
   transform: scale(0.98);
 }
 
-.bottom-dark-mode-toggle label {
-  font-size: 0.8rem;
-  font-weight: 300;
-  cursor: pointer;
-  white-space: nowrap;
+.bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 2rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.bottom--mode-toggle label {
-  font-size: 0.8rem;
+#score-display {
+  font-size: 50px;
   font-weight: 300;
+  color: #b5a8a8;
+  font-family: monospace;
+  letter-spacing: 0.2em;
   cursor: pointer;
-  white-space: nowrap;
+  user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  align-items: center;
+}
+
+/* NEW: bottom dark-mode toggle layout */
+.bottom-dark-mode-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* NEW: big checkbox styled like typeFilterRow, but larger */
+.dark-mode-checkbox-label {
+  display: flex;
+  justify-content: center;
+}
+
+.dark-mode-checkbox-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--c-bg);
+  border: 2px solid var(--c-fg);
+  border-radius: 3px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 80% 80%;
+}
+
+.dark-mode-checkbox-label input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.dark-mode-checkbox-label input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--c-pos);
+  outline-offset: 2px;
+}
+
+/* NEW: ◐ / ◑ label under the checkbox */
+.dark-mode-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--c-fg);
+  user-select: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 /* Toggle switch */
@@ -1320,11 +1382,14 @@ footer b {
     </div>
   </div>
   <hr>
+    <hr>
   <div id="chart"></div>
+  <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
   <!-- Statusbar -->
   <section id="statusbar"></section>
 </header>
+
 
 <hr class="wrap divider">
 
@@ -1335,13 +1400,13 @@ footer b {
   <div class="bottom-section">
     <div id="score-display">000</div>
     <div class="bottom-dark-mode-toggle">
-      <label for="dark-mode-checkbox">◐ nite</label>
-      <label class="toggle-switch">
+      <label class="dark-mode-checkbox-label">
         <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
-        <span class="toggle-switch-slider"></span>
       </label>
+      <div id="dark-mode-icon" class="dark-mode-icon">◐</div>
     </div>
   </div>
+
 
   <!-- Footer -->
   <footer>
@@ -1380,6 +1445,8 @@ let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
 let DARK_MODE = false;
 let SCORE = 0;
+let CHART_SLIDE = 0;          // 0..3
+const MAX_CHART_SLIDE = 3;    // 4 chart views total
 
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1395,32 +1462,45 @@ let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
 /* ============================================
     DARK MODE
    ============================================ */
-function toggleDarkMode() {
-  DARK_MODE = !DARK_MODE;
+function applyDarkModeClass() {
   const root = document.documentElement;
-  const icon = document.querySelector('.dark-mode-toggle-icon');
-
   if (DARK_MODE) {
     root.classList.add('dark-mode');
-    icon.textContent = "◑";     // ← Switch to dark symbol
   } else {
     root.classList.remove('dark-mode');
-    icon.textContent = "◐";     // ← Switch back to light symbol
   }
+}
 
-  document.getElementById('dark-mode-checkbox').checked = DARK_MODE;
+function updateDarkModeIcon() {
+  const iconEl = document.getElementById('dark-mode-icon');
+  if (!iconEl) return;
+  // ◐ for light, ◑ for dark
+  iconEl.textContent = DARK_MODE ? '◑' : '◐';
+}
+
+function toggleDarkMode() {
+  DARK_MODE = !DARK_MODE;
+  applyDarkModeClass();
+
+  const checkbox = document.getElementById('dark-mode-checkbox');
+  if (checkbox) checkbox.checked = DARK_MODE;
+
+  updateDarkModeIcon();
   saveStateToURL();
 }
 
 function initDarkMode() {
   const checkbox = document.getElementById('dark-mode-checkbox');
+  if (!checkbox) return;
+
   checkbox.addEventListener('change', toggleDarkMode);
-  
-  if (DARK_MODE) {
-    document.documentElement.classList.add('dark-mode');
-    checkbox.checked = true;
-  }
+
+  // Initial state
+  applyDarkModeClass();
+  checkbox.checked = DARK_MODE;
+  updateDarkModeIcon();
 }
+
 /* ============================================
     AUTO DARK MODE DETECTION
    ============================================ */
@@ -1452,7 +1532,7 @@ function formatScore(num) {
   return String(num).padStart(3, '0');
 }
 
-function renderScore() {
+function re() {
   const scoreDisplay = document.getElementById('score-display');
   if (scoreDisplay) {
     scoreDisplay.textContent = formatScore(SCORE);
@@ -1545,6 +1625,35 @@ async function processUpdateScore(newValue, backdrop, modal) {
     renderScore();
     setLoading(false);
     showToast('Score updated!', 'success');
+  // Swipe support for chart slides on touch devices
+  const chartEl = document.getElementById('chart');
+  if (chartEl) {
+    let touchStartX = null;
+    const SWIPE_THRESHOLD = 40; // px
+
+    chartEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+      }
+    });
+
+    chartEl.addEventListener('touchend', (e) => {
+      if (touchStartX == null) return;
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(diff) > SWIPE_THRESHOLD) {
+        if (diff < 0 && CHART_SLIDE < MAX_CHART_SLIDE) {
+          // swipe left → next slide
+          setChartSlide(CHART_SLIDE + 1);
+        } else if (diff > 0 && CHART_SLIDE > 0) {
+          // swipe right → previous slide
+          setChartSlide(CHART_SLIDE - 1);
+        }
+      }
+    });
+  }
 
   } catch (e) {
     console.error('Score update error:', e);
@@ -2441,15 +2550,497 @@ function renderStatusbar() {
   statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
 }
 
+/* ============================================
+    CHART RENDERING (MULTI-SLIDE)
+   ============================================ */
+
+// Dispatcher: picks which chart slide to show
 function renderChart() {
   if (!SNAP || !window.google || !google.visualization) return;
 
-  const labels = SNAP.dateAxis; 
+  const chartContainer = document.getElementById('chart');
+  if (!chartContainer) return;
+
+  const labels = SNAP.dateAxis;
   if (!labels || labels.length === 0) {
-    document.getElementById('chart').innerHTML =
+    chartContainer.innerHTML =
       '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data for this timeframe.</div>';
+    renderChartPager();
     return;
   }
+
+  // Clear previous contents (each slide may create its own layout)
+  chartContainer.innerHTML = '';
+
+  switch (CHART_SLIDE) {
+    case 0:
+      // Slide 1: original stacked column chart (respecting MODE)
+      renderBarChart(chartContainer, labels);
+      break;
+    case 1:
+      // Slide 2: line chart of ALL accounts
+      renderLineChartAllAccounts(chartContainer, labels);
+      break;
+    case 2:
+      // Slide 3: two line charts (positive vs negative accounts)
+      renderLineChartsPosNeg(chartContainer, labels);
+      break;
+    case 3:
+      // Slide 4: 3 donuts (type, all accounts, debt-only)
+      renderDonutCharts(chartContainer);
+      break;
+  }
+
+  renderChartPager();
+}
+
+// Original chart logic, now as Slide 1
+function renderBarChart(container, labels) {
+  const styles = getComputedStyle(document.documentElement);
+  const pos   = styles.getPropertyValue('--c-pos').trim();
+  const neg   = styles.getPropertyValue('--c-neg').trim();
+  const fg    = styles.getPropertyValue('--c-fg').trim();
+  const textStyle = { color: fg, fontName: 'system-ui' };
+
+  const data = new google.visualization.DataTable();
+  data.addColumn('string', 'Date'); 
+  let rows = [];
+
+  if (MODE === 'totals') {
+    data.addColumn('number', 'Assets');
+    data.addColumn('number', 'Debts');
+
+    for (let i = 0; i < labels.length; i++) { 
+      let assets = 0;
+      let debts = 0;
+
+      SNAP.accounts.forEach(a => {
+        if (isAccountGloballyHidden(a)) return;
+        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+        if (v >= 0) {
+          assets += v;
+        } else {
+          debts += v;
+        }
+      });
+
+      rows.push([labels[i], assets, debts]);
+    }
+  } else if (MODE === 'types') {
+    const typeSeries = SNAP.typeSeries || {};
+    const typeMeta = SNAP.typeMeta || {};
+    const seriesKeys = Object.keys(typeSeries);
+
+    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+    const orderedCodes = [];
+    preferredOrder.forEach(code => {
+      if (seriesKeys.includes(code)) orderedCodes.push(code);
+    });
+    seriesKeys.forEach(code => {
+      if (!orderedCodes.includes(code)) orderedCodes.push(code);
+    });
+
+    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
+
+    visibleTypes.forEach(code => {
+      const baseLabel = TYPE_LABELS[code] || typeMeta[code]?.label || code;
+      data.addColumn('number', baseLabel);
+    });
+
+    for (let i = 0; i < labels.length; i++) {
+      const row = [labels[i]];
+      visibleTypes.forEach(code => {
+        const seriesArr = typeSeries[code] || [];
+        const v = Number(seriesArr[i] ?? 0);
+        row.push(v);
+      });
+      rows.push(row);
+    }
+  } else {
+    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
+    visibleAccounts.forEach(a => data.addColumn('number', a.name));
+
+    for (let i = 0; i < labels.length; i++) {
+      const row = [labels[i]]; 
+      visibleAccounts.forEach(a => {
+        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+        row.push(Number(v));
+      });
+      rows.push(row);
+    }
+  }
+// Slide 2: line chart of ALL accounts
+function renderLineChartAllAccounts(container, labels) {
+  const data = new google.visualization.DataTable();
+  data.addColumn('string', 'Date');
+
+  const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
+  visibleAccounts.forEach(a => data.addColumn('number', a.name));
+
+  const rows = [];
+  for (let i = 0; i < labels.length; i++) {
+    const row = [labels[i]];
+    visibleAccounts.forEach(a => {
+      const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+      row.push(Number(v));
+    });
+    rows.push(row);
+  }
+  data.addRows(rows);
+
+  const styles = getComputedStyle(document.documentElement);
+  const pos   = styles.getPropertyValue('--c-pos').trim();
+  const neg   = styles.getPropertyValue('--c-neg').trim();
+  const fg    = styles.getPropertyValue('--c-fg').trim();
+  const textStyle = { color: fg, fontName: 'system-ui' };
+
+  const chartColors = visibleAccounts.map(a => {
+    const meta = ACCOUNT_METADATA.get(a.name) || {};
+    const baseColor = meta.color || a.color;
+    if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
+    return a.kind === 'debt' ? neg : pos;
+  });
+
+  const options = {
+    height: Math.max(260, Math.round(window.innerHeight * 0.30)),
+    backgroundColor: { fill: 'transparent' },
+    chartArea: { width: '88%', height: '70%' },
+    legend: { position: 'top', alignment: 'center', textStyle },
+    hAxis: {
+      textStyle,
+      showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
+    },
+    vAxis: {
+      baselineColor: fg,
+      gridlines: { color: fg, opacity: 0.1 },
+      textStyle
+    },
+    colors: chartColors,
+    curveType: 'function',
+    lineWidth: 2,
+    pointSize: 0,
+    animation: { duration: 500, easing: 'out' }
+  };
+
+  const chart = new google.visualization.LineChart(container);
+  chart.draw(data, options);
+}
+
+// Slide 3: two line charts, positive vs negative accounts
+function renderLineChartsPosNeg(container, labels) {
+  const posAccounts = SNAP.accounts.filter(a => {
+    if (isAccountGloballyHidden(a)) return false;
+    const last = SNAP.series[a.name]?.last ?? 0;
+    return last >= 0;
+  });
+
+  const negAccounts = SNAP.accounts.filter(a => {
+    if (isAccountGloballyHidden(a)) return false;
+    const last = SNAP.series[a.name]?.last ?? 0;
+    return last < 0;
+  });
+
+  container.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.gap = '12px';
+  wrapper.style.width = '100%';
+
+  const topDiv = document.createElement('div');
+  const bottomDiv = document.createElement('div');
+  topDiv.style.width = bottomDiv.style.width = '100%';
+  topDiv.style.height = bottomDiv.style.height = '220px';
+
+  wrapper.appendChild(topDiv);
+  wrapper.appendChild(bottomDiv);
+  container.appendChild(wrapper);
+
+  const drawLineSet = (targetEl, accounts, title) => {
+    if (accounts.length === 0) {
+      targetEl.innerHTML =
+        '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data.</div>';
+      return;
+    }
+
+    const data = new google.visualization.DataTable();
+    data.addColumn('string', 'Date');
+    accounts.forEach(a => data.addColumn('number', a.name));
+
+    const rows = [];
+    for (let i = 0; i < labels.length; i++) {
+      const row = [labels[i]];
+      accounts.forEach(a => {
+        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
+        row.push(Number(v));
+      });
+      rows.push(row);
+    }
+    data.addRows(rows);
+
+    const styles = getComputedStyle(document.documentElement);
+    const pos   = styles.getPropertyValue('--c-pos').trim();
+    const neg   = styles.getPropertyValue('--c-neg').trim();
+    const fg    = styles.getPropertyValue('--c-fg').trim();
+    const textStyle = { color: fg, fontName: 'system-ui' };
+
+    const colors = accounts.map(a => {
+      const meta = ACCOUNT_METADATA.get(a.name) || {};
+      const baseColor = meta.color || a.color;
+      const isDebt = title.toLowerCase().includes('debt');
+      if (baseColor) return normalizeHexColor(baseColor) || (isDebt ? neg : pos);
+      return isDebt ? neg : pos;
+    });
+
+    const options = {
+      title,
+      titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+      backgroundColor: { fill: 'transparent' },
+      chartArea: { width: '88%', height: '65%' },
+      legend: { position: 'top', textStyle },
+      hAxis: {
+        textStyle,
+        showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
+      },
+      vAxis: {
+        baselineColor: fg,
+        gridlines: { color: fg, opacity: 0.1 },
+        textStyle
+      },
+      colors,
+      curveType: 'function',
+      lineWidth: 2,
+      pointSize: 0,
+      animation: { duration: 500, easing: 'out' }
+    };
+
+    const chart = new google.visualization.LineChart(targetEl);
+    chart.draw(data, options);
+  };
+
+  drawLineSet(topDiv, posAccounts, 'Positive accounts (banks, savings, investments)');
+  drawLineSet(bottomDiv, negAccounts, 'Negative accounts (debts)');
+}
+
+// Slide 4: 3 donuts — by type, all accounts, and debt-only accounts
+function renderDonutCharts(container) {
+  const styles = getComputedStyle(document.documentElement);
+  const fg = styles.getPropertyValue('--c-fg').trim();
+
+  container.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.style.display = 'grid';
+  wrap.style.gridTemplateColumns = 'repeat(auto-fit, minmax(260px, 1fr))';
+  wrap.style.gap = '12px';
+  wrap.style.alignItems = 'stretch';
+  wrap.style.justifyItems = 'center';
+  wrap.style.width = '100%';
+
+  const typeDiv  = document.createElement('div');
+  const allDiv   = document.createElement('div');
+  const debtDiv  = document.createElement('div');
+
+  [typeDiv, allDiv, debtDiv].forEach(div => {
+    div.style.width = '100%';
+    div.style.height = '260px';
+    wrap.appendChild(div);
+  });
+
+  container.appendChild(wrap);
+
+  // 1) Donut by Type
+  const typeData = new google.visualization.DataTable();
+  typeData.addColumn('string', 'Type');
+  typeData.addColumn('number', 'Value');
+
+  const typeTotals = {};
+  SNAP.accounts.forEach(a => {
+    if (isAccountGloballyHidden(a)) return;
+    const s = SNAP.series[a.name] || {};
+    const last = s?.last ?? 0;
+    const t = a.type || 'bk';
+    if (!typeTotals[t]) typeTotals[t] = 0;
+    typeTotals[t] += last;
+  });
+
+  Object.entries(typeTotals).forEach(([code, total]) => {
+    if (total === 0) return;
+    const label = TYPE_LABELS[code] || code;
+    typeData.addRow([label, Math.abs(total)]);
+  });
+
+  const typeChart = new google.visualization.PieChart(typeDiv);
+  typeChart.draw(typeData, {
+    title: 'By Type',
+    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
+    pieHole: 0.6,
+    chartArea: { width: '80%', height: '80%' }
+  });
+
+  // 2) Donut of ALL accounts
+  const allData = new google.visualization.DataTable();
+  allData.addColumn('string', 'Account');
+  allData.addColumn('number', 'Value');
+
+  SNAP.accounts.forEach(a => {
+    if (isAccountGloballyHidden(a)) return;
+    const s = SNAP.series[a.name] || {};
+    const last = s?.last ?? 0;
+    if (last !== 0) {
+      allData.addRow([a.name, Math.abs(last)]);
+    }
+  });
+
+  const allChart = new google.visualization.PieChart(allDiv);
+  allChart.draw(allData, {
+    title: 'All Accounts (by magnitude)',
+    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
+    pieHole: 0.6,
+    chartArea: { width: '80%', height: '80%' }
+  });
+
+  // 3) Donut of NEGATIVE accounts only
+  const debtData = new google.visualization.DataTable();
+  debtData.addColumn('string', 'Account');
+  debtData.addColumn('number', 'Value');
+
+  SNAP.accounts.forEach(a => {
+    if (isAccountGloballyHidden(a)) return;
+    const s = SNAP.series[a.name] || {};
+    const last = s?.last ?? 0;
+    if (last < 0) {
+      debtData.addRow([a.name, Math.abs(last)]);
+    }
+  });
+
+  const debtChart = new google.visualization.PieChart(debtDiv);
+  debtChart.draw(debtData, {
+    title: 'Debt Accounts',
+    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
+    pieHole: 0.6,
+    chartArea: { width: '80%', height: '80%' }
+  });
+}
+
+
+      // Slide navigation + pager dots
+function setChartSlide(index) {
+  if (index < 0) index = 0;
+  if (index > MAX_CHART_SLIDE) index = MAX_CHART_SLIDE;
+  if (index === CHART_SLIDE) return;
+  CHART_SLIDE = index;
+  renderChart();
+}
+
+function renderChartPager() {
+  const pager = document.getElementById('chart-pager');
+  if (!pager) return;
+
+  pager.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.justifyContent = 'center';
+  wrap.style.alignItems = 'center';
+  wrap.style.gap = '8px';
+  wrap.style.padding = '6px 0';
+
+  for (let i = 0; i <= MAX_CHART_SLIDE; i++) {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.setAttribute('aria-label', `Chart view ${i + 1}`);
+    dot.style.width = '8px';
+    dot.style.height = '8px';
+    dot.style.borderRadius = '50%';
+    dot.style.border = '1px solid var(--c-fg)';
+    dot.style.background = (i === CHART_SLIDE) ? 'var(--c-fg)' : 'transparent';
+    dot.style.padding = '0';
+    dot.style.cursor = 'pointer';
+    dot.style.opacity = (i === CHART_SLIDE) ? '1' : '0.5';
+
+    dot.addEventListener('click', () => setChartSlide(i));
+
+    wrap.appendChild(dot);
+  }
+
+  pager.appendChild(wrap);
+}
+
+  data.addRows(rows);
+
+  let minV = 0, maxV = 0;
+  for (const r of rows) {
+    for (let i = 1; i < r.length; i++) {
+      const v = Number(r[i]) || 0;
+      if (v < minV) minV = v;
+      if (v > maxV) maxV = v;
+    }
+  }
+  const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
+
+  let chartColors;
+  if (MODE === 'totals') {
+    chartColors = [pos, neg];
+  } else if (MODE === 'types') {
+    const typeSeries = SNAP.typeSeries || {};
+    const seriesKeys = Object.keys(typeSeries);
+    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+    const orderedCodes = [];
+    preferredOrder.forEach(code => {
+      if (seriesKeys.includes(code)) orderedCodes.push(code);
+    });
+    seriesKeys.forEach(code => {
+      if (!orderedCodes.includes(code)) orderedCodes.push(code);
+    });
+    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
+    chartColors = visibleTypes.map(code => getTypeEffectiveColor(code));
+  } else {
+    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
+    chartColors = visibleAccounts.map(a => {
+      const meta = ACCOUNT_METADATA.get(a.name) || {};
+      const baseColor = meta.color || a.color;
+      if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
+      return a.kind === 'debt' ? neg : pos;
+    });
+  }
+
+  const options = {
+    height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+    backgroundColor: { fill: 'transparent' },
+    chartArea: { width: '90%', height: '70%' },
+    legend: { position: 'top', alignment: 'center', textStyle: textStyle },
+    hAxis: { 
+      slantedText: false, 
+      textStyle: textStyle,
+      showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
+    },
+    vAxis: { 
+      viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
+      baseline: 0, 
+      baselineColor: fg,
+      gridlines: { color: fg, opacity: 0.1 },
+      textStyle: textStyle
+    },
+    isStacked: true,
+    colors: chartColors,
+    animation: {
+      duration: 500,
+      easing: 'out'
+    }
+  };
+
+  const chart = new google.visualization.ColumnChart(container);
+  chart.draw(data, options);
+}
+
 
   const styles = getComputedStyle(document.documentElement);
   const pos   = styles.getPropertyValue('--c-pos').trim();
@@ -3028,7 +3619,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', renderChart);
 
-renderScore();
+re();
 
   // Make score clickable to edit
   document.getElementById('score-display').addEventListener('click', showEditScoreModal);
