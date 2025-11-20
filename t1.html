@@ -57,7 +57,6 @@
   --c-modal-fg: #e0e0e0;
 }
 
-
 /* ============================================
       BASE LAYOUT
    ============================================ */
@@ -95,8 +94,8 @@ header {
   top: 0; 
   background: var(--c-header-bg); 
   z-index: 5; 
-  border-: 1px solid var(--c-border);
-  padding-: 1rem;
+  border-bottom: 1px solid var(--c-border);
+  padding-bottom: 1rem;
   transition: background-color 0.3s ease;
 }
 
@@ -131,7 +130,7 @@ header {
   max-width: 60%;
 }
 
-/* Type filter row now lives in the toolbar */
+/* Type filter row */
 .type-filter-row {
   display: flex;
   flex-wrap: wrap;
@@ -139,7 +138,7 @@ header {
   gap: 0.35rem;
 }
 
-/* Controls row under type filters */
+/* Controls row */
 .toolbar-controls {
   display: flex;
   gap: 0.6rem;
@@ -194,21 +193,10 @@ header {
   opacity: 0.9;
 }
 
-.interest-earned {
-  color: var(--c-pos);
-}
-
-.interest-cost {
-  color: var(--c-neg);
-}
-
-.summary-debt {
-  color: var(--c-neg);
-}
-
-.summary-asset {
-  color: var(--c-pos);
-}
+.interest-earned { color: var(--c-pos); }
+.interest-cost { color: var(--c-neg); }
+.summary-debt { color: var(--c-neg); }
+.summary-asset { color: var(--c-pos); }
 
 /* ============================================
       CHART CONTAINER
@@ -242,13 +230,8 @@ header {
   transition: background-color 0.3s ease;
 }
 
-.status-positive {
-  color: var(--c-pos);
-}
-
-.status-negative {
-  color: var(--c-neg);
-}
+.status-positive { color: var(--c-pos); }
+.status-negative { color: var(--c-neg); }
 
 hr.divider {
   border: none;
@@ -321,15 +304,9 @@ hr.divider {
   position: relative;
 }
 
-.name:hover {
-  opacity: 0.8;
-}
+.name:hover { opacity: 0.8; }
+.name:active { opacity: 0.6; }
 
-.name:active {
-  opacity: 0.6;
-}
-
-/* Credit limit display */
 .limit {
   font-weight: 600;
   font-size: 0.75rem;
@@ -440,14 +417,13 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Compact buttons in the toolbar controls */
 .toolbar-controls button {
   font-size: 0.8rem;
   padding: 0.4rem 0.75rem;
 }
 
 /* ============================================
-      VALUE CHIPS (editable)
+      VALUE CHIPS
    ============================================ */
 .values { 
   display: flex; 
@@ -530,46 +506,12 @@ button:disabled {
   padding: 0;
   margin: 0;
   line-height: 1;
- /*  min-width: 300px; */
-      align-items: center;
-      align: center;
-}
-
-#score-display:hover {
-  opacity: 0.8;
-}
-
-#score-display:active {
-  transform: scale(0.98);
-}
-
-.bottom-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 2rem 2rem 1rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-#score-display {
-  font-size: 50px;
-  font-weight: 300;
-  color: #b5a8a8;
-  font-family: monospace;
-  letter-spacing: 0.2em;
-  cursor: pointer;
-  user-select: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  padding: 0;
-  margin: 0;
-  line-height: 1;
   align-items: center;
 }
 
-/* NEW: bottom dark-mode toggle layout */
+#score-display:hover { opacity: 0.8; }
+#score-display:active { transform: scale(0.98); }
+
 .bottom-dark-mode-toggle {
   display: flex;
   flex-direction: column;
@@ -577,7 +519,6 @@ button:disabled {
   gap: 0.4rem;
 }
 
-/* NEW: big checkbox styled like typeFilterRow, but larger */
 .dark-mode-checkbox-label {
   display: flex;
   justify-content: center;
@@ -607,72 +548,12 @@ button:disabled {
   outline-offset: 2px;
 }
 
-/* NEW: ◐ / ◑ label under the checkbox */
 .dark-mode-icon {
   font-size: 1.3rem;
   line-height: 1;
   color: var(--c-fg);
   user-select: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-/* Toggle switch */
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 2;
-  margin: 0;
-}
-
-.toggle-switch-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--c-border);
-  border: none;
-  border-radius: 999px;
-  transition: background 0.3s ease;
-  pointer-events: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.toggle-switch-slider::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background: var(--c-black);
-  border: none;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider {
-  background: var(--c-pos);
-}
-
-.toggle-switch input[type="checkbox"]:checked + .toggle-switch-slider::before {
-  transform: translateX(20px);
-}
-
-.toggle-switch input[type="checkbox"]:focus + .toggle-switch-slider {
-  outline: 2px solid var(--c-pos);
-  outline-offset: 1px;
 }
 
 /* ============================================
@@ -705,9 +586,7 @@ footer a:hover {
   text-decoration: none;
 }
 
-footer b {
-  font-weight: 600;
-}
+footer b { font-weight: 600; }
 
 .security-notice {
   font-size: 0.7rem;
@@ -804,154 +683,33 @@ footer b {
   transition: opacity 0.3s ease, top 0.3s ease;
 }
 
-.modal-backdrop.show,
-.modal.show {
+.modal-backdrop.show, .modal.show {
   display: block;
   opacity: 1;
 }
 
-.modal h3 {
-  margin-top: 0;
-  color: var(--c-modal-fg);
+.modal h3 { margin-top: 0; color: var(--c-modal-fg); }
+.modal p { margin-top: 0; line-height: 1.4; color: var(--c-modal-fg); }
+.modal-details { font-weight: 600; display: block; margin: 12px 0; font-size: 1.1rem; color: var(--c-modal-fg); }
+.modal-buttons { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+.modal-form-group { margin-bottom: 16px; }
+.modal-form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--c-modal-fg); }
+.modal-form-group input, .modal-form-group select {
+  width: 100%; max-width: 100%; box-sizing: border-box;
+  background: var(--c-input-bg); color: var(--c-fg);
+  border: 1px solid var(--c-input-border); padding: 8px; border-radius: 4px;
 }
 
-.modal p {
-  margin-top: 0;
-  line-height: 1.4;
-  color: var(--c-modal-fg);
-}
+#delete-btn-confirm { background: var(--c-neg); color: var(--c-white); border-color: var(--c-neg); }
+#edit-chip-save, #edit-account-save, #edit-type-save { background: var(--c-pos); color: var(--c-white); border-color: var(--c-pos); }
 
-.modal-details {
-  font-weight: 600;
-  display: block;
-  margin: 12px 0;
-  font-size: 1.1rem;
-  color: var(--c-modal-fg);
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
-
-.modal-form-group {
-  margin-bottom: 16px;
-}
-
-.modal-form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--c-modal-fg);
-}
-
-.modal-form-group input,
-.modal-form-group select {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  background: var(--c-input-bg);
-  color: var(--c-fg);
-  border: 1px solid var(--c-input-border);
-  padding: 8px;
-  border-radius: 4px;
-}
-
-/* Delete modal */
-#delete-btn-confirm {
-  background: var(--c-neg);
-  color: var(--c-white);
-  border-color: var(--c-neg);
-}
-#delete-btn-confirm:hover {
-  background: #802421;
-  border-color: #802421;
-  text-decoration: none;
-}
-
-/* Edit chip modal */
-#edit-chip-modal .modal-form-group input[type="number"] {
-  font-size: 1.2rem;
-  padding: 0.8rem;
-}
-
-#edit-chip-modal .modal-form-group input[type="date"] {
-  font-size: 1rem;
-  padding: 0.8rem;
-}
-
-#edit-chip-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-chip-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
-
-/* Account menu modal */
-#account-menu-modal .modal-buttons {
-  flex-direction: column;
-}
-
-#account-menu-modal .modal-buttons button {
-  width: 100%;
-  text-align: left;
-  padding: 1rem;
-  font-size: 1.1rem;
-}
-
-#account-menu-delete {
-  background: var(--c-neg);
-  color: var(--c-white);
-  border-color: var(--c-neg);
-}
-#account-menu-delete:hover {
-  background: #802421;
-  border-color: #802421;
-}
-
-#account-menu-add {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#account-menu-add:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-}
-
-/* Edit account modal */
-#edit-account-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-account-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
-
-/* Edit type modal */
-#edit-type-save {
-  background: var(--c-pos);
-  color: var(--c-white);
-  border-color: var(--c-pos);
-}
-#edit-type-save:hover {
-  background: #3d6629;
-  border-color: #3d6629;
-  text-decoration: none;
-}
+#account-menu-modal .modal-buttons { flex-direction: column; }
+#account-menu-modal .modal-buttons button { width: 100%; text-align: left; padding: 1rem; font-size: 1.1rem; }
+#account-menu-delete { background: var(--c-neg); color: var(--c-white); border-color: var(--c-neg); }
+#account-menu-add { background: var(--c-pos); color: var(--c-white); border-color: var(--c-pos); }
 
 /* ============================================
-      TYPE SUMMARY ITEMS (in toolbar)
+      TYPE SUMMARY ITEMS
    ============================================ */
 .type-item {
   display: inline-flex;
@@ -965,30 +723,11 @@ footer b {
   color: var(--c-fg);
 }
 
-.type-item.muted {
-  opacity: 0.4;
-}
-
-.type-item .type-value {
-  font-weight: 600;
-  white-space: nowrap;
-  font-size: 0.8rem;
-}
-
-.type-item .type-value.positive {
-  color: var(--c-pos);
-}
-
-.type-item .type-value.negative {
-  color: var(--c-neg);
-}
-
-.type-item .type-label {
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  font-size: 0.7rem;
-  cursor: pointer;
-}
+.type-item.muted { opacity: 0.4; }
+.type-item .type-value { font-weight: 600; white-space: nowrap; font-size: 0.8rem; }
+.type-item .type-value.positive { color: var(--c-pos); }
+.type-item .type-value.negative { color: var(--c-neg); }
+.type-item .type-label { font-weight: 500; letter-spacing: 0.06em; font-size: 0.7rem; cursor: pointer; }
 
 .type-toggle-label {
   font-size: 0.65rem;
@@ -1000,231 +739,61 @@ footer b {
 }
 
 .type-toggle-label input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  margin: 0;
-  cursor: pointer;
-  background: white;
-  border: 1.5px solid black;
-  border-radius: 2px;
-  font-size: 10px;
-  font-weight: bold;
+  appearance: none; -webkit-appearance: none; width: 14px; height: 14px; margin: 0; cursor: pointer;
+  background: white; border: 1.5px solid black; border-radius: 2px;
 }
-
 .type-toggle-label input[type="checkbox"]:checked {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
 }
 
 /* ============================================
-      MUTE TOGGLE (per-account)
+      MUTE TOGGLE
    ============================================ */
-.mute-checkbox {
-  position: relative;
-  width: 48px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.mute-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  z-index: 2;
-  margin: 0;
-}
-
+.mute-checkbox { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
+.mute-checkbox input[type="checkbox"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0; }
 .mute-checkbox-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--c-pos);
-  border: none;
-  border-radius: 999px;
-  transition: background 0.3s ease;
-  pointer-events: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--c-pos); border: none; border-radius: 999px;
+  transition: background 0.3s ease; pointer-events: none; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-
 .mute-checkbox-slider::before {
-  content: '';
-  position: absolute;
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background: var(--c-white);
-  border: none;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  content: ''; position: absolute; height: 22px; width: 22px; left: 3px; bottom: 3px; background: var(--c-white); border: none; border-radius: 50%;
+  transition: transform 0.3s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider { background: var(--c-muted); }
+.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before { transform: translateX(20px); }
 
-.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider {
-  background: var(--c-muted);
-}
-
-.mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before {
-  transform: translateX(20px);
-}
-
-.mute-checkbox input[type="checkbox"]:focus + .mute-checkbox-slider {
-  outline: 3px solid var(--c-pos);
-  outline-offset: 2px;
-}
+.row.muted { opacity: 0.5; }
+.row.muted * { color: var(--c-muted) !important; border-color: var(--c-muted) !important; background-color: transparent !important; }
+.row.muted input[type="number"] { background: transparent !important; color: var(--c-muted) !important; }
+.row.muted .mute-checkbox-slider { background: var(--c-muted) !important; border-color: var(--c-muted) !important; }
+.row.muted .mute-checkbox-slider::before { background: var(--c-white) !important; border-color: var(--c-muted) !important; }
 
 /* ============================================
-      MUTED ACCOUNT STATE
-   ============================================ */
-.row.muted {
-  opacity: 0.5;
-}
-
-.row.muted * {
-  color: var(--c-muted) !important;
-  border-color: var(--c-muted) !important;
-  background-color: transparent !important;
-}
-
-.row.muted input[type="number"] {
-  background: transparent !important;
-  color: var(--c-muted) !important;
-}
-
-.row.muted .mute-checkbox-slider {
-  background: var(--c-muted) !important;
-  border-color: var(--c-muted) !important;
-}
-
-.row.muted .mute-checkbox-slider::before {
-  background: var(--c-white) !important;
-  border-color: var(--c-muted) !important;
-}
-
-/* ============================================
-      MOBILE RESPONSIVE
+      MOBILE
    ============================================ */
 @media (max-width: 650px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .right { 
-    min-width: unset; 
-    text-align: left; 
-    align-self: flex-start;
-    padding-top: 0.5rem; 
-  }
-
-  .right .values {
-    display: none;
-  }
-  .right .ratio-bar {
-    display: block;
-  }
-
-  .left {
-    gap: 8px;
-    width: 100%;
-    padding-right: 0;
-  }
-
-  input[type="number"], input[type="date"], input[type="text"], input[type="url"] { 
-    width: 100%; 
-    max-width: 100%;
-  }
-
-  .input-line {
-    width: 100%;
-    margin-left: 0;
-    padding-top: 0;
-  }
-
-  .apr {
-    padding-top: 0;
-  }
-
-  .toolbar { 
-    flex-direction: column; 
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 6px 16px 10px 16px;
-  }
-
-  .financial-group {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  #financial-summary {
-    font-size: 4.2rem;
-    padding-bottom: 4px;
-    width: 100%;
-    text-align: center;
-  }
-
-  #interest-summary {
-    font-size: 1.8rem;
-    width: 100%;
-    text-align: center;
-    padding-bottom: 4px;
-  }
-
-  .toolbar-right {
-    align-items: center;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .type-filter-row {
-    justify-content: center;
-  }
-
-  .toolbar-controls {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .lastval, .name {
-    font-size: 2rem;
-  }
-
-  footer, footer small, footer a, .security-notice {
-    font-size: 0.75rem;
-  }
-
-  #score-display {
-    font-size: 60px;
-  }
-
-  .bottom-section {
-    padding: 1.5rem 1rem;
-    gap: 1rem;
-  }
-
-.dark-mode-toggle-icon {
-  font-size: 1.3rem;
-  line-height: 1;
-  color: var(--c-fg);
-  user-select: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon {
-  transform: rotate(180deg);
-  opacity: 0.9;
-}
-
-      
+  .row { flex-direction: column; }
+  .right { min-width: unset; text-align: left; align-self: flex-start; padding-top: 0.5rem; }
+  .right .values { display: none; }
+  .right .ratio-bar { display: block; }
+  .left { gap: 8px; width: 100%; padding-right: 0; }
+  input[type="number"], input[type="date"], input[type="text"], input[type="url"] { width: 100%; max-width: 100%; }
+  .input-line { width: 100%; margin-left: 0; padding-top: 0; }
+  .apr { padding-top: 0; }
+  .toolbar { flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 6px 16px 10px 16px; }
+  .financial-group { flex-direction: column; align-items: center; width: 100%; }
+  #financial-summary { font-size: 4.2rem; padding-bottom: 4px; width: 100%; text-align: center; }
+  #interest-summary { font-size: 1.8rem; width: 100%; text-align: center; padding-bottom: 4px; }
+  .toolbar-right { align-items: center; max-width: 100%; width: 100%; }
+  .type-filter-row { justify-content: center; }
+  .toolbar-controls { justify-content: center; width: 100%; }
+  .lastval, .name { font-size: 2rem; }
+  footer, footer small, footer a, .security-notice { font-size: 0.75rem; }
+  #score-display { font-size: 60px; }
+  .bottom-section { padding: 1.5rem 1rem; gap: 1rem; }
+  .dark-mode-toggle-icon { font-size: 1.3rem; line-height: 1; color: var(--c-fg); user-select: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+  .dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon { transform: rotate(180deg); opacity: 0.9; }
 }
 </style>
 </head>
@@ -1282,7 +851,6 @@ footer b {
 <div id="edit-account-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-account-modal-title">
   <h3 id="edit-account-modal-title">Edit Account</h3>
   <p id="edit-account-name" style="font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem;"></p>
-
   <div class="modal-form-group">
     <label for="edit-account-type">Type:</label>
     <select id="edit-account-type">
@@ -1293,7 +861,6 @@ footer b {
       <option value="sv">Savings</option>
     </select>
   </div>
-
   <div class="modal-form-group">
     <label for="edit-account-color">Account Color (hex):</label>
     <div style="display:flex; gap:8px; align-items:center;">
@@ -1301,27 +868,22 @@ footer b {
       <input type="text" id="edit-account-color" placeholder="#4c8036" style="flex:1;">
     </div>
   </div>
-
   <div class="modal-form-group">
     <label for="edit-account-link">Account Link (login URL, etc.):</label>
     <input type="url" id="edit-account-link" placeholder="https://...">
   </div>
-
   <div class="modal-form-group">
     <label for="edit-account-limit">Credit Limit (for CC accounts):</label>
     <input type="number" id="edit-account-limit" step="1" placeholder="e.g. 5000">
   </div>
-
   <div class="modal-form-group">
     <label for="edit-account-apr">APR (as decimal, e.g. 0.29 for 29%):</label>
     <input type="number" id="edit-account-apr" step="0.01" placeholder="e.g. 0.29">
   </div>
-
   <div class="modal-form-group">
     <label for="edit-account-value">Current Value:</label>
     <input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
   </div>
-
   <div id="edit-account-buttons" class="modal-buttons">
     <button id="edit-account-cancel">Cancel</button>
     <button id="edit-account-save">Save Changes</button>
@@ -1355,22 +917,21 @@ footer b {
     </div>
 
     <div class="toolbar-right">
-      <!-- Type filters now in the top toolbar, no "Types" title -->
       <div id="typeFilterRow" class="type-filter-row"></div>
 
       <div class="toolbar-controls">
         <label for="timeframe">Timeframe:</label>
         <select id="timeframe">
-  <option value="3d" selected>Last 3 Days</option>
-  <option value="today">Today</option>
-  <option value="7d">Last 7 Days</option>
-  <option value="14d">Last 14 Days</option>
-  <option value="30d">Last 30 Days</option>
-  <option value="90d">Last 90 Days</option>
-  <option value="1y">Last Year (12mo)</option>
-  <option value="ytd">This Calendar Year</option>
-  <option value="all">All Time</option>
-</select>
+          <option value="3d" selected>Last 3 Days</option>
+          <option value="today">Today</option>
+          <option value="7d">Last 7 Days</option>
+          <option value="14d">Last 14 Days</option>
+          <option value="30d">Last 30 Days</option>
+          <option value="90d">Last 90 Days</option>
+          <option value="1y">Last Year (12mo)</option>
+          <option value="ytd">This Calendar Year</option>
+          <option value="all">All Time</option>
+        </select>
 
         <label><input type="radio" name="mode" value="totals" checked> Totals</label>
         <label><input type="radio" name="mode" value="types"> Type</label>
@@ -1382,7 +943,6 @@ footer b {
     </div>
   </div>
   <hr>
-    <hr>
   <div id="chart"></div>
   <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
@@ -1427,7 +987,7 @@ footer b {
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbyzB5dWYxfICEILjyA-5y6JoxoiaEThIiuqUDnfZrTaZIQo0JYagwUl4SDnD_cw-wt9Kg/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbxP6jjDKmp3Smuvt3wbi3r3RedrzD9iXL0bUxXoURUnqzg__WdChtVED8NlySoxNhTp0g/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
@@ -1474,17 +1034,14 @@ function applyDarkModeClass() {
 function updateDarkModeIcon() {
   const iconEl = document.getElementById('dark-mode-icon');
   if (!iconEl) return;
-  // ◐ for light, ◑ for dark
   iconEl.textContent = DARK_MODE ? '◑' : '◐';
 }
 
 function toggleDarkMode() {
   DARK_MODE = !DARK_MODE;
   applyDarkModeClass();
-
   const checkbox = document.getElementById('dark-mode-checkbox');
   if (checkbox) checkbox.checked = DARK_MODE;
-
   updateDarkModeIcon();
   saveStateToURL();
 }
@@ -1492,26 +1049,18 @@ function toggleDarkMode() {
 function initDarkMode() {
   const checkbox = document.getElementById('dark-mode-checkbox');
   if (!checkbox) return;
-
   checkbox.addEventListener('change', toggleDarkMode);
-
-  // Initial state
   applyDarkModeClass();
   checkbox.checked = DARK_MODE;
   updateDarkModeIcon();
 }
 
-/* ============================================
-    AUTO DARK MODE DETECTION
-   ============================================ */
 function shouldAutoEnableDarkMode() {
   const hour = new Date().getHours();
-  // Enable dark mode between 8 PM (20:00) and 6 AM
   return hour >= 20 || hour < 6;
 }
 
 function initializeTheme() {
-  // Check URL first (user preference takes priority)
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   const darkModeParam = params.get('darkMode');
@@ -1521,10 +1070,10 @@ function initializeTheme() {
   } else if (darkModeParam === 'false') {
     DARK_MODE = false;
   } else {
-    // Auto-detect based on time if no preference saved
     DARK_MODE = shouldAutoEnableDarkMode();
   }
 }
+
 /* ============================================
     SCORE MANAGEMENT
    ============================================ */
@@ -1532,12 +1081,13 @@ function formatScore(num) {
   return String(num).padStart(3, '0');
 }
 
-function re() {
+function renderScore() {
   const scoreDisplay = document.getElementById('score-display');
   if (scoreDisplay) {
     scoreDisplay.textContent = formatScore(SCORE);
   }
 }
+
 /* ============================================
     SCORE EDITING
    ============================================ */
@@ -1621,39 +1171,11 @@ async function processUpdateScore(newValue, backdrop, modal) {
     }
 
     SCORE = val;
+    // We no longer save score to URL, but we call this to save other state prefs
     saveStateToURL();
     renderScore();
     setLoading(false);
     showToast('Score updated!', 'success');
-  // Swipe support for chart slides on touch devices
-  const chartEl = document.getElementById('chart');
-  if (chartEl) {
-    let touchStartX = null;
-    const SWIPE_THRESHOLD = 40; // px
-
-    chartEl.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        touchStartX = e.touches[0].clientX;
-      }
-    });
-
-    chartEl.addEventListener('touchend', (e) => {
-      if (touchStartX == null) return;
-      const endX = e.changedTouches[0].clientX;
-      const diff = endX - touchStartX;
-      touchStartX = null;
-
-      if (Math.abs(diff) > SWIPE_THRESHOLD) {
-        if (diff < 0 && CHART_SLIDE < MAX_CHART_SLIDE) {
-          // swipe left → next slide
-          setChartSlide(CHART_SLIDE + 1);
-        } else if (diff > 0 && CHART_SLIDE > 0) {
-          // swipe right → previous slide
-          setChartSlide(CHART_SLIDE - 1);
-        }
-      }
-    });
-  }
 
   } catch (e) {
     console.error('Score update error:', e);
@@ -1661,6 +1183,7 @@ async function processUpdateScore(newValue, backdrop, modal) {
     showToast('Failed to update score: ' + e.message, 'error', 5000);
   }
 }
+
 /* ============================================
     UI UTILITIES
    ============================================ */
@@ -1679,15 +1202,12 @@ function showToast(msg, type = 'info', duration = 3000) {
 
 function setLoading(loading, message) {
   IS_LOADING = loading;
-
   document.getElementById('refresh').disabled = loading;
   document.getElementById('submitAll').disabled = loading;
-
   document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
     inp.disabled = loading;
     inp.classList.toggle('submitting', loading);
   });
-
   if (message && !document.getElementById('delete-modal-backdrop').classList.contains('show')) {
     showToast(message, 'info', loading ? 10000 : 3000);
   }
@@ -1698,17 +1218,14 @@ function setLoading(loading, message) {
    ============================================ */
 function showDeleteConfirm(account, date, value, readableValue) {
   if (IS_LOADING) return;
-
   const backdrop = document.getElementById('delete-modal-backdrop');
   const modal = document.getElementById('delete-modal');
   const details = document.getElementById('delete-modal-details');
   const confirmBtn = document.getElementById('delete-btn-confirm');
 
   details.textContent = `${account}: ${readableValue} on ${date}`;
-
   backdrop.classList.add('show');
   modal.classList.add('show');
-
   confirmBtn.onclick = () => processDelete(account, date, value);
 }
 
@@ -1729,11 +1246,8 @@ async function processDelete(account, date, value) {
 
     const res = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body });
     const text = await res.text();
-
     let j;
-    try { 
-      j = JSON.parse(text); 
-    } catch {
+    try { j = JSON.parse(text); } catch {
       console.error('Delete non-JSON:', text);
       showToast('Delete failed (non-JSON response)', 'error', 5000);
       setLoading(false);
@@ -1746,10 +1260,8 @@ async function processDelete(account, date, value) {
       setLoading(false);
       return;
     }
-
     showToast('Entry deleted. Refreshing…', 'success');
     await fetchSnapshot();
-
   } catch (e) {
     console.error(e);
     setLoading(false);
@@ -1762,7 +1274,6 @@ async function processDelete(account, date, value) {
    ============================================ */
 function showEditChipModal(account, date, value, readableValue) {
   if (IS_LOADING) return;
-
   const backdrop = document.getElementById('edit-chip-modal-backdrop');
   const modal = document.getElementById('edit-chip-modal');
   const details = document.getElementById('edit-chip-details');
@@ -1773,7 +1284,6 @@ function showEditChipModal(account, date, value, readableValue) {
 
   details.textContent = `Account: ${account}`;
   valueInput.value = Number(value);
-
   const dateParts = date.split('/');
   if (dateParts.length === 3) {
     const [month, day, year] = dateParts;
@@ -1781,10 +1291,8 @@ function showEditChipModal(account, date, value, readableValue) {
   } else {
     dateInput.value = '';
   }
-
   backdrop.classList.add('show');
   modal.classList.add('show');
-
   setTimeout(() => valueInput.focus(), 100);
 
   saveBtn.onclick = () => processEditChip(account, date, value);
@@ -1801,7 +1309,6 @@ function hideEditChipModal() {
 
 async function processEditChip(originalAccount, originalDate, originalValue) {
   if (IS_LOADING) return;
-
   const valueInput = document.getElementById('edit-chip-value');
   const dateInput = document.getElementById('edit-chip-date');
 
@@ -1812,7 +1319,6 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
     showToast('Please enter a valid non-zero value', 'error');
     return;
   }
-
   if (!newDateISO) {
     showToast('Please select a date', 'error');
     return;
@@ -1826,42 +1332,25 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
 
   try {
     const deleteBody = new URLSearchParams({ 
-      payload: JSON.stringify({ 
-        account: originalAccount, 
-        date: originalDate, 
-        value: Number(originalValue) 
-      }) 
+      payload: JSON.stringify({ account: originalAccount, date: originalDate, value: Number(originalValue) }) 
     });
-
     const deleteRes = await fetch(`${API_BASE}?route=delete`, { method: 'POST', body: deleteBody });
     const deleteText = await deleteRes.text();
     const deleteJson = JSON.parse(deleteText);
-
-    if (!deleteJson.ok) {
-      throw new Error('Delete failed: ' + (deleteJson.error || 'Unknown'));
-    }
+    if (!deleteJson.ok) throw new Error('Delete failed: ' + (deleteJson.error || 'Unknown'));
 
     const submitBody = new URLSearchParams({ 
       payload: JSON.stringify({ 
-        entries: [{ 
-          account: originalAccount, 
-          value: newValue,
-          date: newDate
-        }] 
+        entries: [{ account: originalAccount, value: newValue, date: newDate }] 
       }) 
     });
-
     const submitRes = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body: submitBody });
     const submitText = await submitRes.text();
     const submitJson = JSON.parse(submitText);
-
-    if (!submitJson.ok) {
-      throw new Error('Submit failed: ' + (submitJson.error || 'Unknown'));
-    }
+    if (!submitJson.ok) throw new Error('Submit failed: ' + (submitJson.error || 'Unknown'));
 
     showToast('Entry updated! Refreshing…', 'success');
     await fetchSnapshot();
-
   } catch (e) {
     console.error('Edit error:', e);
     setLoading(false);
@@ -1874,7 +1363,6 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
    ============================================ */
 function showAccountMenu(accountName) {
   if (IS_LOADING) return;
-
   const backdrop = document.getElementById('account-menu-modal-backdrop');
   const modal = document.getElementById('account-menu-modal');
   const accountNameEl = document.getElementById('account-menu-account-name');
@@ -1883,24 +1371,12 @@ function showAccountMenu(accountName) {
   const editBtn = document.getElementById('account-menu-edit');
 
   accountNameEl.textContent = accountName;
-
   backdrop.classList.add('show');
   modal.classList.add('show');
 
-  editBtn.onclick = () => {
-    hideAccountMenu();
-    showEditAccountModal(accountName);
-  };
-
-  deleteBtn.onclick = () => {
-    hideAccountMenu();
-    showToast('Account deletion coming in a future version.', 'info', 3000);
-  };
-
-  addBtn.onclick = () => {
-    hideAccountMenu();
-    showToast('Add account feature coming in a future version.', 'info', 3000);
-  };
+  editBtn.onclick = () => { hideAccountMenu(); showEditAccountModal(accountName); };
+  deleteBtn.onclick = () => { hideAccountMenu(); showToast('Account deletion coming in a future version.', 'info', 3000); };
+  addBtn.onclick = () => { hideAccountMenu(); showToast('Add account feature coming in a future version.', 'info', 3000); };
 }
 
 function hideAccountMenu() {
@@ -1922,32 +1398,26 @@ function normalizeHexColor(value) {
 
 function showEditAccountModal(accountName) {
   if (IS_LOADING) return;
-
-  const backdrop   = document.getElementById('edit-account-modal-backdrop');
-  const modal      = document.getElementById('edit-account-modal');
-  const nameEl     = document.getElementById('edit-account-name');
+  const backdrop = document.getElementById('edit-account-modal-backdrop');
+  const modal = document.getElementById('edit-account-modal');
+  const nameEl = document.getElementById('edit-account-name');
   const typeSelect = document.getElementById('edit-account-type');
   const limitInput = document.getElementById('edit-account-limit');
-  const aprInput   = document.getElementById('edit-account-apr');
+  const aprInput = document.getElementById('edit-account-apr');
   const valueInput = document.getElementById('edit-account-value');
   const colorInput = document.getElementById('edit-account-color');
   const colorPicker = document.getElementById('edit-account-color-picker');
-  const linkInput  = document.getElementById('edit-account-link');
-  const saveBtn    = document.getElementById('edit-account-save');
+  const linkInput = document.getElementById('edit-account-link');
+  const saveBtn = document.getElementById('edit-account-save');
 
   nameEl.textContent = accountName;
-
   const account = SNAP?.accounts?.find(a => a.name === accountName);
-  if (!account) {
-    showToast('Account not found', 'error');
-    return;
-  }
+  if (!account) { showToast('Account not found', 'error'); return; }
 
   const metadata = ACCOUNT_METADATA.get(accountName) || {};
-
   typeSelect.value = account.type || 'bk';
   limitInput.value = metadata.limit || '';
-  aprInput.value   = account.apr || 0;
+  aprInput.value = account.apr || 0;
 
   const series = SNAP?.series?.[accountName];
   const currentValue = series?.last ?? 0;
@@ -1957,22 +1427,14 @@ function showEditAccountModal(accountName) {
   const normalized = normalizeHexColor(effectiveColor) || '#4c8036';
   colorInput.value = normalized;
   colorPicker.value = normalized;
-
   linkInput.value = metadata.link || '';
 
-  colorPicker.oninput = () => {
-    colorInput.value = colorPicker.value;
-  };
-  colorInput.oninput = () => {
-    const norm = normalizeHexColor(colorInput.value);
-    if (norm) colorPicker.value = norm;
-  };
+  colorPicker.oninput = () => { colorInput.value = colorPicker.value; };
+  colorInput.oninput = () => { const norm = normalizeHexColor(colorInput.value); if (norm) colorPicker.value = norm; };
 
   backdrop.classList.add('show');
   modal.classList.add('show');
-
   setTimeout(() => typeSelect.focus(), 100);
-
   saveBtn.onclick = () => processEditAccount(accountName);
 }
 
@@ -1983,32 +1445,30 @@ function hideEditAccountModal() {
 
 async function processEditAccount(accountName) {
   if (IS_LOADING) return;
-
   const typeSelect = document.getElementById('edit-account-type');
   const limitInput = document.getElementById('edit-account-limit');
-  const aprInput   = document.getElementById('edit-account-apr');
+  const aprInput = document.getElementById('edit-account-apr');
   const valueInput = document.getElementById('edit-account-value');
   const colorInput = document.getElementById('edit-account-color');
-  const linkInput  = document.getElementById('edit-account-link');
+  const linkInput = document.getElementById('edit-account-link');
 
-  const newType  = (typeSelect.value || 'bk').trim();
+  const newType = (typeSelect.value || 'bk').trim();
   const newLimit = limitInput.value ? Number(limitInput.value) : null;
-  const newAPR   = Number(aprInput.value);
+  const newAPR = Number(aprInput.value);
   const newValue = Number(valueInput.value);
-  const newLink  = linkInput.value ? linkInput.value.trim() : '';
-
+  const newLink = linkInput.value ? linkInput.value.trim() : '';
   const newColor = normalizeHexColor(colorInput.value);
 
   const meta = ACCOUNT_METADATA.get(accountName) || {};
   meta.limit = (newLimit && newLimit > 0) ? newLimit : null;
   meta.color = newColor || null;
-  meta.link  = newLink || null;
+  meta.link = newLink || null;
   ACCOUNT_METADATA.set(accountName, meta);
 
   const account = SNAP?.accounts?.find(a => a.name === accountName);
   if (account) {
     account.type = newType;
-    account.apr  = isNaN(newAPR) ? account.apr : newAPR;
+    account.apr = isNaN(newAPR) ? account.apr : newAPR;
   }
 
   saveStateToURL();
@@ -2021,19 +1481,12 @@ async function processEditAccount(accountName) {
     setLoading(true, 'Updating account value…');
     try {
       const body = new URLSearchParams({ 
-        payload: JSON.stringify({ 
-          entries: [{ account: accountName, value: newValue }] 
-        }) 
+        payload: JSON.stringify({ entries: [{ account: accountName, value: newValue }] }) 
       });
-
       const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
       const text = await res.text();
       const j = JSON.parse(text);
-
-      if (!j.ok) {
-        throw new Error(j.error || 'Submit failed');
-      }
-
+      if (!j.ok) throw new Error(j.error || 'Submit failed');
       showToast('Account updated! Refreshing…', 'success');
       await fetchSnapshot();
     } catch (e) {
@@ -2053,40 +1506,32 @@ async function processEditAccount(accountName) {
 function getTypeEffectiveColor(typeCode) {
   const override = TYPE_META_OVERRIDES.get(typeCode);
   if (override && override.color) return override.color;
-
   const metaAPI = SNAP?.typeMeta?.[typeCode];
   if (metaAPI && metaAPI.color) return normalizeHexColor(metaAPI.color) || null;
-
   if (typeCode === 'cc' || typeCode === 'bill') return '#a02d2a';
   return '#4c8036';
 }
 
 function showEditTypeModal(typeCode, labelText) {
   if (IS_LOADING) return;
-
   const backdrop = document.getElementById('edit-type-modal-backdrop');
-  const modal    = document.getElementById('edit-type-modal');
-  const nameEl   = document.getElementById('edit-type-name');
-  const picker   = document.getElementById('edit-type-color-picker');
-  const input    = document.getElementById('edit-type-color');
-  const saveBtn  = document.getElementById('edit-type-save');
+  const modal = document.getElementById('edit-type-modal');
+  const nameEl = document.getElementById('edit-type-name');
+  const picker = document.getElementById('edit-type-color-picker');
+  const input = document.getElementById('edit-type-color');
+  const saveBtn = document.getElementById('edit-type-save');
 
   nameEl.textContent = `${labelText} (${typeCode})`;
-
   const current = getTypeEffectiveColor(typeCode) || '#4c8036';
   const norm = normalizeHexColor(current) || '#4c8036';
   picker.value = norm;
-  input.value  = norm;
+  input.value = norm;
 
   picker.oninput = () => { input.value = picker.value; };
-  input.oninput  = () => {
-    const norm = normalizeHexColor(input.value);
-    if (norm) picker.value = norm;
-  };
+  input.oninput = () => { const norm = normalizeHexColor(input.value); if (norm) picker.value = norm; };
 
   backdrop.classList.add('show');
   modal.classList.add('show');
-
   saveBtn.onclick = () => processEditType(typeCode);
 }
 
@@ -2098,12 +1543,10 @@ function hideEditTypeModal() {
 function processEditType(typeCode) {
   const input = document.getElementById('edit-type-color');
   const color = normalizeHexColor(input.value);
-
   if (!color) {
     showToast('Please enter a valid 6-digit hex color (e.g. #4C8036).', 'error', 4000);
     return;
   }
-
   TYPE_META_OVERRIDES.set(typeCode, { color });
   saveStateToURL();
   hideEditTypeModal();
@@ -2121,63 +1564,56 @@ async function fetchSnapshot() {
   try {
     const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
     const text = await res.text();
-
     let j;
-    try { 
-      j = JSON.parse(text); 
-    } catch {
-      console.error('Non-JSON response:', text); 
+    try { j = JSON.parse(text); } catch {
+      console.error('Non-JSON response:', text);
       showToast('Error: API returned non-JSON. Check console.', 'error', 5000);
       setLoading(false);
       return;
     }
-
     if (!j.ok) {
-      console.error('Snapshot error:', j); 
+      console.error('Snapshot error:', j);
       showToast('Error: ' + (j.error || 'snapshot failed'), 'error', 5000);
       setLoading(false);
       return;
     }
 
     SNAP = j;
-    console.log('Snapshot loaded:', SNAP); 
+    
+    // --- NEW: Update Score from Database ---
+    if (SNAP.score !== undefined) {
+      SCORE = Number(SNAP.score);
+    }
+    // ---------------------------------------
 
+    console.log('Snapshot loaded:', SNAP);
     setLoading(false);
     renderAll();
-
   } catch (err) {
-    console.error('Fetch failed:', err); 
+    console.error('Fetch failed:', err);
     setLoading(false);
     showToast('Fetch failed (see console)', 'error', 5000);
   }
 }
 
 /* ============================================
-    URL STATE (muted + metadata + dark mode + score)
+    URL STATE (muted + metadata + dark mode)
    ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
 
   const mutedParam = params.get('muted');
-  if (mutedParam) {
-    MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
-  }
+  if (mutedParam) MUTED_ACCOUNTS = new Set(mutedParam.split(',').filter(a => a));
 
   const mutedTypesParam = params.get('mutedTypes');
-  if (mutedTypesParam) {
-    MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
-  }
+  if (mutedTypesParam) MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
 
   const darkModeParam = params.get('darkMode');
   DARK_MODE = darkModeParam === 'true';
 
-  const scoreParam = params.get('score');
-  if (scoreParam) {
-    SCORE = Number(scoreParam) || 0;
-  }
+  // NOTE: We no longer load 'score' from URL, as it comes from the database now.
 
-  const limitsParam = params.get('limits');
   const accountMetaParam = params.get('acctMeta');
   const typeMetaParam = params.get('typeMeta');
 
@@ -2192,18 +1628,7 @@ function loadStateFromURL() {
           link: meta.link || null
         });
       });
-    } catch (e) {
-      console.error('Failed to parse acctMeta from URL:', e);
-    }
-  } else if (limitsParam) {
-    try {
-      const limitsData = JSON.parse(decodeURIComponent(limitsParam));
-      Object.entries(limitsData).forEach(([account, limit]) => {
-        ACCOUNT_METADATA.set(account, { limit: Number(limit) });
-      });
-    } catch (e) {
-      console.error('Failed to parse limits from URL:', e);
-    }
+    } catch (e) { console.error('Failed to parse acctMeta from URL:', e); }
   }
 
   TYPE_META_OVERRIDES = new Map();
@@ -2216,9 +1641,7 @@ function loadStateFromURL() {
           if (norm) TYPE_META_OVERRIDES.set(code, { color: norm });
         }
       });
-    } catch (e) {
-      console.error('Failed to parse typeMeta from URL:', e);
-    }
+    } catch (e) { console.error('Failed to parse typeMeta from URL:', e); }
   }
 }
 
@@ -2226,22 +1649,14 @@ function saveStateToURL() {
   const params = new URLSearchParams();
 
   const mutedArray = Array.from(MUTED_ACCOUNTS);
-  if (mutedArray.length > 0) {
-    params.set('muted', mutedArray.join(','));
-  }
+  if (mutedArray.length > 0) params.set('muted', mutedArray.join(','));
 
   const mutedTypesArray = Array.from(MUTED_TYPES);
-  if (mutedTypesArray.length > 0) {
-    params.set('mutedTypes', mutedTypesArray.join(','));
-  }
+  if (mutedTypesArray.length > 0) params.set('mutedTypes', mutedTypesArray.join(','));
 
-  if (DARK_MODE) {
-    params.set('darkMode', 'true');
-  }
+  if (DARK_MODE) params.set('darkMode', 'true');
 
-  if (SCORE !== 0) {
-    params.set('score', SCORE);
-  }
+  // NOTE: We no longer save 'score' to URL.
 
   const acctMetaObj = {};
   ACCOUNT_METADATA.forEach((meta, accountName) => {
@@ -2249,54 +1664,36 @@ function saveStateToURL() {
     if (meta.limit) m.limit = meta.limit;
     if (meta.color) m.color = meta.color;
     if (meta.link)  m.link  = meta.link;
-    if (Object.keys(m).length > 0) {
-      acctMetaObj[accountName] = m;
-    }
+    if (Object.keys(m).length > 0) acctMetaObj[accountName] = m;
   });
-  if (Object.keys(acctMetaObj).length > 0) {
-    params.set('acctMeta', encodeURIComponent(JSON.stringify(acctMetaObj)));
-  }
+  if (Object.keys(acctMetaObj).length > 0) params.set('acctMeta', encodeURIComponent(JSON.stringify(acctMetaObj)));
 
   const typeMetaObj = {};
   TYPE_META_OVERRIDES.forEach((meta, typeCode) => {
-    if (meta.color) {
-      typeMetaObj[typeCode] = { color: meta.color };
-    }
+    if (meta.color) typeMetaObj[typeCode] = { color: meta.color };
   });
-  if (Object.keys(typeMetaObj).length > 0) {
-    params.set('typeMeta', encodeURIComponent(JSON.stringify(typeMetaObj)));
-  }
+  if (Object.keys(typeMetaObj).length > 0) params.set('typeMeta', encodeURIComponent(JSON.stringify(typeMetaObj)));
 
   window.location.hash = params.toString();
 }
 
 function toggleAccountMute(accountName) {
-  if (MUTED_ACCOUNTS.has(accountName)) {
-    MUTED_ACCOUNTS.delete(accountName);
-  } else {
-    MUTED_ACCOUNTS.add(accountName);
-  }
+  if (MUTED_ACCOUNTS.has(accountName)) MUTED_ACCOUNTS.delete(accountName);
+  else MUTED_ACCOUNTS.add(accountName);
   saveStateToURL();
   renderAll();
 }
 
-function isAccountMuted(accountName) {
-  return MUTED_ACCOUNTS.has(accountName);
-}
+function isAccountMuted(accountName) { return MUTED_ACCOUNTS.has(accountName); }
 
 function toggleTypeMute(typeCode) {
-  if (MUTED_TYPES.has(typeCode)) {
-    MUTED_TYPES.delete(typeCode);
-  } else {
-    MUTED_TYPES.add(typeCode);
-  }
+  if (MUTED_TYPES.has(typeCode)) MUTED_TYPES.delete(typeCode);
+  else MUTED_TYPES.add(typeCode);
   saveStateToURL();
   renderAll();
 }
 
-function isTypeMuted(typeCode) {
-  return MUTED_TYPES.has(typeCode);
-}
+function isTypeMuted(typeCode) { return MUTED_TYPES.has(typeCode); }
 
 function isAccountGloballyHidden(account) {
   if (isAccountMuted(account.name)) return true;
@@ -2326,83 +1723,47 @@ function renderSummary() {
     return;
   }
 
-  let assets = 0;
-  let debts = 0;
-
+  let assets = 0, debts = 0;
   SNAP.accounts.forEach(a => {
     if (isAccountGloballyHidden(a)) return;
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
-    if (last >= 0) {
-      assets += last;
-    } else {
-      debts += Math.abs(last);
-    }
+    if (last >= 0) assets += last;
+    else debts += Math.abs(last);
   });
 
   const assetClass = assets > debts ? 'bold-value' : '';
-  const debtClass  = debts > assets ? 'bold-value' : '';
-
+  const debtClass = debts > assets ? 'bold-value' : '';
   const assetString = `<span class="summary-asset ${assetClass}">${formatMoney(assets)}</span>`;
-  const debtString  = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
-
+  const debtString = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
   summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
 }
 
 function renderInterestSummary() {
   const summaryEl = document.getElementById('interest-summary');
   if (!summaryEl || !SNAP || !SNAP.accounts) return;
-
-  let totalEarnings = 0;
-  let totalCosts = 0;
-  let periodLabel = '';
+  let totalEarnings = 0, totalCosts = 0, periodLabel = '';
 
   SNAP.accounts.forEach(a => {
     if (isAccountGloballyHidden(a)) return;
-
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
     const apr = a.apr || 0;
-
     if (apr === 0 || last === 0) return;
-
     const dailyRate = (last * apr) / 365;
     let interestAmount = 0;
 
     switch (TIMEFRAME) {
-      case 'today':
-        interestAmount = dailyRate * 1;
-        periodLabel = '/dy';
-        break;
-      case '7d':
-        interestAmount = dailyRate * 7;
-        periodLabel = '/wk';
-        break;
-      case '14d':
-        interestAmount = dailyRate * 14;
-        periodLabel = '/2w';
-        break;
-      case '30d':
-        interestAmount = dailyRate * 30;
-        periodLabel = '/mo';
-        break;
-      case '90d':
-        interestAmount = dailyRate * 90;
-        periodLabel = '/qt';
-        break;
-      case '1y':
-      case 'ytd':
-      case 'all':
-        interestAmount = last * apr;
-        periodLabel = '/yr';
-        break;
+      case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
+      case '7d': interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
+      case '14d': interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
+      case '30d': interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
+      case '90d': interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+      case '1y': case 'ytd': case 'all': interestAmount = last * apr; periodLabel = '/yr'; break;
     }
 
-    if (interestAmount > 0) {
-      totalEarnings += interestAmount;
-    } else {
-      totalCosts += interestAmount;
-    }
+    if (interestAmount > 0) totalEarnings += interestAmount;
+    else totalCosts += interestAmount;
   });
 
   if (Math.abs(totalEarnings) < 0.01 && Math.abs(totalCosts) < 0.01) {
@@ -2410,38 +1771,25 @@ function renderInterestSummary() {
     return;
   }
 
-  const earningsStr = totalEarnings >= 0.01 
-    ? `<span class="interest-earned">+${formatMoney(totalEarnings)}${periodLabel}</span>` 
-    : '';
-
-  const costsStr = Math.abs(totalCosts) >= 0.01 
-    ? `<span class="interest-cost">${formatMoney(totalCosts)}${periodLabel}</span>` 
-    : '';
-
+  const earningsStr = totalEarnings >= 0.01 ? `<span class="interest-earned">+${formatMoney(totalEarnings)}${periodLabel}</span>` : '';
+  const costsStr = Math.abs(totalCosts) >= 0.01 ? `<span class="interest-cost">${formatMoney(totalCosts)}${periodLabel}</span>` : '';
   const displayParts = [];
   if (earningsStr) displayParts.push(earningsStr);
   if (costsStr) displayParts.push(costsStr);
 
-  if (displayParts.length > 0) {
-    summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
-  } else {
-    summaryEl.innerHTML = '';
-  }
+  if (displayParts.length > 0) summaryEl.innerHTML = `Interest: ${displayParts.join(' <span style="font-weight: 300;">|</span> ')}`;
+  else summaryEl.innerHTML = '';
 }
 
 function renderTypeSummary() {
   const container = document.getElementById('typeFilterRow');
   if (!container || !SNAP || !SNAP.accounts) return;
-
   container.hidden = false;
   container.innerHTML = '';
 
   const typeTotals = {};
   const typeMeta = SNAP.typeMeta || {};
-
-  Object.keys(typeMeta).forEach(code => {
-    typeTotals[code] = 0;
-  });
+  Object.keys(typeMeta).forEach(code => { typeTotals[code] = 0; });
 
   SNAP.accounts.forEach(a => {
     const s = SNAP.series[a.name] || {};
@@ -2455,13 +1803,8 @@ function renderTypeSummary() {
   const metaKeys = Object.keys(typeTotals);
   const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
   const orderedCodes = [];
-
-  preferredOrder.forEach(code => {
-    if (metaKeys.includes(code)) orderedCodes.push(code);
-  });
-  metaKeys.forEach(code => {
-    if (!orderedCodes.includes(code)) orderedCodes.push(code);
-  });
+  preferredOrder.forEach(code => { if (metaKeys.includes(code)) orderedCodes.push(code); });
+  metaKeys.forEach(code => { if (!orderedCodes.includes(code)) orderedCodes.push(code); });
 
   orderedCodes.forEach(typeKey => {
     const total = typeTotals[typeKey] || 0;
@@ -2486,26 +1829,18 @@ function renderTypeSummary() {
     labelEl.textContent = label;
     labelEl.style.color = typeColor;
     labelEl.title = 'Double-click to change this Type color';
-    labelEl.addEventListener('dblclick', () => {
-      showEditTypeModal(typeKey, label);
-    });
+    labelEl.addEventListener('dblclick', () => showEditTypeModal(typeKey, label));
     typeItem.appendChild(labelEl);
 
     const toggleLabel = document.createElement('label');
     toggleLabel.className = 'type-toggle-label';
-
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.dataset.typeCode = typeKey;
     cb.checked = !isTypeMuted(typeKey);
-
-    cb.addEventListener('change', () => {
-      toggleTypeMute(typeKey);
-    });
-
+    cb.addEventListener('change', () => toggleTypeMute(typeKey));
     toggleLabel.appendChild(cb);
     typeItem.appendChild(toggleLabel);
-
     container.appendChild(typeItem);
   });
 }
@@ -2513,140 +1848,108 @@ function renderTypeSummary() {
 function renderStatusbar() {
   const statusbarEl = document.getElementById('statusbar');
   if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+  if (SNAP.dateAxis.length === 0) { statusbarEl.innerHTML = ''; return; }
 
-  if (SNAP.dateAxis.length === 0) {
-    statusbarEl.innerHTML = '';
-    return;
-  }
-
-  let assets = 0;
-  let debts = 0;
-
+  let assets = 0, debts = 0;
   SNAP.accounts.forEach(a => {
     if (isAccountGloballyHidden(a)) return;
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
-    if (last >= 0) {
-      assets += last;
-    } else {
-      debts += Math.abs(last);
-    }
+    if (last >= 0) assets += last;
+    else debts += Math.abs(last);
   });
 
   const total = assets + debts;
-
-  if (total === 0) {
-    statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>';
-    return;
-  }
+  if (total === 0) { statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>'; return; }
 
   const totalBlocks = 100;
   const assetBlocks = Math.round((assets / total) * totalBlocks);
   const debtBlocks = totalBlocks - assetBlocks;
-
   const assetBar = '█ '.repeat(assetBlocks);
-  const debtBar  = '█ '.repeat(debtBlocks);
-
+  const debtBar = '█ '.repeat(debtBlocks);
   statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
 }
 
 /* ============================================
     CHART RENDERING (MULTI-SLIDE)
    ============================================ */
-
-// Dispatcher: picks which chart slide to show
 function renderChart() {
   if (!SNAP || !window.google || !google.visualization) return;
-
   const chartContainer = document.getElementById('chart');
   if (!chartContainer) return;
 
   const labels = SNAP.dateAxis;
   if (!labels || labels.length === 0) {
-    chartContainer.innerHTML =
-      '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data for this timeframe.</div>';
+    chartContainer.innerHTML = '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data for this timeframe.</div>';
     renderChartPager();
     return;
   }
 
-  // Clear previous contents (each slide may create its own layout)
   chartContainer.innerHTML = '';
-
   switch (CHART_SLIDE) {
-    case 0:
-      // Slide 1: original stacked column chart (respecting MODE)
-      renderBarChart(chartContainer, labels);
-      break;
-    case 1:
-      // Slide 2: line chart of ALL accounts
-      renderLineChartAllAccounts(chartContainer, labels);
-      break;
-    case 2:
-      // Slide 3: two line charts (positive vs negative accounts)
-      renderLineChartsPosNeg(chartContainer, labels);
-      break;
-    case 3:
-      // Slide 4: 3 donuts (type, all accounts, debt-only)
-      renderDonutCharts(chartContainer);
-      break;
+    case 0: renderBarChart(chartContainer, labels); break;
+    case 1: renderLineChartAllAccounts(chartContainer, labels); break;
+    case 2: renderLineChartsPosNeg(chartContainer, labels); break;
+    case 3: renderDonutCharts(chartContainer); break;
   }
-
   renderChartPager();
+
+  // Add swipe listeners for charts
+  let touchStartX = null;
+  const SWIPE_THRESHOLD = 40;
+  chartContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) touchStartX = e.touches[0].clientX;
+  });
+  chartContainer.addEventListener('touchend', (e) => {
+    if (touchStartX == null) return;
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(diff) > SWIPE_THRESHOLD) {
+      if (diff < 0 && CHART_SLIDE < MAX_CHART_SLIDE) setChartSlide(CHART_SLIDE + 1);
+      else if (diff > 0 && CHART_SLIDE > 0) setChartSlide(CHART_SLIDE - 1);
+    }
+  });
 }
 
-// Original chart logic, now as Slide 1
+// Slide 1: Original Bar Chart
 function renderBarChart(container, labels) {
   const styles = getComputedStyle(document.documentElement);
-  const pos   = styles.getPropertyValue('--c-pos').trim();
-  const neg   = styles.getPropertyValue('--c-neg').trim();
-  const fg    = styles.getPropertyValue('--c-fg').trim();
+  const pos = styles.getPropertyValue('--c-pos').trim();
+  const neg = styles.getPropertyValue('--c-neg').trim();
+  const fg = styles.getPropertyValue('--c-fg').trim();
   const textStyle = { color: fg, fontName: 'system-ui' };
 
   const data = new google.visualization.DataTable();
-  data.addColumn('string', 'Date'); 
+  data.addColumn('string', 'Date');
   let rows = [];
 
   if (MODE === 'totals') {
     data.addColumn('number', 'Assets');
     data.addColumn('number', 'Debts');
-
-    for (let i = 0; i < labels.length; i++) { 
-      let assets = 0;
-      let debts = 0;
-
+    for (let i = 0; i < labels.length; i++) {
+      let assets = 0, debts = 0;
       SNAP.accounts.forEach(a => {
         if (isAccountGloballyHidden(a)) return;
         const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-        if (v >= 0) {
-          assets += v;
-        } else {
-          debts += v;
-        }
+        if (v >= 0) assets += v; else debts += v;
       });
-
       rows.push([labels[i], assets, debts]);
     }
   } else if (MODE === 'types') {
     const typeSeries = SNAP.typeSeries || {};
     const typeMeta = SNAP.typeMeta || {};
     const seriesKeys = Object.keys(typeSeries);
-
     const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
     const orderedCodes = [];
-    preferredOrder.forEach(code => {
-      if (seriesKeys.includes(code)) orderedCodes.push(code);
-    });
-    seriesKeys.forEach(code => {
-      if (!orderedCodes.includes(code)) orderedCodes.push(code);
-    });
+    preferredOrder.forEach(code => { if (seriesKeys.includes(code)) orderedCodes.push(code); });
+    seriesKeys.forEach(code => { if (!orderedCodes.includes(code)) orderedCodes.push(code); });
 
     const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
-
     visibleTypes.forEach(code => {
       const baseLabel = TYPE_LABELS[code] || typeMeta[code]?.label || code;
       data.addColumn('number', baseLabel);
     });
-
     for (let i = 0; i < labels.length; i++) {
       const row = [labels[i]];
       visibleTypes.forEach(code => {
@@ -2659,9 +1962,8 @@ function renderBarChart(container, labels) {
   } else {
     const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
     visibleAccounts.forEach(a => data.addColumn('number', a.name));
-
     for (let i = 0; i < labels.length; i++) {
-      const row = [labels[i]]; 
+      const row = [labels[i]];
       visibleAccounts.forEach(a => {
         const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
         row.push(Number(v));
@@ -2669,14 +1971,61 @@ function renderBarChart(container, labels) {
       rows.push(row);
     }
   }
-// Slide 2: line chart of ALL accounts
+  data.addRows(rows);
+
+  let minV = 0, maxV = 0;
+  for (const r of rows) {
+    for (let i = 1; i < r.length; i++) {
+      const v = Number(r[i]) || 0;
+      if (v < minV) minV = v;
+      if (v > maxV) maxV = v;
+    }
+  }
+  const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
+
+  let chartColors;
+  if (MODE === 'totals') {
+    chartColors = [pos, neg];
+  } else if (MODE === 'types') {
+    const typeSeries = SNAP.typeSeries || {};
+    const seriesKeys = Object.keys(typeSeries);
+    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
+    const orderedCodes = [];
+    preferredOrder.forEach(code => { if (seriesKeys.includes(code)) orderedCodes.push(code); });
+    seriesKeys.forEach(code => { if (!orderedCodes.includes(code)) orderedCodes.push(code); });
+    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
+    chartColors = visibleTypes.map(code => getTypeEffectiveColor(code));
+  } else {
+    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
+    chartColors = visibleAccounts.map(a => {
+      const meta = ACCOUNT_METADATA.get(a.name) || {};
+      const baseColor = meta.color || a.color;
+      if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
+      return a.kind === 'debt' ? neg : pos;
+    });
+  }
+
+  const options = {
+    height: Math.max(240, Math.round(window.innerHeight * 0.30)),
+    backgroundColor: { fill: 'transparent' },
+    chartArea: { width: '90%', height: '70%' },
+    legend: { position: 'top', alignment: 'center', textStyle: textStyle },
+    hAxis: { slantedText: false, textStyle: textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
+    vAxis: { viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, baseline: 0, baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle: textStyle },
+    isStacked: true,
+    colors: chartColors,
+    animation: { duration: 500, easing: 'out' }
+  };
+  const chart = new google.visualization.ColumnChart(container);
+  chart.draw(data, options);
+}
+
+// Slide 2: Line chart ALL
 function renderLineChartAllAccounts(container, labels) {
   const data = new google.visualization.DataTable();
   data.addColumn('string', 'Date');
-
   const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
   visibleAccounts.forEach(a => data.addColumn('number', a.name));
-
   const rows = [];
   for (let i = 0; i < labels.length; i++) {
     const row = [labels[i]];
@@ -2687,104 +2036,64 @@ function renderLineChartAllAccounts(container, labels) {
     rows.push(row);
   }
   data.addRows(rows);
-
   const styles = getComputedStyle(document.documentElement);
-  const pos   = styles.getPropertyValue('--c-pos').trim();
-  const neg   = styles.getPropertyValue('--c-neg').trim();
-  const fg    = styles.getPropertyValue('--c-fg').trim();
+  const pos = styles.getPropertyValue('--c-pos').trim();
+  const neg = styles.getPropertyValue('--c-neg').trim();
+  const fg = styles.getPropertyValue('--c-fg').trim();
   const textStyle = { color: fg, fontName: 'system-ui' };
-
   const chartColors = visibleAccounts.map(a => {
     const meta = ACCOUNT_METADATA.get(a.name) || {};
     const baseColor = meta.color || a.color;
     if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
     return a.kind === 'debt' ? neg : pos;
   });
-
   const options = {
     height: Math.max(260, Math.round(window.innerHeight * 0.30)),
     backgroundColor: { fill: 'transparent' },
     chartArea: { width: '88%', height: '70%' },
     legend: { position: 'top', alignment: 'center', textStyle },
-    hAxis: {
-      textStyle,
-      showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
-    },
-    vAxis: {
-      baselineColor: fg,
-      gridlines: { color: fg, opacity: 0.1 },
-      textStyle
-    },
+    hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
+    vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
     colors: chartColors,
-    curveType: 'function',
-    lineWidth: 2,
-    pointSize: 0,
-    animation: { duration: 500, easing: 'out' }
+    curveType: 'function', lineWidth: 2, pointSize: 0, animation: { duration: 500, easing: 'out' }
   };
-
   const chart = new google.visualization.LineChart(container);
   chart.draw(data, options);
 }
 
-// Slide 3: two line charts, positive vs negative accounts
+// Slide 3: Line Charts Pos/Neg
 function renderLineChartsPosNeg(container, labels) {
-  const posAccounts = SNAP.accounts.filter(a => {
-    if (isAccountGloballyHidden(a)) return false;
-    const last = SNAP.series[a.name]?.last ?? 0;
-    return last >= 0;
-  });
-
-  const negAccounts = SNAP.accounts.filter(a => {
-    if (isAccountGloballyHidden(a)) return false;
-    const last = SNAP.series[a.name]?.last ?? 0;
-    return last < 0;
-  });
+  const posAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a) && (SNAP.series[a.name]?.last ?? 0) >= 0);
+  const negAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a) && (SNAP.series[a.name]?.last ?? 0) < 0);
 
   container.innerHTML = '';
-
   const wrapper = document.createElement('div');
-  wrapper.style.display = 'flex';
-  wrapper.style.flexDirection = 'column';
-  wrapper.style.gap = '12px';
-  wrapper.style.width = '100%';
-
+  wrapper.style.cssText = 'display:flex; flex-direction:column; gap:12px; width:100%';
   const topDiv = document.createElement('div');
   const bottomDiv = document.createElement('div');
   topDiv.style.width = bottomDiv.style.width = '100%';
   topDiv.style.height = bottomDiv.style.height = '220px';
-
   wrapper.appendChild(topDiv);
   wrapper.appendChild(bottomDiv);
   container.appendChild(wrapper);
 
   const drawLineSet = (targetEl, accounts, title) => {
-    if (accounts.length === 0) {
-      targetEl.innerHTML =
-        '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data.</div>';
-      return;
-    }
-
+    if (accounts.length === 0) { targetEl.innerHTML = '<div style="text-align:center; padding-top: 20px; color: var(--c-fg);">No data.</div>'; return; }
     const data = new google.visualization.DataTable();
     data.addColumn('string', 'Date');
     accounts.forEach(a => data.addColumn('number', a.name));
-
     const rows = [];
     for (let i = 0; i < labels.length; i++) {
       const row = [labels[i]];
-      accounts.forEach(a => {
-        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-        row.push(Number(v));
-      });
+      accounts.forEach(a => { const v = SNAP.series[a.name]?.monthly?.[i] ?? 0; row.push(Number(v)); });
       rows.push(row);
     }
     data.addRows(rows);
-
     const styles = getComputedStyle(document.documentElement);
-    const pos   = styles.getPropertyValue('--c-pos').trim();
-    const neg   = styles.getPropertyValue('--c-neg').trim();
-    const fg    = styles.getPropertyValue('--c-fg').trim();
+    const pos = styles.getPropertyValue('--c-pos').trim();
+    const neg = styles.getPropertyValue('--c-neg').trim();
+    const fg = styles.getPropertyValue('--c-fg').trim();
     const textStyle = { color: fg, fontName: 'system-ui' };
-
     const colors = accounts.map(a => {
       const meta = ACCOUNT_METADATA.get(a.name) || {};
       const baseColor = meta.color || a.color;
@@ -2792,149 +2101,55 @@ function renderLineChartsPosNeg(container, labels) {
       if (baseColor) return normalizeHexColor(baseColor) || (isDebt ? neg : pos);
       return isDebt ? neg : pos;
     });
-
     const options = {
-      title,
-      titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+      title, titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
       backgroundColor: { fill: 'transparent' },
       chartArea: { width: '88%', height: '65%' },
       legend: { position: 'top', textStyle },
-      hAxis: {
-        textStyle,
-        showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
-      },
-      vAxis: {
-        baselineColor: fg,
-        gridlines: { color: fg, opacity: 0.1 },
-        textStyle
-      },
-      colors,
-      curveType: 'function',
-      lineWidth: 2,
-      pointSize: 0,
-      animation: { duration: 500, easing: 'out' }
+      hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
+      vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
+      colors, curveType: 'function', lineWidth: 2, pointSize: 0, animation: { duration: 500, easing: 'out' }
     };
-
     const chart = new google.visualization.LineChart(targetEl);
     chart.draw(data, options);
   };
-
-  drawLineSet(topDiv, posAccounts, 'Positive accounts (banks, savings, investments)');
-  drawLineSet(bottomDiv, negAccounts, 'Negative accounts (debts)');
+  drawLineSet(topDiv, posAccounts, 'Positive accounts');
+  drawLineSet(bottomDiv, negAccounts, 'Negative accounts');
 }
 
-// Slide 4: 3 donuts — by type, all accounts, and debt-only accounts
+// Slide 4: Donuts
 function renderDonutCharts(container) {
   const styles = getComputedStyle(document.documentElement);
   const fg = styles.getPropertyValue('--c-fg').trim();
-
   container.innerHTML = '';
-
   const wrap = document.createElement('div');
-  wrap.style.display = 'grid';
-  wrap.style.gridTemplateColumns = 'repeat(auto-fit, minmax(260px, 1fr))';
-  wrap.style.gap = '12px';
-  wrap.style.alignItems = 'stretch';
-  wrap.style.justifyItems = 'center';
-  wrap.style.width = '100%';
-
-  const typeDiv  = document.createElement('div');
-  const allDiv   = document.createElement('div');
-  const debtDiv  = document.createElement('div');
-
-  [typeDiv, allDiv, debtDiv].forEach(div => {
-    div.style.width = '100%';
-    div.style.height = '260px';
-    wrap.appendChild(div);
-  });
-
+  wrap.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; align-items:stretch; justify-items:center; width:100%';
+  const typeDiv = document.createElement('div');
+  const allDiv = document.createElement('div');
+  const debtDiv = document.createElement('div');
+  [typeDiv, allDiv, debtDiv].forEach(div => { div.style.width = '100%'; div.style.height = '260px'; wrap.appendChild(div); });
   container.appendChild(wrap);
 
-  // 1) Donut by Type
   const typeData = new google.visualization.DataTable();
-  typeData.addColumn('string', 'Type');
-  typeData.addColumn('number', 'Value');
-
+  typeData.addColumn('string', 'Type'); typeData.addColumn('number', 'Value');
   const typeTotals = {};
-  SNAP.accounts.forEach(a => {
-    if (isAccountGloballyHidden(a)) return;
-    const s = SNAP.series[a.name] || {};
-    const last = s?.last ?? 0;
-    const t = a.type || 'bk';
-    if (!typeTotals[t]) typeTotals[t] = 0;
-    typeTotals[t] += last;
-  });
+  SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; const t = a.type || 'bk'; if (!typeTotals[t]) typeTotals[t]=0; typeTotals[t]+=last; });
+  Object.entries(typeTotals).forEach(([code, total]) => { if (total !== 0) typeData.addRow([TYPE_LABELS[code] || code, Math.abs(total)]); });
+  new google.visualization.PieChart(typeDiv).draw(typeData, { title: 'By Type', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 
-  Object.entries(typeTotals).forEach(([code, total]) => {
-    if (total === 0) return;
-    const label = TYPE_LABELS[code] || code;
-    typeData.addRow([label, Math.abs(total)]);
-  });
-
-  const typeChart = new google.visualization.PieChart(typeDiv);
-  typeChart.draw(typeData, {
-    title: 'By Type',
-    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
-    backgroundColor: 'transparent',
-    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
-    pieHole: 0.6,
-    chartArea: { width: '80%', height: '80%' }
-  });
-
-  // 2) Donut of ALL accounts
   const allData = new google.visualization.DataTable();
-  allData.addColumn('string', 'Account');
-  allData.addColumn('number', 'Value');
+  allData.addColumn('string', 'Account'); allData.addColumn('number', 'Value');
+  SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last !== 0) allData.addRow([a.name, Math.abs(last)]); });
+  new google.visualization.PieChart(allDiv).draw(allData, { title: 'All Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 
-  SNAP.accounts.forEach(a => {
-    if (isAccountGloballyHidden(a)) return;
-    const s = SNAP.series[a.name] || {};
-    const last = s?.last ?? 0;
-    if (last !== 0) {
-      allData.addRow([a.name, Math.abs(last)]);
-    }
-  });
-
-  const allChart = new google.visualization.PieChart(allDiv);
-  allChart.draw(allData, {
-    title: 'All Accounts (by magnitude)',
-    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
-    backgroundColor: 'transparent',
-    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
-    pieHole: 0.6,
-    chartArea: { width: '80%', height: '80%' }
-  });
-
-  // 3) Donut of NEGATIVE accounts only
   const debtData = new google.visualization.DataTable();
-  debtData.addColumn('string', 'Account');
-  debtData.addColumn('number', 'Value');
-
-  SNAP.accounts.forEach(a => {
-    if (isAccountGloballyHidden(a)) return;
-    const s = SNAP.series[a.name] || {};
-    const last = s?.last ?? 0;
-    if (last < 0) {
-      debtData.addRow([a.name, Math.abs(last)]);
-    }
-  });
-
-  const debtChart = new google.visualization.PieChart(debtDiv);
-  debtChart.draw(debtData, {
-    title: 'Debt Accounts',
-    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
-    backgroundColor: 'transparent',
-    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
-    pieHole: 0.6,
-    chartArea: { width: '80%', height: '80%' }
-  });
+  debtData.addColumn('string', 'Account'); debtData.addColumn('number', 'Value');
+  SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last < 0) debtData.addRow([a.name, Math.abs(last)]); });
+  new google.visualization.PieChart(debtDiv).draw(debtData, { title: 'Debt Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 }
 
-
-      // Slide navigation + pager dots
 function setChartSlide(index) {
-  if (index < 0) index = 0;
-  if (index > MAX_CHART_SLIDE) index = MAX_CHART_SLIDE;
+  if (index < 0) index = 0; if (index > MAX_CHART_SLIDE) index = MAX_CHART_SLIDE;
   if (index === CHART_SLIDE) return;
   CHART_SLIDE = index;
   renderChart();
@@ -2943,244 +2158,17 @@ function setChartSlide(index) {
 function renderChartPager() {
   const pager = document.getElementById('chart-pager');
   if (!pager) return;
-
   pager.innerHTML = '';
-
   const wrap = document.createElement('div');
-  wrap.style.display = 'flex';
-  wrap.style.justifyContent = 'center';
-  wrap.style.alignItems = 'center';
-  wrap.style.gap = '8px';
-  wrap.style.padding = '6px 0';
-
+  wrap.style.cssText = 'display:flex; justify-content:center; align-items:center; gap:8px; padding:6px 0';
   for (let i = 0; i <= MAX_CHART_SLIDE; i++) {
     const dot = document.createElement('button');
     dot.type = 'button';
-    dot.setAttribute('aria-label', `Chart view ${i + 1}`);
-    dot.style.width = '8px';
-    dot.style.height = '8px';
-    dot.style.borderRadius = '50%';
-    dot.style.border = '1px solid var(--c-fg)';
-    dot.style.background = (i === CHART_SLIDE) ? 'var(--c-fg)' : 'transparent';
-    dot.style.padding = '0';
-    dot.style.cursor = 'pointer';
-    dot.style.opacity = (i === CHART_SLIDE) ? '1' : '0.5';
-
-    dot.addEventListener('click', () => setChartSlide(i));
-
+    dot.style.cssText = `width:8px; height:8px; border-radius:50%; border:1px solid var(--c-fg); background:${i === CHART_SLIDE ? 'var(--c-fg)' : 'transparent'}; padding:0; cursor:pointer; opacity:${i === CHART_SLIDE ? '1' : '0.5'}`;
+    dot.onclick = () => setChartSlide(i);
     wrap.appendChild(dot);
   }
-
   pager.appendChild(wrap);
-}
-
-  data.addRows(rows);
-
-  let minV = 0, maxV = 0;
-  for (const r of rows) {
-    for (let i = 1; i < r.length; i++) {
-      const v = Number(r[i]) || 0;
-      if (v < minV) minV = v;
-      if (v > maxV) maxV = v;
-    }
-  }
-  const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
-
-  let chartColors;
-  if (MODE === 'totals') {
-    chartColors = [pos, neg];
-  } else if (MODE === 'types') {
-    const typeSeries = SNAP.typeSeries || {};
-    const seriesKeys = Object.keys(typeSeries);
-    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
-    const orderedCodes = [];
-    preferredOrder.forEach(code => {
-      if (seriesKeys.includes(code)) orderedCodes.push(code);
-    });
-    seriesKeys.forEach(code => {
-      if (!orderedCodes.includes(code)) orderedCodes.push(code);
-    });
-    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
-    chartColors = visibleTypes.map(code => getTypeEffectiveColor(code));
-  } else {
-    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
-    chartColors = visibleAccounts.map(a => {
-      const meta = ACCOUNT_METADATA.get(a.name) || {};
-      const baseColor = meta.color || a.color;
-      if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
-      return a.kind === 'debt' ? neg : pos;
-    });
-  }
-
-  const options = {
-    height: Math.max(240, Math.round(window.innerHeight * 0.30)),
-    backgroundColor: { fill: 'transparent' },
-    chartArea: { width: '90%', height: '70%' },
-    legend: { position: 'top', alignment: 'center', textStyle: textStyle },
-    hAxis: { 
-      slantedText: false, 
-      textStyle: textStyle,
-      showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
-    },
-    vAxis: { 
-      viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
-      baseline: 0, 
-      baselineColor: fg,
-      gridlines: { color: fg, opacity: 0.1 },
-      textStyle: textStyle
-    },
-    isStacked: true,
-    colors: chartColors,
-    animation: {
-      duration: 500,
-      easing: 'out'
-    }
-  };
-
-  const chart = new google.visualization.ColumnChart(container);
-  chart.draw(data, options);
-}
-
-
-  const styles = getComputedStyle(document.documentElement);
-  const pos   = styles.getPropertyValue('--c-pos').trim();
-  const neg   = styles.getPropertyValue('--c-neg').trim();
-  const fg    = styles.getPropertyValue('--c-fg').trim();
-  const textStyle = { color: fg, fontName: 'system-ui' };
-
-  const data = new google.visualization.DataTable();
-  data.addColumn('string', 'Date'); 
-  let rows = [];
-
-  if (MODE === 'totals') {
-    data.addColumn('number', 'Assets');
-    data.addColumn('number', 'Debts');
-
-    for (let i = 0; i < labels.length; i++) { 
-      let assets = 0;
-      let debts = 0;
-
-      SNAP.accounts.forEach(a => {
-        if (isAccountGloballyHidden(a)) return;
-        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-        if (v >= 0) {
-          assets += v;
-        } else {
-          debts += v;
-        }
-      });
-
-      rows.push([labels[i], assets, debts]);
-    }
-  } else if (MODE === 'types') {
-    const typeSeries = SNAP.typeSeries || {};
-    const typeMeta = SNAP.typeMeta || {};
-    const seriesKeys = Object.keys(typeSeries);
-
-    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
-    const orderedCodes = [];
-    preferredOrder.forEach(code => {
-      if (seriesKeys.includes(code)) orderedCodes.push(code);
-    });
-    seriesKeys.forEach(code => {
-      if (!orderedCodes.includes(code)) orderedCodes.push(code);
-    });
-
-    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
-
-    visibleTypes.forEach(code => {
-      const baseLabel = TYPE_LABELS[code] || typeMeta[code]?.label || code;
-      data.addColumn('number', baseLabel);
-    });
-
-    for (let i = 0; i < labels.length; i++) {
-      const row = [labels[i]];
-      visibleTypes.forEach(code => {
-        const seriesArr = typeSeries[code] || [];
-        const v = Number(seriesArr[i] ?? 0);
-        row.push(v);
-      });
-      rows.push(row);
-    }
-  } else {
-    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
-    visibleAccounts.forEach(a => data.addColumn('number', a.name));
-
-    for (let i = 0; i < labels.length; i++) {
-      const row = [labels[i]]; 
-      visibleAccounts.forEach(a => {
-        const v = SNAP.series[a.name]?.monthly?.[i] ?? 0;
-        row.push(Number(v));
-      });
-      rows.push(row);
-    }
-  }
-
-  data.addRows(rows);
-
-  let minV = 0, maxV = 0;
-  for (const r of rows) {
-    for (let i = 1; i < r.length; i++) {
-      const v = Number(r[i]) || 0;
-      if (v < minV) minV = v;
-      if (v > maxV) maxV = v;
-    }
-  }
-  const maxAbs = Math.max(Math.abs(minV), Math.abs(maxV), 100);
-
-  let chartColors;
-  if (MODE === 'totals') {
-    chartColors = [pos, neg];
-  } else if (MODE === 'types') {
-    const typeSeries = SNAP.typeSeries || {};
-    const seriesKeys = Object.keys(typeSeries);
-    const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
-    const orderedCodes = [];
-    preferredOrder.forEach(code => {
-      if (seriesKeys.includes(code)) orderedCodes.push(code);
-    });
-    seriesKeys.forEach(code => {
-      if (!orderedCodes.includes(code)) orderedCodes.push(code);
-    });
-    const visibleTypes = orderedCodes.filter(code => !isTypeMuted(code));
-    chartColors = visibleTypes.map(code => getTypeEffectiveColor(code));
-  } else {
-    const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
-    chartColors = visibleAccounts.map(a => {
-      const meta = ACCOUNT_METADATA.get(a.name) || {};
-      const baseColor = meta.color || a.color;
-      if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
-      return a.kind === 'debt' ? neg : pos;
-    });
-  }
-
-  const options = {
-    height: Math.max(240, Math.round(window.innerHeight * 0.30)),
-    backgroundColor: { fill: 'transparent' },
-    chartArea: { width: '90%', height: '70%' },
-    legend: { position: 'top', alignment: 'center', textStyle: textStyle },
-    hAxis: { 
-      slantedText: false, 
-      textStyle: textStyle,
-      showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1
-    },
-    vAxis: { 
-      viewWindow: { min: -maxAbs * 1.05, max: maxAbs * 1.05 }, 
-      baseline: 0, 
-      baselineColor: fg,
-      gridlines: { color: fg, opacity: 0.1 },
-      textStyle: textStyle
-    },
-    isStacked: true,
-    colors: chartColors,
-    animation: {
-      duration: 500,
-      easing: 'out'
-    }
-  };
-
-  const chart = new google.visualization.ColumnChart(document.getElementById('chart'));
-  chart.draw(data, options);
 }
 
 const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
@@ -3190,32 +2178,19 @@ function formatMoney(n) {
   const sign = val < 0 ? '−' : '';
   const abs = Math.abs(val);
   const displayValue = Math.trunc(abs);
-
-  return `${sign}${displayValue.toLocaleString(undefined, { 
-    minimumFractionDigits: 0, 
-    maximumFractionDigits: 0 
-  })}`;
+  return `${sign}${displayValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 function getLimitColor(currentBalance, limit) {
   const absBalance = Math.abs(currentBalance);
   const utilization = absBalance / limit;
-
-  if (currentBalance >= 0) {
-    return '#4c8036';
-  }
-
-  if (utilization > 1.0) {
-    return '#d85140';
-  }
-
+  if (currentBalance >= 0) return '#4c8036';
+  if (utilization > 1.0) return '#d85140';
   const startColor = { r: 76, g: 128, b: 54 };
-  const endColor   = { r: 160, g: 45,  b: 42 };
-
+  const endColor = { r: 160, g: 45, b: 42 };
   const r = Math.round(startColor.r + (endColor.r - startColor.r) * utilization);
   const g = Math.round(startColor.g + (endColor.g - startColor.g) * utilization);
   const b = Math.round(startColor.b + (endColor.b - startColor.b) * utilization);
-
   return `rgb(${r}, ${g}, ${b})`;
 }
 
@@ -3227,262 +2202,114 @@ function renderAccounts() {
   SNAP.accounts.forEach(a => {
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
-
-    const row  = document.createElement('div');
-    row.className = 'row';
-
-    const left = document.createElement('div');
-    left.className = 'left';
-
-    const right = document.createElement('div');
-    right.className = 'right';
-
-    const accountDetails = document.createElement('div');
-    accountDetails.className = 'account-details';
-
+    const row = document.createElement('div'); row.className = 'row';
+    const left = document.createElement('div'); left.className = 'left';
+    const right = document.createElement('div'); right.className = 'right';
+    const accountDetails = document.createElement('div'); accountDetails.className = 'account-details';
+    
     const identityWrap = document.createElement('div');
-    identityWrap.style.cssText =
-      'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
-
-    const lastEl = document.createElement('span');
-    lastEl.className = 'lastval';
-    lastEl.textContent = formatMoney(last); 
-    lastEl.dataset.sign = signOf(last);
-
-    const nameEl = document.createElement('span');
-    nameEl.className = 'name';
-
+    identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
+    
+    const lastEl = document.createElement('span'); lastEl.className = 'lastval'; lastEl.textContent = formatMoney(last); lastEl.dataset.sign = signOf(last);
+    const nameEl = document.createElement('span'); nameEl.className = 'name'; nameEl.textContent = a.name;
+    
     const meta = ACCOUNT_METADATA.get(a.name) || {};
     const effectiveColor = meta.color || a.color;
-    if (effectiveColor) {
-      const norm = normalizeHexColor(effectiveColor);
-      if (norm) nameEl.style.color = norm;
-    }
-
-    nameEl.textContent = a.name;
+    if (effectiveColor) { const norm = normalizeHexColor(effectiveColor); if (norm) nameEl.style.color = norm; }
+    
     if (meta.link) {
-      nameEl.style.textDecoration = 'underline';
-      nameEl.style.textDecorationStyle = 'dotted';
-      nameEl.title = 'Open account link in new tab';
-      nameEl.addEventListener('click', (e) => {
-        if (LONG_PRESS_TIMER) {
-          clearTimeout(LONG_PRESS_TIMER);
-        }
-        window.open(meta.link, '_blank', 'noopener');
-      });
+      nameEl.style.textDecoration = 'underline'; nameEl.style.textDecorationStyle = 'dotted'; nameEl.title = 'Open account link';
+      nameEl.onclick = () => { if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER); window.open(meta.link, '_blank', 'noopener'); };
     }
 
     let pressStartTime = 0;
+    const startLongPress = () => { pressStartTime = Date.now(); LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION); };
+    const clearLongPress = () => { if (LONG_PRESS_TIMER) { clearTimeout(LONG_PRESS_TIMER); LONG_PRESS_TIMER = null; } };
+    nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
+    nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
 
-    const startLongPress = () => {
-      pressStartTime = Date.now();
-      LONG_PRESS_TIMER = setTimeout(() => {
-        showAccountMenu(a.name);
-      }, LONG_PRESS_DURATION);
-    };
-
-    const clearLongPress = () => {
-      if (LONG_PRESS_TIMER) {
-        clearTimeout(LONG_PRESS_TIMER);
-        LONG_PRESS_TIMER = null;
-      }
-    };
-
-    nameEl.addEventListener('mousedown', startLongPress);
-    nameEl.addEventListener('mouseup', clearLongPress);
-    nameEl.addEventListener('mouseleave', clearLongPress);
-    nameEl.addEventListener('touchstart', startLongPress);
-    nameEl.addEventListener('touchend', clearLongPress);
-
-    identityWrap.appendChild(lastEl);
-    identityWrap.appendChild(nameEl);
-    accountDetails.appendChild(identityWrap);
+    identityWrap.append(lastEl, nameEl);
+    accountDetails.append(identityWrap);
 
     if (a.type === 'cc' && meta.limit) {
-      const limitEl = document.createElement('span');
-      limitEl.className = 'limit';
+      const limitEl = document.createElement('span'); limitEl.className = 'limit';
       const limitValue = meta.limit;
-      const limitColor = getLimitColor(last, limitValue);
-      limitEl.style.color = limitColor;
+      limitEl.style.color = getLimitColor(last, limitValue);
       limitEl.textContent = `$${limitValue.toLocaleString()}`;
       accountDetails.appendChild(limitEl);
     }
 
-    const aprEl = document.createElement('span');
-    aprEl.className = 'apr';
-
+    const aprEl = document.createElement('span'); aprEl.className = 'apr';
     const apr = a.apr || 0;
-    let interestAmount = 0;
-    let periodLabel = '';
-
+    let interestAmount = 0, periodLabel = '';
     if (apr > 0 && last !== 0) {
       const dailyRate = (last * apr) / 365;
-
       switch (TIMEFRAME) {
-        case 'today':
-          interestAmount = dailyRate * 1;
-          periodLabel = '/dy';
-          break;
-        case '7d':
-          interestAmount = dailyRate * 7;
-          periodLabel = '/wk';
-          break;
-        case '14d':
-          interestAmount = dailyRate * 14;
-          periodLabel = '/2w';
-          break;
-        case '30d':
-          interestAmount = dailyRate * 30;
-          periodLabel = '/mo';
-          break;
-        case '90d':
-          interestAmount = dailyRate * 90;
-          periodLabel = '/qt';
-          break;
-        case '1y':
-        case 'ytd':
-        case 'all':
-          interestAmount = last * apr;
-          periodLabel = '/yr';
-          break;
+        case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
+        case '7d': interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
+        case '14d': interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
+        case '30d': interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
+        case '90d': interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+        case '1y': case 'ytd': case 'all': interestAmount = last * apr; periodLabel = '/yr'; break;
       }
     }
-
     let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
-
     if (Math.abs(interestAmount) >= 0.01) {
       const sign = interestAmount >= 0 ? '+' : '';
       const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
       aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
     }
-
     aprEl.innerHTML = aprHTML;
     accountDetails.appendChild(aprEl);
 
-    const inputLine = document.createElement('div');
-    inputLine.className = 'input-line';
+    const inputLine = document.createElement('div'); inputLine.className = 'input-line';
+    const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'Add value…'; inp.step = '0.01'; inp.dataset.accountName = a.name;
+    if (last > 0) inp.style.backgroundColor = 'var(--c-tint-pos)';
+    else if (last < 0) inp.style.backgroundColor = 'var(--c-tint-neg)';
+    else inp.style.backgroundColor = 'var(--c-input-bg)';
+    inp.onkeydown = async (ev) => { if (ev.key === 'Enter') await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]); };
 
-    const inp = document.createElement('input');
-    inp.type = 'number';
-    inp.placeholder = 'Add new value…';
-    inp.step = '0.01';
-    inp.setAttribute('aria-label', `New value for ${a.name}`);
-    inp.dataset.accountName = a.name;
+    const muteWrapper = document.createElement('label'); muteWrapper.className = 'mute-checkbox';
+    const muteCheck = document.createElement('input'); muteCheck.type = 'checkbox'; muteCheck.checked = !isAccountMuted(a.name);
+    muteCheck.onchange = () => toggleAccountMute(a.name);
+    const muteSlider = document.createElement('span'); muteSlider.className = 'mute-checkbox-slider';
+    muteWrapper.append(muteCheck, muteSlider);
+    inputLine.append(inp, muteWrapper);
+    left.append(accountDetails, inputLine);
 
-    if (last > 0) {
-      inp.style.backgroundColor = 'var(--c-tint-pos)';
-    } else if (last < 0) {
-      inp.style.backgroundColor = 'var(--c-tint-neg)';
-    } else {
-      inp.style.backgroundColor = 'var(--c-input-bg)';
-    }
+    if (isAccountMuted(a.name)) row.classList.add('muted');
 
-    inp.addEventListener('keydown', async (ev) => {
-      if (ev.key === 'Enter') {
-        await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]);
-      }
-    });
-
-    const muteWrapper = document.createElement('label');
-    muteWrapper.className = 'mute-checkbox';
-    muteWrapper.setAttribute('aria-label', `Toggle ${a.name} visibility`);
-    muteWrapper.title = `Show/hide ${a.name}`;
-
-    const muteCheck = document.createElement('input');
-    muteCheck.type = 'checkbox';
-    muteCheck.checked = !isAccountMuted(a.name);
-    muteCheck.setAttribute('aria-label', `Show ${a.name}`);
-
-    muteCheck.addEventListener('change', () => {
-      toggleAccountMute(a.name);
-    });
-
-    const muteSlider = document.createElement('span');
-    muteSlider.className = 'mute-checkbox-slider';
-
-    muteWrapper.appendChild(muteCheck);
-    muteWrapper.appendChild(muteSlider);
-
-    inputLine.appendChild(inp);
-    inputLine.appendChild(muteWrapper);
-
-    left.appendChild(accountDetails);
-    left.appendChild(inputLine);
-
-    if (isAccountMuted(a.name)) {
-      row.classList.add('muted');
-    }
-
-    const vals = document.createElement('div');
-    vals.className = 'values';
-
+    const vals = document.createElement('div'); vals.className = 'values';
     (s.lastN || []).forEach(v => {
       const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
       const val = Number(isObject ? v.value : v);
       const date = isObject ? v.date : null;
-
       const readableValue = formatMoney(val);
-
-      const chip = document.createElement('span');
-      chip.className = 'chip';
-      chip.dataset.sign = signOf(val);
-      chip.textContent = readableValue;
-      chip.dataset.value = val;
-
-      if (date) {
-        chip.dataset.date = date;
-        chip.dataset.account = a.name;
-        chip.dataset.readableValue = readableValue;
-
-        chip.addEventListener('click', () => {
-          showEditChipModal(a.name, date, val, readableValue);
-        });
-      } else {
-        chip.classList.add('no-delete');
-        chip.title = "Old data format - re-deploy CODE.JS";
-      }
-
+      const chip = document.createElement('span'); chip.className = 'chip'; chip.dataset.sign = signOf(val); chip.textContent = readableValue;
+      if (date) chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
+      else { chip.classList.add('no-delete'); chip.title = "Old data format"; }
       vals.appendChild(chip);
     });
-
     right.appendChild(vals);
 
-    const bar = document.createElement('h4');
-    bar.className = 'ratio-bar';
-
-    const assetSpan = document.createElement('span');
-    assetSpan.style.color = 'var(--c-pos)';
-
-    const debtSpan = document.createElement('span');
-    debtSpan.style.color = 'var(--c-neg)';
-
+    const bar = document.createElement('h4'); bar.className = 'ratio-bar';
+    const assetSpan = document.createElement('span'); assetSpan.style.color = 'var(--c-pos)';
+    const debtSpan = document.createElement('span'); debtSpan.style.color = 'var(--c-neg)';
     const lastIndex = SNAP.dateAxis.length - 1;
     const totalAssets = Number(SNAP.totals.assets?.[lastIndex]) || 0;
-    const totalDebtsRaw = Number(SNAP.totals.debts?.[lastIndex]) || 0;
-    const totalDebts = Math.abs(totalDebtsRaw);
+    const totalDebts = Math.abs(Number(SNAP.totals.debts?.[lastIndex]) || 0);
 
     if (last >= 0 && totalAssets > 0) {
-      const percentage = (last / totalAssets) * 100;
-      const blocks = percentage >= 5 ? Math.max(1, Math.round((last / totalAssets) * 10)) : 0;
-      assetSpan.textContent = '█ '.repeat(blocks);
-      debtSpan.textContent = '';
+      const blocks = Math.round((last / totalAssets) * 10);
+      if (blocks >= 1) assetSpan.textContent = '█ '.repeat(blocks);
     } else if (last < 0 && totalDebts > 0) {
-      const absLast = Math.abs(last);
-      const percentage = (absLast / totalDebts) * 100;
-      const blocks = percentage >= 5 ? Math.max(1, Math.round((absLast / totalDebts) * 10)) : 0;
-      assetSpan.textContent = '';
-      debtSpan.textContent = '█ '.repeat(blocks);
-    } else {
-      assetSpan.textContent = '';
-      debtSpan.textContent = '';
+      const blocks = Math.round((Math.abs(last) / totalDebts) * 10);
+      if (blocks >= 1) debtSpan.textContent = '█ '.repeat(blocks);
     }
-
-    bar.appendChild(assetSpan);
-    bar.appendChild(debtSpan);
+    bar.append(assetSpan, debtSpan);
     right.appendChild(bar);
 
-    row.appendChild(left);
-    row.appendChild(right);
+    row.append(left, right);
     root.appendChild(row);
   });
 }
@@ -3492,86 +2319,43 @@ function renderAccounts() {
    ============================================ */
 async function submitAll() {
   const entries = [];
-
   document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
     const v = inp.value.trim();
-    if (v !== '') {
-      entries.push({ 
-        account: inp.dataset.accountName, 
-        value: Number(v),
-        inputEl: inp
-      });
-    }
+    if (v !== '') entries.push({ account: inp.dataset.accountName, value: Number(v), inputEl: inp });
   });
-
-  if (entries.length === 0) {
-    showToast('No values entered to submit.', 'info');
-    return;
-  }
-
+  if (entries.length === 0) { showToast('No values entered.', 'info'); return; }
   await submitEntries(entries);
 }
 
 async function submitEntries(entries) {
   if (IS_LOADING) return;
-  setLoading(true, 'Submitting entries…');
-
+  setLoading(true, 'Submitting…');
   entries.forEach(e => e.inputEl?.classList.add('submitting'));
 
   try {
-    const validEntries = entries
-      .map(e => ({ account: e.account, value: e.value }))
-      .filter(e => e.account && !isNaN(e.value));
+    const validEntries = entries.filter(e => e.account && !isNaN(e.value));
+    if (validEntries.length === 0) throw new Error('No valid entries');
 
-    if (validEntries.length === 0) {
-      showToast('No valid entries to submit.', 'error');
-      setLoading(false);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-      return;
-    }
-
-    const body = new URLSearchParams({ 
-      payload: JSON.stringify({ entries: validEntries }) 
-    });
+    const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
     const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
     const text = await res.text();
+    const j = JSON.parse(text);
+    if (!j.ok) throw new Error(j.error || 'Unknown error');
 
-    let j;
-    try { 
-      j = JSON.parse(text); 
-    } catch {
-      console.error('Submit non-JSON:', text);
-      showToast('Submit failed (non-JSON response)', 'error', 5000);
-      setLoading(false);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-      return;
-    }
-
-    if (!j.ok) {
-      console.error('Submit JSON error:', j);
-      showToast('Submit failed: ' + (j.error || 'Unknown'), 'error', 5000);
-      setLoading(false);
-      entries.forEach(e => e.inputEl?.classList.remove('submitting'));
-      return;
-    }
-
-    showToast('Submit successful! Refreshing…', 'success');
+    showToast('Saved!', 'success');
     entries.forEach(e => {
       e.inputEl?.classList.add('submitted-ok');
       e.inputEl.value = '';
       setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
     });
-
     await fetchSnapshot();
-
   } catch (e) {
     console.error(e);
+    showToast('Submit failed', 'error');
+  } finally {
     setLoading(false);
-    showToast('Network error submitting data.', 'error', 5000);
     entries.forEach(e => e.inputEl?.classList.remove('submitting'));
   }
-
-  setLoading(false);
 }
 
 /* ============================================
@@ -3579,7 +2363,7 @@ async function submitEntries(entries) {
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
-  initializeTheme();  // Use new function
+  initializeTheme();
   initDarkMode();
 
   const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
@@ -3589,39 +2373,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('refresh').addEventListener('click', fetchSnapshot);
   document.getElementById('submitAll').addEventListener('click', submitAll);
-
   document.querySelectorAll('input[name="mode"]').forEach(r => {
-    r.addEventListener('change', (e) => { 
-      MODE = e.target.value; 
-      renderChart();
-    });
+    r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
   });
-
-  document.getElementById('timeframe').addEventListener('change', (e) => {
-    TIMEFRAME = e.target.value;
-    fetchSnapshot();
-  });
+  document.getElementById('timeframe').addEventListener('change', (e) => { TIMEFRAME = e.target.value; fetchSnapshot(); });
 
   document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
   document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
-
   document.getElementById('edit-chip-cancel').addEventListener('click', hideEditChipModal);
   document.getElementById('edit-chip-modal-backdrop').addEventListener('click', hideEditChipModal);
-
   document.getElementById('account-menu-cancel').addEventListener('click', hideAccountMenu);
   document.getElementById('account-menu-modal-backdrop').addEventListener('click', hideAccountMenu);
-
   document.getElementById('edit-account-cancel').addEventListener('click', hideEditAccountModal);
   document.getElementById('edit-account-modal-backdrop').addEventListener('click', hideEditAccountModal);
-
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
   window.addEventListener('resize', renderChart);
-
-re();
-
-  // Make score clickable to edit
+  
+  renderScore(); // Initial render (000)
   document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
   if (window.google && google.charts) {
