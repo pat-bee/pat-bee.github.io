@@ -217,36 +217,7 @@ header {
 }
 
 /* ============================================
-      GLOBAL STATUSBAR (█ character)
-   ============================================ */
-#statusbar, #statusbar-secondary {
-  line-height: 3;
-  font-size: larger;
-  text-align: center;
-  padding: 0.5rem 12px 0 12px;
-  letter-spacing: -0.15em;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  word-break: keep-all;
-  background: var(--c-statusbar-bg);
-  width: 100%;
-  box-sizing: border-box;
-  transition: background-color 0.3s ease;
-}
-
-.status-positive { color: var(--c-pos); }
-.status-negative { color: var(--c-neg); }
-
-hr.divider {
-  border: none;
-  border-top: 1px solid var(--c-border);
-  margin-top: 1rem;
-  transition: border-color 0.3s ease;
-}
-
-/* ============================================
-      VISUAL RATIO BAR (New Feature)
+      VISUAL RATIO BAR
    ============================================ */
 #visual-ratio-bar {
   width: 100%;
@@ -266,6 +237,13 @@ hr.divider {
   background-color: var(--c-neg);
   height: 100%;
   transition: width 0.5s ease;
+}
+
+hr.divider {
+  border: none;
+  border-top: 1px solid var(--c-border);
+  margin-top: 1rem;
+  transition: border-color 0.3s ease;
 }
 
 /* ============================================
@@ -974,13 +952,6 @@ footer b { font-weight: 600; }
   <div id="chart"></div>
   <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
-  <!-- Statusbar -->
-
-  <section id="statusbar"></section>
-  <!-- Second statusbar placeholder (reserved) -->
-
-  <hr>
-  <section id="statusbar-secondary"></section>
   <!-- NEW: Visual Ratio Bar (Asset vs Debt) -->
   <div id="visual-ratio-bar">
     <div id="ratio-asset"></div>
@@ -1884,14 +1855,12 @@ function renderTypeSummary() {
 }
 
 function renderStatusbar() {
-  const statusbarEl = document.getElementById('statusbar');
-  if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
-  
-  // Also grab the new visual bar elements
+  // Note: 'statusbar' ID now refers to nothing (removed) but we only update ratio bars
   const ratioAsset = document.getElementById('ratio-asset');
   const ratioDebt = document.getElementById('ratio-debt');
 
-  if (SNAP.dateAxis.length === 0) { statusbarEl.innerHTML = ''; return; }
+  if (!SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+  if (SNAP.dateAxis.length === 0) return;
 
   let assets = 0, debts = 0;
   SNAP.accounts.forEach(a => {
@@ -1904,21 +1873,11 @@ function renderStatusbar() {
 
   const total = assets + debts;
   if (total === 0) { 
-    statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>'; 
     if(ratioAsset) ratioAsset.style.width = '100%';
     if(ratioDebt) ratioDebt.style.width = '0%';
     return; 
   }
 
-  // Text Bar Logic (Existing)
-  const totalBlocks = 100;
-  const assetBlocks = Math.round((assets / total) * totalBlocks);
-  const debtBlocks = totalBlocks - assetBlocks;
-  const assetBar = '█ '.repeat(assetBlocks);
-  const debtBar = '█ '.repeat(debtBlocks);
-  statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
-
-  // NEW: Visual Bar Logic
   if (ratioAsset && ratioDebt) {
     const assetPct = (assets / total) * 100;
     const debtPct = (debts / total) * 100;
@@ -1946,7 +1905,6 @@ function renderChart() {
   switch (CHART_SLIDE) {
     case 0: renderBarChart(chartContainer, labels); break;
     case 1: renderLineChartAllAccounts(chartContainer, labels); break;
-    // Slide 2 is now Donuts (removed pos/neg line chart)
     case 2: renderDonutCharts(chartContainer); break;
   }
   renderChartPager();
