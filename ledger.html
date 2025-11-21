@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -202,12 +203,12 @@ header {
       CHART CONTAINER
    ============================================ */
 #chart { 
-  min-height: 30vh; /* Changed from fixed height to min-height for responsiveness */
+  min-height: 30vh; 
   width: 100%; 
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Safeguard overflow */
-  display: flex;    /* Centering Safeguard */
+  overflow: hidden; 
+  display: flex;    
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -217,26 +218,27 @@ header {
 }
 
 /* ============================================
-      GLOBAL STATUSBAR (█ character)
+      VISUAL RATIO BAR
    ============================================ */
-#statusbar {
-  line-height: 3;
-  font-size: larger;
-  text-align: center;
-  padding: 0.5rem 12px 0 12px;
-  letter-spacing: -0.15em;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  word-break: keep-all;
-  background: var(--c-statusbar-bg);
+#visual-ratio-bar {
   width: 100%;
-  box-sizing: border-box;
-  transition: background-color 0.3s ease;
+  height: 30px; /* Approx finger width */
+  display: flex;
+  overflow: hidden;
+  margin-top: 8px;
 }
 
-.status-positive { color: var(--c-pos); }
-.status-negative { color: var(--c-neg); }
+#ratio-asset {
+  background-color: var(--c-pos);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+#ratio-debt {
+  background-color: var(--c-neg);
+  height: 100%;
+  transition: width 0.5s ease;
+}
 
 hr.divider {
   border: none;
@@ -951,8 +953,11 @@ footer b { font-weight: 600; }
   <div id="chart"></div>
   <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
-  <!-- Statusbar -->
-  <section id="statusbar"></section>
+  <!-- NEW: Visual Ratio Bar (Asset vs Debt) -->
+  <div id="visual-ratio-bar">
+    <div id="ratio-asset"></div>
+    <div id="ratio-debt"></div>
+  </div>
 </header>
 
 
@@ -1851,9 +1856,12 @@ function renderTypeSummary() {
 }
 
 function renderStatusbar() {
-  const statusbarEl = document.getElementById('statusbar');
-  if (!statusbarEl || !SNAP || !SNAP.totals || !SNAP.dateAxis) return;
-  if (SNAP.dateAxis.length === 0) { statusbarEl.innerHTML = ''; return; }
+  // Note: 'statusbar' ID now refers to nothing (removed) but we only update ratio bars
+  const ratioAsset = document.getElementById('ratio-asset');
+  const ratioDebt = document.getElementById('ratio-debt');
+
+  if (!SNAP || !SNAP.totals || !SNAP.dateAxis) return;
+  if (SNAP.dateAxis.length === 0) return;
 
   let assets = 0, debts = 0;
   SNAP.accounts.forEach(a => {
@@ -1865,14 +1873,18 @@ function renderStatusbar() {
   });
 
   const total = assets + debts;
-  if (total === 0) { statusbarEl.innerHTML = '<span class="status-positive">' + '█ '.repeat(100) + '</span>'; return; }
+  if (total === 0) { 
+    if(ratioAsset) ratioAsset.style.width = '100%';
+    if(ratioDebt) ratioDebt.style.width = '0%';
+    return; 
+  }
 
-  const totalBlocks = 100;
-  const assetBlocks = Math.round((assets / total) * totalBlocks);
-  const debtBlocks = totalBlocks - assetBlocks;
-  const assetBar = '█ '.repeat(assetBlocks);
-  const debtBar = '█ '.repeat(debtBlocks);
-  statusbarEl.innerHTML = `<span class="status-positive">${assetBar}</span><span class="status-negative">${debtBar}</span>`;
+  if (ratioAsset && ratioDebt) {
+    const assetPct = (assets / total) * 100;
+    const debtPct = (debts / total) * 100;
+    ratioAsset.style.width = `${assetPct}%`;
+    ratioDebt.style.width = `${debtPct}%`;
+  }
 }
 
 /* ============================================
@@ -1894,7 +1906,6 @@ function renderChart() {
   switch (CHART_SLIDE) {
     case 0: renderBarChart(chartContainer, labels); break;
     case 1: renderLineChartAllAccounts(chartContainer, labels); break;
-    // Slide 2 is now Donuts (removed pos/neg line chart)
     case 2: renderDonutCharts(chartContainer); break;
   }
   renderChartPager();
@@ -2373,3 +2384,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
