@@ -652,60 +652,6 @@ footer b { font-weight: 600; }
   color: var(--c-pos);
 }
 
-      /* ============================================
-      CSS TOOLTIPS (Low Code)
-   ============================================ */
-/* 1. The Trigger */
-[data-tooltip] {
-  position: relative; /* Establishes a coordinate system for the popup */
-  cursor: help;       /* Changes mouse to a question mark */
-}
-
-/* 2. The Bubble (Hidden by default) */
-[data-tooltip]:hover::before {
-  content: attr(data-tooltip); /* Pulls text directly from the HTML attribute */
-  position: absolute;
-  bottom: 100%;           /* Positions it above the element */
-  left: 50%;              /* Centers it */
-  transform: translateX(-50%) translateY(-8px); /* Perfect centering + spacing */
-  
-  /* Visual Styling */
-  background: var(--c-toast-bg);
-  color: var(--c-toast-fg);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 400;
-  font-family: system-ui; /* Ensure readable font */
-  white-space: nowrap;    /* Prevents text wrapping */
-  z-index: 1000;
-  pointer-events: none;   /* Allows mouse to click through the tooltip */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  
-  /* Animation */
-  opacity: 0;
-  animation: fadeInTooltip 0.2s forwards;
-}
-
-/* 3. The Little Arrow (Triangle) */
-[data-tooltip]:hover::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--c-toast-bg);
-  margin-bottom: -3px; /* Pulls arrow down to touch element */
-  
-  /* Animation */
-  opacity: 0;
-  animation: fadeInTooltip 0.2s forwards;
-}
-
-@keyframes fadeInTooltip {
-  to { opacity: 1; transform: translateX(-50%) translateY(-10px); }
-}
 /* ============================================
       TOAST
    ============================================ */
@@ -1011,8 +957,8 @@ footer b { font-weight: 600; }
 <header>
   <div class="toolbar">
     <div class="financial-group">
-      <div id="financial-summary" data-tooltip="Financial Summary"></div>
-      <div id="interest-summary" data-tooltip="Interest Summary"></div>
+      <div id="financial-summary"></div>
+      <div id="interest-summary"></div>
     </div>
 
     <div class="toolbar-right">
@@ -1046,7 +992,8 @@ footer b { font-weight: 600; }
   <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
   <!-- NEW: Visual Ratio Bar (Asset vs Debt) -->
-    <div id="ratio-asset" data-tooltip="Ratio of value to debt"></div>
+  <div id="visual-ratio-bar">
+    <div id="ratio-asset"></div>
     <div id="ratio-debt"></div>
   </div>
 </header>
@@ -1064,17 +1011,15 @@ footer b { font-weight: 600; }
     <!-- NEW: Font Navigation + Dark Mode -->
     <div class="bottom-controls-container">
       <div id="font-prev" class="font-nav-btn">&lt;</div>
-      <div id="font-prev" class="font-nav-btn" data-tooltip="Previous Font">&lt;</div>
       
       <div class="bottom-dark-mode-toggle">
         <label class="dark-mode-checkbox-label">
           <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
         </label>
-        <div id="dark-mode-icon" class="dark-mode-icon" data-tooltip="DARK|LIGHT">◐</div>
-            
+        <div id="dark-mode-icon" class="dark-mode-icon">◐</div>
       </div>
       
-      <div id="font-next" class="font-nav-btn" data-tooltip="Next Font">&gt;</div>
+      <div id="font-next" class="font-nav-btn">&gt;</div>
     </div>
   </div>
 
