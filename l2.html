@@ -2156,7 +2156,7 @@ function renderLineChartAllAccounts(container, labels) {
     hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
     vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
     colors: chartColors,
-    curveType: 'function', lineWidth: 2, pointSize: 0, animation: { duration: 500, easing: 'out' }
+    curveType: 'function', lineWidth: 8, pointSize: 0, animation: { duration: 500, easing: 'out' }
   };
   const chart = new google.visualization.LineChart(container);
   chart.draw(data, options);
