@@ -41,6 +41,9 @@
   
   /* Default Font Family Variable — now Geologica-first */
   --font-current: "Geologica", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* Accent font that does NOT change with user font cycling */
+  --font-accent: "Patrick Hand", cursive;
 }
 
 :root.dark-mode {
@@ -136,6 +139,14 @@ header {
   gap: 6px;
   flex-shrink: 0;
   max-width: 60%;
+
+  /* Always use accent font here (Patrick Hand) */
+  font-family: var(--font-accent);
+}
+
+/* Ensure children inherit accent font */
+.toolbar-right * {
+  font-family: var(--font-accent);
 }
 
 /* Type filter row */
@@ -171,7 +182,7 @@ header {
   border-radius: 4px;
   background: var(--c-input-bg);
   color: var(--c-fg);
-  font-family: var(--font-current);
+  font-family: var(--font-accent); /* ensure select text matches accent */
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -1071,13 +1082,21 @@ let SCORE = 0;
 let CHART_SLIDE = 2;          // 0..2
 const MAX_CHART_SLIDE = 2;    // 3 chart views total
 
-// Fonts List — Inconsolata removed; Geologica is default (index 0)
+// Fonts List — Inconsolata removed
 const FONT_OPTIONS = [
   '"Geologica", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
   'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
   '"Patrick Hand", cursive'
 ];
+
+// Human-readable labels for modal / toasts
+const FONT_LABELS = ['Geologica', 'System', 'Patrick Hand'];
+
+// Main app font (body) starts at Geologica (index 0)
 let CURRENT_FONT_INDEX = 0;
+
+// Chart font starts at Patrick Hand (index 2) by default
+let CHART_FONT_INDEX = 2;
 
 const TYPE_LABELS = {
   'bk': 'Banks',
@@ -1105,8 +1124,19 @@ function cycleFont(direction) {
   } else {
     CURRENT_FONT_INDEX = (CURRENT_FONT_INDEX - 1 + FONT_OPTIONS.length) % FONT_OPTIONS.length;
   }
+
+  // When user taps < or >, chart font tracks the main font
+  CHART_FONT_INDEX = CURRENT_FONT_INDEX;
+
   updateFont();
-  showToast(`Font changed to option ${CURRENT_FONT_INDEX + 1}`, 'info', 1000);
+
+  // 🔁 Re-draw chart so Google Charts uses the new font
+  if (SNAP && window.google && google.visualization) {
+    renderChart();
+  }
+
+  const label = FONT_LABELS[CURRENT_FONT_INDEX] || `Option ${CURRENT_FONT_INDEX + 1}`;
+  showToast(`Font changed: ${label}`, 'info', 1200);
 }
 
 /* ============================================
@@ -1128,12 +1158,27 @@ function updateDarkModeIcon() {
 }
 
 function toggleDarkMode() {
+  // Flip the boolean flag
   DARK_MODE = !DARK_MODE;
+
+  // Apply or remove the .dark-mode class on <html>
   applyDarkModeClass();
+
+  // Keep the checkbox in sync
   const checkbox = document.getElementById('dark-mode-checkbox');
   if (checkbox) checkbox.checked = DARK_MODE;
+
+  // Update the little ◐ / ◑ icon
   updateDarkModeIcon();
+
+  // Persist theme + font/etc. to the URL hash
   saveStateToURL();
+
+  // 🔁 Re-draw chart and ratio bar so colors/text update to the new theme
+  if (SNAP && window.google && google.visualization) {
+    renderChart();
+    renderStatusbar();
+  }
 }
 
 function initDarkMode() {
@@ -1170,8 +1215,12 @@ function initializeTheme() {
     const idx = parseInt(fontParam, 10);
     if (!isNaN(idx) && idx >= 0 && idx < FONT_OPTIONS.length) {
       CURRENT_FONT_INDEX = idx;
+      // If URL had a font saved, keep chart font in sync with it
+      CHART_FONT_INDEX = idx;
     }
   }
+
+  // Apply font
   updateFont();
 }
 
@@ -1282,6 +1331,81 @@ async function processUpdateScore(newValue, backdrop, modal) {
     setLoading(false);
     showToast('Failed to update score: ' + e.message, 'error', 5000);
   }
+}
+
+/* ============================================
+    FONT PICKER MODAL + LONG PRESS
+   ============================================ */
+let FONT_LONG_PRESS_TIMER = null;
+let FONT_LONG_PRESS_FIRED = false;
+const FONT_LONG_PRESS_DURATION = 600; // ms
+
+function showFontPickerModal() {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop show';
+  backdrop.id = 'font-picker-backdrop';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal show';
+  modal.id = 'font-picker-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  const listItems = FONT_OPTIONS.map((fontStack, idx) => {
+    const label = FONT_LABELS[idx] || `Option ${idx + 1}`;
+    const isCurrent = (idx === CURRENT_FONT_INDEX);
+    return `
+      <button type="button" class="font-picker-option" data-index="${idx}"
+        style="width:100%; text-align:left; margin-bottom:6px; padding:8px; border-radius:6px;
+               border:1px solid var(--c-input-border); background:var(--c-input-bg);
+               font-family:${fontStack}; font-size:0.95rem; ${isCurrent ? 'font-weight:600;' : ''}">
+        ${isCurrent ? '★ ' : ''}${label}
+      </button>
+    `;
+  }).join('');
+
+  modal.innerHTML = `
+    <h3>Choose Display Font</h3>
+    <p style="font-size:0.85rem; margin-top:0;">
+      Short tap &lt; or &gt; to cycle. Long press to open this menu.
+    </p>
+    <div style="max-height:220px; overflow-y:auto; margin-top:10px;">
+      ${listItems}
+    </div>
+    <div class="modal-buttons" style="margin-top:14px;">
+      <button id="font-picker-cancel">Cancel</button>
+    </div>
+  `;
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(modal);
+
+  backdrop.addEventListener('click', hideFontPickerModal);
+  document.getElementById('font-picker-cancel').addEventListener('click', hideFontPickerModal);
+
+  modal.querySelectorAll('.font-picker-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.index);
+      if (!isNaN(idx)) {
+        CURRENT_FONT_INDEX = idx;
+        CHART_FONT_INDEX = idx; // keep charts in sync with chosen display font
+        updateFont();
+        if (SNAP && window.google && google.visualization) {
+          renderChart();
+        }
+        const label = FONT_LABELS[idx] || `Option ${idx + 1}`;
+        showToast(`Font set to: ${label}`, 'info', 1500);
+      }
+      hideFontPickerModal();
+    });
+  });
+}
+
+function hideFontPickerModal() {
+  const backdrop = document.getElementById('font-picker-backdrop');
+  const modal = document.getElementById('font-picker-modal');
+  if (backdrop) backdrop.remove();
+  if (modal) modal.remove();
 }
 
 /* ============================================
@@ -2020,7 +2144,10 @@ function renderBarChart(container, labels) {
   const pos = styles.getPropertyValue('--c-pos').trim();
   const neg = styles.getPropertyValue('--c-neg').trim();
   const fg = styles.getPropertyValue('--c-fg').trim();
-  const textStyle = { color: fg, fontName: 'system-ui' };
+
+  // Use the chart font (Patrick Hand by default, then track font changes)
+  const chartFont = FONT_OPTIONS[CHART_FONT_INDEX] || FONT_OPTIONS[CURRENT_FONT_INDEX];
+  const textStyle = { color: fg, fontName: chartFont };
 
   const data = new google.visualization.DataTable();
   data.addColumn('string', 'Date');
@@ -2138,17 +2265,22 @@ function renderLineChartAllAccounts(container, labels) {
     rows.push(row);
   }
   data.addRows(rows);
+
   const styles = getComputedStyle(document.documentElement);
   const pos = styles.getPropertyValue('--c-pos').trim();
   const neg = styles.getPropertyValue('--c-neg').trim();
   const fg = styles.getPropertyValue('--c-fg').trim();
-  const textStyle = { color: fg, fontName: 'system-ui' };
+
+  const chartFont = FONT_OPTIONS[CHART_FONT_INDEX] || FONT_OPTIONS[CURRENT_FONT_INDEX];
+  const textStyle = { color: fg, fontName: chartFont };
+
   const chartColors = visibleAccounts.map(a => {
     const meta = ACCOUNT_METADATA.get(a.name) || {};
     const baseColor = meta.color || a.color;
     if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
     return a.kind === 'debt' ? neg : pos;
   });
+
   const options = {
     height: Math.max(260, Math.round(window.innerHeight * 0.30)),
     backgroundColor: { fill: 'transparent' },
@@ -2167,6 +2299,8 @@ function renderLineChartAllAccounts(container, labels) {
 function renderDonutCharts(container) {
   const styles = getComputedStyle(document.documentElement);
   const fg = styles.getPropertyValue('--c-fg').trim();
+  const chartFont = FONT_OPTIONS[CHART_FONT_INDEX] || FONT_OPTIONS[CURRENT_FONT_INDEX];
+
   container.innerHTML = '';
   
   const wrap = document.createElement('div');
@@ -2192,17 +2326,38 @@ function renderDonutCharts(container) {
   const typeTotals = {};
   SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; const t = a.type || 'bk'; if (!typeTotals[t]) typeTotals[t]=0; typeTotals[t]+=last; });
   Object.entries(typeTotals).forEach(([code, total]) => { if (total !== 0) typeData.addRow([TYPE_LABELS[code] || code, Math.abs(total)]); });
-  new google.visualization.PieChart(typeDiv).draw(typeData, { title: 'By Type', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
+  new google.visualization.PieChart(typeDiv).draw(typeData, {
+    title: 'By Type',
+    titleTextStyle: { color: fg, fontName: chartFont, fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: chartFont, fontSize: 10 } },
+    pieHole: 0.6,
+    chartArea: { width: '80%', height: '80%' }
+  });
 
   const allData = new google.visualization.DataTable();
   allData.addColumn('string', 'Account'); allData.addColumn('number', 'Value');
   SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last !== 0) allData.addRow([a.name, Math.abs(last)]); });
-  new google.visualization.PieChart(allDiv).draw(allData, { title: 'All Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
+  new google.visualization.PieChart(allDiv).draw(allData, {
+    title: 'All Accounts',
+    titleTextStyle: { color: fg, fontName: chartFont, fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: chartFont, fontSize: 10 } },
+    pieHole: 0.6,
+    chartArea: { width: '80%', height: '80%' }
+  });
 
   const debtData = new google.visualization.DataTable();
   debtData.addColumn('string', 'Account'); debtData.addColumn('number', 'Value');
   SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last < 0) debtData.addRow([a.name, Math.abs(last)]); });
-  new google.visualization.PieChart(debtDiv).draw(debtData, { title: 'Debt Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
+  new google.visualization.PieChart(debtDiv).draw(debtData, {
+    title: 'Debt Accounts',
+    titleTextStyle: { color: fg, fontName: chartFont, fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: chartFont, fontSize: 10 } },
+    pieHole: 0.6,
+    chartArea: { width: '80%', height: '80%' }
+  });
 }
 
 function setChartSlide(index) {
@@ -2448,9 +2603,57 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
-  // Font Switcher Event Listeners
-  document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
-  document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
+  // Font Arrows + Long Press setup
+  const fontPrev = document.getElementById('font-prev');
+  const fontNext = document.getElementById('font-next');
+
+  function fontPressStart() {
+    FONT_LONG_PRESS_FIRED = false;
+    if (FONT_LONG_PRESS_TIMER) clearTimeout(FONT_LONG_PRESS_TIMER);
+    FONT_LONG_PRESS_TIMER = setTimeout(() => {
+      FONT_LONG_PRESS_TIMER = null;
+      FONT_LONG_PRESS_FIRED = true;
+      showFontPickerModal();
+    }, FONT_LONG_PRESS_DURATION);
+  }
+
+  function fontPressEnd() {
+    if (FONT_LONG_PRESS_TIMER) {
+      clearTimeout(FONT_LONG_PRESS_TIMER);
+      FONT_LONG_PRESS_TIMER = null;
+    }
+  }
+
+  function onFontPrevClick(e) {
+    if (FONT_LONG_PRESS_FIRED) {
+      FONT_LONG_PRESS_FIRED = false;
+      return; // ignore click after long press
+    }
+    cycleFont('prev');
+  }
+
+  function onFontNextClick(e) {
+    if (FONT_LONG_PRESS_FIRED) {
+      FONT_LONG_PRESS_FIRED = false;
+      return;
+    }
+    cycleFont('next');
+  }
+
+  if (fontPrev && fontNext) {
+    fontPrev.addEventListener('click', onFontPrevClick);
+    fontNext.addEventListener('click', onFontNextClick);
+
+    ['mousedown', 'touchstart'].forEach(ev => {
+      fontPrev.addEventListener(ev, fontPressStart, { passive: true });
+      fontNext.addEventListener(ev, fontPressStart, { passive: true });
+    });
+
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => {
+      fontPrev.addEventListener(ev, fontPressEnd, { passive: true });
+      fontNext.addEventListener(ev, fontPressEnd, { passive: true });
+    });
+  }
 
   window.addEventListener('resize', renderChart);
   
