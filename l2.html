@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Ledger — Accounts & Chart (v2.5)</title>
 
-<!-- Google Fonts Import (Removed DM Mono & Gloria Hallelujah) -->
+<!-- Google Fonts Import (Geologica + Patrick Hand only) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Inconsolata:wght@200..900&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Patrick+Hand&display=swap" rel="stylesheet">
 
 <style>
 /* ============================================
@@ -39,8 +39,8 @@
   --c-modal-border: #000000;
   --c-modal-fg: #000000;
   
-  /* Default Font Family Variable */
-  --font-current: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  /* Default Font Family Variable — now Geologica-first */
+  --font-current: "Geologica", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 :root.dark-mode {
@@ -515,7 +515,7 @@ button:disabled {
   font-size: 50px;
   font-weight: 300;
   color: #b5a8a8;
-  font-family: monospace; /* Overridden by current font if we want, or keep monospace */
+  font-family: monospace;
   letter-spacing: 0.2em;
   cursor: pointer;
   user-select: none;
@@ -534,11 +534,11 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem; /* Space between arrows and toggle */
+  gap: 1.5rem;
 }
 
 .font-nav-btn {
-  font-size: 4.5rem; /* Increased by 50% from 3rem */
+  font-size: 4.5rem;
   line-height: 1;
   font-weight: 300;
   cursor: pointer;
@@ -991,7 +991,7 @@ footer b { font-weight: 600; }
   <div id="chart"></div>
   <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
-  <!-- NEW: Visual Ratio Bar (Asset vs Debt) -->
+  <!-- Visual Ratio Bar (Asset vs Debt) -->
   <div id="visual-ratio-bar">
     <div id="ratio-asset"></div>
     <div id="ratio-debt"></div>
@@ -1008,7 +1008,7 @@ footer b { font-weight: 600; }
   <div class="bottom-section">
     <div id="score-display">000</div>
     
-    <!-- NEW: Font Navigation + Dark Mode -->
+    <!-- Font Navigation + Dark Mode -->
     <div class="bottom-controls-container">
       <div id="font-prev" class="font-nav-btn">&lt;</div>
       
@@ -1061,14 +1061,20 @@ let MUTED_ACCOUNTS = new Set();
 let MUTED_TYPES = new Set();
 let DARK_MODE = false;
 let SCORE = 0;
-let CHART_SLIDE = 0;          // 0..2
+
+/* Chart slides:
+   0 = Bar
+   1 = Line
+   2 = Donut
+   Default now set to Donut (2) as requested
+*/
+let CHART_SLIDE = 2;          // 0..2
 const MAX_CHART_SLIDE = 2;    // 3 chart views total
 
-// Fonts List (DM Mono and Gloria Hallelujah removed)
+// Fonts List — Inconsolata removed; Geologica is default (index 0)
 const FONT_OPTIONS = [
+  '"Geologica", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
   'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-  '"Geologica", sans-serif',
-  '"Inconsolata", monospace',
   '"Patrick Hand", cursive'
 ];
 let CURRENT_FONT_INDEX = 0;
@@ -1674,11 +1680,10 @@ async function fetchSnapshot() {
 
     SNAP = j;
     
-    // --- NEW: Update Score from Database ---
+    // Update Score from Database
     if (SNAP.score !== undefined) {
       SCORE = Number(SNAP.score);
     }
-    // ---------------------------------------
 
     console.log('Snapshot loaded:', SNAP);
     setLoading(false);
@@ -1702,9 +1707,6 @@ function loadStateFromURL() {
 
   const mutedTypesParam = params.get('mutedTypes');
   if (mutedTypesParam) MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
-
-  // Dark mode handled in initializeTheme()
-  // Font handled in initializeTheme()
 
   const accountMetaParam = params.get('acctMeta');
   const typeMetaParam = params.get('typeMeta');
@@ -1941,7 +1943,6 @@ function renderTypeSummary() {
 }
 
 function renderStatusbar() {
-  // Note: 'statusbar' ID now refers to nothing (removed) but we only update ratio bars
   const ratioAsset = document.getElementById('ratio-asset');
   const ratioDebt = document.getElementById('ratio-debt');
 
@@ -1995,7 +1996,7 @@ function renderChart() {
   }
   renderChartPager();
 
-  // Add swipe listeners for charts
+  // Swipe listeners for charts
   let touchStartX = null;
   const SWIPE_THRESHOLD = 40;
   chartContainer.addEventListener('touchstart', (e) => {
@@ -2013,7 +2014,7 @@ function renderChart() {
   });
 }
 
-// Slide 1: Original Bar Chart
+// Slide 1: Bar Chart
 function renderBarChart(container, labels) {
   const styles = getComputedStyle(document.documentElement);
   const pos = styles.getPropertyValue('--c-pos').trim();
@@ -2054,7 +2055,7 @@ function renderBarChart(container, labels) {
     for (let i = 0; i < labels.length; i++) {
       const row = [labels[i]];
       visibleTypes.forEach(code => {
-        const seriesArr = typeSeries[code] || [];
+        const seriesArr = typeSeries[code] || {};
         const v = Number(seriesArr[i] ?? 0);
         row.push(v);
       });
@@ -2168,7 +2169,6 @@ function renderDonutCharts(container) {
   const fg = styles.getPropertyValue('--c-fg').trim();
   container.innerHTML = '';
   
-  // Updated wrapper styling for robust centering
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:12px; width:100%;';
   
@@ -2176,13 +2176,11 @@ function renderDonutCharts(container) {
   const allDiv = document.createElement('div');
   const debtDiv = document.createElement('div');
   
-  // Ensure charts have enough size but flex comfortably
   const commonStyle = 'flex: 1 1 260px; min-width: 260px; max-width: 400px; height: 260px;';
   typeDiv.style.cssText = commonStyle;
   allDiv.style.cssText = commonStyle;
   debtDiv.style.cssText = commonStyle;
   
-  // Append in order. On wider screens, this places "All Accounts" (allDiv) in the visual center of 3 items.
   wrap.appendChild(typeDiv);
   wrap.appendChild(allDiv);
   wrap.appendChild(debtDiv);
@@ -2386,6 +2384,10 @@ async function submitAll() {
   await submitEntries(entries);
 }
 
+/* 
+   After successful submission, we now refresh the entire page
+   so the new values are shown in a clean state.
+*/
 async function submitEntries(entries) {
   if (IS_LOADING) return;
   setLoading(true, 'Submitting…');
@@ -2401,13 +2403,11 @@ async function submitEntries(entries) {
     const j = JSON.parse(text);
     if (!j.ok) throw new Error(j.error || 'Unknown error');
 
-    showToast('Saved!', 'success');
-    entries.forEach(e => {
-      e.inputEl?.classList.add('submitted-ok');
-      e.inputEl.value = '';
-      setTimeout(() => e.inputEl?.classList.remove('submitted-ok'), 800);
-    });
-    await fetchSnapshot();
+    // Full page refresh to display updated values
+    showToast('Saved! Refreshing…', 'success');
+    setTimeout(() => {
+      window.location.reload();
+    }, 600);
   } catch (e) {
     console.error(e);
     showToast('Submit failed', 'error');
@@ -2448,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
-  // NEW: Font Switcher Event Listeners
+  // Font Switcher Event Listeners
   document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
   document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
 
