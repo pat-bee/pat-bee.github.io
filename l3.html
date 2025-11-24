@@ -2455,18 +2455,37 @@ function renderAccounts() {
 
     if (isAccountMuted(a.name)) row.classList.add('muted');
 
-    const vals = document.createElement('div'); vals.className = 'values';
-    (s.lastN || []).forEach(v => {
-      const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-      const val = Number(isObject ? v.value : v);
-      const date = isObject ? v.date : null;
-      const readableValue = formatMoney(val);
-      const chip = document.createElement('span'); chip.className = 'chip'; chip.dataset.sign = signOf(val); chip.textContent = readableValue;
-      if (date) chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
-      else { chip.classList.add('no-delete'); chip.title = "Old data format"; }
-      vals.appendChild(chip);
-    });
-    right.appendChild(vals);
+
+const vals = document.createElement('div');
+vals.className = 'values';
+
+// newest on the left, oldest on the right
+const lastN = s.lastN || [];
+lastN.slice().reverse().forEach(v => {
+  const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+  const val = Number(isObject ? v.value : v);
+  const date = isObject ? v.date : null;
+  const readableValue = formatMoney(val);
+
+  const chip = document.createElement('span');
+  chip.className = 'chip';
+  chip.dataset.sign = signOf(val);
+  chip.textContent = readableValue;
+
+  if (date) {
+    chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
+  } else {
+    chip.classList.add('no-delete');
+    chip.title = 'Old data format';
+  }
+
+  vals.appendChild(chip);
+});
+
+right.appendChild(vals);
+
+
+
 
     const bar = document.createElement('h4'); bar.className = 'ratio-bar';
     const assetSpan = document.createElement('span'); assetSpan.style.color = 'var(--c-pos)';
