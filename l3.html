@@ -1552,37 +1552,51 @@ function showEditAccountModal(accountName) {
 
   const meta = ACCOUNT_METADATA.get(accountName) || {};
 
+  // Set modal text
   document.getElementById('edit-account-name').textContent = accountName;
+
+  // Type
   document.getElementById('edit-account-type').value = account.type || 'bk';
 
+  // Limit (from AccountMeta)
   document.getElementById('edit-account-limit').value =
-      (typeof meta.limit === 'number') ? meta.limit : '';
+    (typeof meta.limit === 'number') ? meta.limit : '';
 
+  // APR (from Accounts)
   document.getElementById('edit-account-apr').value =
-      (typeof account.apr === 'number') ? account.apr : '';
+    (typeof account.apr === 'number') ? account.apr : '';
 
+  // Color
   const color = meta.color || account.color || '';
   const norm  = normalizeHexColor(color) || '#4C8036';
-  document.getElementById('edit-account-color').value = norm;
-  document.getElementById('edit-account-color-picker').value = norm;
+  const colorInput  = document.getElementById('edit-account-color');
+  const colorPicker = document.getElementById('edit-account-color-picker');
+  colorInput.value  = norm;
+  colorPicker.value = norm;
 
+  // Link
   document.getElementById('edit-account-link').value = meta.link || '';
 
+  // Current value (last snapshot value)
   const last = SNAP.series?.[accountName]?.last ?? 0;
   document.getElementById('edit-account-value').value = last;
 
-  // Sync color picker / text
-  const picker = document.getElementById('edit-account-color-picker');
-  const input  = document.getElementById('edit-account-color');
-  picker.oninput = () => input.value = picker.value;
-  input.oninput  = () => {
-    const n = normalizeHexColor(input.value);
-    if (n) picker.value = n;
+  // Sync color picker <-> text input
+  colorPicker.oninput = () => { colorInput.value = colorPicker.value; };
+  colorInput.oninput  = () => {
+    const n = normalizeHexColor(colorInput.value);
+    if (n) colorPicker.value = n;
   };
 
+  // ✅ WIRE THE SAVE BUTTON
+  const saveBtn = document.getElementById('edit-account-save');
+  saveBtn.onclick = () => processEditAccount(accountName);
+
+  // Show modal
   document.getElementById('edit-account-modal-backdrop').classList.add('show');
   document.getElementById('edit-account-modal').classList.add('show');
 }
+
 
 function hideEditAccountModal() {
   document.getElementById('edit-account-modal-backdrop').classList.remove('show');
