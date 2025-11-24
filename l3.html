@@ -325,19 +325,28 @@ hr.divider {
 .limit {
   font-weight: 600;
   font-size: 0.75rem;
-  flex-shrink: 0;
-  padding-top: 0.5rem;
+  padding-top: 0.35rem;
   color: var(--c-fg);
+
+  /* NEW: make limit take a full row under the name */
+  flex-basis: 100%;
+  width: 100%;
+  display: block;
 }
 
 .apr { 
   font-weight: 400; 
   font-size: 0.75rem;
   opacity: .75;
-  flex-shrink: 0;
-  padding-top: 0.5rem;
+  padding-top: 0.1rem;
   color: var(--c-fg);
+
+  /* NEW: stack directly under .limit, same left edge */
+  flex-basis: 100%;
+  width: 100%;
+  display: block;
 }
+
 
 .input-line { 
   display: flex; 
