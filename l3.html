@@ -322,30 +322,31 @@ hr.divider {
 .name:hover { opacity: 0.8; }
 .name:active { opacity: 0.6; }
 
+/* Wraps LIMIT + APR as a small vertical column to the right of the name */
+.account-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+/* Limit line */
 .limit {
   font-weight: 600;
   font-size: 0.75rem;
   padding-top: 0.35rem;
   color: var(--c-fg);
-
-  /* NEW: make limit take a full row under the name */
-  flex-basis: 100%;
-  width: 50%;
-  display: block;
 }
 
+/* APR + interest line */
 .apr { 
   font-weight: 400; 
   font-size: 0.75rem;
   opacity: .75;
-  padding-top: 0.05rem;
+  padding-top: 0.1rem;
   color: var(--c-fg);
-
-  /* NEW: stack directly under .limit, same left edge */
-  flex-basis: 100%;
-  width: 50%;
-  display: block;
 }
+
 
 
 .input-line { 
@@ -2391,61 +2392,102 @@ function renderAccounts() {
     const left = document.createElement('div'); left.className = 'left';
     const right = document.createElement('div'); right.className = 'right';
     const accountDetails = document.createElement('div'); accountDetails.className = 'account-details';
-    
-    const identityWrap = document.createElement('div');
-    identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
-    
-    const lastEl = document.createElement('span'); lastEl.className = 'lastval'; lastEl.textContent = formatMoney(last); lastEl.dataset.sign = signOf(last);
-    const nameEl = document.createElement('span'); nameEl.className = 'name'; nameEl.textContent = a.name;
-    
-    const meta = ACCOUNT_METADATA.get(a.name) || {};
-    const effectiveColor = meta.color || a.color;
-    if (effectiveColor) { const norm = normalizeHexColor(effectiveColor); if (norm) nameEl.style.color = norm; }
-    
-    if (meta.link) {
-      nameEl.style.textDecoration = 'underline'; nameEl.style.textDecorationStyle = 'dotted'; nameEl.title = 'Open account link';
-      nameEl.onclick = () => { if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER); window.open(meta.link, '_blank', 'noopener'); };
-    }
 
-    let pressStartTime = 0;
-    const startLongPress = () => { pressStartTime = Date.now(); LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION); };
-    const clearLongPress = () => { if (LONG_PRESS_TIMER) { clearTimeout(LONG_PRESS_TIMER); LONG_PRESS_TIMER = null; } };
-    nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
-    nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
 
-    identityWrap.append(lastEl, nameEl);
-    accountDetails.append(identityWrap);
+const identityWrap = document.createElement('div');
+identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
-    if (a.type === 'cc' && meta.limit) {
-      const limitEl = document.createElement('span'); limitEl.className = 'limit';
-      const limitValue = meta.limit;
-      limitEl.style.color = getLimitColor(last, limitValue);
-      limitEl.textContent = `$${limitValue.toLocaleString()}`;
-      accountDetails.appendChild(limitEl);
-    }
+const lastEl = document.createElement('span');
+lastEl.className = 'lastval';
+lastEl.textContent = formatMoney(last);
+lastEl.dataset.sign = signOf(last);
 
-    const aprEl = document.createElement('span'); aprEl.className = 'apr';
-    const apr = a.apr || 0;
-    let interestAmount = 0, periodLabel = '';
-    if (apr > 0 && last !== 0) {
-      const dailyRate = (last * apr) / 365;
-      switch (TIMEFRAME) {
-        case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
-        case '7d': interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
-        case '14d': interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
-        case '30d': interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
-        case '90d': interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
-        case '1y': case 'ytd': case 'all': interestAmount = last * apr; periodLabel = '/yr'; break;
-      }
-    }
-    let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
-    if (Math.abs(interestAmount) >= 0.01) {
-      const sign = interestAmount >= 0 ? '+' : '';
-      const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
-      aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
-    }
-    aprEl.innerHTML = aprHTML;
-    accountDetails.appendChild(aprEl);
+const nameEl = document.createElement('span');
+nameEl.className = 'name';
+nameEl.textContent = a.name;
+
+// Apply account color / link behavior as before
+const meta = ACCOUNT_METADATA.get(a.name) || {};
+const effectiveColor = meta.color || a.color;
+if (effectiveColor) {
+  const norm = normalizeHexColor(effectiveColor);
+  if (norm) nameEl.style.color = norm;
+}
+if (meta.link) {
+  nameEl.style.textDecoration = 'underline';
+  nameEl.style.textDecorationStyle = 'dotted';
+  nameEl.title = 'Open account link';
+  nameEl.onclick = () => {
+    if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
+    window.open(meta.link, '_blank', 'noopener');
+  };
+}
+
+// Long-press menu logic (unchanged)
+let pressStartTime = 0;
+const startLongPress = () => {
+  pressStartTime = Date.now();
+  LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION);
+};
+const clearLongPress = () => {
+  if (LONG_PRESS_TIMER) {
+    clearTimeout(LONG_PRESS_TIMER);
+    LONG_PRESS_TIMER = null;
+  }
+};
+nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
+nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
+
+identityWrap.append(lastEl, nameEl);
+accountDetails.append(identityWrap);
+
+// NEW: meta column that stacks LIMIT + APR to the right of the name
+const metaWrap = document.createElement('div');
+metaWrap.className = 'account-meta';
+
+// LIMIT (only for CC with a limit)
+if (a.type === 'cc' && meta.limit) {
+  const limitEl = document.createElement('span');
+  limitEl.className = 'limit';
+  const limitValue = meta.limit;
+  limitEl.style.color = getLimitColor(last, limitValue);
+  limitEl.textContent = `$${limitValue.toLocaleString()}`;
+  metaWrap.appendChild(limitEl);
+}
+
+// APR + interest line, always available
+const aprEl = document.createElement('span');
+aprEl.className = 'apr';
+const apr = a.apr || 0;
+let interestAmount = 0;
+let periodLabel = '';
+
+if (apr > 0 && last !== 0) {
+  const dailyRate = (last * apr) / 365;
+  switch (TIMEFRAME) {
+    case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
+    case '7d':    interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
+    case '14d':   interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
+    case '30d':   interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
+    case '90d':   interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+    case '1y':
+    case 'ytd':
+    case 'all':   interestAmount = last * apr; periodLabel = '/yr'; break;
+  }
+}
+
+let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+if (Math.abs(interestAmount) >= 0.01) {
+  const sign = interestAmount >= 0 ? '+' : '';
+  const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
+  aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
+}
+aprEl.innerHTML = aprHTML;
+metaWrap.appendChild(aprEl);
+
+// Append the stacked meta block to the right of name
+accountDetails.appendChild(metaWrap);
+
 
     const inputLine = document.createElement('div'); inputLine.className = 'input-line';
     const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'Add value…'; inp.step = '0.01'; inp.dataset.accountName = a.name;
