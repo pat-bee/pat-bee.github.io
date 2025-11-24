@@ -1615,6 +1615,111 @@ async function processEditAccount(accountName) {
   const newLink = linkInput.value ? linkInput.value.trim() : '';
   const newColor = normalizeHexColor(colorInput.value);
 
+  // Update local metadata cache
+  const meta = ACCOUNT_METADATA.get(accountName) || {};
+  meta.limit = newLimit !== null ? newLimit : null;
+  meta.color = newColor || null;
+  meta.link = newLink || null;
+  ACCOUNT_METADATA.set(accountName, meta);
+
+  // Update local SNAP copy for immediate UI
+  const account = SNAP?.accounts?.find(a => a.name === accountName);
+  if (account) {
+    account.type = newType;
+    account.apr = isNaN(newAPR) ? account.apr : newAPR;
+    if (newColor) account.color = newColor;
+  }
+
+  saveStateToURL();
+  hideEditAccountModal();
+
+  const series = SNAP?.series?.[accountName];
+  const currentValue = series?.last ?? 0;
+
+  showToast('Saving account settings…', 'info', 2500);
+
+  try {
+    //
+    // 1) Persist account metadata (Limit, Color override, Link) into AccountMeta
+    //
+    const metaPayload = {
+      entries: [{
+        account: accountName,
+        limit: meta.limit !== null ? meta.limit : '',
+        color: meta.color || '',
+        link: meta.link || ''
+      }]
+    };
+    const metaBody = new URLSearchParams({ payload: JSON.stringify(metaPayload) });
+    const metaRes = await fetch(`${API_BASE}?route=updateAccountMeta`, {
+      method: 'POST',
+      body: metaBody
+    });
+    const metaText = await metaRes.text();
+    const metaJson = JSON.parse(metaText);
+    if (!metaJson.ok) {
+      throw new Error(metaJson.error || 'Account meta update failed');
+    }
+
+    //
+    // 2) Persist structural account fields (Type, APR, base Color) into Accounts sheet
+    //
+    const acctPayload = {
+      entries: [{
+        account: accountName,
+        type: newType,
+        apr: isNaN(newAPR) ? '' : newAPR,
+        color: newColor || ''
+        // Kind / Sort could also go here later if you expose them in the modal
+      }]
+    };
+    const acctBody = new URLSearchParams({ payload: JSON.stringify(acctPayload) });
+    const acctRes = await fetch(`${API_BASE}?route=updateAccount`, {
+      method: 'POST',
+      body: acctBody
+    });
+    const acctText = await acctRes.text();
+    const acctJson = JSON.parse(acctText);
+    if (!acctJson.ok) {
+      throw new Error(acctJson.error || 'Account core update failed');
+    }
+
+    //
+    // 3) Optionally append a new Values entry if the balance changed
+    //
+    if (!isNaN(newValue) && newValue !== currentValue) {
+      const valueBody = new URLSearchParams({
+        payload: JSON.stringify({
+          entries: [{ account: accountName, value: newValue }]
+        })
+      });
+      const res = await fetch(`${API_BASE}?route=submit`, {
+        method: 'POST',
+        body: valueBody
+      });
+      const text = await res.text();
+      const j = JSON.parse(text);
+      if (!j.ok) throw new Error(j.error || 'Submit failed');
+
+      showToast('Account value and settings updated! Refreshing…', 'success');
+    } else {
+      showToast('Account settings updated! Refreshing…', 'success');
+    }
+
+    // 4) Reload snapshot so the UI reflects everything from the Sheets state
+    await fetchSnapshot();
+  } catch (e) {
+    console.error('Update error:', e);
+    showToast('Failed to update: ' + e.message, 'error', 5000);
+  }
+}
+
+
+  const newAPR = Number(aprInput.value);
+  const newValue = Number(valueInput.value);
+  const newLink = linkInput.value ? linkInput.value.trim() : '';
+  const newColor = normalizeHexColor(colorInput.value);
+
   const meta = ACCOUNT_METADATA.get(accountName) || {};
   meta.limit = newLimit !== null ? newLimit : null;
   meta.color = newColor || null;
