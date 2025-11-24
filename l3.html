@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.5)</title>
+<title>Ledger — Accounts & Chart (v2.6)</title>
 
 <!-- Google Fonts Import (Removed DM Mono & Gloria Hallelujah) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -872,7 +872,7 @@ footer b { font-weight: 600; }
   .bottom-section { padding: 1.5rem 1rem; gap: 1rem; }
   .dark-mode-toggle-icon { font-size: 1.3rem; line-height: 1; color: var(--c-fg); user-select: none; transition: opacity 0.25s ease, transform 0.25s ease; }
   .dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon { transform: rotate(180deg); opacity: 0.9; }
-       .cc-metrics {
+  .cc-metrics {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
@@ -1042,10 +1042,9 @@ footer b { font-weight: 600; }
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
-  <!-- Bottom section with Score, Font Controls, and Dark Mode toggle -->
-    <!-- Bottom section with CC metrics, Score, Font Controls, and Dark Mode toggle -->
+  <!-- Bottom section with CC metrics, Score, Font Controls, and Dark Mode toggle -->
   <div class="bottom-section">
-    <!-- New CC LIMIT / CC DEBT metrics -->
+    <!-- CC LIMIT / CC DEBT metrics -->
     <div class="cc-metrics">
       <div class="cc-metric">
         <div id="cc-limit-value" class="cc-metric-value">0</div>
@@ -1057,7 +1056,7 @@ footer b { font-weight: 600; }
       </div>
     </div>
 
-    <!-- Existing score display -->
+    <!-- Score display -->
     <div id="score-display">000</div>
     
     <!-- Font Navigation + Dark Mode -->
@@ -1075,8 +1074,6 @@ footer b { font-weight: 600; }
     </div>
   </div>
 
-
-
   <!-- Footer -->
   <footer>
     <div class="security-notice">
@@ -1086,7 +1083,7 @@ footer b { font-weight: 600; }
     </div>
 
     <small>
-      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries • Font Switcher • Mute/unmute • Dark mode 🌙 • Score tracker 📊<br>
+      <b>v2.6 Features:</b> CC limits • Edit account settings • Type summaries • Font Switcher • Mute/unmute • Dark mode 🌙 • Score tracker 📊 • AccountMeta persistence<br>
       <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
@@ -1096,7 +1093,7 @@ footer b { font-weight: 600; }
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycby6yEu1oUCC7_fe5rjuiBlOgQQVt94FgxWhC7NiSSKS4EoT_snkGpqokTYvfvsjjPFk/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbwPinx55T1b2dM3AmOsqZwTobcMTyWEUn9gy0xhUe66iL3GGiPDBMGzG5qKNdgO_u_-/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
@@ -1134,8 +1131,8 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-let ACCOUNT_METADATA = new Map();  // accountName -> { limit, color, link }
-let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
+let ACCOUNT_METADATA = new Map();      // accountName -> { limit, color, link }
+let TYPE_META_OVERRIDES = new Map();   // typeCode -> { color }
 
 /* ============================================
     FONT SWITCHER
@@ -1201,7 +1198,7 @@ function initializeTheme() {
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   
-  // 1. Dark Mode
+  // Dark Mode
   const darkModeParam = params.get('darkMode');
   if (darkModeParam === 'true') {
     DARK_MODE = true;
@@ -1211,7 +1208,7 @@ function initializeTheme() {
     DARK_MODE = shouldAutoEnableDarkMode();
   }
 
-  // 2. Font
+  // Font
   const fontParam = params.get('font');
   if (fontParam) {
     const idx = parseInt(fontParam, 10);
@@ -1349,8 +1346,10 @@ function showToast(msg, type = 'info', duration = 3000) {
 
 function setLoading(loading, message) {
   IS_LOADING = loading;
-  document.getElementById('refresh').disabled = loading;
-  document.getElementById('submitAll').disabled = loading;
+  const refresh = document.getElementById('refresh');
+  const submitAll = document.getElementById('submitAll');
+  if (refresh) refresh.disabled = loading;
+  if (submitAll) submitAll.disabled = loading;
   document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
     inp.disabled = loading;
     inp.classList.toggle('submitting', loading);
@@ -1563,7 +1562,7 @@ function showEditAccountModal(accountName) {
 
   const metadata = ACCOUNT_METADATA.get(accountName) || {};
   typeSelect.value = account.type || 'bk';
-  limitInput.value = metadata.limit || '';
+  limitInput.value = (typeof metadata.limit === 'number' && !isNaN(metadata.limit)) ? metadata.limit : '';
   aprInput.value = account.apr || 0;
 
   const series = SNAP?.series?.[accountName];
@@ -1592,6 +1591,7 @@ function hideEditAccountModal() {
 
 async function processEditAccount(accountName) {
   if (IS_LOADING) return;
+
   const typeSelect = document.getElementById('edit-account-type');
   const limitInput = document.getElementById('edit-account-limit');
   const aprInput = document.getElementById('edit-account-apr');
@@ -1600,14 +1600,23 @@ async function processEditAccount(accountName) {
   const linkInput = document.getElementById('edit-account-link');
 
   const newType = (typeSelect.value || 'bk').trim();
-  const newLimit = limitInput.value ? Number(limitInput.value) : null;
+
+  const newLimitRaw = limitInput.value;
+  let newLimit = null;
+  if (newLimitRaw !== '') {
+    const limitNum = Number(newLimitRaw);
+    if (!isNaN(limitNum) && limitNum > 0) {
+      newLimit = limitNum;
+    }
+  }
+
   const newAPR = Number(aprInput.value);
   const newValue = Number(valueInput.value);
   const newLink = linkInput.value ? linkInput.value.trim() : '';
   const newColor = normalizeHexColor(colorInput.value);
 
   const meta = ACCOUNT_METADATA.get(accountName) || {};
-  meta.limit = (newLimit && newLimit > 0) ? newLimit : null;
+  meta.limit = newLimit !== null ? newLimit : null;
   meta.color = newColor || null;
   meta.link = newLink || null;
   ACCOUNT_METADATA.set(accountName, meta);
@@ -1624,26 +1633,45 @@ async function processEditAccount(accountName) {
   const series = SNAP?.series?.[accountName];
   const currentValue = series?.last ?? 0;
 
-  if (!isNaN(newValue) && newValue !== currentValue) {
-    setLoading(true, 'Updating account value…');
-    try {
-      const body = new URLSearchParams({ 
+  showToast('Saving account settings…', 'info', 2500);
+
+  try {
+    // Persist meta (limit/color/link) via backend
+    const metaPayload = {
+      entries: [{
+        account: accountName,
+        limit: meta.limit !== null ? meta.limit : '',
+        color: meta.color || '',
+        link: meta.link || ''
+      }]
+    };
+    const metaBody = new URLSearchParams({ payload: JSON.stringify(metaPayload) });
+    const metaRes = await fetch(`${API_BASE}?route=updateAccountMeta`, { method: 'POST', body: metaBody });
+    const metaText = await metaRes.text();
+    const metaJson = JSON.parse(metaText);
+    if (!metaJson.ok) {
+      throw new Error(metaJson.error || 'Account meta update failed');
+    }
+
+    // Optionally update current value
+    if (!isNaN(newValue) && newValue !== currentValue) {
+      const valueBody = new URLSearchParams({ 
         payload: JSON.stringify({ entries: [{ account: accountName, value: newValue }] }) 
       });
-      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
+      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body: valueBody });
       const text = await res.text();
       const j = JSON.parse(text);
       if (!j.ok) throw new Error(j.error || 'Submit failed');
-      showToast('Account updated! Refreshing…', 'success');
-      await fetchSnapshot();
-    } catch (e) {
-      console.error('Update error:', e);
-      setLoading(false);
-      showToast('Failed to update: ' + e.message, 'error', 5000);
+      showToast('Account value and settings updated! Refreshing…', 'success');
+    } else {
+      showToast('Account settings updated! Refreshing…', 'success');
     }
-  } else {
-    showToast('Account settings updated!', 'success');
-    renderAll();
+
+    // Pull fresh snapshot (contains updated AccountMeta)
+    await fetchSnapshot();
+  } catch (e) {
+    console.error('Update error:', e);
+    showToast('Failed to update: ' + e.message, 'error', 5000);
   }
 }
 
@@ -1727,11 +1755,30 @@ async function fetchSnapshot() {
 
     SNAP = j;
     
-    // --- NEW: Update Score from Database ---
+    // Update score from database
     if (SNAP.score !== undefined) {
       SCORE = Number(SNAP.score);
     }
-    // ---------------------------------------
+
+    // NEW: Load AccountMeta (limits/colors/links) from backend snapshot
+    ACCOUNT_METADATA = new Map();
+    if (SNAP.accountMeta) {
+      Object.entries(SNAP.accountMeta).forEach(([accountName, meta]) => {
+        if (!accountName) return;
+        let limit = null;
+        if (typeof meta.limit === 'number') {
+          limit = meta.limit;
+        } else if (typeof meta.limit === 'string' && meta.limit.trim() !== '') {
+          const parsed = Number(meta.limit.replace(/,/g, ''));
+          if (!isNaN(parsed)) limit = parsed;
+        }
+        ACCOUNT_METADATA.set(accountName, {
+          limit: Number.isFinite(limit) ? limit : null,
+          color: meta.color || null,
+          link: meta.link || null
+        });
+      });
+    }
 
     console.log('Snapshot loaded:', SNAP);
     setLoading(false);
@@ -1744,7 +1791,7 @@ async function fetchSnapshot() {
 }
 
 /* ============================================
-    URL STATE (muted + metadata + dark mode)
+    URL STATE (muted + types + dark mode)
    ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
@@ -1756,25 +1803,9 @@ function loadStateFromURL() {
   const mutedTypesParam = params.get('mutedTypes');
   if (mutedTypesParam) MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
 
-  // Dark mode handled in initializeTheme()
-  // Font handled in initializeTheme()
+  // Dark mode & font handled in initializeTheme()
 
-  const accountMetaParam = params.get('acctMeta');
   const typeMetaParam = params.get('typeMeta');
-
-  ACCOUNT_METADATA = new Map();
-  if (accountMetaParam) {
-    try {
-      const metaObj = JSON.parse(decodeURIComponent(accountMetaParam));
-      Object.entries(metaObj).forEach(([account, meta]) => {
-        ACCOUNT_METADATA.set(account, {
-          limit: typeof meta.limit === 'number' ? meta.limit : null,
-          color: meta.color ? normalizeHexColor(meta.color) : null,
-          link: meta.link || null
-        });
-      });
-    } catch (e) { console.error('Failed to parse acctMeta from URL:', e); }
-  }
 
   TYPE_META_OVERRIDES = new Map();
   if (typeMetaParam) {
@@ -1805,16 +1836,6 @@ function saveStateToURL() {
   if (CURRENT_FONT_INDEX > 0) {
     params.set('font', CURRENT_FONT_INDEX);
   }
-
-  const acctMetaObj = {};
-  ACCOUNT_METADATA.forEach((meta, accountName) => {
-    const m = {};
-    if (meta.limit) m.limit = meta.limit;
-    if (meta.color) m.color = meta.color;
-    if (meta.link)  m.link  = meta.link;
-    if (Object.keys(m).length > 0) acctMetaObj[accountName] = m;
-  });
-  if (Object.keys(acctMetaObj).length > 0) params.set('acctMeta', encodeURIComponent(JSON.stringify(acctMetaObj)));
 
   const typeMetaObj = {};
   TYPE_META_OVERRIDES.forEach((meta, typeCode) => {
@@ -1856,14 +1877,13 @@ function renderAll() {
   renderSummary();
   renderInterestSummary();
   renderStatusbar();
-  renderCCMetrics();   // ⬅️ NEW: CC LIMIT / CC DEBT
+  renderCCMetrics();
   renderChart();
   renderTypeSummary();
   renderAccounts();
   renderScore();
-
-
 }
+
 function renderCCMetrics() {
   const limitEl = document.getElementById('cc-limit-value');
   const debtEl = document.getElementById('cc-debt-value');
@@ -1880,7 +1900,7 @@ function renderCCMetrics() {
     const series = SNAP.series[a.name] || {};
     const last = Number(series.last ?? 0);
 
-    // limits from ACCOUNT_METADATA (Edit Account modal)
+    // limits from ACCOUNT_METADATA (Edit Account modal / AccountMeta sheet)
     const meta = ACCOUNT_METADATA.get(a.name) || {};
     if (typeof meta.limit === 'number' && !isNaN(meta.limit)) {
       totalLimit += meta.limit;
@@ -1906,7 +1926,6 @@ function renderCCMetrics() {
   limitEl.textContent = formatMoney(availableCredit);
   debtEl.textContent = formatMoney(totalDebtRaw);
 }
-
 
 function renderSummary() {
   const summaryEl = document.getElementById('financial-summary');
@@ -2040,7 +2059,6 @@ function renderTypeSummary() {
 }
 
 function renderStatusbar() {
-  // Note: 'statusbar' ID now refers to nothing (removed) but we only update ratio bars
   const ratioAsset = document.getElementById('ratio-asset');
   const ratioDebt = document.getElementById('ratio-debt');
 
@@ -2267,7 +2285,6 @@ function renderDonutCharts(container) {
   const fg = styles.getPropertyValue('--c-fg').trim();
   container.innerHTML = '';
   
-  // Updated wrapper styling for robust centering
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:12px; width:100%;';
   
@@ -2275,13 +2292,11 @@ function renderDonutCharts(container) {
   const allDiv = document.createElement('div');
   const debtDiv = document.createElement('div');
   
-  // Ensure charts have enough size but flex comfortably
   const commonStyle = 'flex: 1 1 260px; min-width: 260px; max-width: 400px; height: 260px;';
   typeDiv.style.cssText = commonStyle;
   allDiv.style.cssText = commonStyle;
   debtDiv.style.cssText = commonStyle;
   
-  // Append in order. On wider screens, this places "All Accounts" (allDiv) in the visual center of 3 items.
   wrap.appendChild(typeDiv);
   wrap.appendChild(allDiv);
   wrap.appendChild(debtDiv);
@@ -2547,13 +2562,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
-  // NEW: Font Switcher Event Listeners
+  // Font Switcher Event Listeners
   document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
   document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
 
   window.addEventListener('resize', renderChart);
   
-  renderScore(); // Initial render (000)
+  renderScore();
   document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
   if (window.google && google.charts) {
