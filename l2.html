@@ -4,22 +4,29 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Ledger — Accounts & Chart (v2.6)</title>
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ledger — Accounts & Chart (v2.6)</title>
 <!--
-/* ╔═══════════════════════════════════════════════════════════════╗
+   ╔═════════════════════════════════════════════════════════════╗
    ║  ██╗     ███████╗██████╗  ██████╗ ███████╗██████╗           ║
    ║  ██║     ██╔════╝██╔══██╗██╔════╝ ██╔════╝██╔══██╗          ║
    ║  ██║     █████╗  ██║  ██║██║  ███╗█████╗  ██████╔╝          ║
    ║  ██║     ██╔══╝  ██║  ██║██║   ██║██╔══╝  ██╔══██╗          ║
    ║  ███████╗███████╗██████╔╝╚██████╔╝███████╗██║  ██║          ║
    ║  ╚══════╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝          ║
-   ║                                                               ║
-   ║  CSS VARIABLES: The Power-Ups of Styling                     ║
-   ║  "It's dangerous to go alone! Take these variables!"         ║
-   ╚═══════════════════════════════════════════════════════════════╝ */
+   ║                                                             ║
+   ║  CSS VARIABLES: The Power-Ups of Styling                    ║
+   ║  "It's dangerous to go alone! Take these variables!"        ║
+   ╚═════════════════════════════════════════════════════════════╝ 
 
-  Google Fonts used by the app.
+  Google Fonts are used by the app.
   NOTE: DM Mono & Gloria Hallelujah were removed in this version.
--->
+) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Inconsolata:wght@200..900&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -27,22 +34,20 @@
 <style>
 /* ============================================
       CSS VARIABLES & DESIGN TOKENS
-      - Central palette and sizing tokens.
-      - Dark mode overrides in :root.dark-mode.
    ============================================ */
 :root {
   --maxw: 1400px;
-  --c-pos: #4c8036;       /* positive values (assets, credit availability) */
-  --c-neg: #a02d2a;       /* negative values (debt) */
+  --c-pos: #4c8036;
+  --c-neg: #a02d2a;
   --c-black: #000000;
   --c-white: #ffffff;
-  --c-bg: #ffffff;        /* background default */
-  --c-fg: #000000;        /* text color default */
+  --c-bg: #ffffff;
+  --c-fg: #000000;
   --c-border: #000000;
   --radius: 10px;
   --gap: 12px;
-  --c-tint-pos: #f7f9f4;  /* tinted background for positive inputs */
-  --c-tint-neg: #f9f4f4;  /* tinted background for negative inputs */
+  --c-tint-pos: #f7f9f4;
+  --c-tint-neg: #f9f4f4;
   --c-muted: #e8e8e8;
   --c-overlimit: #d85140;
   --c-input-bg: #ffffff;
@@ -55,11 +60,10 @@
   --c-modal-border: #000000;
   --c-modal-fg: #000000;
   
-  /* Default font; can be overridden by JS via --font-current */
+  /* Default Font Family Variable */
   --font-current: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Dark mode palette overrides: same variable names, different values */
 :root.dark-mode {
   --c-pos: #7cbf5f;
   --c-neg: #ff6b5f;
@@ -96,11 +100,9 @@ body {
   font-family: var(--font-current);
   font-size: 18px;
   line-height: 1.5;
-  /* Smooth transitions for theme/font changes */
   transition: background-color 0.3s ease, color 0.3s ease, font-family 0.2s ease;
 }
 
-/* Main content width wrapper */
 .wrap { 
   width: 90vw; 
   max-width: var(--maxw); 
@@ -115,8 +117,6 @@ a {
 
 /* ============================================
       HEADER & TOOLBAR
-      - Sticky top bar with totals, interest summary,
-        timeframe + chart mode controls, refresh/submit.
    ============================================ */
 header { 
   position: sticky; 
@@ -128,7 +128,6 @@ header {
   transition: background-color 0.3s ease;
 }
 
-/* Main toolbar layout */
 .toolbar { 
   display: flex; 
   gap: var(--gap); 
@@ -140,7 +139,7 @@ header {
   box-sizing: border-box;
 }
 
-/* Left side: big “assets vs debts” + interest numbers */
+/* Left side: big numbers */
 .financial-group {
   display: flex;
   gap: var(--gap);
@@ -150,7 +149,7 @@ header {
   flex-shrink: 1;
 }
 
-/* Right side: type filters + timeframe + mode + buttons */
+/* Right side: type filters + controls */
 .toolbar-right {
   display: flex;
   flex-direction: column;
@@ -160,7 +159,7 @@ header {
   max-width: 60%;
 }
 
-/* Row to hold type summary filters (chips) */
+/* Type filter row */
 .type-filter-row {
   display: flex;
   flex-wrap: wrap;
@@ -168,7 +167,7 @@ header {
   gap: 0.35rem;
 }
 
-/* Row with timeframe, mode radio buttons, refresh, submit */
+/* Controls row */
 .toolbar-controls {
   display: flex;
   gap: 0.6rem;
@@ -177,7 +176,7 @@ header {
   justify-content: flex-end;
 }
 
-/* Smaller text for labels in the toolbar */
+/* Make the controls fonts compact */
 .toolbar label { 
   font-size: 0.8rem;
   font-weight: 300;
@@ -185,7 +184,6 @@ header {
   color: var(--c-fg);
 }
 
-/* Compact select styling in toolbar */
 .toolbar select {
   font-size: 0.8rem;
   font-weight: 300;
@@ -200,7 +198,6 @@ header {
 
 /* ============================================
       FINANCIAL SUMMARY
-      - Large assets/debts + smaller interest summary.
    ============================================ */
 #financial-summary {
   font-size: 5rem;
@@ -212,7 +209,6 @@ header {
   color: var(--c-fg);
 }
 
-/* Used to highlight the “winning” side (assets or debts). */
 #financial-summary .bold-value {
   font-weight: 700;
 }
@@ -227,7 +223,6 @@ header {
   opacity: 0.9;
 }
 
-/* Color helpers for interest + sign direction */
 .interest-earned { color: var(--c-pos); }
 .interest-cost { color: var(--c-neg); }
 .summary-debt { color: var(--c-neg); }
@@ -235,7 +230,6 @@ header {
 
 /* ============================================
       CHART CONTAINER
-      - Host Google Charts (bar/line/donuts).
    ============================================ */
 #chart { 
   min-height: 30vh; 
@@ -248,14 +242,12 @@ header {
   justify-content: center;
   align-items: center;
 }
-
 #chart-pager {
   text-align: center;
 }
 
 /* ============================================
       VISUAL RATIO BAR
-      - Simple linear asset vs debt “finger-width” bar.
    ============================================ */
 #visual-ratio-bar {
   width: 100%;
@@ -265,21 +257,18 @@ header {
   margin-top: 8px;
 }
 
-/* Portion representing assets */
 #ratio-asset {
   background-color: var(--c-pos);
   height: 100%;
   transition: width 0.5s ease;
 }
 
-/* Portion representing debts */
 #ratio-debt {
   background-color: var(--c-neg);
   height: 100%;
   transition: width 0.5s ease;
 }
 
-/* Horizontal divider lines around chart & sections */
 hr.divider {
   border: none;
   border-top: 1px solid var(--c-border);
@@ -289,8 +278,6 @@ hr.divider {
 
 /* ============================================
       ACCOUNT ROWS
-      - Each row = account name, current value,
-        interest, input line, history chips, ratio bar.
    ============================================ */
 .accounts { 
   display: grid; 
@@ -298,7 +285,6 @@ hr.divider {
   gap: var(--gap); 
 }
 
-/* Main flex row for a single account */
 .row { 
   display: flex; 
   align-items: flex-start; 
@@ -309,7 +295,6 @@ hr.divider {
   transition: opacity 0.3s ease;
 }
 
-/* Left side: name, last value, meta, input, mute */
 .left { 
   flex: 1 1 auto; 
   padding-right: 12px; 
@@ -321,7 +306,6 @@ hr.divider {
   gap: var(--gap);
 }
 
-/* Right side: value chips + per-account ratio bar */
 .right { 
   flex: 0 1 auto; 
   min-width: 40%; 
@@ -329,7 +313,6 @@ hr.divider {
   font-size: .9rem; 
 }
 
-/* Bundle: last value + name + stacked meta (limit/APR) */
 .account-details {
   display: flex;
   flex-wrap: wrap;
@@ -338,7 +321,6 @@ hr.divider {
   min-width: 0;
 }
 
-/* Big “last known” value for the account */
 .lastval { 
   font-weight: 600; 
   font-size: 2.6rem; 
@@ -346,7 +328,6 @@ hr.divider {
   color: var(--c-fg);
 }
 
-/* Account name: clickable, can long-press for menu, single-click opens link if defined */
 .name { 
   font-weight: lighter; 
   color: var(--c-black); 
@@ -370,7 +351,7 @@ hr.divider {
   gap: 0.1rem;
 }
 
-/* Limit line (shows CC limit with utilization-based color) */
+/* Limit line */
 .limit {
   font-weight: 600;
   font-size: 0.75rem;
@@ -378,7 +359,7 @@ hr.divider {
   color: var(--c-fg);
 }
 
-/* APR + calculated interest for timeframe (e.g. +$X/mo) */
+/* APR + interest line */
 .apr { 
   font-weight: 400; 
   font-size: 0.75rem;
@@ -387,7 +368,8 @@ hr.divider {
   color: var(--c-fg);
 }
 
-/* Line with numeric input + mute toggle switch */
+
+
 .input-line { 
   display: flex; 
   gap: 10px; 
@@ -398,7 +380,6 @@ hr.divider {
 
 /* ============================================
       INPUT FIELDS
-      - Used for adding new account values & some modals.
    ============================================ */
 input[type="number"], input[type="date"], input[type="text"], input[type="url"] {
   width: 10rem;
@@ -422,7 +403,6 @@ input[type="url"]::placeholder {
   opacity: 0.6;
 }
 
-/* Focus ring uses “positive” color as accent */
 input[type="number"]:focus,
 input[type="date"]:focus,
 input[type="text"]:focus,
@@ -431,7 +411,6 @@ input[type="url"]:focus {
   box-shadow: 0 0 0 2px var(--c-pos) inset;
 }
 
-/* Visual state when submitting entries */
 input[type="number"].submitting,
 input[type="date"].submitting,
 input[type="text"].submitting,
@@ -440,7 +419,6 @@ input[type="url"].submitting {
   pointer-events: none;
 }
 
-/* “Pulse green” when submit succeeded */
 input[type="number"].submitted-ok,
 input[type="date"].submitted-ok,
 input[type="text"].submitted-ok,
@@ -453,7 +431,6 @@ input[type="url"].submitted-ok {
   100% { box-shadow: 0 0 0 0px var(--c-pos) inset; }
 }
 
-/* Positive / negative text coloring helpers */
 .values [data-sign="pos"], .lastval[data-sign="pos"] { color: var(--c-pos); }
 .values [data-sign="neg"], .lastval[data-sign="neg"] { color: var(--c-neg); }
 
@@ -478,19 +455,16 @@ button:hover {
   text-decoration: underline;
 }
 
-/* Visible focus for keyboard navigation */
 button:focus-visible { 
   outline: 3px solid var(--c-pos); 
   outline-offset: 2px; 
 }
 
-/* Disabled state for loading moments */
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Smaller buttons inside the top-right toolbar controls */
 .toolbar-controls button {
   font-size: 0.8rem;
   padding: 0.4rem 0.75rem;
@@ -498,7 +472,6 @@ button:disabled {
 
 /* ============================================
       VALUE CHIPS
-      - Recent values per account; click to edit/delete.
    ============================================ */
 .values { 
   display: flex; 
@@ -508,7 +481,6 @@ button:disabled {
   width: 100%;
 }
 
-/* Chip representing a single past entry value */
 .chip {
   padding: .25rem .6rem;
   border-radius: 999px;
@@ -523,14 +495,12 @@ button:disabled {
   background: var(--c-input-bg);
 }
 
-/* Hover uses positive background (green) for emphasis */
 .chip:hover {
   background: var(--c-pos);
   color: var(--c-white);
   transform: scale(1.05);
 }
 
-/* “No delete” chip: old format / non-editable. */
 .chip.no-delete {
   cursor: default;
   opacity: 0.7;
@@ -545,7 +515,6 @@ button:disabled {
 
 /* ============================================
       MOBILE RATIO BARS
-      - Char-based bar (██) for per-account share of assets/debts.
    ============================================ */
 .ratio-bar {
   display: none;
@@ -561,7 +530,6 @@ button:disabled {
 
 /* ============================================
       BOTTOM SECTION (Score, Font & Dark Mode)
-      - Credit card metrics + score display + font nav + dark mode.
    ============================================ */
 .bottom-section {
   display: flex;
@@ -573,7 +541,6 @@ button:disabled {
   width: 100%;
   box-sizing: border-box;
 }
-
 /* CC LIMIT / CC DEBT METRICS */
 .cc-metrics {
   display: flex;
@@ -592,7 +559,6 @@ button:disabled {
   gap: 0.25rem;
 }
 
-/* Numeric value (big) for CC limit / debt */
 .cc-metric-value {
   font-size: 2.2rem;
   font-weight: 600;
@@ -601,7 +567,6 @@ button:disabled {
   color: var(--c-fg);
 }
 
-/* Label text below CC metric value */
 .cc-metric-label {
   font-size: 0.8rem;
   font-weight: 500;
@@ -610,12 +575,11 @@ button:disabled {
   color: var(--c-fg);
 }
 
-/* “Score” numeric indicator for the user’s subjective state */
 #score-display {
   font-size: 50px;
   font-weight: 300;
   color: #b5a8a8;
-  font-family: monospace; /* Can be overridden, or left as monospace for scoreboard feel */
+  font-family: monospace; /* Overridden by current font if we want, or keep monospace */
   letter-spacing: 0.2em;
   cursor: pointer;
   user-select: none;
@@ -629,7 +593,7 @@ button:disabled {
 #score-display:hover { opacity: 0.8; }
 #score-display:active { transform: scale(0.98); }
 
-/* Container for font nav arrows + dark mode toggle */
+/* Container for Font Arrows + Dark Mode Toggle */
 .bottom-controls-container {
   display: flex;
   align-items: center;
@@ -637,9 +601,8 @@ button:disabled {
   gap: 1.5rem; /* Space between arrows and toggle */
 }
 
-/* Left/right arrows to cycle font options */
 .font-nav-btn {
-  font-size: 4.5rem; /* Increased 50% from earlier version */
+  font-size: 4.5rem; /* Increased by 50% from 3rem */
   line-height: 1;
   font-weight: 300;
   cursor: pointer;
@@ -658,7 +621,6 @@ button:disabled {
   transform: scale(0.95);
 }
 
-/* Wrapper for dark mode checkbox + icon indicator */
 .bottom-dark-mode-toggle {
   display: flex;
   flex-direction: column;
@@ -666,7 +628,6 @@ button:disabled {
   gap: 0.4rem;
 }
 
-/* Square checkbox that gets a checkmark when enabled */
 .dark-mode-checkbox-label {
   display: flex;
   justify-content: center;
@@ -687,7 +648,6 @@ button:disabled {
   background-size: 80% 80%;
 }
 
-/* Inline SVG check icon when checked */
 .dark-mode-checkbox-label input[type="checkbox"]:checked {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
 }
@@ -697,7 +657,6 @@ button:disabled {
   outline-offset: 2px;
 }
 
-/* Icon next to checkbox, changes between ◐/◑ in JS */
 .dark-mode-icon {
   font-size: 1.3rem;
   line-height: 1;
@@ -708,7 +667,6 @@ button:disabled {
 
 /* ============================================
       FOOTER
-      - Privacy note + version features + sheet link.
    ============================================ */
 footer { 
   padding: 16px 24px 24px;
@@ -739,7 +697,6 @@ footer a:hover {
 
 footer b { font-weight: 600; }
 
-/* Highlighted “privacy-first” security note block */
 .security-notice {
   font-size: 0.7rem;
   background: var(--c-tint-pos);
@@ -761,7 +718,6 @@ footer b { font-weight: 600; }
 
 /* ============================================
       TOAST
-      - Lightweight notification bubble (bottom center).
    ============================================ */
 #toast {
   position: fixed;
@@ -780,14 +736,12 @@ footer b { font-weight: 600; }
   transition: opacity 0.3s ease, visibility 0.3s ease, bottom 0.3s ease;
 }
 
-/* Visible state of toast */
 #toast.show {
   opacity: 1;
   visibility: visible;
   bottom: 30px;
 }
 
-/* Error vs success color accents (border only). */
 #toast[data-type="error"] {
   background: var(--c-toast-bg);
   color: var(--c-toast-fg);
@@ -802,7 +756,6 @@ footer b { font-weight: 600; }
 
 /* ============================================
       MODALS (Shared)
-      - Reusable base styles for all modal overlays.
    ============================================ */
 .modal-backdrop {
   position: fixed;
@@ -817,12 +770,10 @@ footer b { font-weight: 600; }
   transition: opacity 0.3s ease;
 }
 
-/* Darker backdrop when in dark mode */
 :root.dark-mode .modal-backdrop {
   background: rgba(0, 0, 0, 0.8);
 }
 
-/* Centered modal box */
 .modal {
   position: fixed;
   top: 50%;
@@ -841,7 +792,6 @@ footer b { font-weight: 600; }
   transition: opacity 0.3s ease, top 0.3s ease;
 }
 
-/* Visible state for modals/backdrops */
 .modal-backdrop.show, .modal.show {
   display: block;
   opacity: 1;
@@ -849,14 +799,8 @@ footer b { font-weight: 600; }
 
 .modal h3 { margin-top: 0; color: var(--c-modal-fg); }
 .modal p { margin-top: 0; line-height: 1.4; color: var(--c-modal-fg); }
-
-/* Block for showing descriptive details inside modals */
 .modal-details { font-weight: 600; display: block; margin: 12px 0; font-size: 1.1rem; color: var(--c-modal-fg); }
-
-/* Standard area for buttons inside modals */
 .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
-
-/* Standard label/input grouping inside modals */
 .modal-form-group { margin-bottom: 16px; }
 .modal-form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--c-modal-fg); }
 .modal-form-group input, .modal-form-group select {
@@ -865,13 +809,9 @@ footer b { font-weight: 600; }
   border: 1px solid var(--c-input-border); padding: 8px; border-radius: 4px;
 }
 
-/* Red confirm button for delete actions */
 #delete-btn-confirm { background: var(--c-neg); color: var(--c-white); border-color: var(--c-neg); }
-
-/* Save buttons across modals (green-ish) */
 #edit-chip-save, #edit-account-save, #edit-type-save { background: var(--c-pos); color: var(--c-white); border-color: var(--c-pos); }
 
-/* Account menu modal: vertical stacked buttons */
 #account-menu-modal .modal-buttons { flex-direction: column; }
 #account-menu-modal .modal-buttons button { width: 100%; text-align: left; padding: 1rem; font-size: 1.1rem; }
 #account-menu-delete { background: var(--c-neg); color: var(--c-white); border-color: var(--c-neg); }
@@ -879,7 +819,6 @@ footer b { font-weight: 600; }
 
 /* ============================================
       TYPE SUMMARY ITEMS
-      - Small per-type chips in the toolbar.
    ============================================ */
 .type-item {
   display: inline-flex;
@@ -893,17 +832,12 @@ footer b { font-weight: 600; }
   color: var(--c-fg);
 }
 
-/* Dimmed state when type is muted */
 .type-item.muted { opacity: 0.4; }
-
 .type-item .type-value { font-weight: 600; white-space: nowrap; font-size: 0.8rem; }
 .type-item .type-value.positive { color: var(--c-pos); }
 .type-item .type-value.negative { color: var(--c-neg); }
-
-/* Label text with double-click to edit type color */
 .type-item .type-label { font-weight: 500; letter-spacing: 0.06em; font-size: 0.7rem; cursor: pointer; }
 
-/* Little “enable/disable” checkbox for each type */
 .type-toggle-label {
   font-size: 0.65rem;
   display: flex;
@@ -924,7 +858,6 @@ footer b { font-weight: 600; }
 
 /* ============================================
       MUTE TOGGLE
-      - Per-account mute slider (on right of input).
    ============================================ */
 .mute-checkbox { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
 .mute-checkbox input[type="checkbox"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0; }
@@ -939,7 +872,6 @@ footer b { font-weight: 600; }
 .mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider { background: var(--c-muted); }
 .mute-checkbox input[type="checkbox"]:checked + .mute-checkbox-slider::before { transform: translateX(20px); }
 
-/* “Muted” row style (visually deemphasized, but retained in DOM) */
 .row.muted { opacity: 0.5; }
 .row.muted * { color: var(--c-muted) !important; border-color: var(--c-muted) !important; background-color: transparent !important; }
 .row.muted input[type="number"] { background: transparent !important; color: var(--c-muted) !important; }
@@ -948,13 +880,12 @@ footer b { font-weight: 600; }
 
 /* ============================================
       MOBILE
-      - Layout tweaks for narrow screens.
    ============================================ */
 @media (max-width: 650px) {
   .row { flex-direction: column; }
   .right { min-width: unset; text-align: left; align-self: flex-start; padding-top: 0.5rem; }
-  .right .values { display: none; }       /* Hide chips on right for mobile */
-  .right .ratio-bar { display: block; }   /* Show character ratio bar instead */
+  .right .values { display: none; }
+  .right .ratio-bar { display: block; }
   .left { gap: 8px; width: 100%; padding-right: 0; }
   input[type="number"], input[type="date"], input[type="text"], input[type="url"] { width: 100%; max-width: 100%; }
   .input-line { width: 100%; margin-left: 0; padding-top: 0; }
@@ -970,12 +901,8 @@ footer b { font-weight: 600; }
   footer, footer small, footer a, .security-notice { font-size: 0.75rem; }
   #score-display { font-size: 60px; }
   .bottom-section { padding: 1.5rem 1rem; gap: 1rem; }
-
-  /* Mobile-specific toggling behavior for dark mode icon (if used) */
   .dark-mode-toggle-icon { font-size: 1.3rem; line-height: 1; color: var(--c-fg); user-select: none; transition: opacity 0.25s ease, transform 0.25s ease; }
   .dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon { transform: rotate(180deg); opacity: 0.9; }
-
-  /* CC metrics stack vertically on mobile */
   .cc-metrics {
     flex-direction: column;
     align-items: center;
@@ -985,7 +912,7 @@ footer b { font-weight: 600; }
 </style>
 </head>
 <body>
-<!-- Toast notification container (used by JS for quick status messages) -->
+<!-- Toast notification -->
 <div id="toast" role="status" aria-live="polite"></div>
 
 <!-- Delete confirmation modal -->
@@ -1000,7 +927,7 @@ footer b { font-weight: 600; }
   </div>
 </div>
 
-<!-- Edit chip modal (edit single historical value) -->
+<!-- Edit chip modal -->
 <div id="edit-chip-modal-backdrop" class="modal-backdrop"></div>
 <div id="edit-chip-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-chip-modal-title">
   <h3 id="edit-chip-modal-title">Edit Entry</h3>
@@ -1020,7 +947,7 @@ footer b { font-weight: 600; }
   </div>
 </div>
 
-<!-- Account menu modal (long-press on account name to open) -->
+<!-- Account menu modal -->
 <div id="account-menu-modal-backdrop" class="modal-backdrop"></div>
 <div id="account-menu-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="account-menu-modal-title">
   <h3 id="account-menu-modal-title">Account Actions</h3>
@@ -1033,7 +960,7 @@ footer b { font-weight: 600; }
   </div>
 </div>
 
-<!-- Edit Account modal (type, color, link, limit, APR, current value) -->
+<!-- Edit Account modal -->
 <div id="edit-account-modal-backdrop" class="modal-backdrop"></div>
 <div id="edit-account-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-account-modal-title">
   <h3 id="edit-account-modal-title">Edit Account</h3>
@@ -1077,7 +1004,7 @@ footer b { font-weight: 600; }
   </div>
 </div>
 
-<!-- Edit Type Color modal (used when double-clicking type label in toolbar) -->
+<!-- Edit Type Color modal -->
 <div id="edit-type-modal-backdrop" class="modal-backdrop"></div>
 <div id="edit-type-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-type-modal-title">
   <h3 id="edit-type-modal-title">Edit Type Color</h3>
@@ -1095,16 +1022,14 @@ footer b { font-weight: 600; }
   </div>
 </div>
 
-<!-- Main header section: sticky top with summary, filters, and charts -->
+<!-- Main header -->
 <header>
   <div class="toolbar">
-    <!-- Left: total assets vs total debts, and interest summary -->
     <div class="financial-group">
       <div id="financial-summary"></div>
       <div id="interest-summary"></div>
     </div>
 
-    <!-- Right: type summary filters + timeframe/mode/refresh/submit controls -->
     <div class="toolbar-right">
       <div id="typeFilterRow" class="type-filter-row"></div>
 
@@ -1122,40 +1047,35 @@ footer b { font-weight: 600; }
           <option value="all">All Time</option>
         </select>
 
-        <!-- Chart mode radio buttons -->
         <label><input type="radio" name="mode" value="totals" checked> Totals</label>
         <label><input type="radio" name="mode" value="types"> Type</label>
         <label><input type="radio" name="mode" value="accounts"> Per-account</label>
 
-        <!-- Manual refresh + bulk submit for all rows -->
         <button id="refresh" aria-label="Refresh data">Refresh</button>
         <button id="submitAll">Submit All</button>
       </div>
     </div>
   </div>
   <hr>
-  <!-- Main chart container (Google Charts) -->
   <div id="chart"></div>
-  <!-- Pager to switch between bar, line, donut chart slides -->
   <div id="chart-pager" aria-label="Chart view navigation"></div>
   <hr>
-  <!-- Visual Ratio Bar (Asset vs Debt, full-width) -->
+  <!-- NEW: Visual Ratio Bar (Asset vs Debt) -->
   <div id="visual-ratio-bar">
     <div id="ratio-asset"></div>
     <div id="ratio-debt"></div>
   </div>
 </header>
 
-<!-- Divider separating header from body content -->
+
 <hr class="wrap divider">
 
 <main class="wrap">
-  <!-- Dynamic account rows inserted here via JS -->
   <section id="accounts" class="accounts"></section>
 
   <!-- Bottom section with CC metrics, Score, Font Controls, and Dark Mode toggle -->
   <div class="bottom-section">
-    <!-- Credit card metrics derived from AccountMeta + current balances -->
+    <!-- CC LIMIT / CC DEBT metrics -->
     <div class="cc-metrics">
       <div class="cc-metric">
         <div id="cc-limit-value" class="cc-metric-value">0</div>
@@ -1167,15 +1087,13 @@ footer b { font-weight: 600; }
       </div>
     </div>
 
-    <!-- 3-digit “scoreboard” display, editable via click -->
+    <!-- Score display -->
     <div id="score-display">000</div>
     
     <!-- Font Navigation + Dark Mode -->
     <div class="bottom-controls-container">
-      <!-- Previous font option -->
       <div id="font-prev" class="font-nav-btn">&lt;</div>
       
-      <!-- Checkbox toggles dark-mode root class; icon label below -->
       <div class="bottom-dark-mode-toggle">
         <label class="dark-mode-checkbox-label">
           <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
@@ -1183,12 +1101,11 @@ footer b { font-weight: 600; }
         <div id="dark-mode-icon" class="dark-mode-icon">◐</div>
       </div>
       
-      <!-- Next font option -->
       <div id="font-next" class="font-nav-btn">&gt;</div>
     </div>
   </div>
 
-  <!-- Footer with privacy statement and version features list -->
+  <!-- Footer -->
   <footer>
     <div class="security-notice">
       🔒 <strong>Privacy First:</strong> No login credentials or personally identifiable 
@@ -1206,18 +1123,12 @@ footer b { font-weight: 600; }
 <script>
 /* ============================================
     CONFIGURATION
-    - Backend endpoint + sheet ID used by the app.
    ============================================ */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDKAcw3_UHSMdRzsEktFgBcW1Wao0XysRFpqTlQq-sBqHVGjzbl1YM1ZBFcXJy7tV1/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
     APPLICATION STATE
-    - SNAP: latest snapshot from backend (accounts, series, etc.)
-    - MODE: chart mode (totals, types, accounts)
-    - TIMEFRAME: current timeframe filter
-    - MUTED_ACCOUNTS / MUTED_TYPES: sets of IDs to hide
-    - DARK_MODE: boolean; CHART_SLIDE: 0..2 for slide pager
    ============================================ */
 let SNAP = null;
 let MODE = 'totals';
@@ -1243,7 +1154,6 @@ const FONT_OPTIONS = [
 ];
 let CURRENT_FONT_INDEX = 0;
 
-/* Standard internal type codes → human labels */
 const TYPE_LABELS = {
   'bk': 'Banks',
   'cc': 'CreditCards',
@@ -1252,16 +1162,11 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-/* Metadata containers:
-   - ACCOUNT_METADATA: per-account limit/color/link
-   - TYPE_META_OVERRIDES: per-type color overrides (stored in URL hash)
-*/
 let ACCOUNT_METADATA = new Map();      // accountName -> { limit, color, link }
 let TYPE_META_OVERRIDES = new Map();   // typeCode -> { color }
 
 /* ============================================
     FONT SWITCHER
-    - Uses CSS custom property --font-current.
    ============================================ */
 function updateFont() {
   const font = FONT_OPTIONS[CURRENT_FONT_INDEX];
@@ -1269,7 +1174,6 @@ function updateFont() {
   saveStateToURL();
 }
 
-/* Cycle font index forward/backward and show toast */
 function cycleFont(direction) {
   if (direction === 'next') {
     CURRENT_FONT_INDEX = (CURRENT_FONT_INDEX + 1) % FONT_OPTIONS.length;
@@ -1282,7 +1186,6 @@ function cycleFont(direction) {
 
 /* ============================================
     DARK MODE
-    - Controlled by DARK_MODE boolean and root class.
    ============================================ */
 function applyDarkModeClass() {
   const root = document.documentElement;
@@ -1293,14 +1196,12 @@ function applyDarkModeClass() {
   }
 }
 
-/* Icon text toggles between ◐ and ◑ to reflect mode */
 function updateDarkModeIcon() {
   const iconEl = document.getElementById('dark-mode-icon');
   if (!iconEl) return;
   iconEl.textContent = DARK_MODE ? '◑' : '◐';
 }
 
-/* Toggle dark mode flag, re-apply class and persist in URL */
 function toggleDarkMode() {
   DARK_MODE = !DARK_MODE;
   applyDarkModeClass();
@@ -1310,7 +1211,6 @@ function toggleDarkMode() {
   saveStateToURL();
 }
 
-/* Wire checkbox event + initial apply */
 function initDarkMode() {
   const checkbox = document.getElementById('dark-mode-checkbox');
   if (!checkbox) return;
@@ -1320,18 +1220,16 @@ function initDarkMode() {
   updateDarkModeIcon();
 }
 
-/* Simple heuristic: auto-enable dark mode between 8pm–6am local time */
 function shouldAutoEnableDarkMode() {
   const hour = new Date().getHours();
   return hour >= 20 || hour < 6;
 }
 
-/* Initialize theme from URL hash or auto-detect; also sets font */
 function initializeTheme() {
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   
-  // Dark Mode from URL state if present
+  // Dark Mode
   const darkModeParam = params.get('darkMode');
   if (darkModeParam === 'true') {
     DARK_MODE = true;
@@ -1341,7 +1239,7 @@ function initializeTheme() {
     DARK_MODE = shouldAutoEnableDarkMode();
   }
 
-  // Font selection from URL state if present
+  // Font
   const fontParam = params.get('font');
   if (fontParam) {
     const idx = parseInt(fontParam, 10);
@@ -1354,7 +1252,6 @@ function initializeTheme() {
 
 /* ============================================
     SCORE MANAGEMENT
-    - Basic scoreboard display (000–999).
    ============================================ */
 function formatScore(num) {
   return String(num).padStart(3, '0');
@@ -1369,7 +1266,6 @@ function renderScore() {
 
 /* ============================================
     SCORE EDITING
-    - On click, open a simple modal to modify the score.
    ============================================ */
 function showEditScoreModal() {
   const backdrop = document.createElement('div');
@@ -1401,24 +1297,20 @@ function showEditScoreModal() {
   input.value = SCORE;
   setTimeout(() => input.focus(), 100);
 
-  /* Close on cancel */
   document.getElementById('score-cancel').addEventListener('click', () => {
     backdrop.remove();
     modal.remove();
   });
 
-  /* Save triggers backend updateScore route */
   document.getElementById('score-save').addEventListener('click', () => {
     processUpdateScore(input.value, backdrop, modal);
   });
 
-  /* Clicking outside modal closes it */
   backdrop.addEventListener('click', () => {
     backdrop.remove();
     modal.remove();
   });
 
-  /* Enter key also saves */
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       processUpdateScore(input.value, backdrop, modal);
@@ -1426,7 +1318,6 @@ function showEditScoreModal() {
   });
 }
 
-/* Persist score change to backend (updateScore route) */
 async function processUpdateScore(newValue, backdrop, modal) {
   const val = Number(newValue);
   if (isNaN(val) || val < 0 || val > 999) {
@@ -1470,10 +1361,7 @@ async function processUpdateScore(newValue, backdrop, modal) {
 
 /* ============================================
     UI UTILITIES
-    - Toast & loading state handling.
    ============================================ */
-
-/* Show toast info/error/success messages */
 function showToast(msg, type = 'info', duration = 3000) {
   const el = document.getElementById('toast');
   if (!el) return;
@@ -1487,10 +1375,6 @@ function showToast(msg, type = 'info', duration = 3000) {
   TOAST_TIMER = setTimeout(() => el.classList.remove('show'), duration);
 }
 
-/* Toggle global loading state:
-   - Disables refresh/submit buttons.
-   - Disables row number inputs while submitting.
-*/
 function setLoading(loading, message) {
   IS_LOADING = loading;
   const refresh = document.getElementById('refresh');
@@ -1508,7 +1392,6 @@ function setLoading(loading, message) {
 
 /* ============================================
     DELETE MODAL
-    - Confirm deletion of a specific date/value entry.
    ============================================ */
 function showDeleteConfirm(account, date, value, readableValue) {
   if (IS_LOADING) return;
@@ -1523,13 +1406,11 @@ function showDeleteConfirm(account, date, value, readableValue) {
   confirmBtn.onclick = () => processDelete(account, date, value);
 }
 
-/* Hide delete confirmation modal */
 function hideDeleteConfirm() {
   document.getElementById('delete-modal-backdrop').classList.remove('show');
   document.getElementById('delete-modal').classList.remove('show');
 }
 
-/* Call backend delete route with account/date/value */
 async function processDelete(account, date, value) {
   hideDeleteConfirm();
   if (IS_LOADING) return;
@@ -1567,7 +1448,6 @@ async function processDelete(account, date, value) {
 
 /* ============================================
     EDIT CHIP MODAL
-    - Update date and/or value for an existing entry.
    ============================================ */
 function showEditChipModal(account, date, value, readableValue) {
   if (IS_LOADING) return;
@@ -1581,8 +1461,6 @@ function showEditChipModal(account, date, value, readableValue) {
 
   details.textContent = `Account: ${account}`;
   valueInput.value = Number(value);
-
-  /* Convert MM/DD/YYYY -> YYYY-MM-DD for date input */
   const dateParts = date.split('/');
   if (dateParts.length === 3) {
     const [month, day, year] = dateParts;
@@ -1590,7 +1468,6 @@ function showEditChipModal(account, date, value, readableValue) {
   } else {
     dateInput.value = '';
   }
-
   backdrop.classList.add('show');
   modal.classList.add('show');
   setTimeout(() => valueInput.focus(), 100);
@@ -1602,13 +1479,11 @@ function showEditChipModal(account, date, value, readableValue) {
   };
 }
 
-/* Hide chip edit modal UI */
 function hideEditChipModal() {
   document.getElementById('edit-chip-modal-backdrop').classList.remove('show');
   document.getElementById('edit-chip-modal').classList.remove('show');
 }
 
-/* Apply chip edit by deleting old data point and inserting new one */
 async function processEditChip(originalAccount, originalDate, originalValue) {
   if (IS_LOADING) return;
   const valueInput = document.getElementById('edit-chip-value');
@@ -1633,7 +1508,6 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
   setLoading(true, 'Updating entry…');
 
   try {
-    /* Delete original entry */
     const deleteBody = new URLSearchParams({ 
       payload: JSON.stringify({ account: originalAccount, date: originalDate, value: Number(originalValue) }) 
     });
@@ -1642,7 +1516,6 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
     const deleteJson = JSON.parse(deleteText);
     if (!deleteJson.ok) throw new Error('Delete failed: ' + (deleteJson.error || 'Unknown'));
 
-    /* Submit replacement entry with updated date/value */
     const submitBody = new URLSearchParams({ 
       payload: JSON.stringify({ 
         entries: [{ account: originalAccount, value: newValue, date: newDate }] 
@@ -1664,7 +1537,6 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
 
 /* ============================================
     ACCOUNT MENU MODAL
-    - Long-press on account name to open.
    ============================================ */
 function showAccountMenu(accountName) {
   if (IS_LOADING) return;
@@ -1679,14 +1551,11 @@ function showAccountMenu(accountName) {
   backdrop.classList.add('show');
   modal.classList.add('show');
 
-  /* Edit opens Edit Account modal */
   editBtn.onclick = () => { hideAccountMenu(); showEditAccountModal(accountName); };
-  /* Delete & Add currently just show “coming soon” toasts */
   deleteBtn.onclick = () => { hideAccountMenu(); showToast('Account deletion coming in a future version.', 'info', 3000); };
   addBtn.onclick = () => { hideAccountMenu(); showToast('Add account feature coming in a future version.', 'info', 3000); };
 }
 
-/* Close account menu modal */
 function hideAccountMenu() {
   document.getElementById('account-menu-modal-backdrop').classList.remove('show');
   document.getElementById('account-menu-modal').classList.remove('show');
@@ -1694,10 +1563,8 @@ function hideAccountMenu() {
 
 /* ============================================
     EDIT ACCOUNT MODAL
-    - Color, limit, type, APR, link, and last value.
    ============================================ */
 
-/* Normalize hex string: ensure leading # and 6 hex digits */
 function normalizeHexColor(str) {
   if (!str) return '';
   let s = String(str).trim();
@@ -1708,7 +1575,6 @@ function normalizeHexColor(str) {
   return s.toUpperCase();
 }
 
-/* Populate Edit Account modal for a given account name */
 function showEditAccountModal(accountName) {
   if (IS_LOADING) return;
 
@@ -1723,15 +1589,15 @@ function showEditAccountModal(accountName) {
   // Type
   document.getElementById('edit-account-type').value = account.type || 'bk';
 
-  // Limit (from AccountMeta sheet)
+  // Limit (from AccountMeta)
   document.getElementById('edit-account-limit').value =
     (typeof meta.limit === 'number') ? meta.limit : '';
 
-  // APR (from Accounts sheet)
+  // APR (from Accounts)
   document.getElementById('edit-account-apr').value =
     (typeof account.apr === 'number') ? account.apr : '';
 
-  // Color (AccountMeta color or account.color)
+  // Color
   const color = meta.color || account.color || '';
   const norm  = normalizeHexColor(color) || '#4C8036';
   const colorInput  = document.getElementById('edit-account-color');
@@ -1739,10 +1605,10 @@ function showEditAccountModal(accountName) {
   colorInput.value  = norm;
   colorPicker.value = norm;
 
-  // Link (AccountMeta link if available)
+  // Link
   document.getElementById('edit-account-link').value = meta.link || '';
 
-  // Current value (snapshot last value)
+  // Current value (last snapshot value)
   const last = SNAP.series?.[accountName]?.last ?? 0;
   document.getElementById('edit-account-value').value = last;
 
@@ -1753,7 +1619,7 @@ function showEditAccountModal(accountName) {
     if (n) colorPicker.value = n;
   };
 
-  // Wire SAVE to processEditAccount
+  // ✅ WIRE THE SAVE BUTTON
   const saveBtn = document.getElementById('edit-account-save');
   saveBtn.onclick = () => processEditAccount(accountName);
 
@@ -1762,13 +1628,12 @@ function showEditAccountModal(accountName) {
   document.getElementById('edit-account-modal').classList.add('show');
 }
 
-/* Hide Edit Account modal */
+
 function hideEditAccountModal() {
   document.getElementById('edit-account-modal-backdrop').classList.remove('show');
   document.getElementById('edit-account-modal').classList.remove('show');
 }
 
-/* Persist account type/APR/color/limit/link/value back to backend */
 async function processEditAccount(accountName) {
   if (IS_LOADING) return;
 
@@ -1789,7 +1654,7 @@ async function processEditAccount(accountName) {
   showToast('Saving account…','info');
 
   try {
-    /* 1) Save limit/color/link to AccountMeta sheet */
+    // 1) Save limit/color/link to AccountMeta
     const metaPayload = {
       entries: [{
         account: accountName,
@@ -1805,7 +1670,7 @@ async function processEditAccount(accountName) {
       })
     });
 
-    /* 2) Save APR / Type / AccountColor to Accounts sheet */
+    // 2) Save APR / Type / AccountColor to Accounts sheet
     const acctPayload = {
       entries: [{
         account: accountName,
@@ -1821,7 +1686,7 @@ async function processEditAccount(accountName) {
       })
     });
 
-    /* 3) If value changed vs last known, append new Values entry */
+    // 3) If value changed, append to Values
     const current = SNAP.series?.[accountName]?.last ?? null;
     if (newValue !== null && newValue !== current) {
       await fetch(`${API_BASE}?route=submit`, {
@@ -1843,16 +1708,10 @@ async function processEditAccount(accountName) {
   }
 }
 
+
 /* ============================================
     EDIT TYPE COLOR MODAL
-    - Allows per-type color overrides stored locally.
    ============================================ */
-
-/* Resolve effective color for a type:
-   - 1) Local override (TYPE_META_OVERRIDES)
-   - 2) Backend typeMeta.color
-   - 3) Default red for cc/bill, green otherwise
-*/
 function getTypeEffectiveColor(typeCode) {
   const override = TYPE_META_OVERRIDES.get(typeCode);
   if (override && override.color) return override.color;
@@ -1862,7 +1721,6 @@ function getTypeEffectiveColor(typeCode) {
   return '#4c8036';
 }
 
-/* Populate and display Edit Type Color modal */
 function showEditTypeModal(typeCode, labelText) {
   if (IS_LOADING) return;
   const backdrop = document.getElementById('edit-type-modal-backdrop');
@@ -1886,13 +1744,11 @@ function showEditTypeModal(typeCode, labelText) {
   saveBtn.onclick = () => processEditType(typeCode);
 }
 
-/* Hide Edit Type modal */
 function hideEditTypeModal() {
   document.getElementById('edit-type-modal-backdrop').classList.remove('show');
   document.getElementById('edit-type-modal').classList.remove('show');
 }
 
-/* Store per-type color override and re-render type summary */
 function processEditType(typeCode) {
   const input = document.getElementById('edit-type-color');
   const color = normalizeHexColor(input.value);
@@ -1909,7 +1765,6 @@ function processEditType(typeCode) {
 
 /* ============================================
     DATA FETCHING
-    - snapshot route: accounts, series, typeMeta, accountMeta, score.
    ============================================ */
 async function fetchSnapshot() {
   if (IS_LOADING) return;
@@ -1934,12 +1789,12 @@ async function fetchSnapshot() {
 
     SNAP = j;
     
-    // Update score from database snapshot (if present)
+    // Update score from database
     if (SNAP.score !== undefined) {
       SCORE = Number(SNAP.score);
     }
 
-    // Load AccountMeta (limits/colors/links) into ACCOUNT_METADATA
+    // NEW: Load AccountMeta (limits/colors/links) from backend snapshot
     ACCOUNT_METADATA = new Map();
     if (SNAP.accountMeta) {
       Object.entries(SNAP.accountMeta).forEach(([accountName, meta]) => {
@@ -1970,8 +1825,7 @@ async function fetchSnapshot() {
 }
 
 /* ============================================
-    URL STATE (muted + types + dark mode + font + typeMeta)
-    - Uses window.location.hash to persist UI state.
+    URL STATE (muted + types + dark mode)
    ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
@@ -2001,7 +1855,6 @@ function loadStateFromURL() {
   }
 }
 
-/* Write state back to URL hash (so it’s shareable/bookmarkable) */
 function saveStateToURL() {
   const params = new URLSearchParams();
 
@@ -2027,7 +1880,6 @@ function saveStateToURL() {
   window.location.hash = params.toString();
 }
 
-/* Per-account mute toggling */
 function toggleAccountMute(accountName) {
   if (MUTED_ACCOUNTS.has(accountName)) MUTED_ACCOUNTS.delete(accountName);
   else MUTED_ACCOUNTS.add(accountName);
@@ -2035,10 +1887,8 @@ function toggleAccountMute(accountName) {
   renderAll();
 }
 
-/* Utility: is a given account in the muted set? */
 function isAccountMuted(accountName) { return MUTED_ACCOUNTS.has(accountName); }
 
-/* Per-type “mute” toggle (hides all accounts of that type) */
 function toggleTypeMute(typeCode) {
   if (MUTED_TYPES.has(typeCode)) MUTED_TYPES.delete(typeCode);
   else MUTED_TYPES.add(typeCode);
@@ -2046,12 +1896,8 @@ function toggleTypeMute(typeCode) {
   renderAll();
 }
 
-/* Utility: is a given type in the muted set? */
 function isTypeMuted(typeCode) { return MUTED_TYPES.has(typeCode); }
 
-/* Derived: account is globally hidden if either the specific account
-   or its type is muted.
-*/
 function isAccountGloballyHidden(account) {
   if (isAccountMuted(account.name)) return true;
   const t = account.type || 'bk';
@@ -2060,7 +1906,6 @@ function isAccountGloballyHidden(account) {
 
 /* ============================================
     RENDERING
-    - high-level "renderAll" orchestrates the UI updates.
    ============================================ */
 function renderAll() {
   renderSummary();
@@ -2073,7 +1918,6 @@ function renderAll() {
   renderScore();
 }
 
-/* Compute and display CC LIMIT / CC DEBT from snapshot + meta */
 function renderCCMetrics() {
   const limitEl = document.getElementById('cc-limit-value');
   const debtEl = document.getElementById('cc-debt-value');
@@ -2107,17 +1951,16 @@ function renderCCMetrics() {
     }
   });
 
-  // CC LIMIT = sum of limits minus “magnitude of CC debt”
+  // CC LIMIT = sum of limits minus total credit card debt (as positive amount)
   const availableCredit = totalLimit - totalDebtMagnitude;
 
   // Display:
-  //   CC LIMIT → availableCredit (can go negative if over total limit)
+  //   CC LIMIT → availableCredit (can go negative if you're over total limit)
   //   CC DEBT  → raw combined CC value, e.g. -1000
   limitEl.textContent = formatMoney(availableCredit);
   debtEl.textContent = formatMoney(totalDebtRaw);
 }
 
-/* Render the big “assets | debts” summary at top-left */
 function renderSummary() {
   const summaryEl = document.getElementById('financial-summary');
   if (!summaryEl || !SNAP || !SNAP.accounts) return;
@@ -2143,7 +1986,6 @@ function renderSummary() {
   summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
 }
 
-/* Render interest summary (earnings/costs) based on APR × timeframe */
 function renderInterestSummary() {
   const summaryEl = document.getElementById('interest-summary');
   if (!summaryEl || !SNAP || !SNAP.accounts) return;
@@ -2158,7 +2000,6 @@ function renderInterestSummary() {
     const dailyRate = (last * apr) / 365;
     let interestAmount = 0;
 
-    /* Map timeframe selection to daily multipliers */
     switch (TIMEFRAME) {
       case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
       case '7d': interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
@@ -2187,7 +2028,6 @@ function renderInterestSummary() {
   else summaryEl.innerHTML = '';
 }
 
-/* Render type summary row (toolbar), including totals by type and mute checkboxes */
 function renderTypeSummary() {
   const container = document.getElementById('typeFilterRow');
   if (!container || !SNAP || !SNAP.accounts) return;
@@ -2198,7 +2038,6 @@ function renderTypeSummary() {
   const typeMeta = SNAP.typeMeta || {};
   Object.keys(typeMeta).forEach(code => { typeTotals[code] = 0; });
 
-  /* Aggregate last values by type, excluding muted accounts but not type mutes yet */
   SNAP.accounts.forEach(a => {
     const s = SNAP.series[a.name] || {};
     const last = s?.last ?? 0;
@@ -2253,7 +2092,6 @@ function renderTypeSummary() {
   });
 }
 
-/* Render top ratio bar (asset vs debt) under the chart */
 function renderStatusbar() {
   const ratioAsset = document.getElementById('ratio-asset');
   const ratioDebt = document.getElementById('ratio-debt');
@@ -2287,9 +2125,6 @@ function renderStatusbar() {
 
 /* ============================================
     CHART RENDERING (MULTI-SLIDE)
-    - Slide 0: stacked bar chart
-    - Slide 1: multi-line chart
-    - Slide 2: donut charts
    ============================================ */
 function renderChart() {
   if (!SNAP || !window.google || !google.visualization) return;
@@ -2311,7 +2146,7 @@ function renderChart() {
   }
   renderChartPager();
 
-  // Add simple left/right swipe gestures on mobile
+  // Add swipe listeners for charts
   let touchStartX = null;
   const SWIPE_THRESHOLD = 40;
   chartContainer.addEventListener('touchstart', (e) => {
@@ -2329,7 +2164,7 @@ function renderChart() {
   });
 }
 
-/* Slide 1: stacked bar chart (Totals/Types/Per-account) */
+// Slide 1: Original Bar Chart
 function renderBarChart(container, labels) {
   const styles = getComputedStyle(document.documentElement);
   const pos = styles.getPropertyValue('--c-pos').trim();
@@ -2437,7 +2272,7 @@ function renderBarChart(container, labels) {
   chart.draw(data, options);
 }
 
-/* Slide 2: multi-line chart of all visible accounts */
+// Slide 2: Line chart ALL
 function renderLineChartAllAccounts(container, labels) {
   const data = new google.visualization.DataTable();
   data.addColumn('string', 'Date');
@@ -2478,7 +2313,7 @@ function renderLineChartAllAccounts(container, labels) {
   chart.draw(data, options);
 }
 
-/* Slide 3: donut charts (by type, all accounts, debt-only) */
+// Slide 3: Donuts
 function renderDonutCharts(container) {
   const styles = getComputedStyle(document.documentElement);
   const fg = styles.getPropertyValue('--c-fg').trim();
@@ -2502,7 +2337,6 @@ function renderDonutCharts(container) {
   
   container.appendChild(wrap);
 
-  /* Donut 1: By Type (absolute values) */
   const typeData = new google.visualization.DataTable();
   typeData.addColumn('string', 'Type'); typeData.addColumn('number', 'Value');
   const typeTotals = {};
@@ -2510,20 +2344,17 @@ function renderDonutCharts(container) {
   Object.entries(typeTotals).forEach(([code, total]) => { if (total !== 0) typeData.addRow([TYPE_LABELS[code] || code, Math.abs(total)]); });
   new google.visualization.PieChart(typeDiv).draw(typeData, { title: 'By Type', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 
-  /* Donut 2: All accounts (absolute values) */
   const allData = new google.visualization.DataTable();
   allData.addColumn('string', 'Account'); allData.addColumn('number', 'Value');
   SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last !== 0) allData.addRow([a.name, Math.abs(last)]); });
   new google.visualization.PieChart(allDiv).draw(allData, { title: 'All Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 
-  /* Donut 3: Debt-only accounts (absolute value of negative balances) */
   const debtData = new google.visualization.DataTable();
   debtData.addColumn('string', 'Account'); debtData.addColumn('number', 'Value');
   SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last < 0) debtData.addRow([a.name, Math.abs(last)]); });
   new google.visualization.PieChart(debtDiv).draw(debtData, { title: 'Debt Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 }
 
-/* Set active chart slide and re-render */
 function setChartSlide(index) {
   if (index < 0) index = 0; if (index > MAX_CHART_SLIDE) index = MAX_CHART_SLIDE;
   if (index === CHART_SLIDE) return;
@@ -2531,7 +2362,6 @@ function setChartSlide(index) {
   renderChart();
 }
 
-/* Simple dot pager under chart to choose slide 0/1/2 */
 function renderChartPager() {
   const pager = document.getElementById('chart-pager');
   if (!pager) return;
@@ -2542,16 +2372,14 @@ function renderChartPager() {
     const dot = document.createElement('button');
     dot.type = 'button';
     dot.style.cssText = `width:8px; height:8px; border-radius:50%; border:1px solid var(--c-fg); background:${i === CHART_SLIDE ? 'var(--c-fg)' : 'transparent'}; padding:0; cursor:pointer; opacity:${i === CHART_SLIDE ? '1' : '0.5'}`;
-    dot.onclick = => setChartSlide(i);
+    dot.onclick = () => setChartSlide(i);
     wrap.appendChild(dot);
   }
   pager.appendChild(wrap);
 }
 
-/* Helper: sign label for positive or negative values */
 const signOf = (n) => (Number(n) < 0 ? 'neg' : 'pos');
 
-/* Compact money formatter: integer-only, custom minus sign */
 function formatMoney(n) {
   const val = Number(n) || 0;
   const sign = val < 0 ? '−' : '';
@@ -2560,7 +2388,6 @@ function formatMoney(n) {
   return `${sign}${displayValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-/* Compute utilization-based color for CC limit label */
 function getLimitColor(currentBalance, limit) {
   const absBalance = Math.abs(currentBalance);
   const utilization = absBalance / limit;
@@ -2574,7 +2401,6 @@ function getLimitColor(currentBalance, limit) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-/* Render all account rows (name, value, meta, input, mute, chips, ratio bar) */
 function renderAccounts() {
   const root = document.getElementById('accounts');
   root.innerHTML = '';
@@ -2588,109 +2414,107 @@ function renderAccounts() {
     const right = document.createElement('div'); right.className = 'right';
     const accountDetails = document.createElement('div'); accountDetails.className = 'account-details';
 
-    /* Identity block: last value + name (with optional long-press actions) */
-    const identityWrap = document.createElement('div');
-    identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
-    const lastEl = document.createElement('span');
-    lastEl.className = 'lastval';
-    lastEl.textContent = formatMoney(last);
-    lastEl.dataset.sign = signOf(last);
+const identityWrap = document.createElement('div');
+identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
-    const nameEl = document.createElement('span');
-    nameEl.className = 'name';
-    nameEl.textContent = a.name;
+const lastEl = document.createElement('span');
+lastEl.className = 'lastval';
+lastEl.textContent = formatMoney(last);
+lastEl.dataset.sign = signOf(last);
 
-    // Apply account color / link behavior as before
-    const meta = ACCOUNT_METADATA.get(a.name) || {};
-    const effectiveColor = meta.color || a.color;
-    if (effectiveColor) {
-      const norm = normalizeHexColor(effectiveColor);
-      if (norm) nameEl.style.color = norm;
-    }
-    if (meta.link) {
-      nameEl.style.textDecoration = 'underline';
-      nameEl.style.textDecorationStyle = 'dotted';
-      nameEl.title = 'Open account link';
-      nameEl.onclick = () => {
-        if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
-        window.open(meta.link, '_blank', 'noopener');
-      };
-    }
+const nameEl = document.createElement('span');
+nameEl.className = 'name';
+nameEl.textContent = a.name;
 
-    // Long-press menu logic: open account menu on hold
-    let pressStartTime = 0;
-    const startLongPress = () => {
-      pressStartTime = Date.now();
-      LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION);
-    };
-    const clearLongPress = () => {
-      if (LONG_PRESS_TIMER) {
-        clearTimeout(LONG_PRESS_TIMER);
-        LONG_PRESS_TIMER = null;
-      }
-    };
-    nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
-    nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
+// Apply account color / link behavior as before
+const meta = ACCOUNT_METADATA.get(a.name) || {};
+const effectiveColor = meta.color || a.color;
+if (effectiveColor) {
+  const norm = normalizeHexColor(effectiveColor);
+  if (norm) nameEl.style.color = norm;
+}
+if (meta.link) {
+  nameEl.style.textDecoration = 'underline';
+  nameEl.style.textDecorationStyle = 'dotted';
+  nameEl.title = 'Open account link';
+  nameEl.onclick = () => {
+    if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
+    window.open(meta.link, '_blank', 'noopener');
+  };
+}
 
-    identityWrap.append(lastEl, nameEl);
-    accountDetails.append(identityWrap);
+// Long-press menu logic (unchanged)
+let pressStartTime = 0;
+const startLongPress = () => {
+  pressStartTime = Date.now();
+  LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION);
+};
+const clearLongPress = () => {
+  if (LONG_PRESS_TIMER) {
+    clearTimeout(LONG_PRESS_TIMER);
+    LONG_PRESS_TIMER = null;
+  }
+};
+nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
+nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
 
-    // NEW: meta column that stacks LIMIT + APR to the right of the name
-    const metaWrap = document.createElement('div');
-    metaWrap.className = 'account-meta';
+identityWrap.append(lastEl, nameEl);
+accountDetails.append(identityWrap);
 
-    // LIMIT (only for CC with a limit)
-    if (a.type === 'cc' && meta.limit) {
-      const limitEl = document.createElement('span');
-      limitEl.className = 'limit';
-      const limitValue = meta.limit;
-      limitEl.style.color = getLimitColor(last, limitValue);
-      limitEl.textContent = `$${limitValue.toLocaleString()}`;
-      metaWrap.appendChild(limitEl);
-    }
+// NEW: meta column that stacks LIMIT + APR to the right of the name
+const metaWrap = document.createElement('div');
+metaWrap.className = 'account-meta';
 
-    // APR + interest line, always available
-    const aprEl = document.createElement('span');
-    aprEl.className = 'apr';
-    const apr = a.apr || 0;
-    let interestAmount = 0;
-    let periodLabel = '';
+// LIMIT (only for CC with a limit)
+if (a.type === 'cc' && meta.limit) {
+  const limitEl = document.createElement('span');
+  limitEl.className = 'limit';
+  const limitValue = meta.limit;
+  limitEl.style.color = getLimitColor(last, limitValue);
+  limitEl.textContent = `$${limitValue.toLocaleString()}`;
+  metaWrap.appendChild(limitEl);
+}
 
-    if (apr > 0 && last !== 0) {
-      const dailyRate = (last * apr) / 365;
-      switch (TIMEFRAME) {
-        case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
-        case '7d':    interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
-        case '14d':   interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
-        case '30d':   interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
-        case '90d':   interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
-        case '1y':
-        case 'ytd':
-        case 'all':   interestAmount = last * apr; periodLabel = '/yr'; break;
-      }
-    }
+// APR + interest line, always available
+const aprEl = document.createElement('span');
+aprEl.className = 'apr';
+const apr = a.apr || 0;
+let interestAmount = 0;
+let periodLabel = '';
 
-    let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
-    if (Math.abs(interestAmount) >= 0.01) {
-      const sign = interestAmount >= 0 ? '+' : '';
-      const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
-      aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
-    }
-    aprEl.innerHTML = aprHTML;
-    metaWrap.appendChild(aprEl);
+if (apr > 0 && last !== 0) {
+  const dailyRate = (last * apr) / 365;
+  switch (TIMEFRAME) {
+    case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
+    case '7d':    interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
+    case '14d':   interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
+    case '30d':   interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
+    case '90d':   interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+    case '1y':
+    case 'ytd':
+    case 'all':   interestAmount = last * apr; periodLabel = '/yr'; break;
+  }
+}
 
-    // Append the stacked meta block to the right of name
-    accountDetails.appendChild(metaWrap);
+let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+if (Math.abs(interestAmount) >= 0.01) {
+  const sign = interestAmount >= 0 ? '+' : '';
+  const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
+  aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
+}
+aprEl.innerHTML = aprHTML;
+metaWrap.appendChild(aprEl);
 
-    /* Input line: numeric field + mute slider */
+// Append the stacked meta block to the right of name
+accountDetails.appendChild(metaWrap);
+
+
     const inputLine = document.createElement('div'); inputLine.className = 'input-line';
     const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'Add value…'; inp.step = '0.01'; inp.dataset.accountName = a.name;
     if (last > 0) inp.style.backgroundColor = 'var(--c-tint-pos)';
     else if (last < 0) inp.style.backgroundColor = 'var(--c-tint-neg)';
     else inp.style.backgroundColor = 'var(--c-input-bg)';
-
-    /* Submit single entry on Enter key */
     inp.onkeydown = async (ev) => { if (ev.key === 'Enter') await submitEntries([{ account: a.name, value: inp.value, inputEl: inp }]); };
 
     const muteWrapper = document.createElement('label'); muteWrapper.className = 'mute-checkbox';
@@ -2703,36 +2527,38 @@ function renderAccounts() {
 
     if (isAccountMuted(a.name)) row.classList.add('muted');
 
-    /* Right side: value chips + per-account ratio bar */
-    const vals = document.createElement('div');
-    vals.className = 'values';
 
-    // newest on the left, oldest on the right
-    const lastN = s.lastN || [];
-    lastN.slice().reverse().forEach(v => {
-      const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-      const val = Number(isObject ? v.value : v);
-      const date = isObject ? v.date : null;
-      const readableValue = formatMoney(val);
+const vals = document.createElement('div');
+vals.className = 'values';
 
-      const chip = document.createElement('span');
-      chip.className = 'chip';
-      chip.dataset.sign = signOf(val);
-      chip.textContent = readableValue;
+// newest on the left, oldest on the right
+const lastN = s.lastN || [];
+lastN.slice().reverse().forEach(v => {
+  const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+  const val = Number(isObject ? v.value : v);
+  const date = isObject ? v.date : null;
+  const readableValue = formatMoney(val);
 
-      if (date) {
-        chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
-      } else {
-        chip.classList.add('no-delete');
-        chip.title = 'Old data format';
-      }
+  const chip = document.createElement('span');
+  chip.className = 'chip';
+  chip.dataset.sign = signOf(val);
+  chip.textContent = readableValue;
 
-      vals.appendChild(chip);
-    });
+  if (date) {
+    chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
+  } else {
+    chip.classList.add('no-delete');
+    chip.title = 'Old data format';
+  }
 
-    right.appendChild(vals);
+  vals.appendChild(chip);
+});
 
-    /* Per-account little ratio bar made of block characters for mobile */
+right.appendChild(vals);
+
+
+
+
     const bar = document.createElement('h4'); bar.className = 'ratio-bar';
     const assetSpan = document.createElement('span'); assetSpan.style.color = 'var(--c-pos)';
     const debtSpan = document.createElement('span'); debtSpan.style.color = 'var(--c-neg)';
@@ -2757,8 +2583,6 @@ function renderAccounts() {
 
 /* ============================================
     SUBMISSION
-    - SubmitAll collects all non-empty inputs and sends
-      them to backend submit route in bulk.
    ============================================ */
 async function submitAll() {
   const entries = [];
@@ -2770,7 +2594,6 @@ async function submitAll() {
   await submitEntries(entries);
 }
 
-/* Lowest-level submit function: handles network, statuses, refresh. */
 async function submitEntries(entries) {
   if (IS_LOADING) return;
   setLoading(true, 'Submitting…');
@@ -2804,15 +2627,12 @@ async function submitEntries(entries) {
 
 /* ============================================
     INITIALIZATION
-    - DOMContentLoaded wires up all event handlers
-      and loads Google Charts + initial snapshot.
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
   initializeTheme();
   initDarkMode();
 
-  /* Replace placeholder sheet link with actual sheet ID if configured */
   const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
   if (sheetLink && SHEET_ID && SHEET_ID !== 'YOUR_SHEET_ID_HERE') {
     sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}`;
@@ -2820,16 +2640,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('refresh').addEventListener('click', fetchSnapshot);
   document.getElementById('submitAll').addEventListener('click', submitAll);
-
-  /* Chart mode radios */
   document.querySelectorAll('input[name="mode"]').forEach(r => {
     r.addEventListener('change', (e) => { MODE = e.target.value; renderChart(); });
   });
-
-  /* Timeframe selector triggers new snapshot from backend */
   document.getElementById('timeframe').addEventListener('change', (e) => { TIMEFRAME = e.target.value; fetchSnapshot(); });
 
-  /* Modal cancel/backdrop click handlers */
   document.getElementById('delete-btn-cancel').addEventListener('click', hideDeleteConfirm);
   document.getElementById('delete-modal-backdrop').addEventListener('click', hideDeleteConfirm);
   document.getElementById('edit-chip-cancel').addEventListener('click', hideEditChipModal);
@@ -2845,14 +2660,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
   document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
 
-  // Recalculate chart sizes on resize
   window.addEventListener('resize', renderChart);
   
-  // Initialize score from snapshot (once loaded)
   renderScore();
   document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
-  // Lazy-load Google Charts and then fetch snapshot
   if (window.google && google.charts) {
     google.charts.load('current', { packages: ['corechart'] });
     google.charts.setOnLoadCallback(fetchSnapshot);
