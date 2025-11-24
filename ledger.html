@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.5)</title>
+<title>Ledger — Accounts & Chart (v2.6)</title>
 
 <!-- Google Fonts Import (Removed DM Mono & Gloria Hallelujah) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -322,22 +322,32 @@ hr.divider {
 .name:hover { opacity: 0.8; }
 .name:active { opacity: 0.6; }
 
+/* Wraps LIMIT + APR as a small vertical column to the right of the name */
+.account-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+/* Limit line */
 .limit {
   font-weight: 600;
   font-size: 0.75rem;
-  flex-shrink: 0;
-  padding-top: 0.5rem;
+  padding-top: 0.35rem;
   color: var(--c-fg);
 }
 
+/* APR + interest line */
 .apr { 
   font-weight: 400; 
   font-size: 0.75rem;
   opacity: .75;
-  flex-shrink: 0;
-  padding-top: 0.5rem;
+  padding-top: 0.1rem;
   color: var(--c-fg);
 }
+
+
 
 .input-line { 
   display: flex; 
@@ -872,7 +882,7 @@ footer b { font-weight: 600; }
   .bottom-section { padding: 1.5rem 1rem; gap: 1rem; }
   .dark-mode-toggle-icon { font-size: 1.3rem; line-height: 1; color: var(--c-fg); user-select: none; transition: opacity 0.25s ease, transform 0.25s ease; }
   .dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon { transform: rotate(180deg); opacity: 0.9; }
-       .cc-metrics {
+  .cc-metrics {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
@@ -1042,10 +1052,9 @@ footer b { font-weight: 600; }
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
-  <!-- Bottom section with Score, Font Controls, and Dark Mode toggle -->
-    <!-- Bottom section with CC metrics, Score, Font Controls, and Dark Mode toggle -->
+  <!-- Bottom section with CC metrics, Score, Font Controls, and Dark Mode toggle -->
   <div class="bottom-section">
-    <!-- New CC LIMIT / CC DEBT metrics -->
+    <!-- CC LIMIT / CC DEBT metrics -->
     <div class="cc-metrics">
       <div class="cc-metric">
         <div id="cc-limit-value" class="cc-metric-value">0</div>
@@ -1057,7 +1066,7 @@ footer b { font-weight: 600; }
       </div>
     </div>
 
-    <!-- Existing score display -->
+    <!-- Score display -->
     <div id="score-display">000</div>
     
     <!-- Font Navigation + Dark Mode -->
@@ -1075,8 +1084,6 @@ footer b { font-weight: 600; }
     </div>
   </div>
 
-
-
   <!-- Footer -->
   <footer>
     <div class="security-notice">
@@ -1086,7 +1093,7 @@ footer b { font-weight: 600; }
     </div>
 
     <small>
-      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries • Font Switcher • Mute/unmute • Dark mode 🌙 • Score tracker 📊<br>
+      <b>v2.6 Features:</b> CC limits • Edit account settings • Type summaries • Font Switcher • Mute/unmute • Dark mode 🌙 • Score tracker 📊 • AccountMeta persistence<br>
       <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
@@ -1096,7 +1103,7 @@ footer b { font-weight: 600; }
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbwPaCXzxgP4Liw4fMHIjZre-osm0IiRbQex76uupaOw_-sqCPLvHtj353AAR460s5MJjA/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbyPG7SSqScuBLluk8cT7P0VV_y87XHPc97neA2NODRJlxzEbiwYnEZjNH71QaHYVwN1Kw/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
@@ -1134,8 +1141,8 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
-let ACCOUNT_METADATA = new Map();  // accountName -> { limit, color, link }
-let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
+let ACCOUNT_METADATA = new Map();      // accountName -> { limit, color, link }
+let TYPE_META_OVERRIDES = new Map();   // typeCode -> { color }
 
 /* ============================================
     FONT SWITCHER
@@ -1201,7 +1208,7 @@ function initializeTheme() {
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   
-  // 1. Dark Mode
+  // Dark Mode
   const darkModeParam = params.get('darkMode');
   if (darkModeParam === 'true') {
     DARK_MODE = true;
@@ -1211,7 +1218,7 @@ function initializeTheme() {
     DARK_MODE = shouldAutoEnableDarkMode();
   }
 
-  // 2. Font
+  // Font
   const fontParam = params.get('font');
   if (fontParam) {
     const idx = parseInt(fontParam, 10);
@@ -1349,8 +1356,10 @@ function showToast(msg, type = 'info', duration = 3000) {
 
 function setLoading(loading, message) {
   IS_LOADING = loading;
-  document.getElementById('refresh').disabled = loading;
-  document.getElementById('submitAll').disabled = loading;
+  const refresh = document.getElementById('refresh');
+  const submitAll = document.getElementById('submitAll');
+  if (refresh) refresh.disabled = loading;
+  if (submitAll) submitAll.disabled = loading;
   document.querySelectorAll('.row .left input[type="number"]').forEach(inp => {
     inp.disabled = loading;
     inp.classList.toggle('submitting', loading);
@@ -1534,56 +1543,70 @@ function hideAccountMenu() {
 /* ============================================
     EDIT ACCOUNT MODAL
    ============================================ */
-function normalizeHexColor(value) {
-  if (!value) return null;
-  let v = value.trim();
-  if (!v) return null;
-  if (v[0] !== '#') v = '#' + v;
-  if (!/^#[0-9A-Fa-f]{6}$/.test(v)) return null;
-  return v.toUpperCase();
+
+function normalizeHexColor(str) {
+  if (!str) return '';
+  let s = String(str).trim();
+  if (!s) return '';
+  if (s[0] !== '#') s = '#' + s;
+  if (!/^#[0-9A-Fa-f]{3,6}$/.test(s)) return '';
+  if (s.length === 4) s = '#' + s[1]+s[1] + s[2]+s[2] + s[3]+s[3];
+  return s.toUpperCase();
 }
 
 function showEditAccountModal(accountName) {
   if (IS_LOADING) return;
-  const backdrop = document.getElementById('edit-account-modal-backdrop');
-  const modal = document.getElementById('edit-account-modal');
-  const nameEl = document.getElementById('edit-account-name');
-  const typeSelect = document.getElementById('edit-account-type');
-  const limitInput = document.getElementById('edit-account-limit');
-  const aprInput = document.getElementById('edit-account-apr');
-  const valueInput = document.getElementById('edit-account-value');
-  const colorInput = document.getElementById('edit-account-color');
+
+  const account = SNAP.accounts.find(a => a.name === accountName);
+  if (!account) return showToast('Account not found','error');
+
+  const meta = ACCOUNT_METADATA.get(accountName) || {};
+
+  // Set modal text
+  document.getElementById('edit-account-name').textContent = accountName;
+
+  // Type
+  document.getElementById('edit-account-type').value = account.type || 'bk';
+
+  // Limit (from AccountMeta)
+  document.getElementById('edit-account-limit').value =
+    (typeof meta.limit === 'number') ? meta.limit : '';
+
+  // APR (from Accounts)
+  document.getElementById('edit-account-apr').value =
+    (typeof account.apr === 'number') ? account.apr : '';
+
+  // Color
+  const color = meta.color || account.color || '';
+  const norm  = normalizeHexColor(color) || '#4C8036';
+  const colorInput  = document.getElementById('edit-account-color');
   const colorPicker = document.getElementById('edit-account-color-picker');
-  const linkInput = document.getElementById('edit-account-link');
-  const saveBtn = document.getElementById('edit-account-save');
+  colorInput.value  = norm;
+  colorPicker.value = norm;
 
-  nameEl.textContent = accountName;
-  const account = SNAP?.accounts?.find(a => a.name === accountName);
-  if (!account) { showToast('Account not found', 'error'); return; }
+  // Link
+  document.getElementById('edit-account-link').value = meta.link || '';
 
-  const metadata = ACCOUNT_METADATA.get(accountName) || {};
-  typeSelect.value = account.type || 'bk';
-  limitInput.value = metadata.limit || '';
-  aprInput.value = account.apr || 0;
+  // Current value (last snapshot value)
+  const last = SNAP.series?.[accountName]?.last ?? 0;
+  document.getElementById('edit-account-value').value = last;
 
-  const series = SNAP?.series?.[accountName];
-  const currentValue = series?.last ?? 0;
-  valueInput.value = currentValue;
-
-  const effectiveColor = metadata.color || account.color || '';
-  const normalized = normalizeHexColor(effectiveColor) || '#4c8036';
-  colorInput.value = normalized;
-  colorPicker.value = normalized;
-  linkInput.value = metadata.link || '';
-
+  // Sync color picker <-> text input
   colorPicker.oninput = () => { colorInput.value = colorPicker.value; };
-  colorInput.oninput = () => { const norm = normalizeHexColor(colorInput.value); if (norm) colorPicker.value = norm; };
+  colorInput.oninput  = () => {
+    const n = normalizeHexColor(colorInput.value);
+    if (n) colorPicker.value = n;
+  };
 
-  backdrop.classList.add('show');
-  modal.classList.add('show');
-  setTimeout(() => typeSelect.focus(), 100);
+  // ✅ WIRE THE SAVE BUTTON
+  const saveBtn = document.getElementById('edit-account-save');
   saveBtn.onclick = () => processEditAccount(accountName);
+
+  // Show modal
+  document.getElementById('edit-account-modal-backdrop').classList.add('show');
+  document.getElementById('edit-account-modal').classList.add('show');
 }
+
 
 function hideEditAccountModal() {
   document.getElementById('edit-account-modal-backdrop').classList.remove('show');
@@ -1592,60 +1615,78 @@ function hideEditAccountModal() {
 
 async function processEditAccount(accountName) {
   if (IS_LOADING) return;
-  const typeSelect = document.getElementById('edit-account-type');
-  const limitInput = document.getElementById('edit-account-limit');
-  const aprInput = document.getElementById('edit-account-apr');
-  const valueInput = document.getElementById('edit-account-value');
-  const colorInput = document.getElementById('edit-account-color');
-  const linkInput = document.getElementById('edit-account-link');
 
-  const newType = (typeSelect.value || 'bk').trim();
-  const newLimit = limitInput.value ? Number(limitInput.value) : null;
-  const newAPR = Number(aprInput.value);
-  const newValue = Number(valueInput.value);
-  const newLink = linkInput.value ? linkInput.value.trim() : '';
-  const newColor = normalizeHexColor(colorInput.value);
+  const type  = document.getElementById('edit-account-type').value.trim();
+  const limit = document.getElementById('edit-account-limit').value.trim();
+  const apr   = document.getElementById('edit-account-apr').value.trim();
+  const value = document.getElementById('edit-account-value').value.trim();
+  const color = normalizeHexColor(
+      document.getElementById('edit-account-color').value
+  );
+  const link  = document.getElementById('edit-account-link').value.trim();
 
-  const meta = ACCOUNT_METADATA.get(accountName) || {};
-  meta.limit = (newLimit && newLimit > 0) ? newLimit : null;
-  meta.color = newColor || null;
-  meta.link = newLink || null;
-  ACCOUNT_METADATA.set(accountName, meta);
+  const metaLimit = limit !== '' && !isNaN(Number(limit)) ? Number(limit) : '';
+  const newAPR    = apr   !== '' && !isNaN(Number(apr))   ? Number(apr)   : '';
+  const newValue  = value !== '' && !isNaN(Number(value)) ? Number(value) : null;
 
-  const account = SNAP?.accounts?.find(a => a.name === accountName);
-  if (account) {
-    account.type = newType;
-    account.apr = isNaN(newAPR) ? account.apr : newAPR;
-  }
-
-  saveStateToURL();
   hideEditAccountModal();
+  showToast('Saving account…','info');
 
-  const series = SNAP?.series?.[accountName];
-  const currentValue = series?.last ?? 0;
+  try {
+    // 1) Save limit/color/link to AccountMeta
+    const metaPayload = {
+      entries: [{
+        account: accountName,
+        limit: metaLimit,
+        color: color || '',
+        link:  link  || ''
+      }]
+    };
+    await fetch(`${API_BASE}?route=updateAccountMeta`, {
+      method: 'POST',
+      body: new URLSearchParams({
+        payload: JSON.stringify(metaPayload)
+      })
+    });
 
-  if (!isNaN(newValue) && newValue !== currentValue) {
-    setLoading(true, 'Updating account value…');
-    try {
-      const body = new URLSearchParams({ 
-        payload: JSON.stringify({ entries: [{ account: accountName, value: newValue }] }) 
+    // 2) Save APR / Type / AccountColor to Accounts sheet
+    const acctPayload = {
+      entries: [{
+        account: accountName,
+        type: type,
+        apr: newAPR,
+        accountColor: color || ''
+      }]
+    };
+    await fetch(`${API_BASE}?route=updateAccount`, {
+      method: 'POST',
+      body: new URLSearchParams({
+        payload: JSON.stringify(acctPayload)
+      })
+    });
+
+    // 3) If value changed, append to Values
+    const current = SNAP.series?.[accountName]?.last ?? null;
+    if (newValue !== null && newValue !== current) {
+      await fetch(`${API_BASE}?route=submit`, {
+        method: 'POST',
+        body: new URLSearchParams({
+          payload: JSON.stringify({
+            entries: [{ account: accountName, value: newValue }]
+          })
+        })
       });
-      const res = await fetch(`${API_BASE}?route=submit`, { method: 'POST', body });
-      const text = await res.text();
-      const j = JSON.parse(text);
-      if (!j.ok) throw new Error(j.error || 'Submit failed');
-      showToast('Account updated! Refreshing…', 'success');
-      await fetchSnapshot();
-    } catch (e) {
-      console.error('Update error:', e);
-      setLoading(false);
-      showToast('Failed to update: ' + e.message, 'error', 5000);
     }
-  } else {
-    showToast('Account settings updated!', 'success');
-    renderAll();
+
+    showToast('Saved!', 'success');
+    await fetchSnapshot();
+
+  } catch (err) {
+    console.error(err);
+    showToast('Error saving: ' + err.message, 'error', 5000);
   }
 }
+
 
 /* ============================================
     EDIT TYPE COLOR MODAL
@@ -1727,11 +1768,30 @@ async function fetchSnapshot() {
 
     SNAP = j;
     
-    // --- NEW: Update Score from Database ---
+    // Update score from database
     if (SNAP.score !== undefined) {
       SCORE = Number(SNAP.score);
     }
-    // ---------------------------------------
+
+    // NEW: Load AccountMeta (limits/colors/links) from backend snapshot
+    ACCOUNT_METADATA = new Map();
+    if (SNAP.accountMeta) {
+      Object.entries(SNAP.accountMeta).forEach(([accountName, meta]) => {
+        if (!accountName) return;
+        let limit = null;
+        if (typeof meta.limit === 'number') {
+          limit = meta.limit;
+        } else if (typeof meta.limit === 'string' && meta.limit.trim() !== '') {
+          const parsed = Number(meta.limit.replace(/,/g, ''));
+          if (!isNaN(parsed)) limit = parsed;
+        }
+        ACCOUNT_METADATA.set(accountName, {
+          limit: Number.isFinite(limit) ? limit : null,
+          color: meta.color || null,
+          link: meta.link || null
+        });
+      });
+    }
 
     console.log('Snapshot loaded:', SNAP);
     setLoading(false);
@@ -1744,7 +1804,7 @@ async function fetchSnapshot() {
 }
 
 /* ============================================
-    URL STATE (muted + metadata + dark mode)
+    URL STATE (muted + types + dark mode)
    ============================================ */
 function loadStateFromURL() {
   const hash = window.location.hash.substring(1);
@@ -1756,25 +1816,9 @@ function loadStateFromURL() {
   const mutedTypesParam = params.get('mutedTypes');
   if (mutedTypesParam) MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
 
-  // Dark mode handled in initializeTheme()
-  // Font handled in initializeTheme()
+  // Dark mode & font handled in initializeTheme()
 
-  const accountMetaParam = params.get('acctMeta');
   const typeMetaParam = params.get('typeMeta');
-
-  ACCOUNT_METADATA = new Map();
-  if (accountMetaParam) {
-    try {
-      const metaObj = JSON.parse(decodeURIComponent(accountMetaParam));
-      Object.entries(metaObj).forEach(([account, meta]) => {
-        ACCOUNT_METADATA.set(account, {
-          limit: typeof meta.limit === 'number' ? meta.limit : null,
-          color: meta.color ? normalizeHexColor(meta.color) : null,
-          link: meta.link || null
-        });
-      });
-    } catch (e) { console.error('Failed to parse acctMeta from URL:', e); }
-  }
 
   TYPE_META_OVERRIDES = new Map();
   if (typeMetaParam) {
@@ -1805,16 +1849,6 @@ function saveStateToURL() {
   if (CURRENT_FONT_INDEX > 0) {
     params.set('font', CURRENT_FONT_INDEX);
   }
-
-  const acctMetaObj = {};
-  ACCOUNT_METADATA.forEach((meta, accountName) => {
-    const m = {};
-    if (meta.limit) m.limit = meta.limit;
-    if (meta.color) m.color = meta.color;
-    if (meta.link)  m.link  = meta.link;
-    if (Object.keys(m).length > 0) acctMetaObj[accountName] = m;
-  });
-  if (Object.keys(acctMetaObj).length > 0) params.set('acctMeta', encodeURIComponent(JSON.stringify(acctMetaObj)));
 
   const typeMetaObj = {};
   TYPE_META_OVERRIDES.forEach((meta, typeCode) => {
@@ -1856,14 +1890,13 @@ function renderAll() {
   renderSummary();
   renderInterestSummary();
   renderStatusbar();
-  renderCCMetrics();   // ⬅️ NEW: CC LIMIT / CC DEBT
+  renderCCMetrics();
   renderChart();
   renderTypeSummary();
   renderAccounts();
   renderScore();
-
-
 }
+
 function renderCCMetrics() {
   const limitEl = document.getElementById('cc-limit-value');
   const debtEl = document.getElementById('cc-debt-value');
@@ -1880,7 +1913,7 @@ function renderCCMetrics() {
     const series = SNAP.series[a.name] || {};
     const last = Number(series.last ?? 0);
 
-    // limits from ACCOUNT_METADATA (Edit Account modal)
+    // limits from ACCOUNT_METADATA (Edit Account modal / AccountMeta sheet)
     const meta = ACCOUNT_METADATA.get(a.name) || {};
     if (typeof meta.limit === 'number' && !isNaN(meta.limit)) {
       totalLimit += meta.limit;
@@ -1906,7 +1939,6 @@ function renderCCMetrics() {
   limitEl.textContent = formatMoney(availableCredit);
   debtEl.textContent = formatMoney(totalDebtRaw);
 }
-
 
 function renderSummary() {
   const summaryEl = document.getElementById('financial-summary');
@@ -2040,7 +2072,6 @@ function renderTypeSummary() {
 }
 
 function renderStatusbar() {
-  // Note: 'statusbar' ID now refers to nothing (removed) but we only update ratio bars
   const ratioAsset = document.getElementById('ratio-asset');
   const ratioDebt = document.getElementById('ratio-debt');
 
@@ -2267,7 +2298,6 @@ function renderDonutCharts(container) {
   const fg = styles.getPropertyValue('--c-fg').trim();
   container.innerHTML = '';
   
-  // Updated wrapper styling for robust centering
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:12px; width:100%;';
   
@@ -2275,13 +2305,11 @@ function renderDonutCharts(container) {
   const allDiv = document.createElement('div');
   const debtDiv = document.createElement('div');
   
-  // Ensure charts have enough size but flex comfortably
   const commonStyle = 'flex: 1 1 260px; min-width: 260px; max-width: 400px; height: 260px;';
   typeDiv.style.cssText = commonStyle;
   allDiv.style.cssText = commonStyle;
   debtDiv.style.cssText = commonStyle;
   
-  // Append in order. On wider screens, this places "All Accounts" (allDiv) in the visual center of 3 items.
   wrap.appendChild(typeDiv);
   wrap.appendChild(allDiv);
   wrap.appendChild(debtDiv);
@@ -2364,61 +2392,102 @@ function renderAccounts() {
     const left = document.createElement('div'); left.className = 'left';
     const right = document.createElement('div'); right.className = 'right';
     const accountDetails = document.createElement('div'); accountDetails.className = 'account-details';
-    
-    const identityWrap = document.createElement('div');
-    identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
-    
-    const lastEl = document.createElement('span'); lastEl.className = 'lastval'; lastEl.textContent = formatMoney(last); lastEl.dataset.sign = signOf(last);
-    const nameEl = document.createElement('span'); nameEl.className = 'name'; nameEl.textContent = a.name;
-    
-    const meta = ACCOUNT_METADATA.get(a.name) || {};
-    const effectiveColor = meta.color || a.color;
-    if (effectiveColor) { const norm = normalizeHexColor(effectiveColor); if (norm) nameEl.style.color = norm; }
-    
-    if (meta.link) {
-      nameEl.style.textDecoration = 'underline'; nameEl.style.textDecorationStyle = 'dotted'; nameEl.title = 'Open account link';
-      nameEl.onclick = () => { if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER); window.open(meta.link, '_blank', 'noopener'); };
-    }
 
-    let pressStartTime = 0;
-    const startLongPress = () => { pressStartTime = Date.now(); LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION); };
-    const clearLongPress = () => { if (LONG_PRESS_TIMER) { clearTimeout(LONG_PRESS_TIMER); LONG_PRESS_TIMER = null; } };
-    nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
-    nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
 
-    identityWrap.append(lastEl, nameEl);
-    accountDetails.append(identityWrap);
+const identityWrap = document.createElement('div');
+identityWrap.style.cssText = 'display:flex; align-items:baseline; gap:10px; flex-wrap:nowrap; min-width:0';
 
-    if (a.type === 'cc' && meta.limit) {
-      const limitEl = document.createElement('span'); limitEl.className = 'limit';
-      const limitValue = meta.limit;
-      limitEl.style.color = getLimitColor(last, limitValue);
-      limitEl.textContent = `$${limitValue.toLocaleString()}`;
-      accountDetails.appendChild(limitEl);
-    }
+const lastEl = document.createElement('span');
+lastEl.className = 'lastval';
+lastEl.textContent = formatMoney(last);
+lastEl.dataset.sign = signOf(last);
 
-    const aprEl = document.createElement('span'); aprEl.className = 'apr';
-    const apr = a.apr || 0;
-    let interestAmount = 0, periodLabel = '';
-    if (apr > 0 && last !== 0) {
-      const dailyRate = (last * apr) / 365;
-      switch (TIMEFRAME) {
-        case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
-        case '7d': interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
-        case '14d': interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
-        case '30d': interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
-        case '90d': interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
-        case '1y': case 'ytd': case 'all': interestAmount = last * apr; periodLabel = '/yr'; break;
-      }
-    }
-    let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
-    if (Math.abs(interestAmount) >= 0.01) {
-      const sign = interestAmount >= 0 ? '+' : '';
-      const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
-      aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
-    }
-    aprEl.innerHTML = aprHTML;
-    accountDetails.appendChild(aprEl);
+const nameEl = document.createElement('span');
+nameEl.className = 'name';
+nameEl.textContent = a.name;
+
+// Apply account color / link behavior as before
+const meta = ACCOUNT_METADATA.get(a.name) || {};
+const effectiveColor = meta.color || a.color;
+if (effectiveColor) {
+  const norm = normalizeHexColor(effectiveColor);
+  if (norm) nameEl.style.color = norm;
+}
+if (meta.link) {
+  nameEl.style.textDecoration = 'underline';
+  nameEl.style.textDecorationStyle = 'dotted';
+  nameEl.title = 'Open account link';
+  nameEl.onclick = () => {
+    if (LONG_PRESS_TIMER) clearTimeout(LONG_PRESS_TIMER);
+    window.open(meta.link, '_blank', 'noopener');
+  };
+}
+
+// Long-press menu logic (unchanged)
+let pressStartTime = 0;
+const startLongPress = () => {
+  pressStartTime = Date.now();
+  LONG_PRESS_TIMER = setTimeout(() => showAccountMenu(a.name), LONG_PRESS_DURATION);
+};
+const clearLongPress = () => {
+  if (LONG_PRESS_TIMER) {
+    clearTimeout(LONG_PRESS_TIMER);
+    LONG_PRESS_TIMER = null;
+  }
+};
+nameEl.onmousedown = nameEl.ontouchstart = startLongPress;
+nameEl.onmouseup = nameEl.onmouseleave = nameEl.ontouchend = clearLongPress;
+
+identityWrap.append(lastEl, nameEl);
+accountDetails.append(identityWrap);
+
+// NEW: meta column that stacks LIMIT + APR to the right of the name
+const metaWrap = document.createElement('div');
+metaWrap.className = 'account-meta';
+
+// LIMIT (only for CC with a limit)
+if (a.type === 'cc' && meta.limit) {
+  const limitEl = document.createElement('span');
+  limitEl.className = 'limit';
+  const limitValue = meta.limit;
+  limitEl.style.color = getLimitColor(last, limitValue);
+  limitEl.textContent = `$${limitValue.toLocaleString()}`;
+  metaWrap.appendChild(limitEl);
+}
+
+// APR + interest line, always available
+const aprEl = document.createElement('span');
+aprEl.className = 'apr';
+const apr = a.apr || 0;
+let interestAmount = 0;
+let periodLabel = '';
+
+if (apr > 0 && last !== 0) {
+  const dailyRate = (last * apr) / 365;
+  switch (TIMEFRAME) {
+    case 'today': interestAmount = dailyRate * 1; periodLabel = '/dy'; break;
+    case '7d':    interestAmount = dailyRate * 7; periodLabel = '/wk'; break;
+    case '14d':   interestAmount = dailyRate * 14; periodLabel = '/2w'; break;
+    case '30d':   interestAmount = dailyRate * 30; periodLabel = '/mo'; break;
+    case '90d':   interestAmount = dailyRate * 90; periodLabel = '/qt'; break;
+    case '1y':
+    case 'ytd':
+    case 'all':   interestAmount = last * apr; periodLabel = '/yr'; break;
+  }
+}
+
+let aprHTML = `APR: ${(apr * 100).toFixed(2)}%`;
+if (Math.abs(interestAmount) >= 0.01) {
+  const sign = interestAmount >= 0 ? '+' : '';
+  const color = interestAmount >= 0 ? 'var(--c-pos)' : 'var(--c-neg)';
+  aprHTML += `<br><span style="color: ${color}">${sign}${formatMoney(interestAmount)}${periodLabel}</span>`;
+}
+aprEl.innerHTML = aprHTML;
+metaWrap.appendChild(aprEl);
+
+// Append the stacked meta block to the right of name
+accountDetails.appendChild(metaWrap);
+
 
     const inputLine = document.createElement('div'); inputLine.className = 'input-line';
     const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'Add value…'; inp.step = '0.01'; inp.dataset.accountName = a.name;
@@ -2437,18 +2506,37 @@ function renderAccounts() {
 
     if (isAccountMuted(a.name)) row.classList.add('muted');
 
-    const vals = document.createElement('div'); vals.className = 'values';
-    (s.lastN || []).forEach(v => {
-      const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
-      const val = Number(isObject ? v.value : v);
-      const date = isObject ? v.date : null;
-      const readableValue = formatMoney(val);
-      const chip = document.createElement('span'); chip.className = 'chip'; chip.dataset.sign = signOf(val); chip.textContent = readableValue;
-      if (date) chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
-      else { chip.classList.add('no-delete'); chip.title = "Old data format"; }
-      vals.appendChild(chip);
-    });
-    right.appendChild(vals);
+
+const vals = document.createElement('div');
+vals.className = 'values';
+
+// newest on the left, oldest on the right
+const lastN = s.lastN || [];
+lastN.slice().reverse().forEach(v => {
+  const isObject = (typeof v === 'object' && v !== null && v.value !== undefined);
+  const val = Number(isObject ? v.value : v);
+  const date = isObject ? v.date : null;
+  const readableValue = formatMoney(val);
+
+  const chip = document.createElement('span');
+  chip.className = 'chip';
+  chip.dataset.sign = signOf(val);
+  chip.textContent = readableValue;
+
+  if (date) {
+    chip.onclick = () => showEditChipModal(a.name, date, val, readableValue);
+  } else {
+    chip.classList.add('no-delete');
+    chip.title = 'Old data format';
+  }
+
+  vals.appendChild(chip);
+});
+
+right.appendChild(vals);
+
+
+
 
     const bar = document.createElement('h4'); bar.className = 'ratio-bar';
     const assetSpan = document.createElement('span'); assetSpan.style.color = 'var(--c-pos)';
@@ -2547,13 +2635,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
-  // NEW: Font Switcher Event Listeners
+  // Font Switcher Event Listeners
   document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
   document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
 
   window.addEventListener('resize', renderChart);
   
-  renderScore(); // Initial render (000)
+  renderScore();
   document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
   if (window.google && google.charts) {
