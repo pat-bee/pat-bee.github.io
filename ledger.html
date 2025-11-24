@@ -1,10 +1,14 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Ledger — Accounts & Chart (v2.5)</title>
+
+<!-- Google Fonts Import (Removed DM Mono & Gloria Hallelujah) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Inconsolata:wght@200..900&family=Patrick+Hand&display=swap" rel="stylesheet">
 
 <style>
 /* ============================================
@@ -34,6 +38,9 @@
   --c-modal-bg: #ffffff;
   --c-modal-border: #000000;
   --c-modal-fg: #000000;
+  
+  /* Default Font Family Variable */
+  --font-current: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 :root.dark-mode {
@@ -69,10 +76,10 @@ html, body {
 }
 
 body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: var(--font-current);
   font-size: 18px;
   line-height: 1.5;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, font-family 0.2s ease;
 }
 
 .wrap { 
@@ -164,6 +171,7 @@ header {
   border-radius: 4px;
   background: var(--c-input-bg);
   color: var(--c-fg);
+  font-family: var(--font-current);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -171,7 +179,7 @@ header {
       FINANCIAL SUMMARY
    ============================================ */
 #financial-summary {
-  font-size: 5.25rem;
+  font-size: 5rem;
   font-weight: 300;
   white-space: nowrap;
   line-height: 1.1;
@@ -351,6 +359,7 @@ input[type="number"], input[type="date"], input[type="text"], input[type="url"] 
   border-radius: var(--radius);
   background: var(--c-input-bg);
   color: var(--c-fg);
+  font-family: var(--font-current);
   outline: none;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
@@ -406,6 +415,7 @@ button {
   background: var(--c-input-bg);
   cursor: pointer;
   border-radius: var(--radius);
+  font-family: var(--font-current);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -488,7 +498,7 @@ button:disabled {
 }
 
 /* ============================================
-      BOTTOM SECTION (Score &  Mode)
+      BOTTOM SECTION (Score, Font & Dark Mode)
    ============================================ */
 .bottom-section {
   display: flex;
@@ -500,12 +510,45 @@ button:disabled {
   width: 100%;
   box-sizing: border-box;
 }
+/* CC LIMIT / CC DEBT METRICS */
+.cc-metrics {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.cc-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cc-metric-value {
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-fg);
+}
+
+.cc-metric-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-fg);
+}
 
 #score-display {
   font-size: 50px;
   font-weight: 300;
   color: #b5a8a8;
-  font-family: monospace;
+  font-family: monospace; /* Overridden by current font if we want, or keep monospace */
   letter-spacing: 0.2em;
   cursor: pointer;
   user-select: none;
@@ -518,6 +561,34 @@ button:disabled {
 
 #score-display:hover { opacity: 0.8; }
 #score-display:active { transform: scale(0.98); }
+
+/* Container for Font Arrows + Dark Mode Toggle */
+.bottom-controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem; /* Space between arrows and toggle */
+}
+
+.font-nav-btn {
+  font-size: 4.5rem; /* Increased by 50% from 3rem */
+  line-height: 1;
+  font-weight: 300;
+  cursor: pointer;
+  user-select: none;
+  color: var(--c-fg);
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.font-nav-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.font-nav-btn:active {
+  transform: scale(0.95);
+}
 
 .bottom-dark-mode-toggle {
   display: flex;
@@ -801,6 +872,11 @@ footer b { font-weight: 600; }
   .bottom-section { padding: 1.5rem 1rem; gap: 1rem; }
   .dark-mode-toggle-icon { font-size: 1.3rem; line-height: 1; color: var(--c-fg); user-select: none; transition: opacity 0.25s ease, transform 0.25s ease; }
   .dark-mode-toggle-label input[type="checkbox"]:checked ~ .dark-mode-toggle-icon { transform: rotate(180deg); opacity: 0.9; }
+       .cc-metrics {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
 }
 </style>
 </head>
@@ -966,16 +1042,39 @@ footer b { font-weight: 600; }
 <main class="wrap">
   <section id="accounts" class="accounts"></section>
 
-  <!-- Bottom section with Score and Dark Mode toggle -->
+  <!-- Bottom section with Score, Font Controls, and Dark Mode toggle -->
+    <!-- Bottom section with CC metrics, Score, Font Controls, and Dark Mode toggle -->
   <div class="bottom-section">
+    <!-- New CC LIMIT / CC DEBT metrics -->
+    <div class="cc-metrics">
+      <div class="cc-metric">
+        <div id="cc-limit-value" class="cc-metric-value">0</div>
+        <div class="cc-metric-label">CC LIMIT</div>
+      </div>
+      <div class="cc-metric">
+        <div id="cc-debt-value" class="cc-metric-value">0</div>
+        <div class="cc-metric-label">CC DEBT</div>
+      </div>
+    </div>
+
+    <!-- Existing score display -->
     <div id="score-display">000</div>
-    <div class="bottom-dark-mode-toggle">
-      <label class="dark-mode-checkbox-label">
-        <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
-      </label>
-      <div id="dark-mode-icon" class="dark-mode-icon">◐</div>
+    
+    <!-- Font Navigation + Dark Mode -->
+    <div class="bottom-controls-container">
+      <div id="font-prev" class="font-nav-btn">&lt;</div>
+      
+      <div class="bottom-dark-mode-toggle">
+        <label class="dark-mode-checkbox-label">
+          <input type="checkbox" id="dark-mode-checkbox" aria-label="Toggle dark mode">
+        </label>
+        <div id="dark-mode-icon" class="dark-mode-icon">◐</div>
+      </div>
+      
+      <div id="font-next" class="font-nav-btn">&gt;</div>
     </div>
   </div>
+
 
 
   <!-- Footer -->
@@ -987,7 +1086,7 @@ footer b { font-weight: 600; }
     </div>
 
     <small>
-      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries in toolbar • Type color overrides • Mute/unmute accounts & types • Dark mode 🌙 • Score tracker 📊<br>
+      <b>v2.5 Features:</b> CC limits • Edit account settings • Type summaries • Font Switcher • Mute/unmute • Dark mode 🌙 • Score tracker 📊<br>
       <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
@@ -1018,6 +1117,15 @@ let SCORE = 0;
 let CHART_SLIDE = 0;          // 0..2
 const MAX_CHART_SLIDE = 2;    // 3 chart views total
 
+// Fonts List (DM Mono and Gloria Hallelujah removed)
+const FONT_OPTIONS = [
+  'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+  '"Geologica", sans-serif',
+  '"Inconsolata", monospace',
+  '"Patrick Hand", cursive'
+];
+let CURRENT_FONT_INDEX = 0;
+
 const TYPE_LABELS = {
   'bk': 'Banks',
   'cc': 'CreditCards',
@@ -1028,6 +1136,25 @@ const TYPE_LABELS = {
 
 let ACCOUNT_METADATA = new Map();  // accountName -> { limit, color, link }
 let TYPE_META_OVERRIDES = new Map(); // typeCode -> { color }
+
+/* ============================================
+    FONT SWITCHER
+   ============================================ */
+function updateFont() {
+  const font = FONT_OPTIONS[CURRENT_FONT_INDEX];
+  document.documentElement.style.setProperty('--font-current', font);
+  saveStateToURL();
+}
+
+function cycleFont(direction) {
+  if (direction === 'next') {
+    CURRENT_FONT_INDEX = (CURRENT_FONT_INDEX + 1) % FONT_OPTIONS.length;
+  } else {
+    CURRENT_FONT_INDEX = (CURRENT_FONT_INDEX - 1 + FONT_OPTIONS.length) % FONT_OPTIONS.length;
+  }
+  updateFont();
+  showToast(`Font changed to option ${CURRENT_FONT_INDEX + 1}`, 'info', 1000);
+}
 
 /* ============================================
     DARK MODE
@@ -1073,8 +1200,9 @@ function shouldAutoEnableDarkMode() {
 function initializeTheme() {
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
-  const darkModeParam = params.get('darkMode');
   
+  // 1. Dark Mode
+  const darkModeParam = params.get('darkMode');
   if (darkModeParam === 'true') {
     DARK_MODE = true;
   } else if (darkModeParam === 'false') {
@@ -1082,6 +1210,16 @@ function initializeTheme() {
   } else {
     DARK_MODE = shouldAutoEnableDarkMode();
   }
+
+  // 2. Font
+  const fontParam = params.get('font');
+  if (fontParam) {
+    const idx = parseInt(fontParam, 10);
+    if (!isNaN(idx) && idx >= 0 && idx < FONT_OPTIONS.length) {
+      CURRENT_FONT_INDEX = idx;
+    }
+  }
+  updateFont();
 }
 
 /* ============================================
@@ -1181,7 +1319,6 @@ async function processUpdateScore(newValue, backdrop, modal) {
     }
 
     SCORE = val;
-    // We no longer save score to URL, but we call this to save other state prefs
     saveStateToURL();
     renderScore();
     setLoading(false);
@@ -1619,10 +1756,8 @@ function loadStateFromURL() {
   const mutedTypesParam = params.get('mutedTypes');
   if (mutedTypesParam) MUTED_TYPES = new Set(mutedTypesParam.split(',').filter(t => t));
 
-  const darkModeParam = params.get('darkMode');
-  DARK_MODE = darkModeParam === 'true';
-
-  // NOTE: We no longer load 'score' from URL, as it comes from the database now.
+  // Dark mode handled in initializeTheme()
+  // Font handled in initializeTheme()
 
   const accountMetaParam = params.get('acctMeta');
   const typeMetaParam = params.get('typeMeta');
@@ -1665,8 +1800,11 @@ function saveStateToURL() {
   if (mutedTypesArray.length > 0) params.set('mutedTypes', mutedTypesArray.join(','));
 
   if (DARK_MODE) params.set('darkMode', 'true');
-
-  // NOTE: We no longer save 'score' to URL.
+  
+  // Save Font Preference
+  if (CURRENT_FONT_INDEX > 0) {
+    params.set('font', CURRENT_FONT_INDEX);
+  }
 
   const acctMetaObj = {};
   ACCOUNT_METADATA.forEach((meta, accountName) => {
@@ -1718,11 +1856,57 @@ function renderAll() {
   renderSummary();
   renderInterestSummary();
   renderStatusbar();
+  renderCCMetrics();   // ⬅️ NEW: CC LIMIT / CC DEBT
   renderChart();
   renderTypeSummary();
   renderAccounts();
   renderScore();
+
+
 }
+function renderCCMetrics() {
+  const limitEl = document.getElementById('cc-limit-value');
+  const debtEl = document.getElementById('cc-debt-value');
+
+  if (!limitEl || !debtEl || !SNAP || !SNAP.accounts || !SNAP.series) return;
+
+  let totalLimit = 0;           // sum of all CC limits
+  let totalDebtMagnitude = 0;   // sum of CC debt as positive numbers
+  let totalDebtRaw = 0;         // sum of CC balances as stored (e.g., -500, -500 => -1000)
+
+  SNAP.accounts.forEach(a => {
+    if (a.type !== 'cc') return;
+
+    const series = SNAP.series[a.name] || {};
+    const last = Number(series.last ?? 0);
+
+    // limits from ACCOUNT_METADATA (Edit Account modal)
+    const meta = ACCOUNT_METADATA.get(a.name) || {};
+    if (typeof meta.limit === 'number' && !isNaN(meta.limit)) {
+      totalLimit += meta.limit;
+    }
+
+    if (!isNaN(last)) {
+      // raw sum of CC values (can be negative) → CC DEBT
+      totalDebtRaw += last;
+
+      // magnitude of debt (only when negative) → used to subtract from limits
+      if (last < 0) {
+        totalDebtMagnitude += Math.abs(last);
+      }
+    }
+  });
+
+  // CC LIMIT = sum of limits minus total credit card debt (as positive amount)
+  const availableCredit = totalLimit - totalDebtMagnitude;
+
+  // Display:
+  //   CC LIMIT → availableCredit (can go negative if you're over total limit)
+  //   CC DEBT  → raw combined CC value, e.g. -1000
+  limitEl.textContent = formatMoney(availableCredit);
+  debtEl.textContent = formatMoney(totalDebtRaw);
+}
+
 
 function renderSummary() {
   const summaryEl = document.getElementById('financial-summary');
@@ -2071,7 +2255,7 @@ function renderLineChartAllAccounts(container, labels) {
     hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
     vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
     colors: chartColors,
-    curveType: 'function', lineWidth: 2, pointSize: 0, animation: { duration: 500, easing: 'out' }
+    curveType: 'function', lineWidth: 8, pointSize: 0, animation: { duration: 500, easing: 'out' }
   };
   const chart = new google.visualization.LineChart(container);
   chart.draw(data, options);
@@ -2363,6 +2547,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
 
+  // NEW: Font Switcher Event Listeners
+  document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
+  document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
+
   window.addEventListener('resize', renderChart);
   
   renderScore(); // Initial render (000)
@@ -2384,4 +2572,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
