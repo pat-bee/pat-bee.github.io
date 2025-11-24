@@ -1870,9 +1870,9 @@ function renderCCMetrics() {
 
   if (!limitEl || !debtEl || !SNAP || !SNAP.accounts || !SNAP.series) return;
 
-  let totalLimit = 0;
-  let totalDebtPrincipal = 0;
-  let totalMonthlyInterest = 0;
+  let totalLimit = 0;           // sum of all CC limits
+  let totalDebtMagnitude = 0;   // sum of CC debt as positive numbers
+  let totalDebtRaw = 0;         // sum of CC balances as stored (e.g., -500, -500 => -1000)
 
   SNAP.accounts.forEach(a => {
     if (a.type !== 'cc') return;
@@ -1880,31 +1880,33 @@ function renderCCMetrics() {
     const series = SNAP.series[a.name] || {};
     const last = Number(series.last ?? 0);
 
-    // Limits come from ACCOUNT_METADATA (set via Edit Account modal)
+    // limits from ACCOUNT_METADATA (Edit Account modal)
     const meta = ACCOUNT_METADATA.get(a.name) || {};
     if (typeof meta.limit === 'number' && !isNaN(meta.limit)) {
       totalLimit += meta.limit;
     }
 
-    // Debt + monthly interest (using principal as positive number)
-    if (last < 0) {
-      const principal = Math.abs(last);
-      totalDebtPrincipal += principal;
+    if (!isNaN(last)) {
+      // raw sum of CC values (can be negative) → CC DEBT
+      totalDebtRaw += last;
 
-      const apr = Number(a.apr || 0);
-      if (apr > 0) {
-        const monthlyInterest = principal * (apr / 12); // 1 month of APR
-        totalMonthlyInterest += monthlyInterest;
+      // magnitude of debt (only when negative) → used to subtract from limits
+      if (last < 0) {
+        totalDebtMagnitude += Math.abs(last);
       }
     }
   });
 
-  const totalDebtWithInterest = totalDebtPrincipal + totalMonthlyInterest;
+  // CC LIMIT = sum of limits minus total credit card debt (as positive amount)
+  const availableCredit = totalLimit - totalDebtMagnitude;
 
-  // Use existing money formatter, but keep these positive for comparison
-  limitEl.textContent = formatMoney(Math.max(0, totalLimit));
-  debtEl.textContent = formatMoney(Math.max(0, totalDebtWithInterest));
+  // Display:
+  //   CC LIMIT → availableCredit (can go negative if you're over total limit)
+  //   CC DEBT  → raw combined CC value, e.g. -1000
+  limitEl.textContent = formatMoney(availableCredit);
+  debtEl.textContent = formatMoney(totalDebtRaw);
 }
+
 
 function renderSummary() {
   const summaryEl = document.getElementById('financial-summary');
