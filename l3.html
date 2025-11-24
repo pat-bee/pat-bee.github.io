@@ -1093,7 +1093,7 @@ footer b { font-weight: 600; }
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbx8uVJSZUda71s5bQx0x72SIK9hLXBIL8D60D_gzyefVzv6ywVfsBDLB2oXU2XnQAYi/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbxDKAcw3_UHSMdRzsEktFgBcW1Wao0XysRFpqTlQq-sBqHVGjzbl1YM1ZBFcXJy7tV1/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
 
 /* ============================================
@@ -1589,26 +1589,167 @@ function hideEditAccountModal() {
   document.getElementById('edit-account-modal').classList.remove('show');
 }
 
+// Helper: normalize color string to a hex like #RRGGBB, or '' if invalid
+function normalizeHexColor(str) {
+  if (!str) return '';
+  let s = String(str).trim();
+  if (!s) return '';
+  if (s[0] !== '#') s = '#' + s;
+  if (!/^#[0-9A-Fa-f]{3,6}$/.test(s)) return '';
+  if (s.length === 4) {
+    // #RGB -> #RRGGBB
+    s = '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+  }
+  return s.toUpperCase();
+}
+
 async function processEditAccount(accountName) {
   if (IS_LOADING) return;
 
+  // Grab fields from the modal
   const typeSelect = document.getElementById('edit-account-type');
   const limitInput = document.getElementById('edit-account-limit');
-  const aprInput = document.getElementById('edit-account-apr');
+  const aprInput   = document.getElementById('edit-account-apr');
   const valueInput = document.getElementById('edit-account-value');
   const colorInput = document.getElementById('edit-account-color');
-  const linkInput = document.getElementById('edit-account-link');
+  const linkInput  = document.getElementById('edit-account-link');
 
-  const newType = (typeSelect.value || 'bk').trim();
+  const newType = (typeSelect?.value || '').trim();   // maps to Accounts.Type
 
-  const newLimitRaw = limitInput.value;
+  // Limit (numeric, can be blank)
   let newLimit = null;
-  if (newLimitRaw !== '') {
-    const limitNum = Number(newLimitRaw);
-    if (!isNaN(limitNum) && limitNum > 0) {
-      newLimit = limitNum;
-    }
+  if (limitInput && limitInput.value !== '') {
+    const limitNum = Number(limitInput.value);
+    if (!isNaN(limitNum)) newLimit = limitNum;
   }
+
+  // APR (numeric, can be blank; stored as number in APR column)
+  let newAPR = null;
+  if (aprInput && aprInput.value !== '') {
+    const aprNum = Number(aprInput.value);
+    if (!isNaN(aprNum)) newAPR = aprNum;
+  }
+
+  // Current value (optional: appends to Values if changed)
+  let newValue = null;
+  if (valueInput && valueInput.value !== '') {
+    const v = Number(valueInput.value);
+    if (!isNaN(v)) newValue = v;
+  }
+
+  // Color → stored in Accounts.AccountColor
+  const newColor = normalizeHexColor(colorInput ? colorInput.value : '');
+
+  // Login / link → stored in Accounts.Login
+  const newLink = linkInput && linkInput.value
+    ? linkInput.value.trim()
+    : '';
+
+  // Update any local caches so UI looks updated immediately
+  try {
+    if (typeof ACCOUNT_METADATA !== 'undefined' && ACCOUNT_METADATA instanceof Map) {
+      const meta = ACCOUNT_METADATA.get(accountName) || {};
+      meta.limit = newLimit;
+      meta.color = newColor || null;
+      meta.link  = newLink || null;
+      ACCOUNT_METADATA.set(accountName, meta);
+    }
+
+    if (typeof SNAP !== 'undefined' && SNAP && Array.isArray(SNAP.accounts)) {
+      const acct = SNAP.accounts.find(a => a.name === accountName);
+      if (acct) {
+        if (newType) acct.type = newType;
+        if (newAPR !== null) acct.apr = newAPR;
+        if (newColor) acct.color = newColor;
+      }
+    }
+  } catch (e) {
+    console.warn('Local state update failed, continuing:', e);
+  }
+
+  saveStateToURL?.();
+  hideEditAccountModal?.();
+
+  // For comparison when deciding whether to append a new value
+  const series = SNAP?.series?.[accountName];
+  const currentValue = series?.last ?? null;
+
+  showToast('Saving account settings…', 'info', 2500);
+
+  try {
+    // 1) Persist structural fields into Accounts sheet
+    const acctPayload = {
+      entries: [{
+        account: accountName,
+        type: newType || '',                  // → Type
+        limit: newLimit !== null ? newLimit : '', // → Limit
+        apr: newAPR !== null ? newAPR : '',       // → APR
+        accountColor: newColor || '',         // → AccountColor
+        login: newLink || ''                  // → Login
+        // We are leaving Color, Kind, Sort alone here,
+        // but they can be added if you expose them in the modal later.
+      }]
+    };
+
+    const acctBody = new URLSearchParams({
+      payload: JSON.stringify(acctPayload)
+    });
+
+    const acctRes = await fetch(`${API_BASE}?route=updateaccount`, {
+      method: 'POST',
+      body: acctBody
+    });
+
+    const acctText = await acctRes.text();
+    let acctJson;
+    try {
+      acctJson = JSON.parse(acctText);
+    } catch (parseErr) {
+      throw new Error('Could not parse updateaccount response: ' + acctText);
+    }
+
+    if (!acctJson.ok) {
+      throw new Error(acctJson.error || 'Account update failed');
+    }
+
+    // 2) If balance was changed, append to Values via submit route
+    if (newValue !== null && newValue !== currentValue) {
+      const valuePayload = {
+        entries: [{ account: accountName, value: newValue }]
+      };
+      const valueBody = new URLSearchParams({
+        payload: JSON.stringify(valuePayload)
+      });
+
+      const res = await fetch(`${API_BASE}?route=submit`, {
+        method: 'POST',
+        body: valueBody
+      });
+
+      const text = await res.text();
+      let j;
+      try {
+        j = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error('Could not parse submit response: ' + text);
+      }
+
+      if (!j.ok) throw new Error(j.error || 'Submit failed');
+      showToast('Account value and settings updated! Refreshing…', 'success');
+    } else {
+      showToast('Account settings updated! Refreshing…', 'success');
+    }
+
+    // 3) Reload full snapshot from backend so everything is consistent
+    if (typeof fetchSnapshot === 'function') {
+      await fetchSnapshot();
+    }
+  } catch (err) {
+    console.error('Update error:', err);
+    showToast('Failed to update: ' + err.message, 'error', 5000);
+  }
+}
+
 
   const newAPR = Number(aprInput.value);
   const newValue = Number(valueInput.value);
