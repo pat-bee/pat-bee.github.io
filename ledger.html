@@ -557,7 +557,7 @@ button:disabled {
 #score-display {
   font-size: 50px;
   font-weight: 300;
-  color: #000000;
+  color: #b5a8a8;
   font-family: monospace; /* Overridden by current font if we want, or keep monospace */
   letter-spacing: 0.2em;
   cursor: pointer;
@@ -1071,10 +1071,7 @@ footer b { font-weight: 600; }
     </div>
 
     <!-- Score display -->
-<div id="score-display">
-  <div id="score-value"></div>
-  <div class="score-label cc-metric-label">score</div>
-</div>
+    <div id="score-display">000</div>
     
     <!-- Font Navigation + Dark Mode -->
     <div class="bottom-controls-container">
@@ -2649,7 +2646,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', renderChart);
   
   renderScore();
-  document.getElementById('score-value').addEventListener('click', showEditScoreModal);
+  document.getElementById('score-display').addEventListener('click', showEditScoreModal);
 
   if (window.google && google.charts) {
     google.charts.load('current', { packages: ['corechart'] });
