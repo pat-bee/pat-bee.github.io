@@ -5,28 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Ledger — Accounts & Chart (v2.6)</title>
 
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ledger — Accounts & Chart (v2.6)</title>
-<!--
-   ╔═════════════════════════════════════════════════════════════╗
-   ║  ██╗     ███████╗██████╗  ██████╗ ███████╗██████╗           ║
-   ║  ██║     ██╔════╝██╔══██╗██╔════╝ ██╔════╝██╔══██╗          ║
-   ║  ██║     █████╗  ██║  ██║██║  ███╗█████╗  ██████╔╝          ║
-   ║  ██║     ██╔══╝  ██║  ██║██║   ██║██╔══╝  ██╔══██╗          ║
-   ║  ███████╗███████╗██████╔╝╚██████╔╝███████╗██║  ██║          ║
-   ║  ╚══════╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝          ║
-   ║                                                             ║
-   ║  CSS VARIABLES: The Power-Ups of Styling                    ║
-   ║  "It's dangerous to go alone! Take these variables!"        ║
-   ╚═════════════════════════════════════════════════════════════╝ 
-
-  Google Fonts are used by the app.
-  NOTE: DM Mono & Gloria Hallelujah were removed in this version.
-) -->
+<!-- Google Fonts Import (Removed DM Mono & Gloria Hallelujah) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Inconsolata:wght@200..900&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -578,7 +557,7 @@ button:disabled {
 #score-display {
   font-size: 50px;
   font-weight: 300;
-  color: #b5a8a8;
+  color: var(--c-fg);
   font-family: monospace; /* Overridden by current font if we want, or keep monospace */
   letter-spacing: 0.2em;
   cursor: pointer;
@@ -908,6 +887,10 @@ footer b { font-weight: 600; }
     align-items: center;
     gap: 0.5rem;
   }
+  .account-details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>
 </head>
@@ -1115,7 +1098,7 @@ footer b { font-weight: 600; }
 
     <small>
       <b>v2.6 Features:</b> CC limits • Edit account settings • Type summaries • Font Switcher • Mute/unmute • Dark mode 🌙 • Score tracker 📊 • AccountMeta persistence<br>
-      <a href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE" target="_blank" rel="noopener">📊 Open Google Sheet</a>
+      <a href="https://docs.google.com/spreadsheets/d/1UzOEys7DGhSVMJjoU-VfNo54qeoUjJfKlxXW2Lhcb-s/" target="_blank" rel="noopener">📊 Open Google Sheet</a>
     </small>
   </footer>
 </main>
@@ -1124,8 +1107,8 @@ footer b { font-weight: 600; }
 /* ============================================
     CONFIGURATION
    ============================================ */
-const API_BASE = 'https://script.google.com/macros/s/AKfycbxDKAcw3_UHSMdRzsEktFgBcW1Wao0XysRFpqTlQq-sBqHVGjzbl1YM1ZBFcXJy7tV1/exec';
-const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbyPG7SSqScuBLluk8cT7P0VV_y87XHPc97neA2NODRJlxzEbiwYnEZjNH71QaHYVwN1Kw/exec';
+const SHEET_ID = '1UzOEys7DGhSVMJjoU-VfNo54qeoUjJfKlxXW2Lhcb-s';
 
 /* ============================================
     APPLICATION STATE
