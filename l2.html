@@ -141,16 +141,16 @@ header {
 /* Type filter row */
 .type-filter-row {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: column;   /* stack rows vertically */
+  align-items: center;      /* center the whole block */
   gap: 0.35rem;
 }
 
-/* A row inside the type filter (top / middle / bottom) */
+/* A row inside the type filter (top / bottom) */
 .types-row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: center;  /* center items in each row */
   align-items: flex-end;
   gap: 0.35rem;
 }
@@ -2033,7 +2033,8 @@ function renderTypeSummary() {
   container.hidden = false;
   container.innerHTML = '';
 
-  // 1. Build totals per type (ignoring muted accounts)
+  // 1. Build totals per type (ignoring muted accounts, but NOT muted types;
+  //    type mute is handled separately so the chips still show totals).
   const typeTotals = {};
   const typeMeta = SNAP.typeMeta || {};
 
@@ -2048,20 +2049,17 @@ function renderTypeSummary() {
     typeTotals[typeCode] += last;
   });
 
-  const metaKeys = Object.keys(typeTotals);
+   //  const metaKeys = Object.keys(typeTotals);
 
-  // Preferred order: assets first, then debts
-  const preferredOrder = ['bk', 'ii', 'sv', 'cc', 'bill'];
-  const orderedCodes = [];
+// referred overall ordering (for the P,N,P,N,P vibe)
+//   const preferredOrder = ['bk', 'cc', 'ii', 'bill', 'sv'];
+//   const orderedCodes = [];
   preferredOrder.forEach(code => { if (metaKeys.includes(code)) orderedCodes.push(code); });
   metaKeys.forEach(code => { if (!orderedCodes.includes(code)) orderedCodes.push(code); });
 
-  // 2. Make three rows: top metrics (assets), middle checkboxes, bottom metrics (debts)
+  // 2. Two rows: top (positive band), bottom (negative band)
   const topRow = document.createElement('div');
   topRow.className = 'types-row types-row-top';
-
-  const middleRow = document.createElement('div');
-  middleRow.className = 'types-row types-row-middle';
 
   const bottomRow = document.createElement('div');
   bottomRow.className = 'types-row types-row-bottom';
@@ -2069,6 +2067,7 @@ function renderTypeSummary() {
   orderedCodes.forEach(typeKey => {
     const total = typeTotals[typeKey] || 0;
     const meta = typeMeta[typeKey] || {};
+
     const baseLabel = TYPE_LABELS[typeKey] || meta.label || typeKey;
     const label = baseLabel.toUpperCase();
 
@@ -2078,11 +2077,10 @@ function renderTypeSummary() {
 
     const isMuted = isTypeMuted(typeKey);
 
-    // Decide whether this type belongs in the top (assets) or bottom (debts) band
     const isPositiveBand = (typeKey === 'bk' || typeKey === 'ii' || typeKey === 'sv');
     const isNegativeBand = (typeKey === 'cc' || typeKey === 'bill');
 
-    // ---- METRIC CARD (top or bottom row) ----
+    // --- Construct the pill ---
     const typeItem = document.createElement('div');
     typeItem.className = 'type-item';
     if (isMuted) typeItem.classList.add('muted');
@@ -2090,7 +2088,6 @@ function renderTypeSummary() {
     const valueEl = document.createElement('div');
     valueEl.className = 'type-value ' + colorClass;
     valueEl.textContent = `${signPrefix}${formatMoney(total)}`;
-    typeItem.appendChild(valueEl);
 
     const labelEl = document.createElement('div');
     labelEl.className = 'type-label';
@@ -2098,17 +2095,8 @@ function renderTypeSummary() {
     labelEl.style.color = typeColor;
     labelEl.title = 'Double-click to change this Type color';
     labelEl.addEventListener('dblclick', () => showEditTypeModal(typeKey, label));
-    typeItem.appendChild(labelEl);
 
-    if (isNegativeBand) {
-      bottomRow.appendChild(typeItem);
-    } else if (isPositiveBand) {
-      topRow.appendChild(typeItem);
-    } else {
-      topRow.appendChild(typeItem);
-    }
-
-    // ---- CHECKBOX (middle row – all types) ----
+    // Checkbox for this type
     const toggleLabel = document.createElement('label');
     toggleLabel.className = 'type-toggle-label';
     if (isMuted) toggleLabel.classList.add('muted');
@@ -2118,16 +2106,37 @@ function renderTypeSummary() {
     cb.dataset.typeCode = typeKey;
     cb.checked = !isMuted;
     cb.addEventListener('change', () => toggleTypeMute(typeKey));
-
     toggleLabel.appendChild(cb);
-    middleRow.appendChild(toggleLabel);
+
+    // --- Layout logic:
+    // POSITIVE band (top row): value → label → checkbox (checkbox UNDER the label)
+    // NEGATIVE band (bottom row): checkbox → value → label (checkbox BEFORE value)
+    if (isNegativeBand) {
+      // bottom band: checkbox first
+      typeItem.appendChild(toggleLabel);
+      typeItem.appendChild(valueEl);
+      typeItem.appendChild(labelEl);
+      bottomRow.appendChild(typeItem);
+    } else if (isPositiveBand) {
+      // top band: checkbox last (under label)
+      typeItem.appendChild(valueEl);
+      typeItem.appendChild(labelEl);
+      typeItem.appendChild(toggleLabel);
+      topRow.appendChild(typeItem);
+    } else {
+      // Fallback types behave like positive
+      typeItem.appendChild(valueEl);
+      typeItem.appendChild(labelEl);
+      typeItem.appendChild(toggleLabel);
+      topRow.appendChild(typeItem);
+    }
   });
 
-  // 3. Attach rows to container if they have content
+  // 3. Attach rows
   if (topRow.children.length > 0) container.appendChild(topRow);
-  if (middleRow.children.length > 0) container.appendChild(middleRow);
   if (bottomRow.children.length > 0) container.appendChild(bottomRow);
 }
+
 
 function renderStatusbar() {
   const ratioAsset = document.getElementById('ratio-asset');
