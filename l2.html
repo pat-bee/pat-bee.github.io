@@ -141,10 +141,25 @@ header {
 /* Type filter row */
 .type-filter-row {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;   /* stack rows vertically */
+  align-items: flex-end;    /* right-align in desktop view */
   gap: 0.35rem;
 }
+
+/* A row inside the type filter (top / middle / bottom) */
+.types-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+/* Middle row – all checkboxes live here */
+.types-row-middle {
+  justify-content: center;  /* center the checkbox band */
+}
+
 
 /* Controls row */
 .toolbar-controls {
@@ -874,8 +889,9 @@ footer b { font-weight: 600; }
   #financial-summary { font-size: 4.2rem; padding-bottom: 4px; width: 100%; text-align: center; }
   #interest-summary { font-size: 1.8rem; width: 100%; text-align: center; padding-bottom: 4px; }
   .toolbar-right { align-items: center; max-width: 100%; width: 100%; }
-  .type-filter-row { justify-content: center; }
-  .toolbar-controls { justify-content: center; width: 100%; }
+  .type-filter-row { justify-content: center;  }
+      .types-row {    justify-content: center;}
+ .toolbar-controls { justify-content: center; width: 100%; }
   .lastval, .name { font-size: 2rem; }
   footer, footer small, footer a, .security-notice { font-size: 0.75rem; }
   #score-display { font-size: 60px; }
@@ -2014,11 +2030,14 @@ function renderInterestSummary() {
 function renderTypeSummary() {
   const container = document.getElementById('typeFilterRow');
   if (!container || !SNAP || !SNAP.accounts) return;
+
   container.hidden = false;
   container.innerHTML = '';
 
+  // 1. Build totals per type (ignoring muted accounts)
   const typeTotals = {};
   const typeMeta = SNAP.typeMeta || {};
+
   Object.keys(typeMeta).forEach(code => { typeTotals[code] = 0; });
 
   SNAP.accounts.forEach(a => {
@@ -2026,9 +2045,91 @@ function renderTypeSummary() {
     const last = s?.last ?? 0;
     const typeCode = a.type || 'bk';
     if (typeTotals[typeCode] == null) typeTotals[typeCode] = 0;
-    if (isAccountMuted(a.name)) return;
+    if (isAccountMuted(a.name)) return; // account-level mute still applies
     typeTotals[typeCode] += last;
   });
+
+  const metaKeys = Object.keys(typeTotals);
+
+  // Preferred order: assets first, then debts
+  const preferredOrder = ['bk', 'ii', 'sv', 'cc', 'bill'];
+  const orderedCodes = [];
+  preferredOrder.forEach(code => { if (metaKeys.includes(code)) orderedCodes.push(code); });
+  metaKeys.forEach(code => { if (!orderedCodes.includes(code)) orderedCodes.push(code); });
+
+  // 2. Make three rows: top metrics (assets), middle checkboxes, bottom metrics (debts)
+  const topRow = document.createElement('div');
+  topRow.className = 'types-row types-row-top';
+
+  const middleRow = document.createElement('div');
+  middleRow.className = 'types-row types-row-middle';
+
+  const bottomRow = document.createElement('div');
+  bottomRow.className = 'types-row types-row-bottom';
+
+  orderedCodes.forEach(typeKey => {
+    const total = typeTotals[typeKey] || 0;
+    const meta = typeMeta[typeKey] || {};
+    const baseLabel = TYPE_LABELS[typeKey] || meta.label || typeKey;
+    const label = baseLabel.toUpperCase();
+
+    const colorClass = total >= 0 ? 'positive' : 'negative';
+    const signPrefix = total > 0 ? '+' : '';
+    const typeColor = getTypeEffectiveColor(typeKey);
+
+    const isMuted = isTypeMuted(typeKey);
+
+    // Decide whether this type belongs in the top (assets) or bottom (debts) band
+    const isPositiveBand = (typeKey === 'bk' || typeKey === 'ii' || typeKey === 'sv');
+    const isNegativeBand = (typeKey === 'cc' || typeKey === 'bill');
+
+    // ---- METRIC CARD (top or bottom row) ----
+    const typeItem = document.createElement('div');
+    typeItem.className = 'type-item';
+    if (isMuted) typeItem.classList.add('muted');
+
+    const valueEl = document.createElement('div');
+    valueEl.className = 'type-value ' + colorClass;
+    valueEl.textContent = `${signPrefix}${formatMoney(total)}`;
+    typeItem.appendChild(valueEl);
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'type-label';
+    labelEl.textContent = label;
+    labelEl.style.color = typeColor;
+    labelEl.title = 'Double-click to change this Type color';
+    labelEl.addEventListener('dblclick', () => showEditTypeModal(typeKey, label));
+    typeItem.appendChild(labelEl);
+
+    if (isNegativeBand) {
+      bottomRow.appendChild(typeItem);
+    } else if (isPositiveBand) {
+      topRow.appendChild(typeItem);
+    } else {
+      // Fallback types go to the top band
+      topRow.appendChild(typeItem);
+    }
+
+    // ---- CHECKBOX (middle row – all types) ----
+    const toggleLabel = document.createElement('label');
+    toggleLabel.className = 'type-toggle-label';
+    if (isMuted) toggleLabel.classList.add('muted');
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.dataset.typeCode = typeKey;
+    cb.checked = !isMuted;
+    cb.addEventListener('change', () => toggleTypeMute(typeKey));
+
+    toggleLabel.appendChild(cb);
+    middleRow.appendChild(toggleLabel);
+  });
+
+  // 3. Attach rows to container if they have content
+  if (topRow.children.length > 0) container.appendChild(topRow);
+  if (middleRow.children.length > 0) container.appendChild(middleRow);
+  if (bottomRow.children.length > 0) container.appendChild(bottomRow);
+}
 
   const metaKeys = Object.keys(typeTotals);
   const preferredOrder = ['bk', 'cc', 'bill', 'ii', 'sv'];
