@@ -1386,9 +1386,11 @@ function setLoading(loading, message) {
     inp.disabled = loading;
     inp.classList.toggle('submitting', loading);
   });
-  if (message && !document.getElementById('delete-modal-backdrop').classList.contains('show')) {
-    showToast(message, 'info', loading ? 10000 : 3000);
-  }
+  const deleteBackdrop = document.getElementById('delete-modal-backdrop');
+if (message && (!deleteBackdrop || !deleteBackdrop.classList.contains('show'))) {
+  showToast(message, 'info', loading ? 10000 : 3000);
+}
+
 }
 
 /* ============================================
