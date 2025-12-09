@@ -449,6 +449,44 @@ button:disabled {
   padding: 0.4rem 0.75rem;
 }
 
+/* Default: Hide the toggle button on Desktop */
+.mobile-toggle-btn {
+  display: none;
+}
+
+/* MOBILE STYLES */
+@media (max-width: 650px) {
+  /* 1. Show the toggle button */
+  .mobile-toggle-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0 5px 0;
+    padding: 10px;
+    background: var(--c-tint-pos); /* Uses your existing tint variable */
+    border: 1px solid var(--c-input-border);
+    font-weight: 500;
+  }
+
+  /* 2. Hide the contents of toolbar-right by default */
+  .toolbar-right {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease;
+    /* Remove padding when hidden to close the gap */
+    padding-top: 0; 
+    padding-bottom: 0;
+  }
+
+  /* 3. The "Active" class to show content */
+  .toolbar-right.open {
+    max-height: 500px; /* Arbitrary large height for animation */
+    opacity: 1;
+    padding-top: 10px; /* Restore padding */
+  }
+}
 /* ============================================
       VALUE CHIPS
    ============================================ */
@@ -1012,7 +1050,12 @@ footer b { font-weight: 600; }
       <div id="financial-summary"></div>
       <div id="interest-summary"></div>
     </div>
-
+        
+<button id="mobile-toggle-btn" class="mobile-toggle-btn" aria-label="Toggle Controls">
+  <span>⚡ Controls & Filters</span>
+  <span id="toggle-icon">▼</span>
+</button>
+        
     <div class="toolbar-right">
       <div id="typeFilterRow" class="type-filter-row"></div>
 
@@ -2638,7 +2681,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('edit-account-modal-backdrop').addEventListener('click', hideEditAccountModal);
   document.getElementById('edit-type-cancel').addEventListener('click', hideEditTypeModal);
   document.getElementById('edit-type-modal-backdrop').addEventListener('click', hideEditTypeModal);
+// Mobile Controls Toggle
+const mobileBtn = document.getElementById('mobile-toggle-btn');
+const toolbarRight = document.querySelector('.toolbar-right');
+const toggleIcon = document.getElementById('toggle-icon');
 
+if(mobileBtn && toolbarRight) {
+  mobileBtn.addEventListener('click', () => {
+    toolbarRight.classList.toggle('open');
+    // Rotate arrow icon based on state
+    toggleIcon.style.transform = toolbarRight.classList.contains('open') 
+      ? 'rotate(180deg)' 
+      : 'rotate(0deg)';
+  });
+}
   // Font Switcher Event Listeners
   document.getElementById('font-prev').addEventListener('click', () => cycleFont('prev'));
   document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
