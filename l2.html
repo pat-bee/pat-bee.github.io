@@ -487,6 +487,14 @@ button:disabled {
     padding-top: 10px; /* Restore padding */
   }
 }
+
+@media (max-width: 650px) {
+  #visual-ratio-bar {
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+}
+
 /* ============================================
       VALUE CHIPS
    ============================================ */
@@ -1082,6 +1090,9 @@ footer b { font-weight: 600; }
       </div>
     </div>
   </div>
+
+   <!-- RATIO_BAR_DESKTOP_ANCHOR -->
+     
   <hr>
   <div id="chart"></div>
   <div id="chart-pager" aria-label="Chart view navigation"></div>
@@ -2650,7 +2661,37 @@ async function submitEntries(entries) {
     entries.forEach(e => e.inputEl?.classList.remove('submitting'));
   }
 }
+/* Ratio positioning */
+      function positionVisualRatioBar() {
+  const header = document.querySelector('header');
+  const toolbar = header?.querySelector('.toolbar');
+  const toggleBtn = document.getElementById('mobile-toggle-btn');
+  const ratio = document.getElementById('visual-ratio-bar');
+  if (!header || !toolbar || !toggleBtn || !ratio) return;
 
+  const isMobile = window.matchMedia('(max-width: 650px)').matches;
+
+  if (isMobile) {
+    // MOBILE: place ratio bar directly ABOVE the toggle button (inside toolbar)
+    // This guarantees the bar stacks above the button in the sticky header area.
+    if (ratio.parentElement !== toolbar || ratio.nextElementSibling !== toggleBtn) {
+      toolbar.insertBefore(ratio, toggleBtn);
+    }
+  } else {
+    // DESKTOP: place ratio bar right AFTER .toolbar and BEFORE the first HR in header
+    const firstHr = header.querySelector('hr');
+    if (!firstHr) return;
+
+    // Only move if not already in the correct place
+    if (ratio.parentElement !== header || ratio.nextElementSibling !== firstHr) {
+      header.insertBefore(ratio, firstHr);
+    }
+  }
+}
+
+
+
+      
 /* ============================================
     INITIALIZATION
    ============================================ */
@@ -2658,6 +2699,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStateFromURL();
   initializeTheme();
   initDarkMode();
+positionVisualRatioBar();
+window.addEventListener('resize', positionVisualRatioBar);
+
 
   const sheetLink = document.querySelector('footer a[href*="spreadsheets"]');
   if (sheetLink && SHEET_ID && SHEET_ID !== 'YOUR_SHEET_ID_HERE') {
