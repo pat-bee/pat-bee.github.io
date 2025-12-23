@@ -2047,6 +2047,7 @@ function renderSummary() {
   const assetString = `<span class="summary-asset ${assetClass}">${formatMoney(assets)}</span>`;
   const debtString = `<span class="summary-debt ${debtClass}">${formatMoney(debts)}</span>`;
   summaryEl.innerHTML = `${assetString} <span style="font-weight: 300;">|</span> ${debtString}`;
+      fitFinancialSummary();
 }
 
 function renderInterestSummary() {
