@@ -1152,6 +1152,7 @@ footer b { font-weight: 600; }
    ============================================ */
 const API_BASE = 'https://script.google.com/macros/s/AKfycbxDKAcw3_UHSMdRzsEktFgBcW1Wao0XysRFpqTlQq-sBqHVGjzbl1YM1ZBFcXJy7tV1/exec';
 const SHEET_ID = '1v5Xc57U77arzf-JUqe85Iwwh-9Z1i1u0Rcmyrans9o8/edit?usp=sharing';
+const OVER_LIMIT_COLOR = '#FF0000'; 
 
 
 /* ============================================
@@ -2531,14 +2532,35 @@ const metaWrap = document.createElement('div');
 metaWrap.className = 'account-meta';
 
 // LIMIT (only for CC with a limit)
+// LIMIT (only for CC with a limit)
 if (a.type === 'cc' && meta.limit) {
   const limitEl = document.createElement('span');
   limitEl.className = 'limit';
-  const limitValue = meta.limit;
-  limitEl.style.color = getLimitColor(last, limitValue);
+
+  const limitValue = Number(meta.limit);
+  const isOverLimit =
+    last < 0 &&
+    Math.abs(last) > limitValue;
+
+  // Apply colors
+  if (isOverLimit) {
+    limitEl.style.color = OVER_LIMIT_COLOR;
+  } else {
+    limitEl.style.color = getLimitColor(last, limitValue);
+  }
+
   limitEl.textContent = `$${limitValue.toLocaleString()}`;
   metaWrap.appendChild(limitEl);
+
+  // ALSO color lastval if over limit
+  if (isOverLimit) {
+    lastEl.style.color = OVER_LIMIT_COLOR;
+        // Accessibility + affordance
+    lastEl.title  = 'Over credit limit';
+    limitEl.title = 'Credit limit exceeded';
+  }
 }
+
 
 // APR + interest line, always available
 const aprEl = document.createElement('span');
