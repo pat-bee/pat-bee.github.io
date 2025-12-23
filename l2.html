@@ -93,6 +93,35 @@ a {
   color: var(--c-black);
   text-decoration: underline;
 }
+/* ============================================
+      STICKY HEADER + SCROLLING BODY REGION
+   ============================================ */
+
+/* Prevent the document itself from scrolling */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* key */
+}
+
+/* Header stays on top */
+header {
+  flex: 0 0 auto;
+  position: sticky; /* can stay sticky; harmless even though body isn't scrolling */
+  top: 0;
+  z-index: 1000;    /* raise above rows, modals still higher */
+  background: var(--c-header-bg);
+        box-shadow: 0 6px 0 rgba(0,0,0,0.06);
+
+}
+
+/* Everything below header scrolls */
+.scroll-area {
+  flex: 1 1 auto;
+  overflow-y: auto;                 /* key */
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ============================================
       HEADER & TOOLBAR
@@ -1093,7 +1122,7 @@ footer b { font-weight: 600; }
   </div>
 </header>
 
-
+<div class="scroll-area">
 <hr class="wrap divider">
 
 <main class="wrap">
@@ -1145,7 +1174,7 @@ footer b { font-weight: 600; }
     </small>
   </footer>
 </main>
-
+</div>
 <script>
 /* ============================================
     CONFIGURATION
