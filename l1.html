@@ -468,6 +468,14 @@ button:disabled {
     border: 1px solid var(--c-input-border);
     font-weight: 500;
   }
+#financial-summary{
+    /* keep your desktop styling, but make mobile fluid */
+    font-size: clamp(2.2rem, 9.5vw, 4.2rem);
+    max-width: 100%;
+    overflow: hidden;          /* safety */
+    text-overflow: ellipsis;   /* optional: prevents ugly overflow if it still happens */
+  }
+
 
   /* 2. Hide the contents of toolbar-right by default */
   .toolbar-right {
