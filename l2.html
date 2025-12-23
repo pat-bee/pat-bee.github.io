@@ -1416,6 +1416,35 @@ function setLoading(loading, message) {
     showToast(message, 'info', loading ? 10000 : 3000);
   }
 }
+function fitFinancialSummary() {
+  const el = document.getElementById('financial-summary');
+  if (!el) return;
+
+  // Only apply on small screens
+  if (window.innerWidth > 650) {
+    el.style.fontSize = ''; // revert to CSS
+    return;
+  }
+
+  const parent = el.parentElement;
+  if (!parent) return;
+
+  // Reset to max size before measuring
+  const MAX_REM = 4.2;   // your mobile max
+  const MIN_REM = 2.2;   // safety floor
+
+  el.style.fontSize = `${MAX_REM}rem`;
+
+  const availableWidth = parent.clientWidth;
+  const textWidth = el.scrollWidth;
+
+  if (textWidth <= availableWidth) return;
+
+  const scale = availableWidth / textWidth;
+  const newSize = Math.max(MIN_REM, MAX_REM * scale);
+
+  el.style.fontSize = `${newSize}rem`;
+}
 
 /* ============================================
     DELETE MODAL
@@ -1782,6 +1811,7 @@ function processEditType(typeCode) {
   if (!color) {
     showToast('Please enter a valid 6-digit hex color (e.g. #4C8036).', 'error', 4000);
     return;
+        
   }
   TYPE_META_OVERRIDES.set(typeCode, { color });
   saveStateToURL();
@@ -1806,6 +1836,8 @@ async function fetchSnapshot() {
       showToast('Error: API returned non-JSON. Check console.', 'error', 5000);
       setLoading(false);
       return;
+      fitFinancialSummary();
+
     }
     if (!j.ok) {
       console.error('Snapshot error:', j);
@@ -1995,6 +2027,8 @@ function renderSummary() {
   if (!SNAP.dateAxis || SNAP.dateAxis.length === 0) {
     summaryEl.innerHTML = 'No Data';
     return;
+        fitFinancialSummary();
+
   }
 
   let assets = 0, debts = 0;
@@ -2701,6 +2735,7 @@ if(mobileBtn && toolbarRight) {
   document.getElementById('font-next').addEventListener('click', () => cycleFont('next'));
 
   window.addEventListener('resize', renderChart);
+        window.addEventListener('resize', fitFinancialSummary); 
   
   renderScore();
   document.getElementById('score-display').addEventListener('click', showEditScoreModal);
