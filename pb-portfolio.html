@@ -1,575 +1,234 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portfolio Snapshot — Electric Ice</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Portfolio Snapshot — Electric Ice</title>
 
-  <!--
-    Minimalist “electric ice / synthwave clinic” theme.
-    Key changes in this rebuild:
-      1) Base body font increased from ~13px to 18px.
-      2) Removed: BlackSky (BKSY), Viasat (VSAT), L3Harris (LHX).
-      3) Fixed pricing fetch so totals/figures render reliably:
-         - Use https://r.jina.ai/https://stooq.com/... (HTTPS proxy)
-         - Parse by locating the CSV header row explicitly.
-  -->
-  <style>
-    :root{
-      --bg0:#060813;
-      --bg1:#071225;
-      --panel:#0b1630cc;         /* translucent panel */
-      --stroke:#1a2f55;          /* panel border */
-      --text:#e8f2ff;            /* main text */
-      --muted:#a9bedc;           /* secondary text */
-      --ice:#76f3ff;             /* electric ice cyan */
-      --wave:#ff4fd8;            /* synthwave magenta */
-      --ok:#8affc1;              /* “good” */
-      --warn:#ffd17a;            /* “warning” */
-      --bad:#ff6b86;             /* “bad” */
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
-      --radius: 18px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
+<style>
+:root{
+  --bg0:#060813;
+  --bg1:#071225;
+  --panel:#0b1630cc;
+  --stroke:#1a2f55;
+  --text:#e8f2ff;
+  --muted:#a9bedc;
+  --ice:#76f3ff;
+  --wave:#ff4fd8;
+  --ok:#8affc1;
+  --warn:#ffd17a;
+  --bad:#ff6b86;
+  --shadow:0 20px 60px rgba(0,0,0,.45);
+  --radius:18px;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace;
+  --sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+}
 
-    html, body { height: 100%; }
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--sans);
+  font-size:18px;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(118,243,255,.18), transparent 60%),
+    radial-gradient(1000px 800px at 90% 10%, rgba(255,79,216,.12), transparent 60%),
+    linear-gradient(180deg,var(--bg0),var(--bg1));
+}
 
-    /* Base font size increased to 18px (requested). */
-    body{
-      margin:0;
-      font-family: var(--sans);
-      font-size: 18px;          /* <-- main requested change */
-      color: var(--text);
-      background:
-        radial-gradient(1200px 600px at 10% 0%, rgba(118,243,255,.18), transparent 60%),
-        radial-gradient(1000px 800px at 90% 10%, rgba(255,79,216,.12), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      letter-spacing: .1px;
-    }
+body:before{
+  content:"";
+  position:fixed; inset:0;
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,.045) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:56px 56px;
+  opacity:.18;
+  pointer-events:none;
+}
 
-    /* Subtle “clinic lighting” grid */
-    body:before{
-      content:"";
-      position:fixed; inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(to bottom, rgba(255,255,255,.045) 1px, transparent 1px),
-        linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px);
-      background-size: 56px 56px;
-      opacity:.18;
-      mix-blend-mode: overlay;
-    }
+a{color:var(--ice);text-decoration:none}
+a:hover{text-decoration:underline}
 
-    a{ color: var(--ice); text-decoration: none; }
-    a:hover{ text-decoration: underline; }
+.wrap{max-width:1180px;margin:22px auto 70px;padding:0 16px}
 
-    .wrap{
-      max-width: 1180px;
-      margin: 22px auto 70px;
-      padding: 0 16px;
-    }
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.brand h1{margin:0;font-size:20px;font-weight:800}
+.brand .sub{font-size:13px;color:var(--muted);font-family:var(--mono)}
 
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .brand h1{
-      font-size: 20px;
-      font-weight: 800;
-      margin:0;
-      letter-spacing:.3px;
-    }
-    .brand .sub{
-      font-size: 13px;
-      color: var(--muted);
-      font-family: var(--mono);
-    }
+.btn{
+  border:1px solid var(--stroke);
+  background:linear-gradient(180deg,rgba(118,243,255,.12),rgba(118,243,255,.05));
+  color:var(--text);
+  padding:12px 14px;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:700;
+}
+.btn:disabled{opacity:.6}
 
-    .btn{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(118,243,255,.12), rgba(118,243,255,.05));
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight: 750;
-      box-shadow: 0 0 0 rgba(0,0,0,0);
-      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
-      user-select:none;
-      white-space:nowrap;
-      font-size: 15px;
-    }
-    .btn:hover{
-      border-color: rgba(118,243,255,.55);
-      box-shadow: 0 0 24px rgba(118,243,255,.10);
-    }
-    .btn:active{ transform: translateY(1px); }
-    .btn:disabled{
-      opacity: .6;
-      cursor: default;
-    }
+.panel{
+  background:var(--panel);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(10px);
+}
 
-    .panel{
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
+.kpis{
+  padding:16px;
+  display:grid;
+  grid-template-columns:1.1fr .9fr .9fr;
+  gap:12px;
+}
 
-    .kpis{
-      padding: 16px 16px 14px;
-      display:grid;
-      grid-template-columns: 1.1fr .9fr .9fr;
-      gap: 12px;
-    }
-    .kpi{
-      border: 1px solid rgba(118,243,255,.14);
-      border-radius: 16px;
-      padding: 12px 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-    }
-    .kpi .label{
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-weight: 800;
-      letter-spacing:.25px;
-      margin-bottom: 10px;
-    }
-    .kpi .value{
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing:.2px;
-    }
-    .kpi .hint{
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-      line-height: 1.35;
-    }
-    .ice{
-      color: var(--ice);
-      text-shadow: 0 0 18px rgba(118,243,255,.20);
-    }
-    .wave{
-      color: var(--wave);
-      text-shadow: 0 0 18px rgba(255,79,216,.16);
-    }
+.kpi{
+  border:1px solid rgba(118,243,255,.14);
+  border-radius:16px;
+  padding:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+}
+.kpi .label{font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:800}
+.kpi .value{font-size:26px;font-weight:900}
+.kpi .hint{font-size:12px;color:var(--muted);font-family:var(--mono)}
 
-    .tableWrap{
-      margin-top: 14px;
-      padding: 10px 10px 14px;
-    }
-    table{
-      width: 100%;
-      border-collapse: collapse;
-      overflow: hidden;
-      border-radius: 14px;
-    }
-    thead th{
-      text-align:left;
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-weight: 800;
-      letter-spacing:.25px;
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(118,243,255,.14);
-      background: rgba(8,18,40,.65);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-    tbody td{
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(118,243,255,.08);
-      vertical-align: top;
-      font-size: 18px;  /* keep the row font aligned with body */
-      line-height: 1.25;
-    }
-    tbody tr:hover{
-      background: rgba(118,243,255,.04);
-    }
-    .mono{ font-family: var(--mono); }
-    .muted{ color: var(--muted); }
-    .right{ text-align:right; }
-    .nowrap{ white-space:nowrap; }
+.ice{color:var(--ice)}
+.wave{color:var(--wave)}
 
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-family: var(--mono);
-      font-weight: 800;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      white-space: nowrap;
-    }
-    .b-ok{ border-color: rgba(138,255,193,.35); color: var(--ok); }
-    .b-warn{ border-color: rgba(255,209,122,.38); color: var(--warn); }
-    .b-bad{ border-color: rgba(255,107,134,.38); color: var(--bad); }
+.tableWrap{margin-top:14px;padding:10px}
+table{width:100%;border-collapse:collapse}
+thead th{
+  font-size:12px;
+  color:var(--muted);
+  font-family:var(--mono);
+  text-align:left;
+  padding:12px 10px;
+  border-bottom:1px solid rgba(118,243,255,.14);
+}
+tbody td{
+  padding:12px 10px;
+  border-bottom:1px solid rgba(118,243,255,.08);
+}
+.right{text-align:right}
+.mono{font-family:var(--mono)}
 
-    .foot{
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
-      font-family: var(--mono);
-      padding: 0 4px;
-      line-height: 1.35;
-    }
-
-    @media (max-width: 920px){
-      .kpis{ grid-template-columns: 1fr; }
-      thead{ display:none; }
-      table, tbody, tr, td{ display:block; width:100%; }
-      tbody td{
-        border-bottom: none;
-        padding: 10px 12px;
-      }
-      tbody tr{
-        border: 1px solid rgba(118,243,255,.10);
-        border-radius: 14px;
-        margin: 10px 0;
-        overflow:hidden;
-        background: rgba(8,18,40,.35);
-      }
-      tbody td[data-label]::before{
-        content: attr(data-label);
-        display:block;
-        font-size: 12px;
-        color: var(--muted);
-        font-family: var(--mono);
-        font-weight: 800;
-        margin-bottom: 4px;
-      }
-      .right{ text-align:left; }
-    }
-  </style>
+.badge{
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-family:var(--mono);
+  border:1px solid rgba(255,255,255,.12);
+}
+.b-ok{color:var(--ok)}
+.b-warn{color:var(--warn)}
+.b-bad{color:var(--bad)}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <h1>Portfolio Snapshot — Electric Ice</h1>
-        <div class="sub">Live valuation on refresh · Whole-share holdings · Totals computed from the latest quote returned</div>
-      </div>
-      <button class="btn" id="refreshBtn" title="Re-fetch prices and recompute totals">Refresh Prices</button>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <h1>Portfolio Snapshot — Electric Ice</h1>
+      <div class="sub">Live valuation on refresh · Whole shares · Clean rebuild</div>
     </div>
-
-    <section class="panel kpis" aria-label="Portfolio key performance indicators">
-      <div class="kpi">
-        <div class="label">TOTAL PORTFOLIO VALUE (LIVE)</div>
-        <div class="value ice" id="totalValue">$—</div>
-        <div class="hint" id="lastUpdated">Last updated: —</div>
-      </div>
-
-      <div class="kpi">
-        <div class="label">POSITIONS LOADED / PRICED</div>
-        <div class="value wave" id="pricedCount">— / —</div>
-        <div class="hint">OTC/ADR tickers may return N/A from free sources; totals still compute from priced rows.</div>
-      </div>
-
-      <div class="kpi">
-        <div class="label">DATA SOURCE</div>
-        <div class="value" style="font-size:16px; font-weight:900;">
-          Stooq CSV via r.jina.ai
-        </div>
-        <div class="hint">
-          Uses <span class="mono">https://r.jina.ai/https://stooq.com/…</span> and robust CSV parsing to ensure totals display.
-        </div>
-      </div>
-    </section>
-
-    <section class="panel tableWrap" aria-label="Portfolio detail table">
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 18%;">Company</th>
-            <th style="width: 8%;">Ticker</th>
-            <th style="width: 6%;" class="right">Shares</th>
-            <th style="width: 10%;" class="right">Price</th>
-            <th style="width: 12%;" class="right">Position Value</th>
-            <th style="width: 6%;" class="right">Ethics</th>
-            <th style="width: 14%;">CEO</th>
-            <th>Headline (linked search)</th>
-            <th style="width: 8%;">Status</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-
-      <div class="foot">
-        Links: Company → homepage; Ticker → Google Finance; CEO → Google search; Headline → Google News search.
-        This is a lightweight valuation dashboard (not a brokerage statement).
-      </div>
-    </section>
+    <button class="btn" id="refreshBtn">Refresh Prices</button>
   </div>
 
-  <script>
-    /**
-     * ===========================
-     *  PORTFOLIO (RECALCULATED)
-     * ===========================
-     * Dropped (per your instruction): BKSY, VSAT, LHX
-     * Everything else remains.
-     *
-     * Note: This page values positions using the latest close returned by Stooq.
-     * That value updates each refresh.
-     */
-    const PORTFOLIO = [
-      // Water / waste / logistics
-      { name:"Xylem", ticker:"XYL", exchange:"NYSE", shares:1, ethics:9, home:"https://www.xylem.com", ceo:"Matthew Pine",
-        headline:"Xylem raises outlook on strong demand for water solutions" },
+  <section class="panel kpis">
+    <div class="kpi">
+      <div class="label">TOTAL PORTFOLIO VALUE</div>
+      <div class="value ice" id="totalValue">$—</div>
+      <div class="hint" id="lastUpdated">—</div>
+    </div>
+    <div class="kpi">
+      <div class="label">PRICED POSITIONS</div>
+      <div class="value wave" id="pricedCount">—</div>
+      <div class="hint">OTC tickers may return N/A</div>
+    </div>
+    <div class="kpi">
+      <div class="label">DATA SOURCE</div>
+      <div class="value">Stooq via r.jina.ai</div>
+      <div class="hint mono">https CSV · no API key</div>
+    </div>
+  </section>
 
-      { name:"Waste Management", ticker:"WM", exchange:"NYSE", shares:1, ethics:7, home:"https://www.wm.com", ceo:"Jim Fish",
-        headline:"Waste Management beats estimates on higher pricing" },
-
-      { name:"CSX", ticker:"CSX", exchange:"NASDAQ", shares:1, ethics:6, home:"https://www.csx.com", ceo:"Joe Hinrichs",
-        headline:"CSX reports quarterly results amid intermodal demand focus" },
-
-      // Electrification / grid / efficiency
-      { name:"Eaton", ticker:"ETN", exchange:"NYSE", shares:5, ethics:8, home:"https://www.eaton.com", ceo:"Craig Arnold",
-        headline:"Eaton highlights data center and electrification demand" },
-
-      { name:"Quanta Services", ticker:"PWR", exchange:"NYSE", shares:1, ethics:8, home:"https://www.quantaservices.com", ceo:"Duke Austin",
-        headline:"Quanta Services lifts forecast on power infrastructure work" },
-
-      { name:"Hubbell", ticker:"HUBB", exchange:"NYSE", shares:1, ethics:7, home:"https://www.hubbell.com", ceo:"Gerben Bakker",
-        headline:"Hubbell boosts outlook tied to electrical segment demand" },
-
-      { name:"Johnson Controls", ticker:"JCI", exchange:"NYSE", shares:1, ethics:8, home:"https://www.johnsoncontrols.com", ceo:"Joakim Weidemanis",
-        headline:"Johnson Controls updates profit outlook on building systems demand" },
-
-      { name:"Trane Technologies", ticker:"TT", exchange:"NYSE", shares:1, ethics:7, home:"https://www.tranetechnologies.com", ceo:"Dave Regnery",
-        headline:"Trane raises guidance on resilient HVAC demand" },
-
-      { name:"Carrier Global", ticker:"CARR", exchange:"NYSE", shares:1, ethics:6, home:"https://www.carrier.com", ceo:"David Gitlin",
-        headline:"Carrier discusses investments and HVAC demand trends" },
-
-      { name:"Daikin Industries", ticker:"DKILY", exchange:"OTCMKTS", shares:1, ethics:6, home:"https://www.daikin.com", ceo:"Masatoshi Nakane",
-        headline:"Daikin focuses on efficiency and heat-pump growth" },
-
-      { name:"ABB", ticker:"ABBNY", exchange:"OTCMKTS", shares:1, ethics:7, home:"https://global.abb", ceo:"Morten Wierod",
-        headline:"ABB updates profitability goals amid electrification demand" },
-
-      { name:"Nextracker", ticker:"NXT", exchange:"NASDAQ", shares:3, ethics:9, home:"https://www.nextracker.com", ceo:"Dan Shugar",
-        headline:"Nextracker reports results as utility-scale solar demand evolves" },
-
-      // Semiconductors / enablers
-      { name:"Texas Instruments", ticker:"TXN", exchange:"NASDAQ", shares:1, ethics:5, home:"https://www.ti.com", ceo:"Haviv Ilan",
-        headline:"Texas Instruments outlook reflects analog and industrial cycle" },
-
-      // Health / reduce suffering
-      { name:"Eli Lilly", ticker:"LLY", exchange:"NYSE", shares:2, ethics:7, home:"https://www.lilly.com", ceo:"David Ricks",
-        headline:"Eli Lilly expands manufacturing to meet diabetes and obesity demand" },
-
-      { name:"Intuitive Surgical", ticker:"ISRG", exchange:"NASDAQ", shares:2, ethics:8, home:"https://www.intuitive.com", ceo:"Gary Guthart",
-        headline:"Intuitive Surgical posts results as procedure growth continues" },
-
-      { name:"Thermo Fisher Scientific", ticker:"TMO", exchange:"NYSE", shares:1, ethics:7, home:"https://www.thermofisher.com", ceo:"Marc Casper",
-        headline:"Thermo Fisher discusses demand trends in life sciences tools" },
-
-      // Housing affordability
-      { name:"Cavco Industries", ticker:"CVCO", exchange:"NASDAQ", shares:1, ethics:7, home:"https://www.cavco.com", ceo:"Bill Boor",
-        headline:"Cavco reports results amid manufactured housing demand" },
-
-      // Rare earths
-      { name:"MP Materials", ticker:"MP", exchange:"NYSE", shares:11, ethics:5, home:"https://mpmaterials.com", ceo:"James Litinsky",
-        headline:"MP Materials updates strategy on rare earths processing and supply chains" },
-
-      { name:"Lynas Rare Earths", ticker:"LYSCF", exchange:"OTCMKTS", shares:1, ethics:6, home:"https://lynasrareearths.com", ceo:"Amanda Lacaze",
-        headline:"Lynas advances rare earths supply diversification initiatives" },
-
-      // Space / earth observation (remaining)
-      { name:"Rocket Lab", ticker:"RKLB", exchange:"NASDAQ", shares:4, ethics:5, home:"https://www.rocketlabusa.com", ceo:"Peter Beck",
-        headline:"Rocket Lab wins contracts and expands space systems footprint" },
-
-      { name:"Planet Labs", ticker:"PL", exchange:"NYSE", shares:11, ethics:7, home:"https://www.planet.com", ceo:"Will Marshall",
-        headline:"Planet Labs expands partnerships for Earth observation data" },
-
-      { name:"Spire Global", ticker:"SPIR", exchange:"NYSE", shares:1, ethics:6, home:"https://spire.com", ceo:"Theresa Condor",
-        headline:"Spire Global updates results amid weather and maritime data focus" },
-    ];
-
-    /**
-     * ===========================
-     *  QUOTE FETCHING (FIXED)
-     * ===========================
-     * We use Stooq's CSV endpoint, proxied via r.jina.ai to avoid CORS issues:
-     *   https://r.jina.ai/https://stooq.com/q/l/?s=AAPL.US&f=sd2t2ohlcv&h&e=csv
-     *
-     * Robust parsing:
-     * - r.jina.ai sometimes includes preamble lines
-     * - we locate the CSV header row that begins with "Symbol,"
-     * - then read the next row as data
-     */
-    function stooqSymbolFor(ticker){
-      return `${ticker.toLowerCase()}.us`;
-    }
-
-    async function fetchLastPriceUSD(ticker){
-      const sym = stooqSymbolFor(ticker);
-
-      // IMPORTANT: proxied URL uses https:// (not http://)
-      const url =
-        `https://r.jina.ai/https://stooq.com/q/l/?s=${encodeURIComponent(sym)}&f=sd2t2ohlcv&h&e=csv`;
-
-      const res = await fetch(url, { cache: "no-store" });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const text = (await res.text()).trim();
-
-      // Find the CSV header line explicitly.
-      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-      const headerIdx = lines.findIndex(l => l.toLowerCase().startsWith("symbol,"));
-      if(headerIdx === -1) throw new Error("CSV header not found");
-
-      const header = lines[headerIdx].split(",").map(s => s.trim());
-      const rowLine = lines[headerIdx + 1];
-      if(!rowLine) throw new Error("CSV row not found");
-
-      const row = rowLine.split(",").map(s => s.trim());
-      const closeIdx = header.findIndex(h => h.toLowerCase() === "close");
-      if(closeIdx === -1) throw new Error("No close column");
-
-      const close = Number(row[closeIdx]);
-      if(!Number.isFinite(close)) throw new Error("Close not numeric");
-
-      return close;
-    }
-
-    /**
-     * ===========================
-     *  LINK HELPERS
-     * ===========================
-     */
-    function googleFinanceLink(ticker, exchange){
-      return `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${encodeURIComponent(exchange)}`;
-    }
-    function googleSearchLink(query){
-      return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    }
-    function googleNewsSearchLink(query){
-      return `https://news.google.com/search?q=${encodeURIComponent(query)}`;
-    }
-
-    /**
-     * ===========================
-     *  RENDERING
-     * ===========================
-     */
-    const rowsEl = document.getElementById("rows");
-    const totalValueEl = document.getElementById("totalValue");
-    const pricedCountEl = document.getElementById("pricedCount");
-    const lastUpdatedEl = document.getElementById("lastUpdated");
-    const refreshBtn = document.getElementById("refreshBtn");
-
-    function fmtUSD(n){
-      if(!Number.isFinite(n)) return "N/A";
-      return n.toLocaleString(undefined, { style:"currency", currency:"USD" });
-    }
-
-    function ethicsBadge(score){
-      if(score >= 8) return `<span class="badge b-ok">ethics ${score}/10</span>`;
-      if(score >= 5) return `<span class="badge b-warn">ethics ${score}/10</span>`;
-      return `<span class="badge b-bad">ethics ${score}/10</span>`;
-    }
-
-    function statusBadge(status){
-      if(status === "OK") return `<span class="badge b-ok">priced</span>`;
-      if(status === "N/A") return `<span class="badge b-bad">no quote</span>`;
-      return `<span class="badge b-warn">loading</span>`;
-    }
-
-    function renderRow(item, price, value, status){
-      const companyLink = `<a href="${item.home}" target="_blank" rel="noopener">${item.name}</a>`;
-      const tickerLink = `<a href="${googleFinanceLink(item.ticker, item.exchange)}" target="_blank" rel="noopener" class="mono">${item.ticker}</a>`;
-      const ceoLink = `<a href="${googleSearchLink(item.ceo)}" target="_blank" rel="noopener">${item.ceo}</a>`;
-      const headlineLink = `<a href="${googleNewsSearchLink(item.name + " " + item.headline)}" target="_blank" rel="noopener">${item.headline}</a>`;
-
-      return `
+  <section class="panel tableWrap">
+    <table>
+      <thead>
         <tr>
-          <td data-label="Company">
-            ${companyLink}
-            <div class="muted mono" style="margin-top:6px;">${ethicsBadge(item.ethics)}</div>
-          </td>
-          <td data-label="Ticker">${tickerLink}</td>
-          <td data-label="Shares" class="right mono">${item.shares}</td>
-          <td data-label="Price" class="right mono">${fmtUSD(price)}</td>
-          <td data-label="Position Value" class="right mono">${fmtUSD(value)}</td>
-          <td data-label="Ethics" class="right mono">${item.ethics}/10</td>
-          <td data-label="CEO">${ceoLink}</td>
-          <td data-label="Headline">${headlineLink}</td>
-          <td data-label="Status">${statusBadge(status)}</td>
+          <th>Company</th>
+          <th>Ticker</th>
+          <th class="right">Shares</th>
+          <th class="right">Price</th>
+          <th class="right">Value</th>
         </tr>
-      `;
-    }
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+</div>
 
-    async function refreshPortfolio(){
-      refreshBtn.disabled = true;
-      refreshBtn.textContent = "Refreshing…";
+<script>
+const PORTFOLIO = [
+  ["Xylem","XYL","NYSE",1,"https://www.xylem.com"],
+  ["Waste Management","WM","NYSE",1,"https://www.wm.com"],
+  ["CSX","CSX","NASDAQ",1,"https://www.csx.com"],
+  ["Eaton","ETN","NYSE",5,"https://www.eaton.com"],
+  ["Quanta Services","PWR","NYSE",2,"https://www.quantaservices.com"],
+  ["Hubbell","HUBB","NYSE",1,"https://www.hubbell.com"],
+  ["Johnson Controls","JCI","NYSE",1,"https://www.johnsoncontrols.com"],
+  ["Trane Technologies","TT","NYSE",1,"https://www.tranetechnologies.com"],
+  ["Carrier","CARR","NYSE",1,"https://www.carrier.com"],
+  ["Daikin","DKILY","OTCMKTS",1,"https://www.daikin.com"],
+  ["ABB","ABBNY","OTCMKTS",1,"https://global.abb"],
+  ["Nextracker","NXT","NASDAQ",2,"https://www.nextracker.com"],
+  ["Texas Instruments","TXN","NASDAQ",1,"https://www.ti.com"],
+  ["Eli Lilly","LLY","NYSE",2,"https://www.lilly.com"],
+  ["Intuitive Surgical","ISRG","NASDAQ",2,"https://www.intuitive.com"],
+  ["Thermo Fisher","TMO","NYSE",1,"https://www.thermofisher.com"],
+  ["Cavco","CVCO","NASDAQ",1,"https://www.cavco.com"],
+  ["MP Materials","MP","NYSE",11,"https://mpmaterials.com"],
+  ["Lynas","LYSCF","OTCMKTS",1,"https://lynasrareearths.com"],
+  ["Rocket Lab","RKLB","NASDAQ",4,"https://www.rocketlabusa.com"],
+  ["Planet Labs","PL","NYSE",11,"https://www.planet.com"],
+  ["Spire Global","SPIR","NYSE",1,"https://spire.com"]
+];
 
-      // Render placeholders immediately so the page feels alive.
-      rowsEl.innerHTML = PORTFOLIO.map(p => renderRow(p, NaN, NaN, "LOADING")).join("");
+function stooqSymbol(t){return t.toLowerCase()+".us"}
+async function price(t){
+  const u=`https://r.jina.ai/https://stooq.com/q/l/?s=${stooqSymbol(t)}&f=sd2t2ohlcv&h&e=csv`;
+  const r=await fetch(u); if(!r.ok) throw 0;
+  const l=(await r.text()).split("\n").map(x=>x.trim()).filter(Boolean);
+  const h=l.findIndex(x=>x.toLowerCase().startsWith("symbol,"));
+  const c=l[h].split(",").findIndex(x=>x.toLowerCase()=="close");
+  return Number(l[h+1].split(",")[c]);
+}
 
-      let total = 0;
-      let priced = 0;
+async function refresh(){
+  rows.innerHTML="";
+  let total=0, priced=0;
 
-      // Fetch prices concurrently.
-      const results = await Promise.allSettled(
-        PORTFOLIO.map(async (p) => {
-          const price = await fetchLastPriceUSD(p.ticker);
-          const value = price * p.shares;
-          return { ticker: p.ticker, price, value };
-        })
-      );
+  for(const [n,t,e,s,h] of PORTFOLIO){
+    let p=NaN,v=NaN;
+    try{p=await price(t);v=p*s;total+=v;priced++}catch{}
+    rows.innerHTML+=`
+      <tr>
+        <td><a href="${h}" target="_blank">${n}</a></td>
+        <td><a href="https://www.google.com/finance/quote/${t}:${e}" target="_blank">${t}</a></td>
+        <td class="right mono">${s}</td>
+        <td class="right mono">${isFinite(p)?p.toFixed(2):"N/A"}</td>
+        <td class="right mono">${isFinite(v)?v.toFixed(2):"—"}</td>
+      </tr>`;
+  }
 
-      // Map results back to rows, compute totals.
-      const map = new Map();
-      results.forEach((r, i) => {
-        const p = PORTFOLIO[i];
-        if(r.status === "fulfilled"){
-          map.set(p.ticker, { ...r.value, status:"OK" });
-          total += r.value.value;
-          priced += 1;
-        } else {
-          map.set(p.ticker, { price: NaN, value: NaN, status:"N/A" });
-        }
-      });
+  totalValue.textContent="$"+total.toLocaleString(undefined,{minimumFractionDigits:2});
+  pricedCount.textContent=`${priced} / ${PORTFOLIO.length}`;
+  lastUpdated.textContent=new Date().toLocaleString();
+}
 
-      // Render final rows with computed values.
-      rowsEl.innerHTML = PORTFOLIO.map(p => {
-        const d = map.get(p.ticker);
-        return renderRow(p, d.price, d.value, d.status);
-      }).join("");
-
-      // KPI updates
-      totalValueEl.textContent = fmtUSD(total);
-      pricedCountEl.textContent = `${priced} / ${PORTFOLIO.length}`;
-      lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
-
-      refreshBtn.disabled = false;
-      refreshBtn.textContent = "Refresh Prices";
-    }
-
-    refreshBtn.addEventListener("click", refreshPortfolio);
-    refreshPortfolio(); // auto-run on load
-  </script>
+refreshBtn.onclick=refresh;
+refresh();
+</script>
 </body>
 </html>
