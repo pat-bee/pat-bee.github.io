@@ -3,13 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portfolio — Electric Ice Brief</title>
+  <title>Portfolio Snapshot — Electric Ice</title>
 
   <!--
-    Minimalist “electric ice / synthwave clinic” theme:
-    - Cool cyan + soft magenta accents
-    - Very clean typography
-    - Subtle glow + glassy panels
+    Minimalist “electric ice / synthwave clinic” theme.
+    Key changes in this rebuild:
+      1) Base body font increased from ~13px to 18px.
+      2) Removed: BlackSky (BKSY), Viasat (VSAT), L3Harris (LHX).
+      3) Fixed pricing fetch so totals/figures render reliably:
+         - Use https://r.jina.ai/https://stooq.com/... (HTTPS proxy)
+         - Parse by locating the CSV header row explicitly.
   -->
   <style>
     :root{
@@ -30,11 +33,13 @@
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
-    /* Page background: dark ice gradient with subtle scanline vibe */
     html, body { height: 100%; }
+
+    /* Base font size increased to 18px (requested). */
     body{
       margin:0;
       font-family: var(--sans);
+      font-size: 18px;          /* <-- main requested change */
       color: var(--text);
       background:
         radial-gradient(1200px 600px at 10% 0%, rgba(118,243,255,.18), transparent 60%),
@@ -42,6 +47,7 @@
         linear-gradient(180deg, var(--bg0), var(--bg1));
       letter-spacing: .1px;
     }
+
     /* Subtle “clinic lighting” grid */
     body:before{
       content:"";
@@ -58,14 +64,12 @@
     a{ color: var(--ice); text-decoration: none; }
     a:hover{ text-decoration: underline; }
 
-    /* Layout container — intentionally similar to many Apps Script “single-pane” tools */
     .wrap{
       max-width: 1180px;
       margin: 22px auto 70px;
       padding: 0 16px;
     }
 
-    /* Top bar */
     .top{
       display:flex;
       align-items:center;
@@ -76,41 +80,44 @@
     .brand{
       display:flex;
       flex-direction:column;
-      gap: 4px;
+      gap: 6px;
     }
     .brand h1{
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 800;
       margin:0;
       letter-spacing:.3px;
     }
     .brand .sub{
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
       font-family: var(--mono);
     }
 
-    /* Buttons */
     .btn{
       border: 1px solid var(--stroke);
       background: linear-gradient(180deg, rgba(118,243,255,.12), rgba(118,243,255,.05));
       color: var(--text);
-      padding: 10px 12px;
+      padding: 12px 14px;
       border-radius: 14px;
       cursor:pointer;
-      font-weight: 650;
+      font-weight: 750;
       box-shadow: 0 0 0 rgba(0,0,0,0);
       transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
       user-select:none;
       white-space:nowrap;
+      font-size: 15px;
     }
     .btn:hover{
       border-color: rgba(118,243,255,.55);
       box-shadow: 0 0 24px rgba(118,243,255,.10);
     }
     .btn:active{ transform: translateY(1px); }
+    .btn:disabled{
+      opacity: .6;
+      cursor: default;
+    }
 
-    /* KPI panel */
     .panel{
       background: var(--panel);
       border: 1px solid var(--stroke);
@@ -119,6 +126,7 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
+
     .kpis{
       padding: 16px 16px 14px;
       display:grid;
@@ -132,22 +140,24 @@
       background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     }
     .kpi .label{
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       font-family: var(--mono);
+      font-weight: 800;
       letter-spacing:.25px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .kpi .value{
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 26px;
+      font-weight: 900;
       letter-spacing:.2px;
     }
     .kpi .hint{
-      margin-top: 6px;
-      font-size: 11px;
+      margin-top: 8px;
+      font-size: 12px;
       color: var(--muted);
       font-family: var(--mono);
+      line-height: 1.35;
     }
     .ice{
       color: var(--ice);
@@ -158,7 +168,6 @@
       text-shadow: 0 0 18px rgba(255,79,216,.16);
     }
 
-    /* Table */
     .tableWrap{
       margin-top: 14px;
       padding: 10px 10px 14px;
@@ -171,23 +180,23 @@
     }
     thead th{
       text-align:left;
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       font-family: var(--mono);
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing:.25px;
-      padding: 10px 10px;
+      padding: 12px 10px;
       border-bottom: 1px solid rgba(118,243,255,.14);
       background: rgba(8,18,40,.65);
       position: sticky;
-      top: 0; /* nice for long list */
+      top: 0;
       z-index: 1;
     }
     tbody td{
-      padding: 10px 10px;
+      padding: 12px 10px;
       border-bottom: 1px solid rgba(118,243,255,.08);
       vertical-align: top;
-      font-size: 13px;
+      font-size: 18px;  /* keep the row font aligned with body */
       line-height: 1.25;
     }
     tbody tr:hover{
@@ -198,15 +207,15 @@
     .right{ text-align:right; }
     .nowrap{ white-space:nowrap; }
 
-    /* Row status badges */
     .badge{
       display:inline-flex;
       align-items:center;
       gap: 6px;
       padding: 4px 8px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 12px;
       font-family: var(--mono);
+      font-weight: 800;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.04);
       white-space: nowrap;
@@ -215,23 +224,22 @@
     .b-warn{ border-color: rgba(255,209,122,.38); color: var(--warn); }
     .b-bad{ border-color: rgba(255,107,134,.38); color: var(--bad); }
 
-    /* Footer note */
     .foot{
       margin-top: 12px;
       color: var(--muted);
       font-size: 12px;
       font-family: var(--mono);
       padding: 0 4px;
+      line-height: 1.35;
     }
 
-    /* Mobile adjustments */
     @media (max-width: 920px){
       .kpis{ grid-template-columns: 1fr; }
       thead{ display:none; }
       table, tbody, tr, td{ display:block; width:100%; }
       tbody td{
         border-bottom: none;
-        padding: 8px 10px;
+        padding: 10px 12px;
       }
       tbody tr{
         border: 1px solid rgba(118,243,255,.10);
@@ -243,9 +251,10 @@
       tbody td[data-label]::before{
         content: attr(data-label);
         display:block;
-        font-size: 11px;
+        font-size: 12px;
         color: var(--muted);
         font-family: var(--mono);
+        font-weight: 800;
         margin-bottom: 4px;
       }
       .right{ text-align:left; }
@@ -258,7 +267,7 @@
     <div class="top">
       <div class="brand">
         <h1>Portfolio Snapshot — Electric Ice</h1>
-        <div class="sub">Live valuation on refresh · Whole-share holdings · Minimal, clinical synthwave theme</div>
+        <div class="sub">Live valuation on refresh · Whole-share holdings · Totals computed from the latest quote returned</div>
       </div>
       <button class="btn" id="refreshBtn" title="Re-fetch prices and recompute totals">Refresh Prices</button>
     </div>
@@ -269,17 +278,21 @@
         <div class="value ice" id="totalValue">$—</div>
         <div class="hint" id="lastUpdated">Last updated: —</div>
       </div>
+
       <div class="kpi">
         <div class="label">POSITIONS LOADED / PRICED</div>
         <div class="value wave" id="pricedCount">— / —</div>
-        <div class="hint">Some OTC/ADR symbols may return N/A from free sources</div>
+        <div class="hint">OTC/ADR tickers may return N/A from free sources; totals still compute from priced rows.</div>
       </div>
+
       <div class="kpi">
         <div class="label">DATA SOURCE</div>
-        <div class="value" style="font-size:16px; font-weight:800;">
+        <div class="value" style="font-size:16px; font-weight:900;">
           Stooq CSV via r.jina.ai
         </div>
-        <div class="hint">No API key required; values use latest available close per symbol</div>
+        <div class="hint">
+          Uses <span class="mono">https://r.jina.ai/https://stooq.com/…</span> and robust CSV parsing to ensure totals display.
+        </div>
       </div>
     </section>
 
@@ -302,8 +315,8 @@
       </table>
 
       <div class="foot">
-        Notes: (1) Ticker links go to Google Finance. (2) CEO links are Google searches. (3) Headline links are Google News searches.
-        (4) This page computes value from the latest quote returned; it is not a brokerage statement.
+        Links: Company → homepage; Ticker → Google Finance; CEO → Google search; Headline → Google News search.
+        This is a lightweight valuation dashboard (not a brokerage statement).
       </div>
     </section>
   </div>
@@ -311,18 +324,14 @@
   <script>
     /**
      * ===========================
-     *  PORTFOLIO CONFIG (EXACT)
+     *  PORTFOLIO (RECALCULATED)
      * ===========================
-     * This is your exact master list (25 tickers) and the exact whole-share holdings
-     * implied by the prior allocation logic.
+     * Dropped (per your instruction): BKSY, VSAT, LHX
+     * Everything else remains.
      *
-     * Ethics score is your values-spectrum: 1 = "pure evil capitalist doom"
-     * and 10 = "pure altruistic humanitarian/planet wellbeing".
-     *
-     * Headlines here are simple strings used only to generate a Google News search.
-     * You can replace any line with a headline you prefer.
+     * Note: This page values positions using the latest close returned by Stooq.
+     * That value updates each refresh.
      */
-
     const PORTFOLIO = [
       // Water / waste / logistics
       { name:"Xylem", ticker:"XYL", exchange:"NYSE", shares:1, ethics:9, home:"https://www.xylem.com", ceo:"Matthew Pine",
@@ -380,101 +389,82 @@
       { name:"Cavco Industries", ticker:"CVCO", exchange:"NASDAQ", shares:1, ethics:7, home:"https://www.cavco.com", ceo:"Bill Boor",
         headline:"Cavco reports results amid manufactured housing demand" },
 
-      // Rare earths (strategic + extraction tradeoffs)
+      // Rare earths
       { name:"MP Materials", ticker:"MP", exchange:"NYSE", shares:11, ethics:5, home:"https://mpmaterials.com", ceo:"James Litinsky",
         headline:"MP Materials updates strategy on rare earths processing and supply chains" },
 
       { name:"Lynas Rare Earths", ticker:"LYSCF", exchange:"OTCMKTS", shares:1, ethics:6, home:"https://lynasrareearths.com", ceo:"Amanda Lacaze",
         headline:"Lynas advances rare earths supply diversification initiatives" },
 
-      // Space / Earth observation / comms (dual-use risk varies)
+      // Space / earth observation (remaining)
       { name:"Rocket Lab", ticker:"RKLB", exchange:"NASDAQ", shares:4, ethics:5, home:"https://www.rocketlabusa.com", ceo:"Peter Beck",
         headline:"Rocket Lab wins contracts and expands space systems footprint" },
 
       { name:"Planet Labs", ticker:"PL", exchange:"NYSE", shares:11, ethics:7, home:"https://www.planet.com", ceo:"Will Marshall",
         headline:"Planet Labs expands partnerships for Earth observation data" },
 
-      { name:"BlackSky", ticker:"BKSY", exchange:"NYSE", shares:1, ethics:4, home:"https://www.blacksky.com", ceo:"Brian O'Toole",
-        headline:"BlackSky highlights real-time geospatial intelligence capabilities" },
-
       { name:"Spire Global", ticker:"SPIR", exchange:"NYSE", shares:1, ethics:6, home:"https://spire.com", ceo:"Theresa Condor",
         headline:"Spire Global updates results amid weather and maritime data focus" },
-
-      { name:"Viasat", ticker:"VSAT", exchange:"NASDAQ", shares:1, ethics:4, home:"https://www.viasat.com", ceo:"Mark Dankberg",
-        headline:"Viasat discusses satellite broadband and government communications" },
-
-      { name:"L3Harris Technologies", ticker:"LHX", exchange:"NYSE", shares:1, ethics:2, home:"https://www.l3harris.com", ceo:"Chris Kubasik",
-        headline:"L3Harris wins defense contract for space and sensing systems" },
     ];
 
     /**
      * ===========================
-     *  QUOTE FETCHING
+     *  QUOTE FETCHING (FIXED)
      * ===========================
-     * We fetch “latest quote” via Stooq’s CSV endpoint:
-     *   https://stooq.com/q/l/?s=AAPL.US&f=sd2t2ohlcv&h&e=csv
+     * We use Stooq's CSV endpoint, proxied via r.jina.ai to avoid CORS issues:
+     *   https://r.jina.ai/https://stooq.com/q/l/?s=AAPL.US&f=sd2t2ohlcv&h&e=csv
      *
-     * Browser CORS often blocks direct calls to Stooq; therefore we use a text proxy:
-     *   https://r.jina.ai/http://stooq.com/q/l/?s=AAPL.US&f=sd2t2ohlcv&h&e=csv
-     *
-     * Stooq symbol format:
-     *   - US listed tickers often work as: <ticker>.us (lowercase ok)
-     *   - Some OTC/ADR tickers may or may not be available; we handle failures gracefully.
+     * Robust parsing:
+     * - r.jina.ai sometimes includes preamble lines
+     * - we locate the CSV header row that begins with "Symbol,"
+     * - then read the next row as data
      */
-
     function stooqSymbolFor(ticker){
-      // Stooq typically expects lowercase with ".us"
       return `${ticker.toLowerCase()}.us`;
     }
 
     async function fetchLastPriceUSD(ticker){
       const sym = stooqSymbolFor(ticker);
 
-      // Stooq quote CSV (one data row), proxied through r.jina.ai to avoid CORS blocks.
-      const url = `https://r.jina.ai/http://stooq.com/q/l/?s=${encodeURIComponent(sym)}&f=sd2t2ohlcv&h&e=csv`;
+      // IMPORTANT: proxied URL uses https:// (not http://)
+      const url =
+        `https://r.jina.ai/https://stooq.com/q/l/?s=${encodeURIComponent(sym)}&f=sd2t2ohlcv&h&e=csv`;
 
       const res = await fetch(url, { cache: "no-store" });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const text = (await res.text()).trim();
 
-      // Expected CSV (header + one row):
-      // Symbol,Date,Time,Open,High,Low,Close,Volume
-      // AAPL.US,2026-01-02,22:00:16,272.255,277.840,269.000,271.010,37838054
+      // Find the CSV header line explicitly.
       const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-      if(lines.length < 2) throw new Error("No data rows");
+      const headerIdx = lines.findIndex(l => l.toLowerCase().startsWith("symbol,"));
+      if(headerIdx === -1) throw new Error("CSV header not found");
 
-      const header = lines[0].split(",").map(s => s.trim());
-      const row = lines[1].split(",").map(s => s.trim());
+      const header = lines[headerIdx].split(",").map(s => s.trim());
+      const rowLine = lines[headerIdx + 1];
+      if(!rowLine) throw new Error("CSV row not found");
 
+      const row = rowLine.split(",").map(s => s.trim());
       const closeIdx = header.findIndex(h => h.toLowerCase() === "close");
       if(closeIdx === -1) throw new Error("No close column");
 
       const close = Number(row[closeIdx]);
       if(!Number.isFinite(close)) throw new Error("Close not numeric");
 
-      return close; // USD close as number
+      return close;
     }
 
     /**
      * ===========================
      *  LINK HELPERS
      * ===========================
-     * - Company name → homepage already in data
-     * - Ticker → Google Finance
-     * - CEO → Google search
-     * - Headline → Google News search
      */
     function googleFinanceLink(ticker, exchange){
-      // Example: https://www.google.com/finance/quote/ETN:NYSE
-      // OTC examples often work as :OTCMKTS
       return `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${encodeURIComponent(exchange)}`;
     }
-
     function googleSearchLink(query){
       return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     }
-
     function googleNewsSearchLink(query){
       return `https://news.google.com/search?q=${encodeURIComponent(query)}`;
     }
@@ -496,7 +486,6 @@
     }
 
     function ethicsBadge(score){
-      // Simple banding to provide a quick moral signal
       if(score >= 8) return `<span class="badge b-ok">ethics ${score}/10</span>`;
       if(score >= 5) return `<span class="badge b-warn">ethics ${score}/10</span>`;
       return `<span class="badge b-bad">ethics ${score}/10</span>`;
@@ -514,10 +503,12 @@
       const ceoLink = `<a href="${googleSearchLink(item.ceo)}" target="_blank" rel="noopener">${item.ceo}</a>`;
       const headlineLink = `<a href="${googleNewsSearchLink(item.name + " " + item.headline)}" target="_blank" rel="noopener">${item.headline}</a>`;
 
-      // Desktop table layout; mobile uses data-label attributes
       return `
         <tr>
-          <td data-label="Company">${companyLink}<div class="muted mono" style="margin-top:4px;">${ethicsBadge(item.ethics)}</div></td>
+          <td data-label="Company">
+            ${companyLink}
+            <div class="muted mono" style="margin-top:6px;">${ethicsBadge(item.ethics)}</div>
+          </td>
           <td data-label="Ticker">${tickerLink}</td>
           <td data-label="Shares" class="right mono">${item.shares}</td>
           <td data-label="Price" class="right mono">${fmtUSD(price)}</td>
@@ -534,13 +525,13 @@
       refreshBtn.disabled = true;
       refreshBtn.textContent = "Refreshing…";
 
-      // First pass: render placeholder rows
+      // Render placeholders immediately so the page feels alive.
       rowsEl.innerHTML = PORTFOLIO.map(p => renderRow(p, NaN, NaN, "LOADING")).join("");
 
       let total = 0;
       let priced = 0;
 
-      // Fetch all prices concurrently, but keep the UI stable
+      // Fetch prices concurrently.
       const results = await Promise.allSettled(
         PORTFOLIO.map(async (p) => {
           const price = await fetchLastPriceUSD(p.ticker);
@@ -549,7 +540,7 @@
         })
       );
 
-      // Build a map from ticker -> data, and compute totals
+      // Map results back to rows, compute totals.
       const map = new Map();
       results.forEach((r, i) => {
         const p = PORTFOLIO[i];
@@ -562,28 +553,23 @@
         }
       });
 
-      // Second pass: render final rows with data
+      // Render final rows with computed values.
       rowsEl.innerHTML = PORTFOLIO.map(p => {
         const d = map.get(p.ticker);
         return renderRow(p, d.price, d.value, d.status);
       }).join("");
 
-      // Update KPI header
+      // KPI updates
       totalValueEl.textContent = fmtUSD(total);
       pricedCountEl.textContent = `${priced} / ${PORTFOLIO.length}`;
-
-      const now = new Date();
-      lastUpdatedEl.textContent = `Last updated: ${now.toLocaleString()}`;
+      lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
 
       refreshBtn.disabled = false;
       refreshBtn.textContent = "Refresh Prices";
     }
 
-    // Wire up refresh button
     refreshBtn.addEventListener("click", refreshPortfolio);
-
-    // Auto-run on first load
-    refreshPortfolio();
+    refreshPortfolio(); // auto-run on load
   </script>
 </body>
 </html>
