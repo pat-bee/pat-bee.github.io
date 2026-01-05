@@ -28,7 +28,7 @@ html,body{height:100%}
 body{
   margin:0;
   font-family:var(--sans);
-  font-size:18px;
+  font-size:18px; /* requested */
   color:var(--text);
   background:
     radial-gradient(1200px 600px at 10% 0%, rgba(118,243,255,.18), transparent 60%),
@@ -52,7 +52,7 @@ a:hover{text-decoration:underline}
 
 .wrap{max-width:1180px;margin:22px auto 70px;padding:0 16px}
 
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px}
 .brand h1{margin:0;font-size:20px;font-weight:800}
 .brand .sub{font-size:13px;color:var(--muted);font-family:var(--mono)}
 
@@ -63,9 +63,10 @@ a:hover{text-decoration:underline}
   padding:12px 14px;
   border-radius:14px;
   cursor:pointer;
-  font-weight:700;
+  font-weight:800;
+  font-size:15px;
 }
-.btn:disabled{opacity:.6}
+.btn:disabled{opacity:.6;cursor:default}
 
 .panel{
   background:var(--panel);
@@ -78,7 +79,7 @@ a:hover{text-decoration:underline}
 .kpis{
   padding:16px;
   display:grid;
-  grid-template-columns:1.1fr .9fr .9fr;
+  grid-template-columns:1.2fr .9fr .9fr;
   gap:12px;
 }
 
@@ -88,9 +89,10 @@ a:hover{text-decoration:underline}
   padding:12px;
   background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
 }
-.kpi .label{font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:800}
-.kpi .value{font-size:26px;font-weight:900}
-.kpi .hint{font-size:12px;color:var(--muted);font-family:var(--mono)}
+
+.kpi .label{font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:900;letter-spacing:.25px}
+.kpi .value{font-size:26px;font-weight:950;margin-top:6px}
+.kpi .hint{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:8px;line-height:1.35}
 
 .ice{color:var(--ice)}
 .wave{color:var(--wave)}
@@ -104,6 +106,8 @@ thead th{
   text-align:left;
   padding:12px 10px;
   border-bottom:1px solid rgba(118,243,255,.14);
+  position:sticky; top:0;
+  background:rgba(8,18,40,.65);
 }
 tbody td{
   padding:12px 10px;
@@ -113,15 +117,23 @@ tbody td{
 .mono{font-family:var(--mono)}
 
 .badge{
+  display:inline-flex;
+  align-items:center;
   padding:4px 8px;
   border-radius:999px;
   font-size:12px;
   font-family:var(--mono);
+  font-weight:900;
   border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
 }
-.b-ok{color:var(--ok)}
-.b-warn{color:var(--warn)}
-.b-bad{color:var(--bad)}
+.b-ok{color:var(--ok);border-color:rgba(138,255,193,.35)}
+.b-warn{color:var(--warn);border-color:rgba(255,209,122,.38)}
+.b-bad{color:var(--bad);border-color:rgba(255,107,134,.38)}
+
+@media (max-width: 920px){
+  .kpis{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -130,7 +142,7 @@ tbody td{
   <div class="top">
     <div class="brand">
       <h1>Portfolio Snapshot — Electric Ice</h1>
-      <div class="sub">Live valuation on refresh · Whole shares · Clean rebuild</div>
+      <div class="sub">Live valuation on refresh · Whole shares · Values fetched client-side</div>
     </div>
     <button class="btn" id="refreshBtn">Refresh Prices</button>
   </div>
@@ -139,17 +151,21 @@ tbody td{
     <div class="kpi">
       <div class="label">TOTAL PORTFOLIO VALUE</div>
       <div class="value ice" id="totalValue">$—</div>
-      <div class="hint" id="lastUpdated">—</div>
+      <div class="hint" id="lastUpdated">Last updated: —</div>
     </div>
+
     <div class="kpi">
       <div class="label">PRICED POSITIONS</div>
       <div class="value wave" id="pricedCount">—</div>
-      <div class="hint">OTC tickers may return N/A</div>
+      <div class="hint" id="diag">Diagnostics: —</div>
     </div>
+
     <div class="kpi">
       <div class="label">DATA SOURCE</div>
-      <div class="value">Stooq via r.jina.ai</div>
-      <div class="hint mono">https CSV · no API key</div>
+      <div class="value" style="font-size:16px;font-weight:950;">Stooq CSV (fallback proxies)</div>
+      <div class="hint mono">
+        try: direct → r.jina.ai → allorigins.win/raw
+      </div>
     </div>
   </section>
 
@@ -162,6 +178,7 @@ tbody td{
           <th class="right">Shares</th>
           <th class="right">Price</th>
           <th class="right">Value</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
@@ -170,64 +187,176 @@ tbody td{
 </div>
 
 <script>
+/**
+ * Portfolio holdings — EXACTLY as you specified.
+ * Dropped: BKSY, VSAT, LHX.
+ * Updated: PWR=2, NXT=2, RKLB=4.
+ */
 const PORTFOLIO = [
-  ["Xylem","XYL","NYSE",1,"https://www.xylem.com"],
-  ["Waste Management","WM","NYSE",1,"https://www.wm.com"],
-  ["CSX","CSX","NASDAQ",1,"https://www.csx.com"],
-  ["Eaton","ETN","NYSE",5,"https://www.eaton.com"],
-  ["Quanta Services","PWR","NYSE",2,"https://www.quantaservices.com"],
-  ["Hubbell","HUBB","NYSE",1,"https://www.hubbell.com"],
-  ["Johnson Controls","JCI","NYSE",1,"https://www.johnsoncontrols.com"],
-  ["Trane Technologies","TT","NYSE",1,"https://www.tranetechnologies.com"],
-  ["Carrier","CARR","NYSE",1,"https://www.carrier.com"],
-  ["Daikin","DKILY","OTCMKTS",1,"https://www.daikin.com"],
-  ["ABB","ABBNY","OTCMKTS",1,"https://global.abb"],
-  ["Nextracker","NXT","NASDAQ",2,"https://www.nextracker.com"],
-  ["Texas Instruments","TXN","NASDAQ",1,"https://www.ti.com"],
-  ["Eli Lilly","LLY","NYSE",2,"https://www.lilly.com"],
-  ["Intuitive Surgical","ISRG","NASDAQ",2,"https://www.intuitive.com"],
-  ["Thermo Fisher","TMO","NYSE",1,"https://www.thermofisher.com"],
-  ["Cavco","CVCO","NASDAQ",1,"https://www.cavco.com"],
-  ["MP Materials","MP","NYSE",11,"https://mpmaterials.com"],
-  ["Lynas","LYSCF","OTCMKTS",1,"https://lynasrareearths.com"],
-  ["Rocket Lab","RKLB","NASDAQ",4,"https://www.rocketlabusa.com"],
-  ["Planet Labs","PL","NYSE",11,"https://www.planet.com"],
-  ["Spire Global","SPIR","NYSE",1,"https://spire.com"]
+  { name:"Xylem", ticker:"XYL", exch:"NYSE", shares:1, home:"https://www.xylem.com" },
+  { name:"Waste Management", ticker:"WM", exch:"NYSE", shares:1, home:"https://www.wm.com" },
+  { name:"CSX", ticker:"CSX", exch:"NASDAQ", shares:1, home:"https://www.csx.com" },
+  { name:"Eaton", ticker:"ETN", exch:"NYSE", shares:5, home:"https://www.eaton.com" },
+  { name:"Quanta Services", ticker:"PWR", exch:"NYSE", shares:2, home:"https://www.quantaservices.com" },
+  { name:"Hubbell", ticker:"HUBB", exch:"NYSE", shares:1, home:"https://www.hubbell.com" },
+  { name:"Johnson Controls", ticker:"JCI", exch:"NYSE", shares:1, home:"https://www.johnsoncontrols.com" },
+  { name:"Trane Technologies", ticker:"TT", exch:"NYSE", shares:1, home:"https://www.tranetechnologies.com" },
+  { name:"Carrier", ticker:"CARR", exch:"NYSE", shares:1, home:"https://www.carrier.com" },
+  { name:"Daikin", ticker:"DKILY", exch:"OTCMKTS", shares:1, home:"https://www.daikin.com" },
+  { name:"ABB", ticker:"ABBNY", exch:"OTCMKTS", shares:1, home:"https://global.abb" },
+  { name:"Nextracker", ticker:"NXT", exch:"NASDAQ", shares:2, home:"https://www.nextracker.com" },
+  { name:"Texas Instruments", ticker:"TXN", exch:"NASDAQ", shares:1, home:"https://www.ti.com" },
+  { name:"Eli Lilly", ticker:"LLY", exch:"NYSE", shares:2, home:"https://www.lilly.com" },
+  { name:"Intuitive Surgical", ticker:"ISRG", exch:"NASDAQ", shares:2, home:"https://www.intuitive.com" },
+  { name:"Thermo Fisher", ticker:"TMO", exch:"NYSE", shares:1, home:"https://www.thermofisher.com" },
+  { name:"Cavco", ticker:"CVCO", exch:"NASDAQ", shares:1, home:"https://www.cavco.com" },
+  { name:"MP Materials", ticker:"MP", exch:"NYSE", shares:11, home:"https://mpmaterials.com" },
+  { name:"Lynas", ticker:"LYSCF", exch:"OTCMKTS", shares:1, home:"https://lynasrareearths.com" },
+  { name:"Rocket Lab", ticker:"RKLB", exch:"NASDAQ", shares:4, home:"https://www.rocketlabusa.com" },
+  { name:"Planet Labs", ticker:"PL", exch:"NYSE", shares:11, home:"https://www.planet.com" },
+  { name:"Spire Global", ticker:"SPIR", exch:"NYSE", shares:1, home:"https://spire.com" },
 ];
 
-function stooqSymbol(t){return t.toLowerCase()+".us"}
-async function price(t){
-  const u=`https://r.jina.ai/https://stooq.com/q/l/?s=${stooqSymbol(t)}&f=sd2t2ohlcv&h&e=csv`;
-  const r=await fetch(u); if(!r.ok) throw 0;
-  const l=(await r.text()).split("\n").map(x=>x.trim()).filter(Boolean);
-  const h=l.findIndex(x=>x.toLowerCase().startsWith("symbol,"));
-  const c=l[h].split(",").findIndex(x=>x.toLowerCase()=="close");
-  return Number(l[h+1].split(",")[c]);
+// UI refs
+const rowsEl = document.getElementById("rows");
+const totalValueEl = document.getElementById("totalValue");
+const pricedCountEl = document.getElementById("pricedCount");
+const lastUpdatedEl = document.getElementById("lastUpdated");
+const refreshBtn = document.getElementById("refreshBtn");
+const diagEl = document.getElementById("diag");
+
+// Formatting
+function fmtUSD(n){
+  if(!Number.isFinite(n)) return "N/A";
+  return n.toLocaleString(undefined,{style:"currency",currency:"USD"});
+}
+function googleFinanceLink(ticker, exch){
+  return `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${encodeURIComponent(exch)}`;
+}
+function badge(status){
+  if(status === "OK") return `<span class="badge b-ok">priced</span>`;
+  if(status === "N/A") return `<span class="badge b-bad">no quote</span>`;
+  return `<span class="badge b-warn">loading</span>`;
+}
+
+// ---- Quote fetching (robust) ----
+function stooqSymbol(t){ return `${t.toLowerCase()}.us`; }
+
+function stooqUrlFor(ticker){
+  // Stooq CSV returns: Symbol,Date,Time,Open,High,Low,Close,Volume
+  return `https://stooq.com/q/l/?s=${encodeURIComponent(stooqSymbol(ticker))}&f=sd2t2ohlcv&h&e=csv`;
+}
+
+function proxiedUrls(rawUrl){
+  // Ordered fallbacks. If one fails or returns non-CSV, try the next.
+  return [
+    rawUrl, // direct (sometimes CORS-blocked)
+    `https://r.jina.ai/https://${rawUrl.replace(/^https?:\/\//,"")}`, // r.jina.ai
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`, // allorigins raw proxy
+  ];
+}
+
+function parseStooqClose(text){
+  // Find the "Symbol," header row and read the following row.
+  const lines = text.split("\n").map(l=>l.trim()).filter(Boolean);
+  const headerIdx = lines.findIndex(l => l.toLowerCase().startsWith("symbol,"));
+  if(headerIdx === -1) throw new Error("CSV header not found");
+
+  const header = lines[headerIdx].split(",").map(s=>s.trim().toLowerCase());
+  const rowLine = lines[headerIdx+1];
+  if(!rowLine) throw new Error("CSV data row not found");
+
+  const row = rowLine.split(",").map(s=>s.trim());
+  const closeIdx = header.indexOf("close");
+  if(closeIdx === -1) throw new Error("Close column not found");
+
+  const close = Number(row[closeIdx]);
+  if(!Number.isFinite(close)) throw new Error("Close is not numeric");
+
+  return close;
+}
+
+async function fetchPriceWithFallback(ticker){
+  const raw = stooqUrlFor(ticker);
+  const urls = proxiedUrls(raw);
+
+  let lastErr = null;
+  for(const u of urls){
+    try{
+      const res = await fetch(u, { cache:"no-store" });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const close = parseStooqClose(text);
+      return { close, source: (u===raw ? "direct" : (u.includes("jina.ai") ? "jina" : "allorigins")) };
+    }catch(e){
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("All sources failed");
+}
+
+// ---- Render & refresh ----
+function renderRow(p, price, value, status){
+  return `
+    <tr>
+      <td><a href="${p.home}" target="_blank" rel="noopener">${p.name}</a></td>
+      <td class="mono"><a href="${googleFinanceLink(p.ticker,p.exch)}" target="_blank" rel="noopener">${p.ticker}</a></td>
+      <td class="right mono">${p.shares}</td>
+      <td class="right mono">${fmtUSD(price)}</td>
+      <td class="right mono">${fmtUSD(value)}</td>
+      <td>${badge(status)}</td>
+    </tr>
+  `;
 }
 
 async function refresh(){
-  rows.innerHTML="";
-  let total=0, priced=0;
+  refreshBtn.disabled = true;
+  refreshBtn.textContent = "Refreshing…";
 
-  for(const [n,t,e,s,h] of PORTFOLIO){
-    let p=NaN,v=NaN;
-    try{p=await price(t);v=p*s;total+=v;priced++}catch{}
-    rows.innerHTML+=`
-      <tr>
-        <td><a href="${h}" target="_blank">${n}</a></td>
-        <td><a href="https://www.google.com/finance/quote/${t}:${e}" target="_blank">${t}</a></td>
-        <td class="right mono">${s}</td>
-        <td class="right mono">${isFinite(p)?p.toFixed(2):"N/A"}</td>
-        <td class="right mono">${isFinite(v)?v.toFixed(2):"—"}</td>
-      </tr>`;
-  }
+  rowsEl.innerHTML = PORTFOLIO.map(p => renderRow(p, NaN, NaN, "LOADING")).join("");
 
-  totalValue.textContent="$"+total.toLocaleString(undefined,{minimumFractionDigits:2});
-  pricedCount.textContent=`${priced} / ${PORTFOLIO.length}`;
-  lastUpdated.textContent=new Date().toLocaleString();
+  let total = 0;
+  let priced = 0;
+  const sourceCounts = { direct:0, jina:0, allorigins:0 };
+
+  // Fetch concurrently for speed
+  const results = await Promise.allSettled(
+    PORTFOLIO.map(async (p) => {
+      const q = await fetchPriceWithFallback(p.ticker);
+      const value = q.close * p.shares;
+      return { ticker:p.ticker, close:q.close, value, source:q.source };
+    })
+  );
+
+  const map = new Map();
+  results.forEach((r, i) => {
+    const p = PORTFOLIO[i];
+    if(r.status === "fulfilled"){
+      map.set(p.ticker, { price:r.value.close, value:r.value.value, status:"OK" });
+      total += r.value.value;
+      priced += 1;
+      sourceCounts[r.value.source] += 1;
+    }else{
+      map.set(p.ticker, { price:NaN, value:NaN, status:"N/A" });
+    }
+  });
+
+  rowsEl.innerHTML = PORTFOLIO.map(p => {
+    const d = map.get(p.ticker);
+    return renderRow(p, d.price, d.value, d.status);
+  }).join("");
+
+  totalValueEl.textContent = fmtUSD(total);
+  pricedCountEl.textContent = `${priced} / ${PORTFOLIO.length}`;
+  lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
+  diagEl.textContent = `Diagnostics: direct ${sourceCounts.direct}, jina ${sourceCounts.jina}, allorigins ${sourceCounts.allorigins}`;
+
+  refreshBtn.disabled = false;
+  refreshBtn.textContent = "Refresh Prices";
 }
 
-refreshBtn.onclick=refresh;
+// Hook up
+document.getElementById("refreshBtn").addEventListener("click", refresh);
 refresh();
 </script>
 </body>
