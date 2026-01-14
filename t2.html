@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Agenda</title>
+    <!-- Modern, clean styling for the form with dark mode support -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://drive.google.com/file/d/1RHuCmyfAIY85TlXcolPx9fQ076wLzOZU/view?usp=sharing">
+<link rel="icon" type="image/png" sizes="96x96" href="https://drive.google.com/file/d/12bB0GIUSZXKpem7IrsWBJ9nTP7lhcdW5/view?usp=sharing">
+<link rel="apple-touch-icon" sizes="180x180" href="https://drive.google.com/file/d/1UFppY1Br4ou09UPVZmenb-PX7UyZbFu1/view?usp=sharing">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&family=Red+Hat+Mono:wght@555&display=swap');
+
+        /* --- Color & Theme Variables --- */
+        :root {
+            --bg-color: #f7fafc;
+            --text-color: #1a202c;
+            --container-bg: #ffffff;
+            --container-border: #e2e8f0;
+            --header-color: #2d3748;
+            --header-link-color: #edf1f7; /* Dark mode h2 color */
+            --header-link-hover-color: #C4B5FD; /* Lighter purple */
+            --header-link-active-color: #A78BFA; /* Purple */
+            --input-bg: #edf2f7;
+            --input-border: #cbd5e0;
+            --input-focus-border: #8B5CF6;
+            --input-focus-shadow: rgba(139, 92, 246, 0.5);
+            --button-bg: #8B5CF6;
+            --button-hover-bg: #7C3AED;
+            --button-text: #ffffff;
+            --nav-button-bg: #e2e8f0;
+            --nav-button-hover-bg: #cbd5e0;
+            --nav-button-text: #4a5568;
+            --search-border: #d1d5db;
+            --search-bg: #f9fafb;
+            --list-item-border: #f3f4f6;
+            --done-text-color: #9ca3af;
+            --danger-color: #EF4444;
+            --danger-hover-color: #DC2626;
+        }
+
+        .dark-mode {
+            --bg-color: #1a202c;
+            --text-color: #f7fafc;
+            --container-bg: #2d3748;
+            --container-border: #4a5568;
+            --header-color: #edf1f7;
+            --input-bg: #4a5568;
+            --input-border: #718096;
+            --input-focus-border: #A78BFA;
+            --input-focus-shadow: rgba(167, 139, 250, 0.5);
+            --button-bg: #A78BFA;
+            --button-hover-bg: #C4B5FD;
+            --button-text: #1a202c;
+            --nav-button-bg: #4a5568;
+            --nav-button-hover-bg: #718096;
+            --nav-button-text: #e2e8f0;
+            --search-border: #4b5563;
+            --search-bg: #374151;
+            --list-item-border: #374151;
+            --done-text-color: #6b7280;
+        }
+
+        /* --- General Layout & Typography (Mobile First) --- */
+        body {
+            font-family: 'Cutive Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            background-color: var(--container-bg);
+            padding: 1.5rem 10px;
+            border: none;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1, h2 {
+            font-family: 'Red Hat Mono', monospace;
+            font-weight: 555;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            color: var(--header-color);
+            margin-top: 1rem;
+            margin-bottom: 0;
+            text-align: center;
+        }
+        
+        .date-numeric {
+            font-size: 1.75rem;
+            font-weight: 400;
+            color: var(--done-text-color);
+            margin-top: 0;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--header-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--container-border);
+            padding-bottom: 0.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .dark-mode h2 { color: var(--header-link-color); }
+        h2:hover { color: var(--header-link-hover-color); }
+        h2:active { color: var(--header-link-active-color); }
+
+
+        #date { display: none; }
+
+        /* --- List & Item Styling (Mobile First) --- */
+        ul { list-style-type: none; padding: 0; margin: 0; }
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0.25rem;
+            border-bottom: 1px solid var(--list-item-border);
+            transition: opacity 0.3s, background-color 0.2s;
+            word-break: break-word;
+            cursor: pointer;
+            font-size: 2rem;
+        }
+        
+        li:hover { background-color: rgba(0,0,0,0.03); }
+        .dark-mode li:hover { background-color: rgba(255,255,255,0.03); }
+        
+        li.done { opacity: 0.5; }
+        .item-text { margin-right: 1rem; }
+        li.done .item-text { text-decoration: line-through; color: var(--done-text-color); }
+
+        .item-toggle {
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: transparent;
+            margin-left: 1rem;
+            font: inherit;
+            color: var(--text-color);
+            width: 1.25em;
+            height: 1.25em;
+            border: 0.15em solid var(--text-color);
+            border-radius: 50%;
+            transform: translateY(-0.075em);
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .item-toggle::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em var(--button-bg);
+        }
+        .item-toggle:checked::before { transform: scale(1); }
+        li.done .item-toggle { border-color: var(--done-text-color); }
+        li.done .item-toggle:checked::before { box-shadow: inset 1em 1em var(--done-text-color); }
+
+        /* --- Input & Button Styling (Mobile First) --- */
+        .new-item-input, .submit-button, .nav-button, #search-button, .modal-button {
+            font-family: 'Cutive Mono', monospace;
+            font-weight: 400; /* Cutive Mono only supports regular weight */
+        }
+
+        .new-item-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 2rem;
+            color: var(--text-color);
+            background-color: var(--input-bg);
+            box-sizing: border-box;
+            margin-top: 0.5rem;
+        }
+        .new-item-input:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+        .submit-button, .nav-button, #search-button {
+            padding: 1.5rem;
+            font-size: 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .submit-button {
+            width: 100%;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            margin-top: 2rem;
+            text-transform: uppercase;
+        }
+        
+        /* --- Search Section --- */
+        .search-container { margin-top: 2rem; display: flex; gap: 0.5rem; }
+        #search-input { flex-grow: 1; border: 1px solid var(--search-border); background-color: var(--search-bg); }
+        #search-button {
+            background-color: #e5e7eb; color: #374151; border: 1px solid #d1d5db;
+        }
+        .dark-mode #search-button { background-color: #4b5563; color: #e5e7eb; border-color: #6b7280; }
+
+        .nav-container { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+        .nav-button {
+            background-color: var(--nav-button-bg); color: var(--nav-button-text);
+            border: none;
+        }
+        #status { text-align: center; margin-top: 1.5rem; font-weight: 500; min-height: 1.2em; font-size: 1.5rem; }
+        
+        /* --- Confirmation Modal --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out;
+        }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background-color: var(--container-bg); color: var(--text-color);
+            padding: 2rem; border-radius: 12px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%; font-size: 2rem;
+        }
+        #modal-edit-textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: 1.5rem;
+        }
+        .modal-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .modal-button {
+            padding: 1rem 1.5rem; border-radius: 8px; border: none;
+            cursor: pointer; font-size: 1.75rem;
+        }
+        #modal-save { background-color: var(--button-bg); color: var(--button-text); }
+        #modal-save:hover { background-color: var(--button-hover-bg); }
+        #modal-delete { background-color: var(--danger-color); color: white; }
+        #modal-delete:hover { background-color: var(--danger-hover-color); }
+        #modal-cancel { background-color: var(--nav-button-bg); color: var(--nav-button-text); }
+        
+        /* --- DESKTOP & LARGER SCREEN OVERRIDES --- */
+        @media (min-width: 499px) {
+            body {
+                padding: 2rem;
+                align-items: flex-start;
+            }
+            .container {
+                width: 100%;
+                max-width: 600px;
+                padding: 2.5rem;
+                border-radius: 12px;
+                border: 1px solid var(--container-border);
+                min-height: auto;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            h1 {
+                font-size: 2.25rem;
+                margin-bottom: 0;
+            }
+            .date-numeric {
+                font-size: 1.25rem;
+            }
+            h2 {
+                font-size: 1.5625rem;
+            }
+            li, .new-item-input, #search-input {
+                font-size: 1rem;
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+            .submit-button {
+                padding: 0.875rem;
+                font-size: 1rem;
+            }
+            .nav-button {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+            #search-button {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+            #status {
+                font-size: 1rem;
+            }
+            .modal-content {
+                width: auto;
+                font-size: 1rem;
+            }
+            .modal-button {
+                font-size: 1rem;
+                padding: 0.5rem 1.5rem;
+            }
+        }
+
+        /* --- INCREASED MOBILE FONT SIZE --- */
+        @media (max-width: 799px) {
+            h1 {
+                font-size: 5.85rem;
+            }
+            .date-numeric {
+                font-size: 2.275rem;
+            }
+            h2 {
+                font-size: 3.125rem;
+            }
+            li, .new-item-input, #search-input {
+                font-size: 2.6rem;
+            }
+            .submit-button, .nav-button, #search-button {
+                font-size: 2.6rem;
+            }
+            #status {
+                font-size: 1.95rem;
+            }
+            .modal-content {
+                font-size: 2.6rem;
+            }
+            .modal-button {
+                font-size: 2.275rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="main-view">
+        <h1 id="display-date"></h1>
+        <h1 id="display-date-numeric" class="date-numeric"></h1>
+        <form id="user-form">
+            <input type="date" id="date" name="date" required>
+            <div id="categories-container"></div>
+            <button type="submit" class="submit-button">SAVE NEW ITEMS</button>
+        </form>
+        
+        <div class="search-container">
+            <input type="search" id="search-input" class="new-item-input" placeholder="Search all entries...">
+            <button id="search-button">Search</button>
+        </div>
+
+        <p id="status"></p>
+        <div class="nav-container">
+            <button id="prev-day" class="nav-button">&lt;&lt; Back a Day</button>
+            <a id="all-link" href="#" target="_blank" class="nav-button">ALL</a>
+            <button id="next-day" class="nav-button">Forward a Day &gt;&gt;</button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal HTML -->
+    <div id="edit-delete-modal" class="modal-overlay">
+        <div class="modal-content">
+            <p>Edit or delete this item:</p>
+            <textarea id="modal-edit-textarea" class="new-item-input"></textarea>
+            <div class="modal-buttons">
+                <button id="modal-cancel" class="modal-button">Cancel</button>
+                <button id="modal-save" class="modal-button">Save Changes</button>
+                <button id="modal-delete" class="modal-button">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- INITIALIZATION & THEME ---
+        (function() {
+            const SUNSET_HOUR = 20;
+            if (new Date().getHours() >= SUNSET_HOUR) {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+
+        // --- DOM REFERENCES & STATE ---
+        const displayDateEl = document.getElementById('display-date');
+        const displayDateNumericEl = document.getElementById('display-date-numeric');
+        const dateInput = document.getElementById('date');
+        const form = document.getElementById('user-form');
+        const statusEl = document.getElementById('status');
+        const prevDayBtn = document.getElementById('prev-day');
+        const nextDayBtn = document.getElementById('next-day');
+        const allLink = document.getElementById('all-link');
+        const categoriesContainer = document.getElementById('categories-container');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const editDeleteModal = document.getElementById('edit-delete-modal');
+        const modalSaveBtn = document.getElementById('modal-save');
+        const modalDeleteBtn = document.getElementById('modal-delete');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+        const modalEditTextarea = document.getElementById('modal-edit-textarea');
+
+        const CATEGORIES = {
+            mustDo: { title: 'Must Do', persistent: true, hasToggle: true },
+            wantToDo: { title: 'Want To Do', persistent: true, hasToggle: true },
+            happyFace: { title: '😊 Happy Face', persistent: false, hasToggle: false },
+            sadFace: { title: '😞 Sad Face', persistent: false, hasToggle: false },
+            poetry: { title: 'Poetry', persistent: false, hasToggle: false },
+            therapy: { title: 'Therapy', persistent: false, hasToggle: false },
+            notes: { title: 'Notes', persistent: false, hasToggle: false },
+        };
+
+        let longPressTimer;
+        let itemToModify = null;
+
+        // --- RENDER & DISPLAY FUNCTIONS ---
+        function renderCategories() {
+            categoriesContainer.innerHTML = '';
+            for (const id in CATEGORIES) {
+                const category = CATEGORIES[id];
+                const section = document.createElement('div');
+                section.className = 'form-group';
+                const h2 = document.createElement('h2');
+                h2.textContent = category.title;
+                h2.addEventListener('click', () => handleCategoryClick(id));
+                
+                section.appendChild(h2);
+                section.innerHTML += `
+                    <ul id="list-${id}"></ul>
+                    <input type="text" id="input-${id}" class="new-item-input" placeholder="Add a new item...">
+                `;
+                categoriesContainer.appendChild(section);
+            }
+        }
+
+        function renderItems(items) {
+            for (const id in CATEGORIES) {
+                document.getElementById(`list-${id}`).innerHTML = '';
+            }
+            if (!items) return;
+
+            const isToday = isDateToday(new Date(dateInput.value + 'T12:00:00'));
+            items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            items.forEach(item => {
+                if (isToday && item.status === 'done') return;
+
+                const list = document.getElementById(`list-${item.category}`);
+                if (!list) return;
+
+                const li = document.createElement('li');
+                li.dataset.id = item.entryID;
+                if (item.status === 'done') li.classList.add('done');
+                
+                const categoryConfig = CATEGORIES[item.category];
+                let toggleHTML = '';
+                if (categoryConfig.hasToggle) {
+                    const checkedAttr = item.status === 'done' ? 'checked' : '';
+                    toggleHTML = `<input type="checkbox" class="item-toggle" ${checkedAttr}>`;
+                }
+                
+                li.innerHTML = `<span class="item-text">${item.content}</span>${toggleHTML}`;
+                list.appendChild(li);
+
+                // Add event listeners
+                if (categoryConfig.hasToggle) {
+                    li.querySelector('.item-toggle').addEventListener('change', (e) => {
+                        updateStatus(item.entryID, e.target.checked ? 'done' : 'pending');
+                        if (isToday) {
+                            li.style.opacity = '0';
+                            setTimeout(() => li.remove(), 300);
+                        } else {
+                            li.classList.toggle('done');
+                        }
+                    });
+                }
+                addLongPressListener(li, item);
+            });
+        }
+
+        // --- DATA HANDLING & ACTIONS ---
+        function fetchDataForDate(dateString) {
+            statusEl.textContent = 'Loading...';
+            if (typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(renderItems)
+                .withFailureHandler(err => statusEl.textContent = `Error: ${err.message}`)
+                .getDataForView(dateString);
+        }
+        
+        function handleSave() {
+            statusEl.textContent = 'Saving...';
+            const newEntries = [];
+            const entryDate = dateInput.value;
+
+            for (const id in CATEGORIES) {
+                const content = document.getElementById(`input-${id}`).value.trim();
+                if (content) newEntries.push({ category: id, content, entryDate });
+            }
+
+            if (newEntries.length === 0) {
+                statusEl.textContent = 'Nothing new to save.';
+                return;
+            }
+            
+            if (typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(() => {
+                    statusEl.textContent = 'Save successful!';
+                    for (const id in CATEGORIES) document.getElementById(`input-${id}`).value = '';
+                    fetchDataForDate(entryDate);
+                })
+                .withFailureHandler(err => statusEl.textContent = `Save failed: ${err.message}`)
+                .addEntries(newEntries);
+        }
+        
+        function updateStatus(entryID, status) {
+            if (typeof google === 'undefined') return;
+            google.script.run
+                .withFailureHandler(err => alert(`Failed to update status: ${err.message}`))
+                .updateEntryStatus(entryID, status);
+        }
+        
+        function deleteItem(entryID) {
+            if (typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(() => {
+                    const liToRemove = document.querySelector(`li[data-id="${entryID}"]`);
+                    if (liToRemove) {
+                        liToRemove.style.opacity = '0';
+                        setTimeout(() => liToRemove.remove(), 300);
+                    }
+                })
+                .withFailureHandler(err => alert(`Failed to delete: ${err.message}`))
+                .deleteEntry(entryID);
+        }
+
+        function handleEdit(entryID, newContent) {
+            if (typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(() => {
+                    const liToUpdate = document.querySelector(`li[data-id="${entryID}"] .item-text`);
+                    if (liToUpdate) {
+                        liToUpdate.textContent = newContent;
+                    }
+                })
+                .withFailureHandler(err => alert(`Failed to edit: ${err.message}`))
+                .editEntry(entryID, newContent);
+        }
+
+        function handleSearch() {
+            const query = searchInput.value.trim();
+            if (!query || typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(url => window.open(`${url}?page=search&query=${encodeURIComponent(query)}`, '_blank'))
+                .getScriptUrl();
+        }
+        
+        function handleCategoryClick(categoryId) {
+            if (!categoryId || typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(url => window.open(`${url}?page=category&category=${encodeURIComponent(categoryId)}`, '_blank'))
+                .getScriptUrl();
+        }
+
+        function setSheetUrl() {
+            if (typeof google === 'undefined') return;
+            google.script.run
+                .withSuccessHandler(url => {
+                    allLink.href = url;
+                })
+                .getSheetUrl();
+        }
+
+        // --- UTILITIES & EVENT LISTENERS ---
+        function updateMainHeadline(dateObj) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            const compareDate = new Date(dateObj);
+            compareDate.setHours(0,0,0,0);
+
+            if (compareDate.getTime() === today.getTime()) {
+                displayDateEl.textContent = 'Today';
+            } else if (compareDate.getTime() === tomorrow.getTime()) {
+                displayDateEl.textContent = 'Tomorrow';
+            } else if (compareDate.getTime() === yesterday.getTime()) {
+                displayDateEl.textContent = 'Yesterday';
+            } else {
+                displayDateEl.textContent = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(compareDate);
+            }
+            
+            const dateOptions = { month: '2-digit', day: '2-digit', year: 'numeric' };
+            displayDateNumericEl.textContent = new Intl.DateTimeFormat('en-US', dateOptions).format(dateObj);
+        }
+        
+        function isDateToday(date) {
+            const today = new Date();
+            return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+        }
+
+        function changeDate(days) {
+            const currentDate = new Date(dateInput.value + 'T12:00:00');
+            currentDate.setDate(currentDate.getDate() + days);
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const newDateString = `${year}-${month}-${day}`;
+            dateInput.value = newDateString;
+            updateMainHeadline(currentDate);
+            fetchDataForDate(newDateString);
+        }
+
+        function addLongPressListener(element, item) {
+            element.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('item-toggle')) return;
+                longPressTimer = setTimeout(() => {
+                    itemToModify = item;
+                    modalEditTextarea.value = item.content;
+                    editDeleteModal.classList.add('visible');
+                }, 750);
+            });
+            const clearTimer = () => clearTimeout(longPressTimer);
+            element.addEventListener('mouseup', clearTimer);
+            element.addEventListener('mouseleave', clearTimer);
+        }
+
+        form.addEventListener('submit', (e) => { e.preventDefault(); handleSave(); });
+        prevDayBtn.addEventListener('click', () => changeDate(-1));
+        nextDayBtn.addEventListener('click', () => changeDate(1));
+        searchButton.addEventListener('click', handleSearch);
+        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } });
+        
+        modalCancelBtn.addEventListener('click', () => editDeleteModal.classList.remove('visible'));
+        modalDeleteBtn.addEventListener('click', () => {
+            if (itemToModify) deleteItem(itemToModify.entryID);
+            editDeleteModal.classList.remove('visible');
+        });
+        modalSaveBtn.addEventListener('click', () => {
+            if (itemToModify) handleEdit(itemToModify.entryID, modalEditTextarea.value);
+            editDeleteModal.classList.remove('visible');
+        });
+        
+        // --- PAGE INITIALIZATION ---
+        (function initialize() {
+            renderCategories();
+            setSheetUrl(); // Get the sheet URL on page load
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayString = `${year}-${month}-${day}`;
+            dateInput.value = todayString;
+            updateMainHeadline(today);
+            fetchDataForDate(todayString);
+        })();
+    </script>
+</body>
+</html>
