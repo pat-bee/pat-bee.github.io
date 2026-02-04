@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strain Comparison: Super Lemon Haze vs Moonshine Haze</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 4px solid #764ba2;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 0.95em;
+            opacity: 0.95;
+        }
+        
+        .content {
+            padding: 35px 40px;
+            line-height: 1.8;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .strain-card {
+            background: #f8f9ff;
+            border-left: 5px solid;
+            padding: 25px;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .strain-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .strain-card.slh {
+            border-left-color: #ffd700;
+            background: linear-gradient(135deg, #fffaf0 0%, #fff8e7 100%);
+        }
+        
+        .strain-card.msh {
+            border-left-color: #87ceeb;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e7f3ff 100%);
+        }
+        
+        .strain-card h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin: 5px 0;
+        }
+        
+        .badge.thc {
+            background: #ffe4e1;
+            color: #c41e3a;
+        }
+        
+        .badge.type {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .property {
+            margin: 12px 0;
+            font-size: 0.95em;
+        }
+        
+        .property strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .key-differences {
+            background: linear-gradient(135deg, #f5f7fa 0%, #f1f3f8 100%);
+            border: 2px solid #e0e7ff;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .key-differences h2 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .difference-item {
+            margin: 15px 0;
+            padding: 12px;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .difference-item strong {
+            color: #667eea;
+        }
+        
+        .neurological-section {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+            border: 2px solid #ffd700;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .neurological-section h2 {
+            color: #b8860b;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #ffd700;
+            padding-bottom: 10px;
+        }
+        
+        .neuro-point {
+            margin: 12px 0;
+            padding-left: 20px;
+            border-left: 3px solid #ffd700;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 4px;
+        }
+        
+        .citations {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            font-size: 0.9em;
+        }
+        
+        .citations h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .citation-item {
+            margin: 10px 0;
+            padding-left: 20px;
+            text-indent: -20px;
+        }
+        
+        .conclusion {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 5px solid #4caf50;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .conclusion h2 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+        
+        .conclusion p {
+            color: #1b5e20;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.6em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+        
+        .terpene-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin: 3px;
+            font-weight: 500;
+        }
+        
+        .divider {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            margin: 30px 0;
+        }
+        
+        sup {
+            color: #667eea;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cannabis Strain Neurological Comparison</h1>
+            <p>Super Lemon Haze vs. Moonshine Haze: Effects on Cognition & Behavior</p>
+        </div>
+        
+        <div class="content">
+            <!-- Comparison Grid -->
+            <div class="comparison-grid">
+                <div class="strain-card slh">
+                    <h3>🍋 Super Lemon Haze</h3>
+                    <div class="property">
+                        <strong>Classification</strong>
+                        <span class="badge type">Sativa Hybrid</span>
+                    </div>
+                    <div class="property">
+                        <strong>THC Content</strong>
+                        <span class="badge thc">~19%</span>
+                    </div>
+                    <div class="property">
+                        <strong>Genetics</strong>
+                        Lemon Skunk × Super Silver Haze
+                    </div>
+                    <div class="property">
+                        <strong>Primary Terpenes</strong>
+                        <span class="terpene-badge">Terpinolene</span>
+                        <span class="terpene-badge">Caryophyllene</span>
+                        <span class="terpene-badge">Myrcene</span>
+                    </div>
+                    <div class="property">
+                        <strong>Flavor Profile</strong>
+                        Zesty lemon, citrus, lime
+                    </div>
+                </div>
+                
+                <div class="strain-card msh">
+                    <h3>🌙 Moonshine Haze</h3>
+                    <div class="property">
+                        <strong>Classification</strong>
+                        <span class="badge type">Sativa</span>
+                    </div>
+                    <div class="property">
+                        <strong>THC Content</strong>
+                        <span class="badge thc">~20%</span>
+                    </div>
+                    <div class="property">
+                        <strong>Genetics</strong>
+                        Amnesia Haze × Nevil's Wreck
+                    </div>
+                    <div class="property">
+                        <strong>Primary Terpenes</strong>
+                        <span class="terpene-badge">Terpinolene</span>
+                        <span class="terpene-badge">Caryophyllene</span>
+                        <span class="terpene-badge">Pinene</span>
+                    </div>
+                    <div class="property">
+                        <strong>Flavor Profile</strong>
+                        Flowery, sage, woody
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- Neurological & Cognitive Effects -->
+            <div class="neurological-section">
+                <h2>Neurological & Cognitive Effects</h2>
+                
+                <div class="neuro-point">
+                    <strong>Super Lemon Haze: Terpinolene-Dominant Profile</strong>
+                    <p>Super Lemon Haze's primary terpene, terpinolene, demonstrates <strong>sustained cognitive clarity through antioxidant neuroprotection</strong><sup>1</sup>. Research indicates terpinolene provides mental stimulation while maintaining relaxation, making it ideal for focus-intensive tasks without overstimulation<sup>2</sup>. The dominance of caryophyllene activates CB2 receptors, reducing stress-related cognitive interference<sup>3</sup>. Users report enhanced focus, energy, and uplift—particularly suited for daytime use.</p>
+                </div>
+                
+                <div class="neuro-point">
+                    <strong>Moonshine Haze: Balanced Terpene Synergy</strong>
+                    <p>Moonshine Haze combines terpinolene with pinene, creating <strong>multi-pathway cognitive enhancement</strong><sup>4</sup>. While terpinolene provides mental clarity, pinene's inhibition of acetylcholinesterase improves memory retention and alertness<sup>5</sup>. This dual mechanism supports creative thinking and sustained attention. Caryophyllene's anti-inflammatory effects further reduce neuroinflammation that impairs cognitive performance<sup>6</sup>. Users report creativity, focus, and euphoria with social ease.</p>
+                </div>
+            </div>
+            
+            <!-- Key Neurological Differences -->
+            <div class="key-differences">
+                <h2>Key Neurological Differences</h2>
+                
+                <div class="difference-item">
+                    <strong>Cognitive Focus Architecture</strong>
+                    Super Lemon Haze emphasizes <strong>sustained attentional clarity</strong> through terpinolene's antioxidant neuroprotection; Moonshine Haze adds <strong>memory-specific enhancement</strong> via pinene's acetylcholinesterase inhibition<sup>7</sup>.
+                </div>
+                
+                <div class="difference-item">
+                    <strong>Behavioral Trajectory</strong>
+                    Super Lemon Haze typically generates focused, energetic engagement; Moonshine Haze users report enhanced social fluidity alongside creative capacity, reflecting Amnesia Haze genetics' euphoric cerebrality<sup>8</sup>.
+                </div>
+                
+                <div class="difference-item">
+                    <strong>Anxiety Modulation</strong>
+                    Both contain caryophyllene for stress reduction, but Moonshine Haze's pinene provides additional GABAergic modulation supporting nervous system calm<sup>9</sup>, while Super Lemon Haze relies primarily on terpinolene's inherent anxiolytic properties<sup>10</sup>.
+                </div>
+                
+                <div class="difference-item">
+                    <strong>Sensory Experience & Mood</strong>
+                    Super Lemon Haze's citrus profile (limonene-adjacent) enhances mood through dopamine-adjacent pathways; Moonshine Haze's floral-woody notes reflect Amnesia Haze's complex limonene/caryophyllene synergy, supporting euphoria alongside clarity<sup>11</sup>.
+                </div>
+            </div>
+            
+            <!-- Behavioral Effects -->
+            <div class="key-differences" style="background: linear-gradient(135deg, #f0f8ff 0%, #e1f3ff 100%); border-color: #87ceeb;">
+                <h2 style="color: #0277bd;">Behavioral Manifestations</h2>
+                
+                <div class="difference-item">
+                    <strong>Super Lemon Haze:</strong> Energetic, focused, uplifted—optimal for task completion and mental work. Users report clarity without racing thoughts; best for concentration-dependent activities<sup>12</sup>.
+                </div>
+                
+                <div class="difference-item">
+                    <strong>Moonshine Haze:</strong> Uplifted, creative, talkative—promotes social ease and ideation. Suited for collaborative work, artistic pursuits, and social gatherings while maintaining functional clarity<sup>13</sup>.
+                </div>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- Conclusion -->
+            <div class="conclusion">
+                <h2>Conclusion</h2>
+                <p>Both strains are sativa-dominant with nearly identical THC levels (~19-20%) and overlapping terpene profiles, yet they diverge neurologically. Super Lemon Haze emphasizes <strong>sustained focus and mental clarity</strong>, driven by terpinolene's antioxidant neuroprotection. Moonshine Haze delivers <strong>multi-modal cognitive enhancement</strong>—combining terpinolene's clarity with pinene's memory support—producing a more socially fluid, creatively stimulating experience. Choice depends on whether the user prioritizes laser-focused attention or creative sociability paired with clarity.</p>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- References -->
+            <div class="citations">
+                <h3>Sources & Citations</h3>
+                
+                <div class="citation-item">
+                    <sup>1</sup> Terpene Belt Farms (2025). "5 Energy-Boosting Terpenes: Product Development Guide." Terpinolene's antioxidant neuroprotection supports sustained mental clarity without overstimulation.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>2</sup> 21 Cannabis (2026). "Best Terpenes for Focus." Terpinolene balances mild sedation with cognitive stimulation, promoting focus and relaxation.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>3</sup> Terpene Belt Farms (2025). "Best Terpenes for Productivity." Beta-caryophyllene activates CB2 receptors to reduce stress-related cognitive interference.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>4</sup> Terpene Belt Farms (2025). "Best Terpenes for Energy and Focus." Multi-terpene synergy (pinene + limonene + terpinolene + caryophyllene) delivers balanced cognitive enhancement.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>5</sup> 21 Cannabis (2026). "Best Terpenes for Focus." Alpha-pinene improves recall and alertness by inhibiting acetylcholinesterase, preserving acetylcholine for learning and attention.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>6</sup> Terpene Belt Farms (2025). "Best Terpenes for Productivity." Beta-caryophyllene reduces neuroinflammation markers (TNF-α, IL-1β) that compromise cognitive function.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>7</sup> Terpene Belt Farms (2025). "Best Terpenes for Energy and Focus." Pinene's neuroprotective mechanism through acetylcholinesterase inhibition differs from terpinolene's antioxidant pathway.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>8</sup> Leafly (2025). Amnesia Haze strain data; users report euphoric clarity and social fluidity. Moonshine Haze inherits Amnesia Haze genetics contributing to its behavioral profile.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>9</sup> Canavape (2025). "Essential Terpenes for ADHD-like Symptoms." Pinene influences GABAergic activity, supporting nervous system excitability management.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>10</sup> Hyperwolf (2025). "Exploring Terpinolene Effects in Cannabis." Terpinolene's mood-regulating potential operates through neurotransmitter activity affecting cognitive performance.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>11</sup> DNA Genetics (2025). "Amnesia Haze Cannabis Strain." Limonene's mood-enhancing qualities combined with caryophyllene's properties create euphoric clarity characteristic of Amnesia Haze genetics.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>12</sup> Leafly (2025). Super Lemon Haze strain data; users report energetic, focused, uplifting effects without anxiety in most cases.
+                </div>
+                
+                <div class="citation-item">
+                    <sup>13</sup> Leafly (2025). Moonshine Haze strain data; users report creative, talkative, uplifted effects with enhanced social capacity and ideation.
+                </div>
+            </div>
+            
+            <p style="text-align: center; color: #999; font-size: 0.85em; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <em>This report synthesizes publicly available information from cannabis research platforms and terpene pharmacology sources. It is intended for educational purposes only and does not constitute medical advice. Consult healthcare professionals before using cannabis for therapeutic purposes.</em>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
