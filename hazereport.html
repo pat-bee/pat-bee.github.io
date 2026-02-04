@@ -1,387 +1,702 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strain Comparison: Super Lemon Haze vs Moonshine Haze</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-            border-bottom: 4px solid #764ba2;
-        }
-        
-        .header h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .header p {
-            font-size: 0.95em;
-            opacity: 0.95;
-        }
-        
-        .content {
-            padding: 35px 40px;
-            line-height: 1.8;
-        }
-        
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin: 30px 0;
-        }
-        
-        .strain-card {
-            background: #f8f9ff;
-            border-left: 5px solid;
-            padding: 25px;
-            border-radius: 8px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .strain-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-        }
-        
-        .strain-card.slh {
-            border-left-color: #ffd700;
-            background: linear-gradient(135deg, #fffaf0 0%, #fff8e7 100%);
-        }
-        
-        .strain-card.msh {
-            border-left-color: #87ceeb;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e7f3ff 100%);
-        }
-        
-        .strain-card h3 {
-            color: #667eea;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 600;
-            margin: 5px 0;
-        }
-        
-        .badge.thc {
-            background: #ffe4e1;
-            color: #c41e3a;
-        }
-        
-        .badge.type {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .property {
-            margin: 12px 0;
-            font-size: 0.95em;
-        }
-        
-        .property strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 3px;
-        }
-        
-        .key-differences {
-            background: linear-gradient(135deg, #f5f7fa 0%, #f1f3f8 100%);
-            border: 2px solid #e0e7ff;
-            padding: 25px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .key-differences h2 {
-            color: #667eea;
-            font-size: 1.4em;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
-        
-        .difference-item {
-            margin: 15px 0;
-            padding: 12px;
-            background: white;
-            border-left: 4px solid #667eea;
-            border-radius: 4px;
-        }
-        
-        .difference-item strong {
-            color: #667eea;
-        }
-        
-        .neurological-section {
-            background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
-            border: 2px solid #ffd700;
-            padding: 25px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .neurological-section h2 {
-            color: #b8860b;
-            font-size: 1.4em;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #ffd700;
-            padding-bottom: 10px;
-        }
-        
-        .neuro-point {
-            margin: 12px 0;
-            padding-left: 20px;
-            border-left: 3px solid #ffd700;
-            background: white;
-            padding: 12px 15px;
-            border-radius: 4px;
-        }
-        
-        .citations {
-            background: #f0f4ff;
-            border: 2px solid #667eea;
-            padding: 25px;
-            border-radius: 8px;
-            margin: 30px 0;
-            font-size: 0.9em;
-        }
-        
-        .citations h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .citation-item {
-            margin: 10px 0;
-            padding-left: 20px;
-            text-indent: -20px;
-        }
-        
-        .conclusion {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-left: 5px solid #4caf50;
-            padding: 25px;
-            border-radius: 8px;
-            margin: 30px 0;
-        }
-        
-        .conclusion h2 {
-            color: #2e7d32;
-            margin-bottom: 15px;
-        }
-        
-        .conclusion p {
-            color: #1b5e20;
-        }
-        
-        @media (max-width: 768px) {
-            .comparison-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .header h1 {
-                font-size: 1.6em;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-        }
-        
-        .terpene-badge {
-            display: inline-block;
-            background: #e3f2fd;
-            color: #1565c0;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            margin: 3px;
-            font-weight: 500;
-        }
-        
-        .divider {
-            border: none;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #667eea, transparent);
-            margin: 30px 0;
-        }
-        
-        sup {
-            color: #667eea;
-            font-weight: 600;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Strain Comparison Playground: Super Lemon Haze vs Moonshine Haze</title>
+
+  <!-- Friendly, kid-ish (but accessible) type. Falls back safely if fonts fail. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Comic+Neue:wght@300;400;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#ffe8f4;
+      --bg2:#e9f7ff;
+      --ink:#1a1a1a;
+      --paper:#fffdf7;
+
+      --lemon:#ffea5b;
+      --moon:#a9e1ff;
+      --moonAccent:#527d8f;
+
+      --crayon1:#ff4d6d;
+      --crayon2:#5b8cff;
+      --crayon3:#7ad957;
+      --crayon4:#ffb703;
+      --crayon5:#8a5cf7;
+
+      --shadow: 0 14px 40px rgba(0,0,0,.18);
+      --soft: 0 10px 22px rgba(0,0,0,.10);
+
+      --radius: 22px;
+      --radius2: 14px;
+
+      --maxw: 980px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1100px 700px at 10% 10%, var(--bg2), transparent 60%),
+        radial-gradient(900px 650px at 90% 25%, var(--bg1), transparent 55%),
+        linear-gradient(135deg, #fff 0%, #f7fbff 60%, #fff 100%);
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.6;
+      font-size: 17px;
+      padding: 18px;
+    }
+
+    /* A11y: focus ring */
+    :focus-visible{
+      outline: 3px dashed var(--crayon2);
+      outline-offset: 4px;
+      border-radius: 10px;
+    }
+
+    .wrap{
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+
+    /* Doodly banner */
+    .banner{
+      position: relative;
+      background: var(--paper);
+      border-radius: var(--radius);
+      padding: 22px 18px 18px;
+      box-shadow: var(--shadow);
+      border: 3px solid rgba(0,0,0,.08);
+      overflow:hidden;
+    }
+
+    .banner::before,
+    .banner::after{
+      content:"";
+      position:absolute;
+      inset:-60px -40px auto auto;
+      width:260px;
+      height:260px;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,77,109,.35), transparent 60%),
+        radial-gradient(circle at 70% 60%, rgba(91,140,255,.35), transparent 62%),
+        radial-gradient(circle at 40% 80%, rgba(255,183,3,.28), transparent 62%);
+      transform: rotate(14deg);
+      filter: blur(0.3px);
+      pointer-events:none;
+    }
+    .banner::after{
+      inset:auto auto -70px -60px;
+      transform: rotate(-10deg);
+      background:
+        radial-gradient(circle at 40% 35%, rgba(122,217,87,.35), transparent 62%),
+        radial-gradient(circle at 70% 60%, rgba(138,92,247,.28), transparent 62%),
+        radial-gradient(circle at 30% 85%, rgba(255,183,3,.25), transparent 60%);
+    }
+
+    .banner-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .title{
+      margin: 0;
+      font-family: "Patrick Hand", "Comic Neue", cursive;
+      font-size: clamp(1.85rem, 3.8vw, 2.95rem);
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .subtitle{
+      margin: 8px 0 0;
+      font-size: 1.08rem;
+      opacity:.9;
+      max-width: 58ch;
+    }
+
+    .badge-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 14px;
+    }
+
+    .sticker{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,.12);
+      box-shadow: 0 5px 0 rgba(0,0,0,.08);
+      transform: rotate(-1.2deg);
+      user-select:none;
+    }
+    .sticker strong{ font-family:"Comic Neue", "Nunito", sans-serif; }
+    .sticker.lemon{ background: linear-gradient(135deg, #fff8b7, #fff); }
+    .sticker.moon{ background: linear-gradient(135deg, #cfefff, #fff); transform: rotate(1.2deg); }
+    .sticker.note{ background: linear-gradient(135deg, #ffe4ea, #fff); }
+
+    /* Sections */
+    .section{
+      background: var(--paper);
+      border-radius: var(--radius);
+      box-shadow: var(--soft);
+      border: 3px solid rgba(0,0,0,.07);
+      padding: 18px;
+      margin-top: 16px;
+      position:relative;
+    }
+
+    .section h2{
+      font-family:"Patrick Hand","Comic Neue",cursive;
+      font-size: 1.92rem;
+      margin: 0 0 10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .kicker{
+      font-weight: 800;
+      font-size: .99rem;
+      letter-spacing: .25px;
+      text-transform: uppercase;
+      opacity:.75;
+      margin-bottom: 8px;
+    }
+
+    /* Media blocks (video + audio) */
+    .media-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 820px){
+      .media-grid{ grid-template-columns: 1fr; }
+    }
+
+    .media-card{
+      border-radius: var(--radius2);
+      border: 3px dashed rgba(0,0,0,.12);
+      background: linear-gradient(180deg, #fff 0%, #fffdf7 100%);
+      box-shadow: 0 10px 0 rgba(0,0,0,.06);
+      padding: 14px;
+      overflow:hidden;
+    }
+
+    .media-label{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+
+    .media-label h3{
+      margin:0;
+      font-size: 1.14rem;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: .85rem;
+      border: 2px solid rgba(0,0,0,.12);
+      background: #fff;
+    }
+
+    /* Responsive iframe wrapper */
+    .ratio{
+      width:100%;
+      border-radius: 16px;
+      overflow:hidden;
+      border: 2px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,253,247,.95));
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+
+    /* Wide variant for the end-of-page video: full content width */
+    .ratio.wide{
+      padding: 10px;
+    }
+    .ratio.wide iframe{
+      width: 100%;
+      max-width: 100%;
+      height: clamp(260px, 48vw, 540px);
+    }
+
+    /* Keep the player consistently sized and centered */
+    .ratio iframe{
+      position: relative;
+      width: min(100%, 500px);
+      height: 250px;
+      border: 0;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 10px 26px rgba(0,0,0,.10);
+    }
+
+    .small-note{
+      margin: 10px 0 0;
+      font-size: 1.03rem;
+      opacity: .9;
+    }
+
+    /* Comparison cards */
+    .compare-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 760px){
+      .compare-grid{ grid-template-columns: 1fr; }
+    }
+
+
+    /* Unify all boxes: give media-card and callout the same "strain card" treatment */
+    .media-card, .callout{
+      border-radius: var(--radius2);
+      padding: 16px 16px 14px;
+      border: 3px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 0 rgba(0,0,0,.06);
+      position:relative;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .strain{
+      border-radius: var(--radius2);
+      padding: 16px 16px 14px;
+      border: 3px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 0 rgba(0,0,0,.06);
+      position:relative;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .strain.lemon{
+      background: linear-gradient(135deg, #fff8b7 0%, #fff 55%);
+    }
+    .strain.moon{
+      background: linear-gradient(135deg, rgba(82,125,143,.18) 0%, #fff 55%);
+    }
+
+    .strain h3{
+      margin: 0 0 10px;
+      font-family: "Patrick Hand","Comic Neue",cursive;
+      font-size: 1.68rem;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin: 10px 0 2px;
+    }
+    .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .86rem;
+      font-weight: 800;
+      background:#fff;
+      border: 2px solid rgba(0,0,0,.12);
+    }
+    .pill.thc{ background: linear-gradient(135deg, #ffe1e6, #fff); }
+    .pill.type{ background: linear-gradient(135deg, #dff7e5, #fff); }
+
+    dl{
+      margin: 10px 0 0;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    dt{
+      font-weight: 900;
+      margin: 0;
+    }
+    dd{
+      margin: 0 0 2px 0;
+      padding-left: 10px;
+      border-left: 3px solid rgba(0,0,0,.12);
+    }
+
+    .terpenes{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top: 6px;
+    }
+    .terp{
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,.10);
+      font-weight: 800;
+      font-size: .86rem;
+    }
+
+    /* Callouts */
+    .callout{
+      border-radius: var(--radius2);
+      border: 3px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 0 rgba(0,0,0,.06);
+      background:#fff;
+      padding: 14px;
+    }
+    .callout h3{
+      margin:0 0 8px;
+      font-family:"Patrick Hand","Comic Neue",cursive;
+      font-size: 1.5rem;
+    }
+    .callout p{ margin: 0 0 8px; }
+    .callout p:last-child{ margin:0; }
+
+    .divider{
+      height: 10px;
+      margin: 16px 0 4px;
+      border-radius: 999px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,77,109,.55) 0 16px,
+          rgba(91,140,255,.45) 16px 32px,
+          rgba(122,217,87,.45) 32px 48px,
+          rgba(255,183,3,.45) 48px 64px,
+          rgba(138,92,247,.45) 64px 80px
+        );
+      border: 2px solid rgba(0,0,0,.08);
+      box-shadow: 0 6px 0 rgba(0,0,0,.06);
+    }
+
+    /* Citations area */
+    .refs{
+      font-size: 1.03rem;
+      opacity:.95;
+    }
+    .refs ol{
+      margin: 8px 0 0;
+      padding-left: 20px;
+    }
+    .refs li{
+      margin: 8px 0;
+    }
+
+
+    .inner-pad{
+      border-radius: 14px;
+      border: 2px dashed rgba(0,0,0,.12);
+      padding: 14px;
+      background: rgba(255,255,255,.72);
+    }
+    .inner-pad h3{
+      margin:0 0 8px;
+      font-family:"Patrick Hand","Comic Neue",cursive;
+      font-size: 1.5rem;
+    }
+
+    /* Moonshine accent: use #527d8f as the crayon outline/accent */
+    .strain.moon{
+      border-color: rgba(82,125,143,.55);
+    }
+
+    /* Sleeker audio player */
+    .audio-sleek{
+      border-style: solid;
+      border-width: 2px;
+      box-shadow: 0 8px 0 rgba(0,0,0,.05);
+    }
+    .audio-sleek .ratio{
+      border: 1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,253,247,.98));
+    }
+
+    /* Bigger, bolder 40-minute callout */
+    .listen-big{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin: 8px 0 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 3px solid rgba(0,0,0,.10);
+      background: linear-gradient(135deg, rgba(255,77,109,.16), rgba(255,234,91,.18), rgba(82,125,143,.12), rgba(255,255,255,.65));
+      box-shadow: 0 10px 0 rgba(0,0,0,.06);
+      font-weight: 900;
+      font-size: 1.16rem;
+    }
+    .listen-big strong{
+      font-family:"Patrick Hand","Comic Neue",cursive;
+      font-size: 1.48rem;
+      letter-spacing: .2px;
+    }
+
+    footer{
+      margin: 14px 0 6px;
+      text-align:center;
+      font-size: .9rem;
+      opacity:.8;
+    }
+
+    /* Print-friendly */
+    @media print{
+      body{ background:#fff; padding:0; }
+      .banner, .section{ box-shadow:none; }
+      .divider{ box-shadow:none; }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Cannabis Strain Neurological Comparison</h1>
-            <p>Super Lemon Haze vs. Moonshine Haze: Effects on Cognition & Behavior</p>
+  <main class="wrap" aria-label="Strain comparison report">
+
+    <!-- Header -->
+    <header class="banner" aria-label="Page header">
+      <div class="banner-top">
+        <div>
+          <h1 class="title">Cannabis Strain Neurological Comparison</h1>
+          <p class="subtitle">
+            Super Lemon Haze vs. Moonshine Haze: cognition, mood, behavior — explained like a fun little
+            sketchbook, but organized like a grown-up.
+          </p>
         </div>
-        
-        <div class="content">
-            <!-- Comparison Grid -->
-            <div class="comparison-grid">
-                <div class="strain-card slh">
-                    <h3>🍋 Super Lemon Haze</h3>
-                    <div class="property">
-                        <strong>Classification</strong>
-                        <span class="badge type">Sativa Hybrid</span>
-                    </div>
-                    <div class="property">
-                        <strong>THC Content</strong>
-                        <span class="badge thc">~19%</span>
-                    </div>
-                    <div class="property">
-                        <strong>Genetics</strong>
-                        Lemon Skunk × Super Silver Haze
-                    </div>
-                    <div class="property">
-                        <strong>Primary Terpenes</strong>
-                        <span class="terpene-badge">Terpinolene</span>
-                        <span class="terpene-badge">Caryophyllene</span>
-                        <span class="terpene-badge">Myrcene</span>
-                    </div>
-                    <div class="property">
-                        <strong>Flavor Profile</strong>
-                        Zesty lemon, citrus, lime
-                    </div>
-                </div>
-                
-                <div class="strain-card msh">
-                    <h3>🌙 Moonshine Haze</h3>
-                    <div class="property">
-                        <strong>Classification</strong>
-                        <span class="badge type">Sativa</span>
-                    </div>
-                    <div class="property">
-                        <strong>THC Content</strong>
-                        <span class="badge thc">~20%</span>
-                    </div>
-                    <div class="property">
-                        <strong>Genetics</strong>
-                        Amnesia Haze × Nevil's Wreck
-                    </div>
-                    <div class="property">
-                        <strong>Primary Terpenes</strong>
-                        <span class="terpene-badge">Terpinolene</span>
-                        <span class="terpene-badge">Caryophyllene</span>
-                        <span class="terpene-badge">Pinene</span>
-                    </div>
-                    <div class="property">
-                        <strong>Flavor Profile</strong>
-                        Flowery, sage, woody
-                    </div>
-                </div>
-            </div>
-            
-            <hr class="divider">
-            
-            <!-- Neurological & Cognitive Effects -->
-            <div class="neurological-section">
-                <h2>Neurological & Cognitive Effects</h2>
-                
-                <div class="neuro-point">
-                    <strong>Super Lemon Haze: Terpinolene-Dominant Profile</strong>
-                    <p>Super Lemon Haze's primary terpene, terpinolene, demonstrates <strong>sustained cognitive clarity through antioxidant neuroprotection</strong><sup>1</sup>. Research indicates terpinolene provides mental stimulation while maintaining relaxation, making it ideal for focus-intensive tasks without overstimulation<sup>2</sup>. The dominance of caryophyllene activates CB2 receptors, reducing stress-related cognitive interference<sup>3</sup>. Users report enhanced focus, energy, and uplift—particularly suited for daytime use.</p>
-                </div>
-                
-                <div class="neuro-point">
-                    <strong>Moonshine Haze: Balanced Terpene Synergy</strong>
-                    <p>Moonshine Haze combines terpinolene with pinene, creating <strong>multi-pathway cognitive enhancement</strong><sup>4</sup>. While terpinolene provides mental clarity, pinene's inhibition of acetylcholinesterase improves memory retention and alertness<sup>5</sup>. This dual mechanism supports creative thinking and sustained attention. Caryophyllene's anti-inflammatory effects further reduce neuroinflammation that impairs cognitive performance<sup>6</sup>. Users report creativity, focus, and euphoria with social ease.</p>
-                </div>
-            </div>
-            
-            <!-- Key Neurological Differences -->
-            <div class="key-differences">
-                <h2>Key Neurological Differences</h2>
-                
-                <div class="difference-item">
-                    <strong>Cognitive Focus Architecture</strong>
-                    Super Lemon Haze emphasizes <strong>sustained attentional clarity</strong> through terpinolene's antioxidant neuroprotection; Moonshine Haze adds <strong>memory-specific enhancement</strong> via pinene's acetylcholinesterase inhibition<sup>7</sup>.
-                </div>
-                
-                <div class="difference-item">
-                    <strong>Behavioral Trajectory</strong>
-                    Super Lemon Haze typically generates focused, energetic engagement; Moonshine Haze users report enhanced social fluidity alongside creative capacity, reflecting Amnesia Haze genetics' euphoric cerebrality<sup>8</sup>.
-                </div>
-                
-                <div class="difference-item">
-                    <strong>Anxiety Modulation</strong>
-                    Both contain caryophyllene for stress reduction, but Moonshine Haze's pinene provides additional GABAergic modulation supporting nervous system calm<sup>9</sup>, while Super Lemon Haze relies primarily on terpinolene's inherent anxiolytic properties<sup>10</sup>.
-                </div>
-                
-                <div class="difference-item">
-                    <strong>Sensory Experience & Mood</strong>
-                    Super Lemon Haze's citrus profile (limonene-adjacent) enhances mood through dopamine-adjacent pathways; Moonshine Haze's floral-woody notes reflect Amnesia Haze's complex limonene/caryophyllene synergy, supporting euphoria alongside clarity<sup>11</sup>.
-                </div>
-            </div>
-            
-            <!-- Behavioral Effects -->
-            <div class="key-differences" style="background: linear-gradient(135deg, #f0f8ff 0%, #e1f3ff 100%); border-color: #87ceeb;">
-                <h2 style="color: #0277bd;">Behavioral Manifestations</h2>
-                
-                <div class="difference-item">
-                    <strong>Super Lemon Haze:</strong> Energetic, focused, uplifted—optimal for task completion and mental work. Users report clarity without racing thoughts; best for concentration-dependent activities<sup>12</sup>.
-                </div>
-                
-                <div class="difference-item">
-                    <strong>Moonshine Haze:</strong> Uplifted, creative, talkative—promotes social ease and ideation. Suited for collaborative work, artistic pursuits, and social gatherings while maintaining functional clarity<sup>13</sup>.
-                </div>
-            </div>
-            
-            <hr class="divider">
-            
-            <!-- Conclusion -->
-            <div class="conclusion">
-                <h2>Conclusion</h2>
-                <p>Both strains are sativa-dominant with nearly identical THC levels (~19-20%) and overlapping terpene profiles, yet they diverge neurologically. Super Lemon Haze emphasizes <strong>sustained focus and mental clarity</strong>, driven by terpinolene's antioxidant neuroprotection. Moonshine Haze delivers <strong>multi-modal cognitive enhancement</strong>—combining terpinolene's clarity with pinene's memory support—producing a more socially fluid, creatively stimulating experience. Choice depends on whether the user prioritizes laser-focused attention or creative sociability paired with clarity.</p>
-            </div>
-            
-            <hr class="divider">
-            
-            <!-- References -->
-            <div class="citations">
+
+        <div class="badge-row" aria-label="Quick badges">
+          <span class="sticker lemon" aria-label="Super Lemon Haze sticker">🍋 <strong>Super Lemon Haze</strong></span>
+          <span class="sticker moon" aria-label="Moonshine Haze sticker">🌙 <strong>Moonshine Haze</strong></span>
+          <span class="sticker note" aria-label="Educational use sticker">🧠 <strong>Educational</strong> (not medical advice)</span>
+        </div>
+      </div>
+    </header>
+
+    
+
+
+    <!-- Comparison Cards -->
+    <section class="section" aria-label="Strain cards">
+      <div class="kicker">Two big cards</div>
+      <h2>The strains side-by-side</h2>
+
+      <div class="compare-grid">
+        <article class="strain lemon" aria-label="Super Lemon Haze card">
+          <h3>Super Lemon Haze</h3>
+          <div class="pill-row" aria-label="Key facts">
+            <span class="pill type">Sativa Hybrid</span>
+            <span class="pill thc">~19% THC</span>
+          </div>
+
+          <dl>
+            <dt>Genetics</dt>
+            <dd>Lemon Skunk × Super Silver Haze</dd>
+
+            <dt>Primary terpenes</dt>
+            <dd>
+              <div class="terpenes" aria-label="Terpenes list">
+                <span class="terp">Terpinolene</span>
+                <span class="terp">Caryophyllene</span>
+                <span class="terp">Myrcene</span>
+              </div>
+            </dd>
+
+            <dt>Flavor profile</dt>
+            <dd>Zesty lemon, citrus, lime</dd>
+          </dl>
+        </article>
+
+        <article class="strain moon" aria-label="Moonshine Haze card">
+          <h3>Moonshine Haze</h3>
+          <div class="pill-row" aria-label="Key facts">
+            <span class="pill type">Sativa</span>
+            <span class="pill thc">~20% THC</span>
+          </div>
+
+          <dl>
+            <dt>Genetics</dt>
+            <dd>Amnesia Haze × Nevil's Wreck</dd>
+
+            <dt>Primary terpenes</dt>
+            <dd>
+              <div class="terpenes" aria-label="Terpenes list">
+                <span class="terp">Terpinolene</span>
+                <span class="terp">Caryophyllene</span>
+                <span class="terp">Pinene</span>
+              </div>
+            </dd>
+
+            <dt>Flavor profile</dt>
+            <dd>Flowery, sage, woody</dd>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <!-- Neuro + cognition -->
+    <section class="section" aria-label="Neurological and cognitive effects">
+      <div class="kicker">Brain stuff</div>
+      <h2>Neurological &amp; cognitive effects</h2>
+
+      <div class="compare-grid">
+        <div class="strain lemon" aria-label="Super Lemon Haze neuro notes">
+          <h3>Super Lemon Haze: terpinolene-forward</h3>
+          <p>
+            Often described as <strong>clear + energized</strong>. Terpinolene is frequently discussed as supporting
+            mental stimulation with some calming balance, while caryophyllene is commonly associated with stress-modulating effects.
+          </p>
+          <p><strong>Reported vibe:</strong> focus, get-stuff-done energy, daytime lift.</p>
+        </div>
+
+        <div class="strain moon" aria-label="Moonshine Haze neuro notes">
+          <h3>Moonshine Haze: terpinolene + pinene duo</h3>
+          <p>
+            This profile adds pinene into the mix, which is often discussed in relation to alertness and memory-like clarity.
+            Combined with terpinolene, users commonly describe a <strong>creative + socially fluid</strong> experience.
+          </p>
+          <p><strong>Reported vibe:</strong> talky, idea-sparkly, collaborative energy.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Podcast (middle, prominent) -->
+    <section class="section" aria-label="Podcast section">
+      <div class="kicker">Middle of the page (as requested)</div>
+      <h2>Podcast pit-stop</h2>
+
+      <div class="listen-big" aria-label="40 minute podcast callout">
+        <span>Press play and let it run.</span>
+        <strong>~40 minute podcast</strong>
+        <span>Perfect for a walk</span>
+      </div>
+
+      <div class="strain moon audio-sleek" aria-label="Podcast embed">
+        <div class="media-label">
+          <h3>Podcast (Google Drive)</h3>
+          <span class="tag" style="border-style:solid; opacity:.95;">▶︎ Listen</span>
+        </div>
+
+        <div class="ratio audio">
+          <iframe
+            src="https://drive.google.com/file/d/1n4OdxyEXEm2vL-vxosqUGKjI7koeQi7P/preview"
+            allow="autoplay"
+            title="Podcast audio player"
+          ></iframe>
+        </div>
+
+        <p class="small-note">
+          Tip: If you’re on mobile, rotate landscape for easier playback controls.
+        </p>
+      </div>
+
+      <div class="divider" aria-hidden="true"></div>
+    </section>
+
+    <!-- Key differences -->
+    <section class="section" aria-label="Key differences section">
+      <div class="kicker">The “so what?”</div>
+      <h2>Key neurological differences</h2>
+
+      <div class="strain lemon" aria-label="Key differences list">
+        <p><strong>Cognitive focus architecture:</strong> Super Lemon Haze tends toward “sustained attention”; Moonshine Haze adds a “memory/alertness” flavor via pinene.</p>
+        <p><strong>Behavioral trajectory:</strong> Super Lemon Haze = focused engagement; Moonshine Haze = creative + social ease.</p>
+        <p><strong>Anxiety modulation (anecdotally):</strong> both often described as “not too heavy,” but individual sensitivity varies a lot.</p>
+        <p><strong>Sensory & mood:</strong> citrus-forward profiles are frequently reported as mood-lifting; Moonshine Haze is often described as more “euphoric + chatty.”</p>
+      </div>
+    </section>
+
+    <!-- Behavioral Manifestations -->
+    <section class="section" aria-label="Behavioral manifestations">
+      <div class="kicker">What it *feels* like</div>
+      <h2>Behavioral manifestations</h2>
+
+      <div class="compare-grid">
+        <div class="strain lemon" aria-label="Super Lemon Haze behavioral">
+          <h3>Super Lemon Haze</h3>
+          <p>Energetic, focused, uplifted — often chosen for task completion and “brain work.”</p>
+        </div>
+        <div class="strain moon" aria-label="Moonshine Haze behavioral">
+          <h3>Moonshine Haze</h3>
+          <p>Uplifted, creative, talkative — often chosen for ideation, collaboration, social hangouts.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conclusion -->
+    <section class="section" aria-label="Conclusion section">
+      <div class="kicker">Wrap-up</div>
+      <h2>Conclusion</h2>
+
+      <div class="strain lemon" aria-label="Conclusion text">
+        <p>
+          Both strains are sativa-dominant with similar reported THC ranges and overlapping terpene families.
+          The common decision point is usually:
+        </p>
+        <p><strong>Pick Super Lemon Haze</strong> when you want “laser focus / day mode.”</p>
+        <p><strong>Pick Moonshine Haze</strong> when you want “creative + social clarity.”</p>
+      </div>
+    </section>
+
+    <!-- Media: Video (moved to end; full-width) -->
+    <section class="section" aria-label="Video section">
+      <div class="kicker">Visual reference (at the end, on purpose)</div>
+      <h2>Visual representation of the strains</h2>
+
+      <div class="strain lemon" aria-label="Video embed (full width)">
+        <div class="media-label">
+          <h3>Video (Google Drive)</h3>
+          <span class="tag" aria-label="Sound notice" style="font-weight:900; border-style:solid;">Sound on</span>
+        </div>
+
+        <p class="small-note" style="font-weight:900; font-size:1.06rem; margin-top:0;">
+          Note: this video includes sound.
+        </p>
+
+        <div class="ratio wide">
+          <iframe
+            src="https://drive.google.com/file/d/157h43XmXSm3JbX5DlF1jhoKBOD7pYifd/preview"
+            allow="autoplay; encrypted-media"
+            title="Visual representation of the strains (video)"
+          ></iframe>
+        </div>
+
+        <p class="small-note">
+          If the embed doesn’t load (some browsers + Drive permissions): open the file in Google Drive and hit play there.
+        </p>
+      </div>
+    </section>
+
+
+
+    <!-- References (kept, but made less “academic wall”) -->
+    
+<section class="section refs" aria-label="Sources and notes">
+  <div class="kicker">Notes</div>
+  <h2>Sources & notes</h2>
+  <div class="citations">
                 <h3>Sources & Citations</h3>
                 
                 <div class="citation-item">
@@ -440,7 +755,9 @@
             <p style="text-align: center; color: #999; font-size: 0.85em; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
                 <em>This report synthesizes publicly available information from cannabis research platforms and terpene pharmacology sources. It is intended for educational purposes only and does not constitute medical advice. Consult healthcare professionals before using cannabis for therapeutic purposes.</em>
             </p>
-        </div>
-    </div>
+</section>
+
+</main>
 </body>
 </html>
+
