@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: system-ui;
+}
+
+.viewport {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.text {
+  position: absolute;
+  width: 100%;
+  padding: 40px;
+  animation: scroll 2400s linear forwards; /* 40 minutes = 2400 seconds */
+}
+
+@keyframes scroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+</style>
+</head>
+
+<body>
+<div class="viewport">
+  <div class="text">
+
+<ol>
+    <li><h2>Comfortable Seated Meditation</h2></li>
+    <li><h2>Seated Twist (Right)</h2></li>
+    <li><h2>Seated Twist (Left)</h2></li>
+    <li><h2>Seated Side Bend (Right)</h2></li>
+    <li><h2>Seated Side Bend (Left)</h2></li>
+    <li><h2>Seated Cat–Cow</h2></li>
+    <li><h2>Tabletop</h2></li>
+    <li><h2>Cat</h2></li>
+    <li><h2>Cow</h2></li>
+    <li><h2>Child's Pose</h2> <p>(flow between Cow and Child's)</p></li>
+    <li><h2>Child's Pose – Side Stretch (Right)</h2></li>
+    <li><h2>Child's Pose – Side Stretch (Left)</h2></li>
+    <li><h2>Downward Facing Dog</h2></li>
+    <li><h2>Halfway Lift</h2></li>
+    <li><h2>Standing Forward Fold</h2></li>
+    <li><h2>Mountain Pose (Tadasana)</h2></li>
+  </ol>
+
+  <h1>Sun Salutation A <small>(multiple rounds)</small></h1>
+  <ol>
+    <li><h2>Mountain</h2></li>
+    <li><h2>Forward Fold</h2></li>
+    <li><h2>Halfway Lift</h2></li>
+    <li><h2>Plank / Chaturanga</h2></li>
+    <li><h2>Upward Facing Dog</h2></li>
+    <li><h2>Downward Facing Dog</h2></li>
+    <li><h2>Halfway Lift</h2></li>
+    <li><h2>Forward Fold</h2></li>
+    <li><h2>Mountain</h2></li>
+  </ol>
+  <p><em>(Repeated variations)</em></p>
+
+  <ol>
+    <li><h2>Standing Side Stretch (Interlaced Fingers)</h2></li>
+    <li><h2>Wide Forward Fold Preparation</h2></li>
+    <li><h2>Padangusthasana (Big Toe Pose)</h2></li>
+    <li><h2>Ragdoll</h2></li>
+    <li><h2>Standing Backbend (Hands at Low Back)</h2></li>
+    <li><h2>Vinyasa or Child's Pose</h2></li>
+    <li><h2>Downward Facing Dog</h2></li>
+  </ol>
+
+  <h1>Right Side Standing Flow</h1>
+  <ol>
+    <li><h2>Low Lunge or High Lunge (Right)</h2></li>
+    <li><h2>Cactus Arms Variation</h2></li>
+    <li><h2>Humble Warrior (Right)</h2></li>
+    <li><h2>Warrior II (Right)</h2></li>
+    <li><h2>Reverse Warrior (Right)</h2></li>
+    <li><h2>Side Angle (Right)</h2></li>
+    <li><h2>Lizard Pose (Right)</h2></li>
+    <li><h2>Low Lunge Flow (Right)</h2></li>
+    <li><h2>Gate Pose (Right)</h2></li>
+    <li><h2>Half Split / Hamstring Stretch (Right)</h2></li>
+    <li><h2>Child's Pose</h2></li>
+  </ol>
+
+  <h1>Left Side Standing Flow</h1>
+  <ol>
+    <li><h2>Low Lunge or High Lunge (Left)</h2></li>
+    <li><h2>Cactus Arms Variation</h2></li>
+    <li><h2>Humble Warrior (Left)</h2></li>
+    <li><h2>Warrior II (Left)</h2></li>
+    <li><h2>Reverse Warrior (Left)</h2></li>
+    <li><h2>Side Angle (Left)</h2></li>
+    <li><h2>Lizard Pose (Left)</h2></li>
+    <li><h2>Low Lunge Flow (Left)</h2></li>
+    <li><h2>Gate Pose (Left)</h2></li>
+    <li><h2>Half Split / Hamstring Stretch (Left)</h2></li>
+    <li><h2>Child's Pose</h2></li>
+  </ol>
+
+  <h1>Wide-Leg Standing Series</h1>
+  <ol>
+    <li><h2>Downward Facing Dog</h2></li>
+    <li><h2>Wide-Leg Forward Fold (Prasarita Padottanasana)</h2></li>
+    <li><h2>Wide-Leg Forward Fold with Shoulder Bind</h2></li>
+    <li><h2>Mountain Pose</h2></li>
+  </ol>
+
+  <h1>Balance &amp; Squat</h1>
+  <ol>
+    <li><h2>Tree Pose (Right)</h2></li>
+    <li><h2>Chair Pose</h2></li>
+    <li><h2>Mountain</h2></li>
+    <li><h2>Tree Pose (Left)</h2></li>
+    <li><h2>Chair Pose</h2></li>
+    <li><h2>Yogi Squat (Malasana)</h2></li>
+  </ol>
+
+  <h1>Seated Hip Series</h1>
+  <ol>
+    <li><h2>Cobbler's Pose (Baddha Konasana)</h2></li>
+    <li><h2>Frog Pose (Mandukasana variation)</h2></li>
+    <li><h2>Child's Pose (Knees Wide)</h2></li>
+  </ol>
+
+  <h1>Shoulder Series</h1>
+  <ol>
+    <li><h2>Tabletop</h2></li>
+    <li><h2>Thread the Needle (Right)</h2></li>
+    <li><h2>Thread the Needle (Left)</h2></li>
+    <li><h2>Puppy Pose (Uttana Shishosana)</h2></li>
+    <li><h2>Child's Pose with Blocks (Shoulder Stretch)</h2></li>
+  </ol>
+
+  <h1>Supine Series</h1>
+  <ol>
+    <li><h2>Bridge Pose (dynamic)</h2></li>
+    <li><h2>Supported Bridge (Restorative)</h2></li>
+    <li><h2>Happy Baby</h2></li>
+    <li><h2>Supine Twist (Right)</h2></li>
+    <li><h2>Supine Twist (Left)</h2></li>
+    <li><h2>Reclined Pigeon (Right)</h2></li>
+    <li><h2>Reclined Pigeon (Left)</h2></li>
+    <li><h2>Knees-to-Chest</h2></li>
+  </ol>
+
+  <h1>Final Restorative</h1>
+  <ol>
+    <li><h2>Restorative Fish</h2></li>
+    <li><h2>Savasana</h2></li>
+  </ol>
+
+  </div>
+</div>
+</body>
+</html>
