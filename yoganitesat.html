@@ -11,10 +11,16 @@
     font-family: Georgia, serif;
     color: #e8e4df;
   }
- #bg-video {
-  opacity: 0.25;
-}
 
+#bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
   .viewport {
     height: 100vh;
     overflow: hidden;
@@ -92,6 +98,15 @@
 </style>
 </head>
 <body>
+<iframe
+  id="bg-video"
+  src="https://player.vimeo.com/video/1167038383?autoplay=1&loop=1&muted=0&background=1"
+  frameborder="0"
+  allow="autoplay; fullscreen"
+  allowfullscreen>
+</iframe>
+
+
 <div class="viewport">
   <div class="text">
 
@@ -325,5 +340,13 @@
 
   </div>
 </div>
+<script>
+/* iOS / mobile playback helper */
+document.body.addEventListener("click", () => {
+  const v = document.getElementById("bg-video");
+  if (v.paused) v.play();
+}, { once: true });
+</script>
+
 </body>
 </html>
