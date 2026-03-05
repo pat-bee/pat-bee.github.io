@@ -104,6 +104,11 @@
       min-height:92px;
     }
 
+    /* REMOVE the "Pose:" label entirely — no label shown for pose column */
+    .cell.pose-cell{
+      padding-top:18px; /* small optical alignment since label is removed */
+    }
+
     .label{
       font-size:var(--fs-small);
       color:var(--muted);
@@ -164,8 +169,7 @@
     <header>
       <h1>Yoga Sequence Spreadsheet (HTML)</h1>
       <p class="sub">
-        Rows render from your CSV. Each row: <strong>Pose Name</strong> • <strong>Cue</strong> • <strong>Image</strong>.
-        Image file names are auto-generated (Right assumed; Left gets <code>_L</code>).
+        Each row: pose name • cue • image. Theme follows local sun-up/sun-down via your device’s light/dark mode.
       </p>
     </header>
 
@@ -175,71 +179,71 @@
   <script>
     // ---- Source data (from your FULL CSV) ----
     const rows = [
-      {  "Seated Meditation (Easy Pose)", cue: "Focus on energy projection; palms down for grounding or up for receiving." },
-      {  "Seated Side Bend", cue: "Arms overhead, lateral stretches to both sides." },
-      {  "Downward-Facing Dog", cue: "" },
-      {  "Forward Fold / Ragdoll", cue: "" },
-      {  "Slow Roll-Up to Standing", cue: "" },
-      {  "Mountain Pose (Tadasana)", cue: "" },
-      {  "Standing Side Bend", cue: "Reach overhead, lean Right, center, lean Left, center (3 reps)." },
-      {  "Hands to Prayer", cue: "" },
-      {  "Mountain to Forward Fold", cue: "Inhale reach high look to your thumbs; exhale hinge from the hips heart leads the way down to a forward fold." },
-      {  "Flat Back", cue: "Inhale to a flat back." },
-      {  "Plank", cue: "Plant the palms step back to plank shift forward onto the toes." },
-      {  "Low Push-Up (Chaturanga)", cue: "Exhale lower halfway elbows hugging ribs." },
-      {  "Upward-Facing Dog", cue: "Inhale roll over the toes lift the chest shoulders away from ears knees off mat." },
-      {  "Downward-Facing Dog", cue: "Exhale lift hips high." },
+      { pose: "Seated Meditation (Easy Pose)", cue: "Focus on energy projection; palms down for grounding or up for receiving." },
+      { pose: "Seated Side Bend", cue: "Arms overhead, lateral stretches to both sides." },
+      { pose: "Downward-Facing Dog", cue: "" },
+      { pose: "Forward Fold / Ragdoll", cue: "" },
+      { pose: "Slow Roll-Up to Standing", cue: "" },
+      { pose: "Mountain Pose (Tadasana)", cue: "" },
+      { pose: "Standing Side Bend", cue: "Reach overhead, lean Right, center, lean Left, center (3 reps)." },
+      { pose: "Hands to Prayer", cue: "" },
+      { pose: "Mountain to Forward Fold", cue: "Inhale reach high look to your thumbs; exhale hinge from the hips heart leads the way down to a forward fold." },
+      { pose: "Flat Back", cue: "Inhale to a flat back." },
+      { pose: "Plank", cue: "Plant the palms step back to plank shift forward onto the toes." },
+      { pose: "Low Push-Up (Chaturanga)", cue: "Exhale lower halfway elbows hugging ribs." },
+      { pose: "Upward-Facing Dog", cue: "Inhale roll over the toes lift the chest shoulders away from ears knees off mat." },
+      { pose: "Downward-Facing Dog", cue: "Exhale lift hips high." },
 
-      {  "Warrior II (Right)", cue: "Step right foot forward spin back heel down windmill arms open sink into right knee gaze over right middle finger." },
-      {  "Triangle (Right)", cue: "Straighten right leg reach forward right hand to shin or block left arm to sky body between two panes of glass." },
-      {  "Reverse Warrior (Right)", cue: "Sweep right arm up and back left hand rests on back thigh breathe into right side ribs." },
-      {  "Half Moon (Right)", cue: "Right hand 10 inches forward lift left leg parallel flex left foot stack hips." },
-      {  "Revolved Half Moon (Right)", cue: "Square hips drop left hand reach right arm up twist from mid back." },
-      {  "Warrior III (Right)", cue: "Hands to heart lean torso forward body forms capital T left toes down core engaged." },
-      {  "Crescent Lunge (Right)", cue: "Back foot on ball reach arms up tuck tailbone stretch left hip flexor." },
-      {  "Side Plank (Right)", cue: "Roll onto outer right foot stack left foot lift right hip reach left arm up." },
-      {  "Lizard (Right)", cue: "Right foot outside right hand drop back knee lower to elbows or palms breathe into inner right groin." },
+      { pose: "Warrior II (Right)", cue: "Step right foot forward spin back heel down windmill arms open sink into right knee gaze over right middle finger." },
+      { pose: "Triangle (Right)", cue: "Straighten right leg reach forward right hand to shin or block left arm to sky body between two panes of glass." },
+      { pose: "Reverse Warrior (Right)", cue: "Sweep right arm up and back left hand rests on back thigh breathe into right side ribs." },
+      { pose: "Half Moon (Right)", cue: "Right hand 10 inches forward lift left leg parallel flex left foot stack hips." },
+      { pose: "Revolved Half Moon (Right)", cue: "Square hips drop left hand reach right arm up twist from mid back." },
+      { pose: "Warrior III (Right)", cue: "Hands to heart lean torso forward body forms capital T left toes down core engaged." },
+      { pose: "Crescent Lunge (Right)", cue: "Back foot on ball reach arms up tuck tailbone stretch left hip flexor." },
+      { pose: "Side Plank (Right)", cue: "Roll onto outer right foot stack left foot lift right hip reach left arm up." },
+      { pose: "Lizard (Right)", cue: "Right foot outside right hand drop back knee lower to elbows or palms breathe into inner right groin." },
 
-      {  "Gate Pose (Right)", cue: "Rise up from knees extend right leg to side." },
-      {  "Gate Pose (Left)", cue: "Rise up from knees extend left leg to side." },
-      {  "Camel Pose", cue: "Hands to heels lift chest arch back." },
-      {  "Sphinx or Cobra", cue: "Forearms or hands down lift chest gentle backbend." },
-      {  "Tabletop / Box Pose", cue: "Neutral spine on hands and knees." },
-      {  "Thread the Needle (Right)", cue: "Right arm threads under chest shoulder to mat." },
-      {  "Thread the Needle (Left)", cue: "Left arm threads under chest shoulder to mat." },
-      {  "Extended Puppy Pose", cue: "Hips above knees arms forward chest melts toward mat." },
-      {  "Child's Pose", cue: "Hips to heels forehead down relax." },
+      { pose: "Gate Pose (Right)", cue: "Rise up from knees extend right leg to side." },
+      { pose: "Gate Pose (Left)", cue: "Rise up from knees extend left leg to side." },
+      { pose: "Camel Pose", cue: "Hands to heels lift chest arch back." },
+      { pose: "Sphinx or Cobra", cue: "Forearms or hands down lift chest gentle backbend." },
+      { pose: "Tabletop / Box Pose", cue: "Neutral spine on hands and knees." },
+      { pose: "Thread the Needle (Right)", cue: "Right arm threads under chest shoulder to mat." },
+      { pose: "Thread the Needle (Left)", cue: "Left arm threads under chest shoulder to mat." },
+      { pose: "Extended Puppy Pose", cue: "Hips above knees arms forward chest melts toward mat." },
+      { pose: "Child's Pose", cue: "Hips to heels forehead down relax." },
 
-      {  "Mountain to Forward Fold (Left Sequence)", cue: "Inhale reach high exhale fold from hips." },
-      {  "Flat Back (Left Sequence)", cue: "Inhale lengthen spine." },
-      {  "Plank (Left Sequence)", cue: "Step back to plank." },
-      {  "Low Push-Up / Chaturanga (Left Sequence)", cue: "Lower halfway elbows hug ribs." },
-      {  "Upward-Facing Dog (Left Sequence)", cue: "Lift chest roll over toes." },
-      {  "Downward-Facing Dog (Left Sequence)", cue: "Lift hips high." },
+      { pose: "Mountain to Forward Fold (Left Sequence)", cue: "Inhale reach high exhale fold from hips." },
+      { pose: "Flat Back (Left Sequence)", cue: "Inhale lengthen spine." },
+      { pose: "Plank (Left Sequence)", cue: "Step back to plank." },
+      { pose: "Low Push-Up / Chaturanga (Left Sequence)", cue: "Lower halfway elbows hug ribs." },
+      { pose: "Upward-Facing Dog (Left Sequence)", cue: "Lift chest roll over toes." },
+      { pose: "Downward-Facing Dog (Left Sequence)", cue: "Lift hips high." },
 
-      {  "Warrior II (Left)", cue: "Step left foot forward spin back heel down windmill arms open sink into left knee gaze over left middle finger." },
-      {  "Triangle (Left)", cue: "Straighten left leg reach forward left hand to shin or block right arm to sky." },
-      {  "Reverse Warrior (Left)", cue: "Sweep left arm up and back right hand rests on back thigh breathe into left side ribs." },
-      {  "Half Moon (Left)", cue: "Left hand forward lift right leg parallel flex right foot stack hips." },
-      {  "Revolved Half Moon (Left)", cue: "Square hips drop right hand reach left arm up twist mid back." },
-      {  "Warrior III (Left)", cue: "Hands to heart lean torso forward body forms capital T right toes down." },
-      {  "Crescent Lunge (Left)", cue: "Back foot on ball reach arms up stretch right hip flexor." },
-      {  "Side Plank (Left)", cue: "Roll onto outer left foot stack right foot lift left hip reach left arm up." },
-      {  "Lizard (Left)", cue: "Left foot outside left hand drop back knee breathe into inner left groin." },
+      { pose: "Warrior II (Left)", cue: "Step left foot forward spin back heel down windmill arms open sink into left knee gaze over left middle finger." },
+      { pose: "Triangle (Left)", cue: "Straighten left leg reach forward left hand to shin or block right arm to sky." },
+      { pose: "Reverse Warrior (Left)", cue: "Sweep left arm up and back right hand rests on back thigh breathe into left side ribs." },
+      { pose: "Half Moon (Left)", cue: "Left hand forward lift right leg parallel flex right foot stack hips." },
+      { pose: "Revolved Half Moon (Left)", cue: "Square hips drop right hand reach left arm up twist mid back." },
+      { pose: "Warrior III (Left)", cue: "Hands to heart lean torso forward body forms capital T right toes down." },
+      { pose: "Crescent Lunge (Left)", cue: "Back foot on ball reach arms up stretch right hip flexor." },
+      { pose: "Side Plank (Left)", cue: "Roll onto outer left foot stack right foot lift left hip reach right arm up." },
+      { pose: "Lizard (Left)", cue: "Left foot outside left hand drop back knee breathe into inner left groin." },
 
-      {  "Goddess Pose", cue: "Wide squat toes turned out arms bent cactus shape." },
-      {  "Garland Pose / Yogi Squat", cue: "Deep squat palms together elbows press knees open." },
-      {  "Crow Pose (Optional)", cue: "Hands down knees to triceps lean forward lift feet." },
-      {  "Supported Shoulder Stand or Headstand", cue: "Practice inversion with props or wall." },
-      {  "Seated Transition", cue: "Come to seated slowly with control." },
-      {  "Bridge Pose (Supported with Block)", cue: "Lift hips place block under sacrum." },
-      {  "One-Legged Bridge (Right)", cue: "Extend right leg while hips lifted." },
-      {  "One-Legged Bridge (Left)", cue: "Extend left leg while hips lifted." },
-      {  "Slow Roll Down", cue: "Remove block articulate spine to mat." },
-      {  "Reclining Bound Angle", cue: "Feet together knees open hands on belly." },
-      {  "Corpse Pose / Savasana", cue: "Full relaxation natural breath." },
-      {  "Fetal Position", cue: "Roll to one side knees drawn in." },
-      {  "Return to Easy Pose", cue: "Sit tall bring palms together for closing namaste." }
+      { pose: "Goddess Pose", cue: "Wide squat toes turned out arms bent cactus shape." },
+      { pose: "Garland Pose / Yogi Squat", cue: "Deep squat palms together elbows press knees open." },
+      { pose: "Crow Pose (Optional)", cue: "Hands down knees to triceps lean forward lift feet." },
+      { pose: "Supported Shoulder Stand or Headstand", cue: "Practice inversion with props or wall." },
+      { pose: "Seated Transition", cue: "Come to seated slowly with control." },
+      { pose: "Bridge Pose (Supported with Block)", cue: "Lift hips place block under sacrum." },
+      { pose: "One-Legged Bridge (Right)", cue: "Extend right leg while hips lifted." },
+      { pose: "One-Legged Bridge (Left)", cue: "Extend left leg while hips lifted." },
+      { pose: "Slow Roll Down", cue: "Remove block articulate spine to mat." },
+      { pose: "Reclining Bound Angle", cue: "Feet together knees open hands on belly." },
+      { pose: "Corpse Pose / Savasana", cue: "Full relaxation natural breath." },
+      { pose: "Fetal Position", cue: "Roll to one side knees drawn in." },
+      { pose: "Return to Easy Pose", cue: "Sit tall bring palms together for closing namaste." }
     ];
 
     // ---- Filename rules ----
@@ -250,7 +254,6 @@
     ]);
 
     function isLeftPose(poseName){
-      // Any explicit Left marker OR left-side sequence is treated as left for filename
       return /\(Left\)/i.test(poseName) || /\(Left Sequence\)/i.test(poseName);
     }
 
@@ -264,40 +267,21 @@
     }
 
     function romanToDigitsInWords(s){
-      // Replace standalone roman numerals as tokens (e.g., "Warrior II" -> "Warrior 2")
       return s.split(/\s+/).map(tok => ROMAN.get(tok) ?? tok).join(" ");
     }
 
     function toPascalCaseFilenameBase(poseName){
-      // 1) strip side markers and optional markers
       let base = stripSideMarkers(poseName);
-
-      // 2) convert roman numerals to digits
       base = romanToDigitsInWords(base);
-
-      // 3) remove parenthetical subtitles, but keep meaningful words inside common ones already handled
-      // (e.g., "Mountain Pose (Tadasana)" -> "Mountain Pose")
       base = base.replace(/\s*\([^)]*\)\s*/g, " ").trim();
-
-      // 4) normalize separators: hyphens, slashes, apostrophes -> spaces
-      base = base
-        .replace(/[\/]/g, " ")
-        .replace(/[-–—]/g, " ")
-        .replace(/[’']/g, "");
-
-      // 5) remove other punctuation
+      base = base.replace(/[\/]/g, " ")
+                 .replace(/[-–—]/g, " ")
+                 .replace(/[’']/g, "");
       base = base.replace(/[^a-zA-Z0-9\s]/g, " ");
-
-      // 6) collapse spaces
       base = base.replace(/\s+/g, " ").trim();
 
-      // 7) PascalCase join, but keep digits as-is (Warrior 2 -> Warrior2)
       const parts = base.split(" ").filter(Boolean);
-      return parts.map(p => {
-        // if token is all digits, keep it
-        if (/^\d+$/.test(p)) return p;
-        return p.charAt(0).toUpperCase() + p.slice(1);
-      }).join("");
+      return parts.map(p => (/^\d+$/.test(p) ? p : (p.charAt(0).toUpperCase() + p.slice(1)))).join("");
     }
 
     function imageFilename(poseName){
@@ -316,8 +300,7 @@
       row.className = "row";
 
       row.innerHTML = `
-        <div class="cell">
-          <div class="label">Pose Name</div>
+        <div class="cell pose-cell">
           <div class="pose">${escapeHtml(r.pose)}</div>
         </div>
 
@@ -336,7 +319,7 @@
       grid.appendChild(row);
     });
 
-    // ---- small helpers ----
+    // ---- helpers ----
     function escapeHtml(str){
       return String(str)
         .replaceAll("&","&amp;")
