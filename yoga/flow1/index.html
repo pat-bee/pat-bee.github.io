@@ -1,88 +1,70 @@
 <!doctype html>
-<html lang="en" data-theme="auto">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Yoga Sequence – Pose / Cue / Image Filenames</title>
-
+  <title>Yoga Sequence – Pose / Cue / Image</title>
   <style>
+    /* Sun-up / Sun-down via prefers-color-scheme */
     :root{
-      /* Typography (big by default) */
-      --fs: 20px;
-      --pose: 1.5em; /* requested */
-      --cue: 1.0em;
-      --label: 0.75em;
-      --fname: 0.80em;
+      /* Day (light) defaults */
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --ink:#111318;
+      --muted:#4b5563;
+      --line:rgba(17,19,24,.14);
+      --chip:rgba(17,19,24,.05);
+      --shadow: 0 10px 30px rgba(17,19,24,.10);
 
-      /* Layout */
-      --max: 1200px;
-      --gap: 12px;
-      --radius: 16px;
-      --pad: 14px;
+      --radius:18px;
+      --pad:16px;
+      --max:1180px;
 
-      /* Day theme (default) */
-      --bg: #f7f8fb;
-      --card: #ffffff;
-      --ink: #101427;
-      --muted: #55607a;
-      --line: rgba(10,18,40,.12);
-      --shadow: 0 10px 28px rgba(10,18,40,.10);
-      --imgbg: rgba(10,18,40,.04);
-      --imgline: rgba(10,18,40,.18);
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --fs: 20px;          /* big base font */
+      --fs-small: 14px;
     }
 
-    /* Night theme */
-    html[data-theme="night"]{
-      --bg: #0b0c10;
-      --card: #121521;
-      --ink: #eef2ff;
-      --muted: #aab3d6;
-      --line: rgba(255,255,255,.10);
-      --shadow: 0 10px 28px rgba(0,0,0,.35);
-      --imgbg: rgba(255,255,255,.04);
-      --imgline: rgba(255,255,255,.18);
-    }
-
-    /* If you prefer OS dark mode, respect it when data-theme="auto" */
     @media (prefers-color-scheme: dark){
-      html[data-theme="auto"]{
-        --bg: #0b0c10;
-        --card: #121521;
-        --ink: #eef2ff;
-        --muted: #aab3d6;
-        --line: rgba(255,255,255,.10);
-        --shadow: 0 10px 28px rgba(0,0,0,.35);
-        --imgbg: rgba(255,255,255,.04);
-        --imgline: rgba(255,255,255,.18);
+      :root{
+        /* Night (dark) */
+        --bg:#0b0c10;
+        --card:#111521;
+        --ink:#eef2ff;
+        --muted:#aab3d6;
+        --line:rgba(255,255,255,.12);
+        --chip:rgba(255,255,255,.06);
+        --shadow: 0 14px 34px rgba(0,0,0,.45);
       }
     }
 
     *{ box-sizing:border-box; }
-
     body{
       margin:0;
-      font-size:var(--fs);
-      line-height:1.35;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       background:var(--bg);
       color:var(--ink);
+      font-family:var(--sans);
+      font-size:var(--fs);
+      line-height:1.35;
     }
 
     .wrap{
       max-width:var(--max);
       margin:0 auto;
-      padding:18px;
+      padding:20px;
     }
 
     header{
       display:flex;
       flex-direction:column;
       gap:8px;
-      margin-bottom:14px;
+      margin-bottom:16px;
     }
 
     h1{
-      font-size:1.05em;
+      font-size:1.1em;
       margin:0;
       letter-spacing:.2px;
     }
@@ -90,103 +72,89 @@
     .sub{
       margin:0;
       color:var(--muted);
-      font-size:0.90em;
+      font-size:0.85em;
     }
 
     .grid{
       display:flex;
       flex-direction:column;
-      gap:var(--gap);
+      gap:14px;
     }
 
-    /* Each "spreadsheet row" */
     .row{
       display:grid;
-      grid-template-columns: 1.1fr 2.2fr 1fr;
-      gap:10px;
-      padding:var(--pad);
-      border-radius:var(--radius);
+      grid-template-columns: 1.1fr 2fr 1fr;
+      gap:12px;
       background:var(--card);
       border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:var(--pad);
       box-shadow:var(--shadow);
       align-items:stretch;
     }
 
     .cell{
       border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px;
-      background: rgba(0,0,0,0); /* inherit clean */
+      border-radius:14px;
+      padding:14px;
+      background: var(--chip);
       display:flex;
       flex-direction:column;
       gap:10px;
-      min-height:86px;
+      min-height:92px;
     }
 
     .label{
-      font-size:var(--label);
+      font-size:var(--fs-small);
       color:var(--muted);
       text-transform:uppercase;
-      letter-spacing:.14em;
+      letter-spacing:.12em;
     }
 
     .pose{
-      font-size:var(--pose);
       font-weight:750;
+      font-size:1.5em; /* requested */
       line-height:1.15;
     }
 
     .cue{
-      font-size:var(--cue);
+      font-size:1em;
       white-space:pre-wrap;
-      opacity:.95;
+      opacity:.98;
     }
 
     .imgbox{
       justify-content:center;
       align-items:center;
       text-align:center;
+      overflow:hidden;
     }
 
     .imgbox img{
       width:100%;
       height:auto;
-      max-height:200px;
+      max-height:190px;
       object-fit:contain;
-      border-radius:10px;
+      border-radius:12px;
       display:block;
-      border:1px dashed var(--imgline);
-      background: var(--imgbg);
-      padding:14px;
+      border:1px dashed rgba(127,127,127,.35);
+      background: rgba(0,0,0,.06);
     }
 
     .fname{
       margin-top:10px;
-      font-size:var(--fname);
+      font-family:var(--mono);
+      font-size:var(--fs-small);
       color:var(--muted);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      user-select:all;
       word-break:break-word;
     }
 
     /* Mobile: stack Pose, Cue, Image */
     @media (max-width: 860px){
+      body{ font-size: 22px; } /* slightly larger on mobile */
       .row{ grid-template-columns: 1fr; }
-      .cell{ min-height:auto; }
       .imgbox img{ max-height:260px; }
-    }
-
-    /* Optional: a tiny theme badge */
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:0.85em;
-      color:var(--muted);
-    }
-    .dot{
-      width:10px;height:10px;border-radius:99px;
-      background: currentColor;
-      opacity:.55;
     }
   </style>
 </head>
@@ -194,658 +162,190 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Yoga Sequence (Pose • Cue • Image filename)</h1>
+      <h1>Yoga Sequence Spreadsheet (HTML)</h1>
       <p class="sub">
-        Responsive layout: 3 columns on desktop, stacked on mobile. Theme adapts automatically (day/night).
-        <span class="badge" id="themeBadge" style="margin-left:10px;"><span class="dot"></span><span id="themeText">Auto</span></span>
+        Rows render from your CSV. Each row: <strong>Pose Name</strong> • <strong>Cue</strong> • <strong>Image</strong>.
+        Image file names are auto-generated (Right assumed; Left gets <code>_L</code>).
       </p>
     </header>
 
-    <main class="grid">
-
-      <!-- Rows (full CSV rendered) -->
-
-      <section class="row">
-        <div class="cell">
-          <div class="label">Pose Name</div>
-          <div class="pose">Seated Meditation (Easy Pose)</div>
-        </div>
-        <div class="cell">
-          <div class="label">Cue</div>
-          <div class="cue">Focus on energy projection; palms down for grounding or up for receiving.</div>
-        </div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SeatedMeditation_EasyPose.png" alt="Seated Meditation (Easy Pose) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SeatedMeditation_EasyPose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Seated Side Bend</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Arms overhead, lateral stretches to both sides.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SeatedSideBend.png" alt="Seated Side Bend image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SeatedSideBend.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Downward-Facing Dog</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue"></div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="DownwardFacingDog.png" alt="Downward-Facing Dog image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">DownwardFacingDog.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Forward Fold / Ragdoll</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue"></div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ForwardFold_Ragdoll.png" alt="Forward Fold / Ragdoll image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ForwardFold_Ragdoll.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Slow Roll-Up to Standing</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue"></div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SlowRollUpToStanding.png" alt="Slow Roll-Up to Standing image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SlowRollUpToStanding.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Mountain Pose (Tadasana)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue"></div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="MountainPose_Tadasana.png" alt="Mountain Pose (Tadasana) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">MountainPose_Tadasana.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Standing Side Bend</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Reach overhead, lean Right, center, lean Left, center (3 reps).</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="StandingSideBend.png" alt="Standing Side Bend image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">StandingSideBend.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Hands to Prayer</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue"></div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="HandsToPrayer.png" alt="Hands to Prayer image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">HandsToPrayer.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Mountain to Forward Fold</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Inhale reach high look to your thumbs; exhale hinge from the hips heart leads the way down to a forward fold.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="MountainToForwardFold.png" alt="Mountain to Forward Fold image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">MountainToForwardFold.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Flat Back</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Inhale to a flat back.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="FlatBack.png" alt="Flat Back image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">FlatBack.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Plank</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Plant the palms step back to plank shift forward onto the toes.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Plank.png" alt="Plank image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Plank.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Low Push-Up (Chaturanga)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Exhale lower halfway elbows hugging ribs.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="LowPushUp_Chaturanga.png" alt="Low Push-Up (Chaturanga) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">LowPushUp_Chaturanga.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Upward-Facing Dog</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Inhale roll over the toes lift the chest shoulders away from ears knees off mat.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="UpwardFacingDog.png" alt="Upward-Facing Dog image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">UpwardFacingDog.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Downward-Facing Dog</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Exhale lift hips high.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="DownwardFacingDog.png" alt="Downward-Facing Dog image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">DownwardFacingDog.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Warrior II (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Step right foot forward spin back heel down windmill arms open sink into right knee gaze over right middle finger.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="WarriorII.png" alt="Warrior II image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">WarriorII.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Triangle (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Straighten right leg reach forward right hand to shin or block left arm to sky body between two panes of glass.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Triangle.png" alt="Triangle image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Triangle.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Reverse Warrior (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Sweep right arm up and back left hand rests on back thigh breathe into right side ribs.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ReverseWarrior.png" alt="Reverse Warrior image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ReverseWarrior.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Half Moon (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Right hand 10 inches forward lift left leg parallel flex left foot stack hips.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="HalfMoon.png" alt="Half Moon image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">HalfMoon.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Revolved Half Moon (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Square hips drop left hand reach right arm up twist from mid back.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="RevolvedHalfMoon.png" alt="Revolved Half Moon image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">RevolvedHalfMoon.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Warrior III (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Hands to heart lean torso forward body forms capital T left toes down core engaged.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="WarriorIII.png" alt="Warrior III image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">WarriorIII.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Crescent Lunge (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Back foot on ball reach arms up tuck tailbone stretch left hip flexor.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="CrescentLunge.png" alt="Crescent Lunge image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">CrescentLunge.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Side Plank (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Roll onto outer right foot stack left foot lift right hip reach left arm up.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SidePlank.png" alt="Side Plank image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SidePlank.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Lizard (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Right foot outside right hand drop back knee lower to elbows or palms breathe into inner right groin.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Lizard.png" alt="Lizard image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Lizard.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Gate Pose (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Rise up from knees extend right leg to side.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="GatePose.png" alt="Gate Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">GatePose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Gate Pose (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Rise up from knees extend left leg to side.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="GatePose_L.png" alt="Gate Pose (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">GatePose_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Camel Pose</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Hands to heels lift chest arch back.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="CamelPose.png" alt="Camel Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">CamelPose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Sphinx or Cobra</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Forearms or hands down lift chest gentle backbend.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SphinxOrCobra.png" alt="Sphinx or Cobra image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SphinxOrCobra.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Tabletop / Box Pose</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Neutral spine on hands and knees.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Tabletop_BoxPose.png" alt="Tabletop / Box Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Tabletop_BoxPose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Thread the Needle (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Right arm threads under chest shoulder to mat.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ThreadTheNeedle.png" alt="Thread the Needle image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ThreadTheNeedle.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Thread the Needle (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Left arm threads under chest shoulder to mat.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ThreadTheNeedle_L.png" alt="Thread the Needle (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ThreadTheNeedle_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Extended Puppy Pose</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Hips above knees arms forward chest melts toward mat.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ExtendedPuppyPose.png" alt="Extended Puppy Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ExtendedPuppyPose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Child's Pose</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Hips to heels forehead down relax.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ChildsPose.png" alt="Child's Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ChildsPose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Mountain to Forward Fold (Left Sequence)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Inhale reach high exhale fold from hips.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="MountainToForwardFold_L.png" alt="Mountain to Forward Fold (Left Sequence) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">MountainToForwardFold_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Flat Back (Left Sequence)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Inhale lengthen spine.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="FlatBack_L.png" alt="Flat Back (Left Sequence) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">FlatBack_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Plank (Left Sequence)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Step back to plank.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Plank_L.png" alt="Plank (Left Sequence) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Plank_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Low Push-Up / Chaturanga (Left Sequence)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Lower halfway elbows hug ribs.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="LowPushUp_Chaturanga_L.png" alt="Low Push-Up / Chaturanga (Left Sequence) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">LowPushUp_Chaturanga_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Upward-Facing Dog (Left Sequence)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Lift chest roll over toes.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="UpwardFacingDog_L.png" alt="Upward-Facing Dog (Left Sequence) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">UpwardFacingDog_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Downward-Facing Dog (Left Sequence)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Lift hips high.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="DownwardFacingDog_L.png" alt="Downward-Facing Dog (Left Sequence) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">DownwardFacingDog_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Warrior II (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Step left foot forward spin back heel down windmill arms open sink into left knee gaze over left middle finger.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="WarriorII_L.png" alt="Warrior II (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">WarriorII_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Triangle (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Straighten left leg reach forward left hand to shin or block right arm to sky.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Triangle_L.png" alt="Triangle (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Triangle_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Reverse Warrior (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Sweep left arm up and back right hand rests on back thigh breathe into left side ribs.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ReverseWarrior_L.png" alt="Reverse Warrior (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ReverseWarrior_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Half Moon (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Left hand forward lift right leg parallel flex right foot stack hips.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="HalfMoon_L.png" alt="Half Moon (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">HalfMoon_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Revolved Half Moon (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Square hips drop right hand reach left arm up twist mid back.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="RevolvedHalfMoon_L.png" alt="Revolved Half Moon (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">RevolvedHalfMoon_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Warrior III (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Hands to heart lean torso forward body forms capital T right toes down.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="WarriorIII_L.png" alt="Warrior III (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">WarriorIII_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Crescent Lunge (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Back foot on ball reach arms up stretch right hip flexor.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="CrescentLunge_L.png" alt="Crescent Lunge (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">CrescentLunge_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Side Plank (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Roll onto outer left foot stack right foot lift left hip reach right arm up.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SidePlank_L.png" alt="Side Plank (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SidePlank_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Lizard (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Left foot outside left hand drop back knee breathe into inner left groin.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="Lizard_L.png" alt="Lizard (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">Lizard_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Goddess Pose</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Wide squat toes turned out arms bent cactus shape.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="GoddessPose.png" alt="Goddess Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">GoddessPose.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Garland Pose / Yogi Squat</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Deep squat palms together elbows press knees open.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="GarlandPose_YogiSquat.png" alt="Garland Pose / Yogi Squat image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">GarlandPose_YogiSquat.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Crow Pose (Optional)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Hands down knees to triceps lean forward lift feet.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="CrowPose_Optional.png" alt="Crow Pose (Optional) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">CrowPose_Optional.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Supported Shoulder Stand or Headstand</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Practice inversion with props or wall.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SupportedShoulderStandOrHeadstand.png" alt="Supported Shoulder Stand or Headstand image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SupportedShoulderStandOrHeadstand.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Seated Transition</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Come to seated slowly with control.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SeatedTransition.png" alt="Seated Transition image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SeatedTransition.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Bridge Pose (Supported with Block)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Lift hips place block under sacrum.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="BridgePose_SupportedWithBlock.png" alt="Bridge Pose (Supported with Block) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">BridgePose_SupportedWithBlock.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">One-Legged Bridge (Right)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Extend right leg while hips lifted.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="OneLeggedBridge.png" alt="One-Legged Bridge image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">OneLeggedBridge.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">One-Legged Bridge (Left)</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Extend left leg while hips lifted.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="OneLeggedBridge_L.png" alt="One-Legged Bridge (Left) image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">OneLeggedBridge_L.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Slow Roll Down</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Remove block articulate spine to mat.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="SlowRollDown.png" alt="Slow Roll Down image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">SlowRollDown.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Reclining Bound Angle</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Feet together knees open hands on belly.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="RecliningBoundAngle.png" alt="Reclining Bound Angle image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">RecliningBoundAngle.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Corpse Pose / Savasana</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Full relaxation natural breath.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="CorpsePose_Savasana.png" alt="Corpse Pose / Savasana image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">CorpsePose_Savasana.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Fetal Position</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Roll to one side knees drawn in.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="FetalPosition.png" alt="Fetal Position image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">FetalPosition.png</div>
-        </div>
-      </section>
-
-      <section class="row">
-        <div class="cell"><div class="label">Pose Name</div><div class="pose">Return to Easy Pose</div></div>
-        <div class="cell"><div class="label">Cue</div><div class="cue">Sit tall bring palms together for closing namaste.</div></div>
-        <div class="cell imgbox">
-          <div class="label">Image</div>
-          <img src="ReturnToEasyPose.png" alt="Return to Easy Pose image placeholder" onerror="this.src=window.__blankSvg">
-          <div class="fname">ReturnToEasyPose.png</div>
-        </div>
-      </section>
-
-    </main>
+    <main id="grid" class="grid"></main>
   </div>
 
   <script>
-    // A tiny inline "blank" SVG placeholder (used if the PNGs don't exist yet).
-    // Keeps the layout clean while you build your image library.
-    window.__blankSvg =
-      "data:image/svg+xml;charset=utf-8," +
-      encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500">
-          <rect width="100%" height="100%" fill="transparent"/>
-        </svg>`
-      );
+    // ---- Source data (from your FULL CSV) ----
+    const rows = [
+      { pose: "Seated Meditation (Easy Pose)", cue: "Focus on energy projection; palms down for grounding or up for receiving." },
+      { pose: "Seated Side Bend", cue: "Arms overhead, lateral stretches to both sides." },
+      { pose: "Downward-Facing Dog", cue: "" },
+      { pose: "Forward Fold / Ragdoll", cue: "" },
+      { pose: "Slow Roll-Up to Standing", cue: "" },
+      { pose: "Mountain Pose (Tadasana)", cue: "" },
+      { pose: "Standing Side Bend", cue: "Reach overhead, lean Right, center, lean Left, center (3 reps)." },
+      { pose: "Hands to Prayer", cue: "" },
+      { pose: "Mountain to Forward Fold", cue: "Inhale reach high look to your thumbs; exhale hinge from the hips heart leads the way down to a forward fold." },
+      { pose: "Flat Back", cue: "Inhale to a flat back." },
+      { pose: "Plank", cue: "Plant the palms step back to plank shift forward onto the toes." },
+      { pose: "Low Push-Up (Chaturanga)", cue: "Exhale lower halfway elbows hugging ribs." },
+      { pose: "Upward-Facing Dog", cue: "Inhale roll over the toes lift the chest shoulders away from ears knees off mat." },
+      { pose: "Downward-Facing Dog", cue: "Exhale lift hips high." },
 
-    /**
-     * "Sun up / sun down" without geolocation:
-     * - Uses local browser time as a pragmatic proxy.
-     * - Day: 07:00–18:59, Night: 19:00–06:59
-     * - If you want exact sunrise/sunset, you'd need geolocation + a sunrise API.
-     */
-    function applyDayNightThemeByLocalTime(){
-      const now = new Date();
-      const h = now.getHours();
-      const isDay = (h >= 7 && h < 19);
+      { pose: "Warrior II (Right)", cue: "Step right foot forward spin back heel down windmill arms open sink into right knee gaze over right middle finger." },
+      { pose: "Triangle (Right)", cue: "Straighten right leg reach forward right hand to shin or block left arm to sky body between two panes of glass." },
+      { pose: "Reverse Warrior (Right)", cue: "Sweep right arm up and back left hand rests on back thigh breathe into right side ribs." },
+      { pose: "Half Moon (Right)", cue: "Right hand 10 inches forward lift left leg parallel flex left foot stack hips." },
+      { pose: "Revolved Half Moon (Right)", cue: "Square hips drop left hand reach right arm up twist from mid back." },
+      { pose: "Warrior III (Right)", cue: "Hands to heart lean torso forward body forms capital T left toes down core engaged." },
+      { pose: "Crescent Lunge (Right)", cue: "Back foot on ball reach arms up tuck tailbone stretch left hip flexor." },
+      { pose: "Side Plank (Right)", cue: "Roll onto outer right foot stack left foot lift right hip reach left arm up." },
+      { pose: "Lizard (Right)", cue: "Right foot outside right hand drop back knee lower to elbows or palms breathe into inner right groin." },
 
-      // If you prefer OS theme instead, set data-theme="auto" on <html> and return early.
-      // Here: we actually enforce day/night by clock.
-      document.documentElement.setAttribute("data-theme", isDay ? "day" : "night");
-      const themeText = document.getElementById("themeText");
-      if (themeText) themeText.textContent = isDay ? "Day (local time)" : "Night (local time)";
+      { pose: "Gate Pose (Right)", cue: "Rise up from knees extend right leg to side." },
+      { pose: "Gate Pose (Left)", cue: "Rise up from knees extend left leg to side." },
+      { pose: "Camel Pose", cue: "Hands to heels lift chest arch back." },
+      { pose: "Sphinx or Cobra", cue: "Forearms or hands down lift chest gentle backbend." },
+      { pose: "Tabletop / Box Pose", cue: "Neutral spine on hands and knees." },
+      { pose: "Thread the Needle (Right)", cue: "Right arm threads under chest shoulder to mat." },
+      { pose: "Thread the Needle (Left)", cue: "Left arm threads under chest shoulder to mat." },
+      { pose: "Extended Puppy Pose", cue: "Hips above knees arms forward chest melts toward mat." },
+      { pose: "Child's Pose", cue: "Hips to heels forehead down relax." },
+
+      { pose: "Mountain to Forward Fold (Left Sequence)", cue: "Inhale reach high exhale fold from hips." },
+      { pose: "Flat Back (Left Sequence)", cue: "Inhale lengthen spine." },
+      { pose: "Plank (Left Sequence)", cue: "Step back to plank." },
+      { pose: "Low Push-Up / Chaturanga (Left Sequence)", cue: "Lower halfway elbows hug ribs." },
+      { pose: "Upward-Facing Dog (Left Sequence)", cue: "Lift chest roll over toes." },
+      { pose: "Downward-Facing Dog (Left Sequence)", cue: "Lift hips high." },
+
+      { pose: "Warrior II (Left)", cue: "Step left foot forward spin back heel down windmill arms open sink into left knee gaze over left middle finger." },
+      { pose: "Triangle (Left)", cue: "Straighten left leg reach forward left hand to shin or block right arm to sky." },
+      { pose: "Reverse Warrior (Left)", cue: "Sweep left arm up and back right hand rests on back thigh breathe into left side ribs." },
+      { pose: "Half Moon (Left)", cue: "Left hand forward lift right leg parallel flex right foot stack hips." },
+      { pose: "Revolved Half Moon (Left)", cue: "Square hips drop right hand reach left arm up twist mid back." },
+      { pose: "Warrior III (Left)", cue: "Hands to heart lean torso forward body forms capital T right toes down." },
+      { pose: "Crescent Lunge (Left)", cue: "Back foot on ball reach arms up stretch right hip flexor." },
+      { pose: "Side Plank (Left)", cue: "Roll onto outer left foot stack right foot lift left hip reach left arm up." },
+      { pose: "Lizard (Left)", cue: "Left foot outside left hand drop back knee breathe into inner left groin." },
+
+      { pose: "Goddess Pose", cue: "Wide squat toes turned out arms bent cactus shape." },
+      { pose: "Garland Pose / Yogi Squat", cue: "Deep squat palms together elbows press knees open." },
+      { pose: "Crow Pose (Optional)", cue: "Hands down knees to triceps lean forward lift feet." },
+      { pose: "Supported Shoulder Stand or Headstand", cue: "Practice inversion with props or wall." },
+      { pose: "Seated Transition", cue: "Come to seated slowly with control." },
+      { pose: "Bridge Pose (Supported with Block)", cue: "Lift hips place block under sacrum." },
+      { pose: "One-Legged Bridge (Right)", cue: "Extend right leg while hips lifted." },
+      { pose: "One-Legged Bridge (Left)", cue: "Extend left leg while hips lifted." },
+      { pose: "Slow Roll Down", cue: "Remove block articulate spine to mat." },
+      { pose: "Reclining Bound Angle", cue: "Feet together knees open hands on belly." },
+      { pose: "Corpse Pose / Savasana", cue: "Full relaxation natural breath." },
+      { pose: "Fetal Position", cue: "Roll to one side knees drawn in." },
+      { pose: "Return to Easy Pose", cue: "Sit tall bring palms together for closing namaste." }
+    ];
+
+    // ---- Filename rules ----
+    // Right is assumed; Left indicated with _L.
+    // Examples requested: Warrior2.png, LowPushUp.png, Lizard_L.png
+    const ROMAN = new Map([
+      ["I", "1"], ["II", "2"], ["III", "3"], ["IV", "4"], ["V", "5"], ["VI", "6"], ["VII", "7"], ["VIII", "8"], ["IX", "9"], ["X", "10"]
+    ]);
+
+    function isLeftPose(poseName){
+      // Any explicit Left marker OR left-side sequence is treated as left for filename
+      return /\(Left\)/i.test(poseName) || /\(Left Sequence\)/i.test(poseName);
     }
 
-    // Run now + refresh periodically (in case the page stays open across sunset/sunrise)
-    applyDayNightThemeByLocalTime();
-    setInterval(applyDayNightThemeByLocalTime, 5 * 60 * 1000);
+    function stripSideMarkers(poseName){
+      return poseName
+        .replace(/\s*\(Right\)\s*/gi, "")
+        .replace(/\s*\(Left\)\s*/gi, "")
+        .replace(/\s*\(Left Sequence\)\s*/gi, "")
+        .replace(/\s*\(Optional\)\s*/gi, "")
+        .trim();
+    }
+
+    function romanToDigitsInWords(s){
+      // Replace standalone roman numerals as tokens (e.g., "Warrior II" -> "Warrior 2")
+      return s.split(/\s+/).map(tok => ROMAN.get(tok) ?? tok).join(" ");
+    }
+
+    function toPascalCaseFilenameBase(poseName){
+      // 1) strip side markers and optional markers
+      let base = stripSideMarkers(poseName);
+
+      // 2) convert roman numerals to digits
+      base = romanToDigitsInWords(base);
+
+      // 3) remove parenthetical subtitles, but keep meaningful words inside common ones already handled
+      // (e.g., "Mountain Pose (Tadasana)" -> "Mountain Pose")
+      base = base.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+
+      // 4) normalize separators: hyphens, slashes, apostrophes -> spaces
+      base = base
+        .replace(/[\/]/g, " ")
+        .replace(/[-–—]/g, " ")
+        .replace(/[’']/g, "");
+
+      // 5) remove other punctuation
+      base = base.replace(/[^a-zA-Z0-9\s]/g, " ");
+
+      // 6) collapse spaces
+      base = base.replace(/\s+/g, " ").trim();
+
+      // 7) PascalCase join, but keep digits as-is (Warrior 2 -> Warrior2)
+      const parts = base.split(" ").filter(Boolean);
+      return parts.map(p => {
+        // if token is all digits, keep it
+        if (/^\d+$/.test(p)) return p;
+        return p.charAt(0).toUpperCase() + p.slice(1);
+      }).join("");
+    }
+
+    function imageFilename(poseName){
+      const left = isLeftPose(poseName);
+      const base = toPascalCaseFilenameBase(poseName);
+      return left ? `${base}_L.png` : `${base}.png`;
+    }
+
+    // ---- Render ----
+    const grid = document.getElementById("grid");
+
+    rows.forEach((r) => {
+      const fname = imageFilename(r.pose);
+
+      const row = document.createElement("section");
+      row.className = "row";
+
+      row.innerHTML = `
+        <div class="cell">
+          <div class="label">Pose Name</div>
+          <div class="pose">${escapeHtml(r.pose)}</div>
+        </div>
+
+        <div class="cell">
+          <div class="label">Cue</div>
+          <div class="cue">${escapeHtml(r.cue || "")}</div>
+        </div>
+
+        <div class="cell imgbox">
+          <div class="label">Image</div>
+          <img src="${escapeAttr(fname)}" alt="${escapeAttr(r.pose)} image (${fname})">
+          <div class="fname">${escapeHtml(fname)}</div>
+        </div>
+      `;
+
+      grid.appendChild(row);
+    });
+
+    // ---- small helpers ----
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function escapeAttr(str){ return escapeHtml(str); }
   </script>
 </body>
 </html>
