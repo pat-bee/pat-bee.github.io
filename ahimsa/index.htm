@@ -45,35 +45,44 @@
     .half.light { background: #ffffff; }
     .half.dark  { background: #0a0a0a; }
 
-    h1 {
-      font-family: 'Open Sans', sans-serif;
-      font-weight: var(--bionic-base-weight);
-      font-size: 10vw;
-      line-height: var(--bionic-line-height);
-      display: flex;
-      align-items: baseline;
-      gap: 0.55em;
-      text-wrap: balance;
-    }
+  h1 {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: var(--bionic-base-weight);
+  font-size: 10vw;
+  line-height: var(--bionic-line-height);
+  letter-spacing: var(--bionic-letter-spacing);
+  display: block;
+  text-wrap: balance;
+}
+
+
 
     /* Bionic reading spans */
-    .bio {
-      font-weight: var(--bionic-bold-weight);
-    }
+.bio,
+.rest {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
 
-    .rest {
-      font-weight: var(--bionic-base-weight);
-    }
+.bio {
+  font-weight: var(--bionic-bold-weight);
+}
+
+.rest {
+  font-weight: var(--bionic-base-weight);
+}
 
     /* Period-sized bullet — scaled to match a full stop */
-    h1::before {
-      content: '•';
-      font-size: 0.28em;
-      line-height: 1;
-      flex-shrink: 0;
-      position: relative;
-      top: -0.1em;
-    }
+h1::before {
+  content: '•';
+  display: inline-block;
+  font-size: 0.28em;
+  line-height: 1;
+  margin-right: 0.55em;
+  position: relative;
+  top: -0.1em;
+}
 
     .half.light h1         { color: #000000; }
     .half.light h1::before { color: #000000; }
