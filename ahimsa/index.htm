@@ -36,14 +36,29 @@
     h1 {
       font-family: 'Open Sans', sans-serif;
       font-weight: 300;
-      /* Start huge — fitText() will shrink to fit */
+      /* Start large — fitText() will shrink to fit */
       font-size: 10vw;
       line-height: 1.2;
       letter-spacing: -0.01em;
+      display: flex;
+      align-items: baseline;
+      gap: 0.55em;
     }
 
-    .half.light h1 { color: #000000; }
-    .half.dark  h1 { color: #ffffff; }
+    /* Period-sized bullet — scaled to match a full stop */
+    h1::before {
+      content: '•';
+      font-size: 0.28em;
+      line-height: 1;
+      flex-shrink: 0;
+      position: relative;
+      top: -0.1em;
+    }
+
+    .half.light h1         { color: #000000; }
+    .half.light h1::before { color: #000000; }
+    .half.dark  h1         { color: #ffffff; }
+    .half.dark  h1::before { color: #ffffff; }
 
     .divider {
       text-align: center;
@@ -129,7 +144,7 @@
 
   // ── FIT TEXT ──────────────────────────────────────────────────────
   // Binary search: start at maxPx, find largest size that still fits
-  function fitText(containerId, maxPx = 120, minPx = 10) {
+  function fitText(containerId, maxPx = 100, minPx = 10) {
     const container = document.getElementById(containerId);
     const headings  = container.querySelectorAll('h1');
     if (!headings.length) return;
