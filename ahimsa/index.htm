@@ -26,7 +26,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-evenly;
-      padding: clamp(0.8rem, 2.5vw, 2rem) clamp(1.2rem, 5vw, 4rem);
+      padding: clamp(0.6rem, 2vw, 1.8rem) clamp(1rem, 4vw, 3.5rem);
       overflow: hidden;
     }
 
@@ -36,19 +36,10 @@
     h1 {
       font-family: 'Open Sans', sans-serif;
       font-weight: 300;
-      /* Each half is ~50vh, 5 statements + 4 dividers.
-         Statements get roughly 1/9th of 50vh each ≈ 5.5vh.
-         We use a generous vw-based size so it fills width too. */
-      font-size: clamp(1.1rem, 3.2vw, 2.2rem);
-      line-height: 1.25;
+      /* Start huge — fitText() will shrink to fit */
+      font-size: 10vw;
+      line-height: 1.2;
       letter-spacing: -0.01em;
-    }
-
-    /* On tall/narrow mobile, scale up relative to viewport height */
-    @media (max-width: 600px) {
-      h1 {
-        font-size: clamp(1rem, 4.5vw, 2rem);
-      }
     }
 
     .half.light h1 { color: #000000; }
@@ -57,11 +48,22 @@
     .divider {
       text-align: center;
       color: #7f7f7f;
-      font-size: clamp(0.9rem, 2vw, 1.4rem);
       font-weight: 300;
-      line-height: 1;
+      /* Divider stays compact — just enough to breathe */
+      font-size: 0.75em;
+      line-height: 0.6;
       flex-shrink: 0;
+      padding: 0;
+      margin: 0;
     }
+
+    /* Shake feedback flash */
+    @keyframes shakeFlash {
+      0%   { opacity: 1; }
+      40%  { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    #app.shake-flash { animation: shakeFlash 0.35s ease; }
 
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -82,6 +84,7 @@
 
   const COUNT = 5;
 
+  // ── DAILY SEED ────────────────────────────────────────────────────
   function getDailySeed() {
     const shifted = new Date(Date.now() - 4 * 60 * 60 * 1000);
     const y = shifted.getFullYear();
@@ -109,6 +112,7 @@
     return a.slice(0, Math.min(n, a.length));
   }
 
+  // ── CSV PARSER ────────────────────────────────────────────────────
   function parseCSV(text) {
     return text.trim().split('\n').map(line => {
       const cols = [];
@@ -123,23 +127,34 @@
     });
   }
 
-  // After rendering, auto-shrink font size until everything fits in its half
-  function fitText(containerId) {
+  // ── FIT TEXT ──────────────────────────────────────────────────────
+  // Binary search: start at maxPx, find largest size that still fits
+  function fitText(containerId, maxPx = 120, minPx = 10) {
     const container = document.getElementById(containerId);
     const headings  = container.querySelectorAll('h1');
     if (!headings.length) return;
 
-    let size = parseFloat(getComputedStyle(headings[0]).fontSize);
-    const maxHeight = container.clientHeight;
+    const availH = container.clientHeight;
+    let lo = minPx, hi = maxPx, best = minPx;
 
-    // Step down 0.5px at a time until content fits
-    while (container.scrollHeight > maxHeight && size > 10) {
-      size -= 0.5;
-      headings.forEach(h => h.style.fontSize = size + 'px');
+    while (lo <= hi) {
+      const mid = (lo + hi) / 2;
+      headings.forEach(h => h.style.fontSize = mid + 'px');
+      if (container.scrollHeight <= availH) {
+        best = mid;
+        lo = mid + 0.5;
+      } else {
+        hi = mid - 0.5;
+      }
     }
+    headings.forEach(h => h.style.fontSize = best + 'px');
   }
 
-  function render(doList, avoidList) {
+  // ── RENDER ────────────────────────────────────────────────────────
+  function clearAndRender(doList, avoidList) {
+    document.getElementById('lightHalf').innerHTML = '';
+    document.getElementById('darkHalf').innerHTML  = '';
+
     const seed  = getDailySeed();
     const light = pickN(doList,    COUNT, makeRng(seed));
     const dark  = pickN(avoidList, COUNT, makeRng(seed + 1));
@@ -151,10 +166,10 @@
         h.textContent = text;
         container.appendChild(h);
         if (i < list.length - 1) {
-          const div = document.createElement('div');
-          div.className = 'divider';
-          div.textContent = '–';
-          container.appendChild(div);
+          const d = document.createElement('div');
+          d.className = 'divider';
+          d.textContent = '–';
+          container.appendChild(d);
         }
       });
     }
@@ -162,13 +177,14 @@
     appendWithDividers(light, 'lightHalf');
     appendWithDividers(dark,  'darkHalf');
 
-    // Let the DOM paint, then fit text to available space
-    requestAnimationFrame(() => {
+    // Two rAF passes: first lets browser lay out, second measures correctly
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       fitText('lightHalf');
       fitText('darkHalf');
-    });
+    }));
   }
 
+  // ── FALLBACK ──────────────────────────────────────────────────────
   const FALLBACK_DO = [
     "Speak to yourself as you would to an 8-year-old who doesn't want to get in trouble.",
     "Write one kind sentence about yourself in your journal, even if you don't fully believe it.",
@@ -185,22 +201,88 @@
     "Refrain from labeling your needs as too much."
   ];
 
-  async function load() {
+  // ── LOAD ──────────────────────────────────────────────────────────
+  let cachedDo = null, cachedAvoid = null;
+
+  async function load(forceRefresh = false) {
     try {
-      const res  = await fetch(SHEET_CSV_URL);
+      const url = forceRefresh ? SHEET_CSV_URL + '&t=' + Date.now() : SHEET_CSV_URL;
+      const res  = await fetch(url);
       const text = await res.text();
       const rows = parseCSV(text).filter(r => r[0] && r[1]);
 
-      const doList    = rows.filter(r => r[1].toLowerCase().trim() === 'do').map(r => r[0]);
-      const avoidList = rows.filter(r => r[1].toLowerCase().trim() === 'avoid').map(r => r[0]);
+      cachedDo    = rows.filter(r => r[1].toLowerCase().trim() === 'do').map(r => r[0]);
+      cachedAvoid = rows.filter(r => r[1].toLowerCase().trim() === 'avoid').map(r => r[0]);
 
-      if (doList.length < COUNT || avoidList.length < COUNT) throw new Error('Too few rows');
-      render(doList, avoidList);
+      if (cachedDo.length < COUNT || cachedAvoid.length < COUNT) throw new Error('Too few rows');
+      clearAndRender(cachedDo, cachedAvoid);
     } catch (e) {
       console.warn('Using fallback statements.', e);
-      render(FALLBACK_DO, FALLBACK_AVOID);
+      cachedDo    = FALLBACK_DO;
+      cachedAvoid = FALLBACK_AVOID;
+      clearAndRender(FALLBACK_DO, FALLBACK_AVOID);
     }
   }
+
+  // ── SHAKE TO REFRESH ──────────────────────────────────────────────
+  (function initShake() {
+    if (!window.DeviceMotionEvent) return;
+
+    const THRESHOLD  = 18;   // acceleration needed (m/s²)
+    const COOLDOWN   = 2000; // ms between refreshes
+    let lastShake    = 0;
+    let lastX = null, lastY = null, lastZ = null;
+
+    window.addEventListener('devicemotion', e => {
+      const acc = e.accelerationIncludingGravity;
+      if (!acc) return;
+
+      const { x, y, z } = acc;
+      if (lastX === null) { lastX = x; lastY = y; lastZ = z; return; }
+
+      const delta = Math.abs(x - lastX) + Math.abs(y - lastY) + Math.abs(z - lastZ);
+      lastX = x; lastY = y; lastZ = z;
+
+      const now = Date.now();
+      if (delta > THRESHOLD && now - lastShake > COOLDOWN) {
+        lastShake = now;
+        triggerRefresh();
+      }
+    });
+
+    // iOS 13+ requires permission
+    function requestMotionPermission() {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().catch(() => {});
+      }
+      document.removeEventListener('touchend', requestMotionPermission);
+    }
+    document.addEventListener('touchend', requestMotionPermission);
+  })();
+
+  function triggerRefresh() {
+    const app = document.getElementById('app');
+    app.classList.remove('shake-flash');
+    void app.offsetWidth; // reflow to restart animation
+    app.classList.add('shake-flash');
+    app.addEventListener('animationend', () => app.classList.remove('shake-flash'), { once: true });
+
+    if (cachedDo && cachedAvoid) {
+      // Re-pick from cached data instantly; re-fetch in background
+      clearAndRender(cachedDo, cachedAvoid);
+      load(true);
+    } else {
+      load(true);
+    }
+  }
+
+  // Re-fit on orientation change / resize
+  window.addEventListener('resize', () => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fitText('lightHalf');
+      fitText('darkHalf');
+    }));
+  });
 
   load();
 </script>
