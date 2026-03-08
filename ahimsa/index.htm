@@ -26,7 +26,8 @@
       display: flex;
       flex-direction: column;
       justify-content: space-evenly;
-      padding: clamp(1rem, 3.5vw, 3rem) clamp(1.6rem, 7vw, 6rem);
+      padding: clamp(0.8rem, 2.5vw, 2rem) clamp(1.2rem, 5vw, 4rem);
+      overflow: hidden;
     }
 
     .half.light { background: #ffffff; }
@@ -35,8 +36,19 @@
     h1 {
       font-family: 'Open Sans', sans-serif;
       font-weight: 300;
-      font-size: 1.5em;
-      
+      /* Each half is ~50vh, 5 statements + 4 dividers.
+         Statements get roughly 1/9th of 50vh each ≈ 5.5vh.
+         We use a generous vw-based size so it fills width too. */
+      font-size: clamp(1.1rem, 3.2vw, 2.2rem);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    /* On tall/narrow mobile, scale up relative to viewport height */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: clamp(1rem, 4.5vw, 2rem);
+      }
     }
 
     .half.light h1 { color: #000000; }
@@ -45,7 +57,7 @@
     .divider {
       text-align: center;
       color: #7f7f7f;
-      font-size: clamp(0.85rem, 2vw, 1.4rem);
+      font-size: clamp(0.9rem, 2vw, 1.4rem);
       font-weight: 300;
       line-height: 1;
       flex-shrink: 0;
@@ -62,19 +74,14 @@
 <div id="app">
   <div class="half light" id="lightHalf"></div>
   <div class="half dark"  id="darkHalf"></div>
-  <div class="half dark" ><p style="text-align: center;">-</p></div>
 </div>
 
 <script>
-  // ── CONFIG ────────────────────────────────────────────────────────
-  // Google Sheet published as CSV (File → Share → Publish to web → CSV)
   const SHEET_CSV_URL =
     'https://docs.google.com/spreadsheets/d/1IF2tmMmEuBjdUvvJCN8K1uiE4RXbj1XkKOyUsBF_qDQ/export?format=csv&gid=0';
 
-  const COUNT = 5; // statements per half
+  const COUNT = 5;
 
-  // ── DAILY SEED ───────────────────────────────────────────────────
-  // "Today" resets at 4am — same seed for everyone visiting the same day
   function getDailySeed() {
     const shifted = new Date(Date.now() - 4 * 60 * 60 * 1000);
     const y = shifted.getFullYear();
@@ -83,7 +90,6 @@
     return parseInt(`${y}${m}${d}`, 10);
   }
 
-  // Mulberry32 seeded PRNG
   function makeRng(seed) {
     let s = seed >>> 0;
     return () => {
@@ -94,7 +100,6 @@
     };
   }
 
-  // Seeded shuffle, return first n
   function pickN(arr, n, rng) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -104,7 +109,6 @@
     return a.slice(0, Math.min(n, a.length));
   }
 
-  // ── CSV PARSER ────────────────────────────────────────────────────
   function parseCSV(text) {
     return text.trim().split('\n').map(line => {
       const cols = [];
@@ -119,7 +123,22 @@
     });
   }
 
-  // ── RENDER ────────────────────────────────────────────────────────
+  // After rendering, auto-shrink font size until everything fits in its half
+  function fitText(containerId) {
+    const container = document.getElementById(containerId);
+    const headings  = container.querySelectorAll('h1');
+    if (!headings.length) return;
+
+    let size = parseFloat(getComputedStyle(headings[0]).fontSize);
+    const maxHeight = container.clientHeight;
+
+    // Step down 0.5px at a time until content fits
+    while (container.scrollHeight > maxHeight && size > 10) {
+      size -= 0.5;
+      headings.forEach(h => h.style.fontSize = size + 'px');
+    }
+  }
+
   function render(doList, avoidList) {
     const seed  = getDailySeed();
     const light = pickN(doList,    COUNT, makeRng(seed));
@@ -142,9 +161,14 @@
 
     appendWithDividers(light, 'lightHalf');
     appendWithDividers(dark,  'darkHalf');
+
+    // Let the DOM paint, then fit text to available space
+    requestAnimationFrame(() => {
+      fitText('lightHalf');
+      fitText('darkHalf');
+    });
   }
 
-  // ── FALLBACK (if sheet unreachable) ──────────────────────────────
   const FALLBACK_DO = [
     "Speak to yourself as you would to an 8-year-old who doesn't want to get in trouble.",
     "Write one kind sentence about yourself in your journal, even if you don't fully believe it.",
@@ -161,7 +185,6 @@
     "Refrain from labeling your needs as too much."
   ];
 
-  // ── LOAD ──────────────────────────────────────────────────────────
   async function load() {
     try {
       const res  = await fetch(SHEET_CSV_URL);
