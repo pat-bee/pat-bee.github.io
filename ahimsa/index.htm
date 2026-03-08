@@ -4,9 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daily Statements</title>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet" />
+
+  <!-- Load multiple weights so the bionic treatment has real contrast -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap" rel="stylesheet" />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* BIONIC SETTINGS */
+      --bionic-base-weight: 300;
+      --bionic-bold-weight: 700;
+      --bionic-letter-spacing: -0.01em;
+      --bionic-line-height: 1.15;
+    }
 
     html, body {
       height: 100%;
@@ -19,6 +30,7 @@
       flex-direction: column;
       height: 100vh;
       width: 100vw;
+      animation: fadeIn 0.5s ease;
     }
 
     .half {
@@ -34,15 +46,24 @@
     .half.dark  { background: #0a0a0a; }
 
     h1 {
-      font-family: 'Inter-Thin.woff2', 'Open Sans', sans-serif;
-      font-weight: 300;
-      /* Start large — fitText() will shrink to fit */
+      font-family: 'Open Sans', sans-serif;
+      font-weight: var(--bionic-base-weight);
       font-size: 10vw;
-      line-height: 1.15;
-      letter-spacing: -0.01em;
+      line-height: var(--bionic-line-height);
+      letter-spacing: var(--bionic-letter-spacing);
       display: flex;
       align-items: baseline;
       gap: 0.55em;
+      text-wrap: balance;
+    }
+
+    /* Bionic reading spans */
+    .bio {
+      font-weight: var(--bionic-bold-weight);
+    }
+
+    .rest {
+      font-weight: var(--bionic-base-weight);
     }
 
     /* Period-sized bullet — scaled to match a full stop */
@@ -64,7 +85,6 @@
       text-align: center;
       color: #7f7f7f;
       font-weight: 300;
-      /* Divider stays compact — just enough to breathe */
       font-size: 0.75em;
       line-height: 0.6;
       flex-shrink: 0;
@@ -72,7 +92,6 @@
       margin: 0;
     }
 
-    /* Shake feedback flash */
     @keyframes shakeFlash {
       0%   { opacity: 1; }
       40%  { opacity: 0; }
@@ -84,7 +103,6 @@
       from { opacity: 0; }
       to   { opacity: 1; }
     }
-    #app { animation: fadeIn 0.5s ease; }
   </style>
 </head>
 <body>
@@ -98,6 +116,14 @@
     'https://docs.google.com/spreadsheets/d/1IF2tmMmEuBjdUvvJCN8K1uiE4RXbj1XkKOyUsBF_qDQ/export?format=csv&gid=0';
 
   const COUNT = 5;
+
+  // BIONIC SETTINGS
+  // Portion of each word to bold. 0.45 = first 45% of letters.
+  const BIONIC_RATIO = 0.45;
+
+  // Minimum and maximum number of bolded letters per word.
+  const BIONIC_MIN = 1;
+  const BIONIC_MAX = 5;
 
   // ── DAILY SEED ────────────────────────────────────────────────────
   function getDailySeed() {
@@ -142,8 +168,71 @@
     });
   }
 
+  // ── BIONIC TEXT ───────────────────────────────────────────────────
+  function getBoldCount(wordCore) {
+    const len = wordCore.length;
+    if (len <= 1) return 1;
+    return Math.max(
+      BIONIC_MIN,
+      Math.min(BIONIC_MAX, Math.ceil(len * BIONIC_RATIO))
+    );
+  }
+
+  function makeBionicFragment(text) {
+    const frag = document.createDocumentFragment();
+
+    // Split into whitespace and non-whitespace chunks, preserving spaces
+    const tokens = text.split(/(\s+)/);
+
+    tokens.forEach(token => {
+      if (!token) return;
+
+      // Keep whitespace untouched
+      if (/^\s+$/.test(token)) {
+        frag.appendChild(document.createTextNode(token));
+        return;
+      }
+
+      // Separate leading punctuation, core word, trailing punctuation
+      const match = token.match(/^([^A-Za-z0-9À-ÖØ-öø-ÿ'’-]*)([A-Za-z0-9À-ÖØ-öø-ÿ'’-]+)([^A-Za-z0-9À-ÖØ-öø-ÿ'’-]*)$/);
+
+      if (!match) {
+        frag.appendChild(document.createTextNode(token));
+        return;
+      }
+
+      const [, lead, core, trail] = match;
+
+      if (lead) frag.appendChild(document.createTextNode(lead));
+
+      const boldCount = getBoldCount(core);
+      const boldPart = core.slice(0, boldCount);
+      const restPart = core.slice(boldCount);
+
+      const boldSpan = document.createElement('span');
+      boldSpan.className = 'bio';
+      boldSpan.textContent = boldPart;
+      frag.appendChild(boldSpan);
+
+      if (restPart) {
+        const restSpan = document.createElement('span');
+        restSpan.className = 'rest';
+        restSpan.textContent = restPart;
+        frag.appendChild(restSpan);
+      }
+
+      if (trail) frag.appendChild(document.createTextNode(trail));
+    });
+
+    return frag;
+  }
+
+  function setBionicText(el, text) {
+    el.textContent = '';
+    el.appendChild(makeBionicFragment(text));
+  }
+
   // ── FIT TEXT ──────────────────────────────────────────────────────
-  // Binary search: start at maxPx, find largest size that still fits
   function fitText(containerId, maxPx = 100, minPx = 10) {
     const container = document.getElementById(containerId);
     const headings  = container.querySelectorAll('h1');
@@ -178,8 +267,9 @@
       const container = document.getElementById(containerId);
       list.forEach((text, i) => {
         const h = document.createElement('h1');
-        h.textContent = text;
+        setBionicText(h, text);
         container.appendChild(h);
+
         if (i < list.length - 1) {
           const d = document.createElement('div');
           d.className = 'divider';
@@ -192,7 +282,6 @@
     appendWithDividers(light, 'lightHalf');
     appendWithDividers(dark,  'darkHalf');
 
-    // Two rAF passes: first lets browser lay out, second measures correctly
     requestAnimationFrame(() => requestAnimationFrame(() => {
       fitText('lightHalf');
       fitText('darkHalf');
@@ -207,6 +296,7 @@
     "Notice one moment you feel jealousy and add: \"Of course I feel this; it makes sense.\"",
     "Practice \"responsibility to\" someone by keeping one small promise today."
   ];
+
   const FALLBACK_AVOID = [
     "Avoid using things to avoid or disconnect from your feelings today.",
     "Do not force yourself to figure it out once and for all; allow not-knowing.",
@@ -243,8 +333,8 @@
   (function initShake() {
     if (!window.DeviceMotionEvent) return;
 
-    const THRESHOLD  = 18;   // acceleration needed (m/s²)
-    const COOLDOWN   = 2000; // ms between refreshes
+    const THRESHOLD  = 18;
+    const COOLDOWN   = 2000;
     let lastShake    = 0;
     let lastX = null, lastY = null, lastZ = null;
 
@@ -265,7 +355,6 @@
       }
     });
 
-    // iOS 13+ requires permission
     function requestMotionPermission() {
       if (typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().catch(() => {});
@@ -278,12 +367,11 @@
   function triggerRefresh() {
     const app = document.getElementById('app');
     app.classList.remove('shake-flash');
-    void app.offsetWidth; // reflow to restart animation
+    void app.offsetWidth;
     app.classList.add('shake-flash');
     app.addEventListener('animationend', () => app.classList.remove('shake-flash'), { once: true });
 
     if (cachedDo && cachedAvoid) {
-      // Re-pick from cached data instantly; re-fetch in background
       clearAndRender(cachedDo, cachedAvoid);
       load(true);
     } else {
@@ -291,7 +379,6 @@
     }
   }
 
-  // Re-fit on orientation change / resize
   window.addEventListener('resize', () => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       fitText('lightHalf');
@@ -303,3 +390,4 @@
 </script>
 </body>
 </html>
+
