@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Statements</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bionic-base-weight: 300;
+      --bionic-bold-weight: 450;
+      --bionic-letter-spacing: -0.01em;
+      --bionic-line-height: 1.15;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Open Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      padding: clamp(0.6rem, 2vw, 1.8rem) clamp(1rem, 4vw, 3.5rem);
+      overflow: hidden;
+    }
+
+    .half.light { background: #ffffff; }
+    .half.dark  { background: #0a0a0a; }
+
+    h1 {
+      font-family: 'Open Sans', sans-serif;
+      font-weight: var(--bionic-base-weight);
+      font-size: 10vw;
+      line-height: var(--bionic-line-height);
+      letter-spacing: var(--bionic-letter-spacing);
+      display: block;
+      text-wrap: balance;
+      /* Long-press: prevent selection & callout */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    /* Dim slightly while finger is held down */
+    h1.pressing { opacity: 0.5; }
+
+    /* Voted = boost all bio spans to full bold */
+    h1.voted .bio { font-weight: 700; }
+    h1.voted .rest { font-weight: 500; }
+
+    .bio  { display: inline; font-weight: var(--bionic-bold-weight); }
+    .rest { display: inline; font-weight: var(--bionic-base-weight); }
+
+    h1::before {
+      content: '•';
+      display: inline-block;
+      font-size: 0.28em;
+      line-height: 1;
+      margin-right: 0.55em;
+      position: relative;
+      top: -0.1em;
+    }
+
+    .half.light h1         { color: #000000; }
+    .half.light h1::before { color: #000000; }
+    .half.dark  h1         { color: #ffffff; }
+    .half.dark  h1::before { color: #ffffff; }
+
+    .divider {
+      text-align: center;
+      color: #7f7f7f;
+      font-weight: 300;
+      font-size: 0.75em;
+      line-height: 0.6;
+      flex-shrink: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 2.2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: rgba(0,0,0,0.72);
+      color: #fff;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 300;
+      letter-spacing: 0.07em;
+      padding: 0.45rem 1.3rem;
+      border-radius: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes shakeFlash {
+      0%   { opacity: 1; }
+      40%  { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    #app.shake-flash { animation: shakeFlash 0.35s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="half light" id="lightHalf"></div>
+  <div class="half dark"  id="darkHalf"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+  // ── CONFIG ────────────────────────────────────────────────────────
+  const SHEET_CSV_URL =
+    'https://docs.google.com/spreadsheets/d/1IF2tmMmEuBjdUvvJCN8K1uiE4RXbj1XkKOyUsBF_qDQ/export?format=csv&gid=0';
+
+  // After deploying the Apps Script, paste its URL here:
+  // const VOTE_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+  const VOTE_URL = 'https://script.google.com/macros/s/AKfycbzhM8rtoUr37HoTq9qqaPnF14hVjOsoMK7grGOxQlTpVaW8hZKP-RJKZF42_CP_KKvgpw/exec'; // <-- replace null with your URL
+
+  const COUNT          = 5;
+  const LONG_PRESS_MS  = 600;
+  const BIONIC_RATIO   = 0.45;
+  const BIONIC_MIN     = 1;
+  const BIONIC_MAX     = 5;
+
+  // ── DAY KEY (resets at 4 am) ──────────────────────────────────────
+  function getDayKey() {
+    const shifted = new Date(Date.now() - 4 * 60 * 60 * 1000);
+    const y = shifted.getFullYear();
+    const m = String(shifted.getMonth() + 1).padStart(2, '0');
+    const d = String(shifted.getDate()).padStart(2, '0');
+    return `${y}${m}${d}`;
+  }
+
+  function getDailySeed() { return parseInt(getDayKey(), 10); }
+
+  // ── VOTE STORAGE ─────────────────────────────────────────────────
+  // localStorage key = "voted_YYYYMMDD"  →  JSON array of statement texts
+  function getVotedToday() {
+    try {
+      const raw = localStorage.getItem('voted_' + getDayKey());
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch { return new Set(); }
+  }
+
+  function markVotedLocally(text) {
+    try {
+      const key   = 'voted_' + getDayKey();
+      const votes = getVotedToday();
+      votes.add(text);
+      localStorage.setItem(key, JSON.stringify([...votes]));
+    } catch(e) { console.warn('localStorage unavailable', e); }
+  }
+
+  // ── PRNG ─────────────────────────────────────────────────────────
+  function makeRng(seed) {
+    let s = seed >>> 0;
+    return () => {
+      s += 0x6D2B79F5;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function pickN(arr, n, rng) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a.slice(0, Math.min(n, a.length));
+  }
+
+  // ── CSV PARSER ────────────────────────────────────────────────────
+  function parseCSV(text) {
+    return text.trim().split('\n').map(line => {
+      const cols = [];
+      let cur = '', inQ = false;
+      for (const ch of line) {
+        if (ch === '"') { inQ = !inQ; }
+        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+        else { cur += ch; }
+      }
+      cols.push(cur.trim());
+      return cols;
+    });
+  }
+
+  // ── BIONIC TEXT ───────────────────────────────────────────────────
+  function getBoldCount(wordCore) {
+    const len = wordCore.length;
+    if (len <= 1) return 1;
+    return Math.max(BIONIC_MIN, Math.min(BIONIC_MAX, Math.ceil(len * BIONIC_RATIO)));
+  }
+
+  function makeBionicFragment(text) {
+    const frag   = document.createDocumentFragment();
+    const tokens = text.split(/(\s+)/);
+    tokens.forEach(token => {
+      if (!token) return;
+      if (/^\s+$/.test(token)) { frag.appendChild(document.createTextNode(token)); return; }
+      const match = token.match(/^([^A-Za-z0-9À-ÖØ-öø-ÿ''-]*)([A-Za-z0-9À-ÖØ-öø-ÿ''-]+)([^A-Za-z0-9À-ÖØ-öø-ÿ''-]*)$/);
+      if (!match) { frag.appendChild(document.createTextNode(token)); return; }
+      const [, lead, core, trail] = match;
+      if (lead) frag.appendChild(document.createTextNode(lead));
+      const n = getBoldCount(core);
+      const b = document.createElement('span'); b.className = 'bio'; b.textContent = core.slice(0, n); frag.appendChild(b);
+      if (core.slice(n)) { const r = document.createElement('span'); r.className = 'rest'; r.textContent = core.slice(n); frag.appendChild(r); }
+      if (trail) frag.appendChild(document.createTextNode(trail));
+    });
+    return frag;
+  }
+
+  function setBionicText(el, text) {
+    el.textContent = '';
+    el.appendChild(makeBionicFragment(text));
+  }
+
+  // ── FIT TEXT ─────────────────────────────────────────────────────
+  function fitText(containerId, maxPx = 100, minPx = 10) {
+    const container = document.getElementById(containerId);
+    const headings  = container.querySelectorAll('h1');
+    if (!headings.length) return;
+    const availH = container.clientHeight;
+    let lo = minPx, hi = maxPx, best = minPx;
+    while (lo <= hi) {
+      const mid = (lo + hi) / 2;
+      headings.forEach(h => h.style.fontSize = mid + 'px');
+      if (container.scrollHeight <= availH) { best = mid; lo = mid + 0.5; }
+      else { hi = mid - 0.5; }
+    }
+    headings.forEach(h => h.style.fontSize = best + 'px');
+  }
+
+  // ── TOAST ─────────────────────────────────────────────────────────
+  let _toastTimer = null;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  // ── SEND VOTE TO APPS SCRIPT ──────────────────────────────────────
+  async function sendVoteToSheet(statementText) {
+    if (!VOTE_URL) {
+      // Demo mode — log only
+      console.log('[vote demo]', statementText);
+      return;
+    }
+    try {
+      // mode:'no-cors' means we can't read the response, but the write succeeds
+      await fetch(VOTE_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statement: statementText })
+      });
+    } catch(e) {
+      console.warn('Vote POST failed:', e);
+    }
+  }
+
+  // ── LONG PRESS ───────────────────────────────────────────────────
+  function bindLongPress(el, text) {
+    let timer = null;
+
+    function onStart(e) {
+      if (e.touches && e.touches.length > 1) return; // ignore multi-touch
+      el.classList.add('pressing');
+      timer = setTimeout(() => {
+        timer = null;
+        el.classList.remove('pressing');
+        handleVote(el, text);
+      }, LONG_PRESS_MS);
+    }
+
+    function onCancel() {
+      clearTimeout(timer);
+      timer = null;
+      el.classList.remove('pressing');
+    }
+
+    el.addEventListener('touchstart',  onStart,  { passive: true });
+    el.addEventListener('touchend',    onCancel, { passive: true });
+    el.addEventListener('touchmove',   onCancel, { passive: true });
+    el.addEventListener('touchcancel', onCancel, { passive: true });
+    // Desktop fallback
+    el.addEventListener('mousedown',  onStart);
+    el.addEventListener('mouseup',    onCancel);
+    el.addEventListener('mouseleave', onCancel);
+  }
+
+  function handleVote(el, text) {
+    const alreadyBold = el.classList.contains('voted');
+    el.classList.add('voted');       // bold immediately
+    markVotedLocally(text);          // persist across reloads until 4am
+    sendVoteToSheet(text);           // fire-and-forget to Apps Script
+    showToast(alreadyBold ? '✓ noted again' : '✓ resonates');
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────
+  function clearAndRender(doList, avoidList) {
+    document.getElementById('lightHalf').innerHTML = '';
+    document.getElementById('darkHalf').innerHTML  = '';
+
+    const seed   = getDailySeed();
+    const light  = pickN(doList,    COUNT, makeRng(seed));
+    const dark   = pickN(avoidList, COUNT, makeRng(seed + 1));
+    const voted  = getVotedToday();
+
+    function appendWithDividers(list, containerId) {
+      const container = document.getElementById(containerId);
+      list.forEach((text, i) => {
+        const h = document.createElement('h1');
+        setBionicText(h, text);
+        if (voted.has(text)) h.classList.add('voted'); // restore bold on reload
+        bindLongPress(h, text);
+        container.appendChild(h);
+        if (i < list.length - 1) {
+          const d = document.createElement('div');
+          d.className = 'divider';
+          d.textContent = '–';
+          container.appendChild(d);
+        }
+      });
+    }
+
+    appendWithDividers(light, 'lightHalf');
+    appendWithDividers(dark,  'darkHalf');
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fitText('lightHalf');
+      fitText('darkHalf');
+    }));
+  }
+
+  // ── FALLBACK ─────────────────────────────────────────────────────
+  const FALLBACK_DO = [
+    "Speak to yourself as you would to an 8-year-old who doesn't want to get in trouble.",
+    "Write one kind sentence about yourself in your journal, even if you don't fully believe it.",
+    "Send one short, genuine appreciation message to a friend.",
+    "Notice one moment you feel jealousy and add: \"Of course I feel this; it makes sense.\"",
+    "Practice \"responsibility to\" someone by keeping one small promise today."
+  ];
+  const FALLBACK_AVOID = [
+    "Avoid using things to avoid or disconnect from your feelings today.",
+    "Do not force yourself to figure it out once and for all; allow not-knowing.",
+    "Refrain from assuming that wanting emotional intimacy makes you weak or childish.",
+    "Avoid escalating a small fear into a full doom scenario.",
+    "Do not treat your protectiveness of others as proof you must exile yourself.",
+    "Refrain from labeling your needs as too much."
+  ];
+
+  // ── LOAD ─────────────────────────────────────────────────────────
+  let cachedDo = null, cachedAvoid = null;
+
+  async function load(forceRefresh = false) {
+    try {
+      const url  = forceRefresh ? SHEET_CSV_URL + '&t=' + Date.now() : SHEET_CSV_URL;
+      const res  = await fetch(url);
+      const text = await res.text();
+      const rows = parseCSV(text).filter(r => r[0] && r[1]);
+      cachedDo    = rows.filter(r => r[1].toLowerCase().trim() === 'do').map(r => r[0]);
+      cachedAvoid = rows.filter(r => r[1].toLowerCase().trim() === 'avoid').map(r => r[0]);
+      if (cachedDo.length < COUNT || cachedAvoid.length < COUNT) throw new Error('Too few rows');
+      clearAndRender(cachedDo, cachedAvoid);
+    } catch(e) {
+      console.warn('Using fallback statements.', e);
+      cachedDo    = FALLBACK_DO;
+      cachedAvoid = FALLBACK_AVOID;
+      clearAndRender(FALLBACK_DO, FALLBACK_AVOID);
+    }
+  }
+
+  // ── SHAKE TO REFRESH ─────────────────────────────────────────────
+  (function initShake() {
+    if (!window.DeviceMotionEvent) return;
+    const THRESHOLD = 18, COOLDOWN = 2000;
+    let lastShake = 0, lastX = null, lastY = null, lastZ = null;
+    window.addEventListener('devicemotion', e => {
+      const acc = e.accelerationIncludingGravity;
+      if (!acc) return;
+      const { x, y, z } = acc;
+      if (lastX === null) { lastX = x; lastY = y; lastZ = z; return; }
+      const delta = Math.abs(x - lastX) + Math.abs(y - lastY) + Math.abs(z - lastZ);
+      lastX = x; lastY = y; lastZ = z;
+      const now = Date.now();
+      if (delta > THRESHOLD && now - lastShake > COOLDOWN) { lastShake = now; triggerRefresh(); }
+    });
+    function requestMotionPermission() {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().catch(() => {});
+      }
+      document.removeEventListener('touchend', requestMotionPermission);
+    }
+    document.addEventListener('touchend', requestMotionPermission);
+  })();
+
+  function triggerRefresh() {
+    const app = document.getElementById('app');
+    app.classList.remove('shake-flash');
+    void app.offsetWidth;
+    app.classList.add('shake-flash');
+    app.addEventListener('animationend', () => app.classList.remove('shake-flash'), { once: true });
+    if (cachedDo && cachedAvoid) { clearAndRender(cachedDo, cachedAvoid); load(true); }
+    else { load(true); }
+  }
+
+  window.addEventListener('resize', () => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fitText('lightHalf');
+      fitText('darkHalf');
+    }));
+  });
+
+  load();
+</script>
+</body>
+</html>
