@@ -426,9 +426,10 @@ let endMin     = DEFAULT_END_MIN;
 let userPresets = [];
 let isPlaying  = false;
 let elapsedSec = 0;
-let rafId      = null;
-let lastNow    = null;
 let audioCtx   = null;
+var tickInterval          = null;
+var sessionStartAudioTime = null;
+var sessionStartElapsed   = 0;
 
 // ── Audio context ─────────────────────────────────────────────────────────────
 function getCtx() {
@@ -645,9 +646,11 @@ function addBell() {
   if (bells.length >= 29) return;
   const taken = bells.map(b=>b.minutes).sort((a,b)=>a-b);
   var suggest = taken.length > 0
-    ? Math.min(endMin-1, taken[taken.length-1] + Math.max(5, Math.floor((endMin-taken[taken.length-1])/2)))
-    : Math.max(1, Math.floor(endMin/2));
-  bells.push({ id: idCtr++, minutes: Math.max(1,suggest), label:'', fired:false, type:'A' });
+    ? Math.min(endMin-0.5, taken[taken.length-1] + Math.max(5, Math.floor((endMin-taken[taken.length-1])/2)))
+    : Math.max(0.5, Math.floor(endMin/2));
+  // snap to nearest half
+  suggest = Math.round(suggest * 2) / 2;
+  bells.push({ id: idCtr++, minutes: Math.max(0.5,suggest), label:'', fired:false, type:'A' });
   render();
 }
 
@@ -662,39 +665,43 @@ function setBellMin(id, val) {
 function setBellLabel(id, val) { var b=bells.find(b=>b.id===id); if(b) b.label=val; }
 function setBellType(id, val)  { var b=bells.find(b=>b.id===id); if(b) b.type=val; }
 
-// ── Stepper factory ───────────────────────────────────────────────────────────
+// ── Stepper factory (supports 0.5 step for half-minutes) ─────────────────────
 function makeStepper(getVal, setVal, opts) {
   opts = opts || {};
   var wrap = document.createElement('div'); wrap.className='bell-min-wrap';
   var minus=document.createElement('button'); minus.className='bell-step minus'; minus.textContent='−';
   var input=document.createElement('input'); input.type='number'; input.className='bell-min';
-  input.min=1; input.max=999; input.value=getVal();
+  input.min=0.5; input.max=999; input.step=0.5; input.value=getVal();
   if(opts.inputId) input.id=opts.inputId;
   var plus=document.createElement('button'); plus.className='bell-step plus'; plus.textContent='+';
   var unit=document.createElement('span'); unit.className='bell-unit'; unit.textContent='min';
 
+  function snapHalf(v){ return Math.round(v * 2) / 2; }
+
   function step(d){
-    var v=parseInt(input.value)||getVal(), nv=Math.max(1,Math.min(999,v+d));
+    var v=parseFloat(input.value)||getVal();
+    var nv=snapHalf(Math.max(0.5,Math.min(999,v+d)));
     input.value=nv; input.classList.remove('invalid'); setVal(nv);
   }
-  minus.addEventListener('click',()=>step(-1));
-  plus.addEventListener('click',()=>step(1));
+  minus.addEventListener('click',()=>step(-0.5));
+  plus.addEventListener('click',()=>step(0.5));
 
   var hT=null,hI=null;
-  function sh(d){ hT=setTimeout(()=>{ hI=setInterval(()=>step(d),80); },400); }
+  function sh(d){ hT=setTimeout(()=>{ hI=setInterval(()=>step(d),120); },400); }
   function eh(){ clearTimeout(hT); clearInterval(hI); }
-  minus.addEventListener('mousedown',()=>sh(-1)); plus.addEventListener('mousedown',()=>sh(1));
-  minus.addEventListener('touchstart',()=>sh(-1),{passive:true}); plus.addEventListener('touchstart',()=>sh(1),{passive:true});
+  minus.addEventListener('mousedown',()=>sh(-0.5)); plus.addEventListener('mousedown',()=>sh(0.5));
+  minus.addEventListener('touchstart',()=>sh(-0.5),{passive:true}); plus.addEventListener('touchstart',()=>sh(0.5),{passive:true});
   ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>{ minus.addEventListener(ev,eh); plus.addEventListener(ev,eh); });
 
   input.addEventListener('input',()=>{
-    var v=parseInt(input.value), ok=!isNaN(v)&&v>=1&&v<=999;
+    var v=parseFloat(input.value), ok=!isNaN(v)&&v>=0.5&&v<=999;
     input.classList.toggle('invalid',!ok);
-    if(ok) setVal(v);
+    if(ok) setVal(snapHalf(v));
   });
   input.addEventListener('blur',()=>{
-    var v=parseInt(input.value);
-    if(isNaN(v)||v<1){ input.value=getVal(); input.classList.remove('invalid'); }
+    var v=parseFloat(input.value);
+    if(isNaN(v)||v<0.5){ input.value=getVal(); input.classList.remove('invalid'); }
+    else { var snapped=snapHalf(v); input.value=snapped; setVal(snapped); }
   });
 
   wrap.appendChild(minus); wrap.appendChild(input); wrap.appendChild(plus); wrap.appendChild(unit);
@@ -872,24 +879,60 @@ function renderPresets() {
 }
 
 // ── Session controls ──────────────────────────────────────────────────────────
+// Use setInterval + Web Audio currentTime as clock — works in background tabs.
+// requestAnimationFrame pauses when tab is hidden; setInterval + AudioContext does not.
+
+var tickInterval = null;
+var sessionStartAudioTime = null;  // ac.currentTime at the moment play() was called
+var sessionStartElapsed   = 0;     // elapsedSec at the moment play() was called
+
 function togglePlay(){ if(isPlaying) pause(); else play(); }
 
 function play(){
-  getCtx(); isPlaying=true; lastNow=performance.now();
+  var ac = getCtx();
+  isPlaying = true;
+
+  // Snap elapsed to nearest 0.1s to avoid float drift
+  sessionStartAudioTime = ac.currentTime;
+  sessionStartElapsed   = elapsedSec;
+
   document.getElementById('btnPlay').innerHTML='⏸ &nbsp;Pause';
   document.getElementById('btnPlay').classList.add('playing');
   document.getElementById('tlPlayhead').classList.add('show');
-  rafId=requestAnimationFrame(tick);
+
+  // Fire Bell-A immediately at session start
+  playBell(0.88, 'A');
+
+  // setInterval at 200ms — fine resolution, works in background tabs
+  tickInterval = setInterval(tickFn, 200);
+  tickFn(); // immediate first tick
 }
 
 function pause(){
-  isPlaying=false; cancelAnimationFrame(rafId);
+  isPlaying = false;
+  if(tickInterval){ clearInterval(tickInterval); tickInterval=null; }
   document.getElementById('btnPlay').innerHTML='▶ &nbsp;Resume';
   document.getElementById('btnPlay').classList.remove('playing');
 }
 
+function tickFn(){
+  if(!isPlaying) return;
+  var ac = getCtx();
+  // Drive elapsed from the AudioContext clock — never drifts, never pauses
+  elapsedSec = sessionStartElapsed + (ac.currentTime - sessionStartAudioTime);
+  var totalSec = endMin * 60;
+  if(elapsedSec >= totalSec){
+    elapsedSec = totalSec;
+    updateTimerUI();
+    checkBells();
+    pause();
+    return;
+  }
+  updateTimerUI();
+  checkBells();
+}
 function resetSession(){
-  pause(); elapsedSec=0;
+  pause(); elapsedSec=0; sessionStartElapsed=0;
   bells.forEach(function(b){b.fired=false;b._pre=false;});
   document.getElementById('tlPlayhead').classList.remove('show');
   document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
@@ -898,23 +941,13 @@ function resetSession(){
 }
 
 function resetAll(){
-  pause(); idCtr=1;
+  pause(); idCtr=1; elapsedSec=0; sessionStartElapsed=0;
   bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false,type:'A'};});
-  endMin=DEFAULT_END_MIN; elapsedSec=0;
+  endMin=DEFAULT_END_MIN;
   document.getElementById('tlPlayhead').classList.remove('show');
   document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
   document.getElementById('btnPlay').classList.remove('playing');
   render();
-}
-
-// ── Timer tick ────────────────────────────────────────────────────────────────
-function tick(now){
-  if(!isPlaying) return;
-  var dt=(now-lastNow)/1000; lastNow=now;
-  elapsedSec=Math.min(elapsedSec+dt, endMin*60);
-  updateTimerUI(); checkBells();
-  if(elapsedSec>=endMin*60){ pause(); return; }
-  rafId=requestAnimationFrame(tick);
 }
 
 function checkBells(){
@@ -949,9 +982,9 @@ function updateNextBell(){
   var next=sortedBells().find(function(b){return !b.fired;});
   if(next&&isPlaying){
     var rem=next.minutes*60-elapsedSec;
-    document.getElementById('nextBellDisplay').textContent=next.minutes+'m (−'+fmt(Math.max(0,rem))+')';
+    document.getElementById('nextBellDisplay').textContent=fmtMin(next.minutes)+' (−'+fmt(Math.max(0,rem))+')';
   } else if(next){
-    document.getElementById('nextBellDisplay').textContent=next.minutes+' min';
+    document.getElementById('nextBellDisplay').textContent=fmtMin(next.minutes);
   } else {
     document.getElementById('nextBellDisplay').textContent='—';
   }
@@ -959,9 +992,17 @@ function updateNextBell(){
   document.getElementById('remainingDisplay').textContent=isPlaying?fmt(Math.max(0,rem2)):fmt(endMin*60);
 }
 
+// Format elapsed seconds as m:ss
 function fmt(secs){
   var s=Math.floor(secs),m=Math.floor(s/60),ss=s%60;
   return m+':'+String(ss).padStart(2,'0');
+}
+
+// Format a minute value, showing .5 as ":30" e.g. "1:30" or "5 min"
+function fmtMin(m){
+  if(m % 1 === 0) return m+' min';
+  var whole=Math.floor(m);
+  return whole+':30';
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
