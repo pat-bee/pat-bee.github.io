@@ -900,8 +900,12 @@ function play(){
   document.getElementById('btnPlay').classList.add('playing');
   document.getElementById('tlPlayhead').classList.add('show');
 
-  // Fire Bell-A immediately at session start
-  playBell(0.88, 'A');
+  // Fire immediate Bell-A strike + Koshi chime at session start (no build-up)
+  var ac = getCtx();
+  var t0 = ac.currentTime + 0.05;
+  playStrike(ac, t0);
+  playKoshi(ac, t0);
+  triggerFlash();
 
   // setInterval at 200ms — fine resolution, works in background tabs
   tickInterval = setInterval(tickFn, 200);
