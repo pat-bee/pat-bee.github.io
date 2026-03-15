@@ -254,6 +254,24 @@ header { text-align: center; margin-bottom: 48px; }
 }
 .bell-del:hover { color: var(--red); background: var(--red-faint); }
 
+/* Bell type A/B toggle */
+.bell-type-toggle {
+  display: flex; align-items: center; flex-shrink: 0; gap: 0;
+}
+.bell-type-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; letter-spacing: 0.14em;
+  background: transparent; border: 1px solid var(--border2); color: var(--text-muted);
+  padding: 4px 9px; cursor: pointer; transition: all 0.18s; line-height: 1.6; user-select: none;
+}
+.bell-type-btn:first-child { border-radius: 3px 0 0 3px; border-right: none; }
+.bell-type-btn:last-child  { border-radius: 0 3px 3px 0; }
+.bell-type-btn.selected {
+  background: rgba(63,255,210,0.1); border-color: rgba(63,255,210,0.45); color: var(--cyan);
+}
+.bell-type-btn.sel-b.selected {
+  background: rgba(56,184,255,0.09); border-color: rgba(56,184,255,0.4); color: var(--blue);
+}
+
 /* Add button */
 .add-row { display: flex; align-items: stretch; padding-left: 28px; margin-top: 4px; }
 .add-row-line { width: 28px; display: flex; justify-content: center; position: relative; }
@@ -343,7 +361,8 @@ header { text-align: center; margin-bottom: 48px; }
   <div class="controls">
     <button class="btn btn-play" id="btnPlay" onclick="togglePlay()">▶ &nbsp;Begin Session</button>
     <button class="btn" onclick="resetSession()">Reset</button>
-    <button class="btn" onclick="testBell()">Test Bell</button>
+    <button class="btn" onclick="testBell('A')">Test A</button>
+    <button class="btn" onclick="testBell('B')">Test B</button>
     <button class="btn btn-reset-all" onclick="resetAll()">Reset All</button>
   </div>
 
@@ -431,17 +450,17 @@ function sineNote(ac, freq, peakGain, attackSec, decaySec, startT) {
   o.start(startT); o.stop(startT + decaySec + 0.3);
 }
 
-// ── Build-up: 12s ascending layers, all direct to destination ─────────────────
+// ── Build-up: 12s ascending layers, gentle volume ────────────────────────────
 function playBuildUp(ac, t) {
   // Bowl 216 Hz: rises from 130
   var b1=ac.createOscillator(), b1g=ac.createGain();
   b1.type='sine'; b1.frequency.setValueAtTime(130,t); b1.frequency.exponentialRampToValueAtTime(216,t+12);
   b1.connect(b1g); b1g.connect(ac.destination);
   b1g.gain.setValueAtTime(0.0001,t);
-  b1g.gain.exponentialRampToValueAtTime(0.08, t+12*0.20);
-  b1g.gain.exponentialRampToValueAtTime(0.38, t+12*0.72);
-  b1g.gain.exponentialRampToValueAtTime(0.56, t+12*0.92);
-  b1g.gain.exponentialRampToValueAtTime(0.64, t+12*0.97);
+  b1g.gain.exponentialRampToValueAtTime(0.03, t+12*0.20);
+  b1g.gain.exponentialRampToValueAtTime(0.14, t+12*0.72);
+  b1g.gain.exponentialRampToValueAtTime(0.22, t+12*0.92);
+  b1g.gain.exponentialRampToValueAtTime(0.26, t+12*0.97);
   b1g.gain.linearRampToValueAtTime(0.0001, t+12.06);
   b1.start(t); b1.stop(t+12.2);
 
@@ -450,9 +469,9 @@ function playBuildUp(ac, t) {
   b2.type='sine'; b2.frequency.setValueAtTime(260,t+1.5); b2.frequency.exponentialRampToValueAtTime(432,t+12);
   b2.connect(b2g); b2g.connect(ac.destination);
   b2g.gain.setValueAtTime(0.0001,t+1.5);
-  b2g.gain.exponentialRampToValueAtTime(0.05, t+12*0.35);
-  b2g.gain.exponentialRampToValueAtTime(0.24, t+12*0.78);
-  b2g.gain.exponentialRampToValueAtTime(0.38, t+12*0.97);
+  b2g.gain.exponentialRampToValueAtTime(0.02, t+12*0.35);
+  b2g.gain.exponentialRampToValueAtTime(0.09, t+12*0.78);
+  b2g.gain.exponentialRampToValueAtTime(0.15, t+12*0.97);
   b2g.gain.linearRampToValueAtTime(0.0001, t+12.06);
   b2.start(t+1.5); b2.stop(t+12.2);
 
@@ -461,9 +480,9 @@ function playBuildUp(ac, t) {
   b3.type='sine'; b3.frequency.setValueAtTime(400,t+4); b3.frequency.exponentialRampToValueAtTime(648,t+12);
   b3.connect(b3g); b3g.connect(ac.destination);
   b3g.gain.setValueAtTime(0.0001,t+4);
-  b3g.gain.exponentialRampToValueAtTime(0.03, t+12*0.55);
-  b3g.gain.exponentialRampToValueAtTime(0.16, t+12*0.85);
-  b3g.gain.exponentialRampToValueAtTime(0.24, t+12*0.97);
+  b3g.gain.exponentialRampToValueAtTime(0.012,t+12*0.55);
+  b3g.gain.exponentialRampToValueAtTime(0.06, t+12*0.85);
+  b3g.gain.exponentialRampToValueAtTime(0.09, t+12*0.97);
   b3g.gain.linearRampToValueAtTime(0.0001, t+12.06);
   b3.start(t+4); b3.stop(t+12.2);
 
@@ -472,9 +491,9 @@ function playBuildUp(ac, t) {
   b4.type='sine'; b4.frequency.setValueAtTime(900,t+7); b4.frequency.exponentialRampToValueAtTime(1296,t+12);
   b4.connect(b4g); b4g.connect(ac.destination);
   b4g.gain.setValueAtTime(0.0001,t+7);
-  b4g.gain.exponentialRampToValueAtTime(0.05, t+12*0.76);
-  b4g.gain.exponentialRampToValueAtTime(0.24, t+12*0.93);
-  b4g.gain.exponentialRampToValueAtTime(0.34, t+12*0.98);
+  b4g.gain.exponentialRampToValueAtTime(0.018,t+12*0.76);
+  b4g.gain.exponentialRampToValueAtTime(0.09, t+12*0.93);
+  b4g.gain.exponentialRampToValueAtTime(0.13, t+12*0.98);
   b4g.gain.linearRampToValueAtTime(0.0001, t+12.05);
   b4.start(t+7); b4.stop(t+12.2);
 
@@ -483,9 +502,9 @@ function playBuildUp(ac, t) {
   b5.type='sine'; b5.frequency.setValueAtTime(70,t+3); b5.frequency.exponentialRampToValueAtTime(108,t+12);
   b5.connect(b5g); b5g.connect(ac.destination);
   b5g.gain.setValueAtTime(0.0001,t+3);
-  b5g.gain.exponentialRampToValueAtTime(0.03, t+12*0.50);
-  b5g.gain.exponentialRampToValueAtTime(0.15, t+12*0.88);
-  b5g.gain.exponentialRampToValueAtTime(0.22, t+12*0.97);
+  b5g.gain.exponentialRampToValueAtTime(0.012,t+12*0.50);
+  b5g.gain.exponentialRampToValueAtTime(0.06, t+12*0.88);
+  b5g.gain.exponentialRampToValueAtTime(0.09, t+12*0.97);
   b5g.gain.linearRampToValueAtTime(0.0001, t+12.06);
   b5.start(t+3); b5.stop(t+12.2);
 }
@@ -540,22 +559,77 @@ function playKoshi(ac, t) {
   src.start(t); src.stop(t+0.01);
 }
 
-// ── Full bell: build-up (12s) → strike + Koshi chime at t+12 ─────────────────
-// Called 12s before the scheduled alarm time
-function playBell(vol) {
+// ── Full bell A: build-up (12s) → strike + Koshi chime ───────────────────────
+function playBell(vol, type) {
   var ac = getCtx();
   var t  = ac.currentTime + 0.05;
-  playBuildUp(ac, t);
-  playStrike(ac, t + 12);
-  playKoshi(ac,  t + 12);
+  if (type === 'B') {
+    playBellB(ac, t);
+  } else {
+    playBuildUp(ac, t);
+    playStrike(ac, t + 12);
+    playKoshi(ac,  t + 12);
+  }
 }
 
-// ── Test bell: immediate strike + chime, no build-up wait ────────────────────
-function testBell() {
+// ── Bell-B: single delicate chime, no build-up, quiet ────────────────────────
+// A soft high crystal tone at 1296 Hz with a gentle 540 Hz undertone.
+// Short, subtle, unobtrusive — just a quiet reminder.
+function playBellB(ac, t) {
+  // Primary: soft crystal at 1296 Hz (6th harmonic of 216)
+  var o1=ac.createOscillator(), g1=ac.createGain();
+  o1.type='sine';
+  o1.frequency.setValueAtTime(1296*1.001, t);
+  o1.frequency.exponentialRampToValueAtTime(1296*0.998, t+0.3);
+  o1.frequency.exponentialRampToValueAtTime(1296*0.995, t+5);
+  o1.connect(g1); g1.connect(ac.destination);
+  g1.gain.setValueAtTime(0.0001, t);
+  g1.gain.linearRampToValueAtTime(0.18, t+0.008);   // gentle but clear attack
+  g1.gain.exponentialRampToValueAtTime(0.12, t+0.05);
+  g1.gain.exponentialRampToValueAtTime(0.0001, t+6);
+  o1.start(t); o1.stop(t+6.3);
+
+  // Undertone: 540 Hz (5th harmonic of 108) — warm, barely audible
+  var o2=ac.createOscillator(), g2=ac.createGain();
+  o2.type='sine';
+  o2.frequency.setValueAtTime(540, t);
+  o2.frequency.exponentialRampToValueAtTime(540*0.994, t+4);
+  o2.connect(g2); g2.connect(ac.destination);
+  g2.gain.setValueAtTime(0.0001, t);
+  g2.gain.linearRampToValueAtTime(0.07, t+0.012);
+  g2.gain.exponentialRampToValueAtTime(0.0001, t+4.5);
+  o2.start(t); o2.stop(t+4.8);
+
+  // Very faint sub-body at 216 Hz — just a whisper of depth
+  var o3=ac.createOscillator(), g3=ac.createGain();
+  o3.type='sine'; o3.frequency.value=216;
+  o3.connect(g3); g3.connect(ac.destination);
+  g3.gain.setValueAtTime(0.0001, t);
+  g3.gain.linearRampToValueAtTime(0.04, t+0.018);
+  g3.gain.exponentialRampToValueAtTime(0.0001, t+3);
+  o3.start(t); o3.stop(t+3.3);
+
+  // Tiny click — delicate fingernail tap character
+  var buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.004),ac.sampleRate);
+  var d=buf.getChannelData(0);
+  for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length)*0.6;
+  var src=ac.createBufferSource(); src.buffer=buf;
+  var hp=ac.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=3500;
+  var cg=ac.createGain(); cg.gain.setValueAtTime(0.08, t);
+  src.connect(hp); hp.connect(cg); cg.connect(ac.destination);
+  src.start(t); src.stop(t+0.006);
+}
+
+// ── Test bell: immediate strike, no build-up ──────────────────────────────────
+function testBell(type) {
   var ac = getCtx();
   var t  = ac.currentTime + 0.05;
-  playStrike(ac, t);
-  playKoshi(ac,  t);
+  if (type === 'B') {
+    playBellB(ac, t);
+  } else {
+    playStrike(ac, t);
+    playKoshi(ac,  t);
+  }
   triggerFlash();
 }
 
@@ -573,7 +647,7 @@ function addBell() {
   var suggest = taken.length > 0
     ? Math.min(endMin-1, taken[taken.length-1] + Math.max(5, Math.floor((endMin-taken[taken.length-1])/2)))
     : Math.max(1, Math.floor(endMin/2));
-  bells.push({ id: idCtr++, minutes: Math.max(1,suggest), label:'', fired:false });
+  bells.push({ id: idCtr++, minutes: Math.max(1,suggest), label:'', fired:false, type:'A' });
   render();
 }
 
@@ -586,6 +660,7 @@ function setBellMin(id, val) {
 }
 
 function setBellLabel(id, val) { var b=bells.find(b=>b.id===id); if(b) b.label=val; }
+function setBellType(id, val)  { var b=bells.find(b=>b.id===id); if(b) b.type=val; }
 
 // ── Stepper factory ───────────────────────────────────────────────────────────
 function makeStepper(getVal, setVal, opts) {
@@ -651,6 +726,24 @@ function renderChain() {
 
     var stepper=makeStepper(function(){return b.minutes;}, function(v){setBellMin(b.id,v);});
 
+    // ── Bell type A / B toggle ──
+    var toggle=document.createElement('div'); toggle.className='bell-type-toggle';
+    var btnA=document.createElement('button'); btnA.className='bell-type-btn'+(b.type!=='B'?' selected':'');
+    btnA.textContent='Bell-A'; btnA.title='12s build-up + Koshi chime';
+    var btnB=document.createElement('button'); btnB.className='bell-type-btn sel-b'+(b.type==='B'?' selected':'');
+    btnB.textContent='Bell-B'; btnB.title='Quiet single chime, no build-up';
+    (function(bell,bA,bB){
+      bA.addEventListener('click',function(){
+        setBellType(bell.id,'A');
+        bA.classList.add('selected'); bB.classList.remove('selected');
+      });
+      bB.addEventListener('click',function(){
+        setBellType(bell.id,'B');
+        bB.classList.add('selected'); bA.classList.remove('selected');
+      });
+    })(b,btnA,btnB);
+    toggle.appendChild(btnA); toggle.appendChild(btnB);
+
     var nameIn=document.createElement('input'); nameIn.type='text'; nameIn.className='bell-name';
     nameIn.placeholder='label'; nameIn.value=b.label;
     nameIn.addEventListener('input',function(){ setBellLabel(b.id,nameIn.value); });
@@ -661,8 +754,8 @@ function renderChain() {
     var del=document.createElement('button'); del.className='bell-del'; del.textContent='✕';
     del.onclick=function(){ removeBell(b.id); };
 
-    card.appendChild(badge); card.appendChild(stepper); card.appendChild(nameIn);
-    card.appendChild(status); card.appendChild(del);
+    card.appendChild(badge); card.appendChild(stepper); card.appendChild(toggle);
+    card.appendChild(nameIn); card.appendChild(status); card.appendChild(del);
     row.appendChild(node); row.appendChild(card);
     chain.appendChild(row);
   });
@@ -746,7 +839,7 @@ function deleteUserPreset(name) {
 
 function applyPreset(p) {
   pause();
-  idCtr=1; bells=p.bells.map(function(b){return{id:idCtr++,minutes:b.minutes,label:b.label||'',fired:false};});
+  idCtr=1; bells=p.bells.map(function(b){return{id:idCtr++,minutes:b.minutes,label:b.label||'',fired:false,type:b.type||'A'};});
   endMin=p.endMinutes; elapsedSec=0;
   document.getElementById('tlPlayhead').classList.remove('show');
   document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
@@ -806,7 +899,7 @@ function resetSession(){
 
 function resetAll(){
   pause(); idCtr=1;
-  bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false};});
+  bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false,type:'A'};});
   endMin=DEFAULT_END_MIN; elapsedSec=0;
   document.getElementById('tlPlayhead').classList.remove('show');
   document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
@@ -827,8 +920,10 @@ function tick(now){
 function checkBells(){
   sortedBells().forEach(function(b){
     if(b.fired) return;
-    var strike=b.minutes*60, pre=strike-12;  // 12s build-up window
-    if(elapsedSec>=pre && !b._pre){ b._pre=true; playBell(0.88); }
+    var strike=b.minutes*60;
+    var preRoll = (b.type==='B') ? 1 : 12;  // B: 1s buffer, A: 12s build-up
+    var pre=strike-preRoll;
+    if(elapsedSec>=pre && !b._pre){ b._pre=true; playBell(0.88, b.type||'A'); }
     if(elapsedSec>=strike){
       b.fired=true; b._pre=false; triggerFlash();
       var dot=document.querySelector('.tl-dot[data-bid="'+b.id+'"] .tl-dot-inner');
@@ -872,7 +967,7 @@ function fmt(secs){
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadUserPresets();
 idCtr=1;
-bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false};});
+bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false,type:'A'};});
 render();
 renderPresets();
 </script>
