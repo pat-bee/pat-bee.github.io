@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bell Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&family=JetBrains+Mono:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:    #030810;
+  --deep:    #060f1a;
+  --surface: #091524;
+  --panel:   #0c1d30;
+  --border:  #0e2840;
+  --border2: #163650;
+  --cyan:     #3fffd2;
+  --cyan-dim: #1a8a72;
+  --cyan-faint: rgba(63,255,210,0.08);
+  --blue:     #38b8ff;
+  --text:     #c8e8e0;
+  --text-dim: #4a7a70;
+  --text-muted: #1e3d38;
+  --red:      #ff6b6b;
+  --red-faint: rgba(255,107,107,0.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--void); color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(63,255,210,0.05) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 40% at 10% 90%,  rgba(56,184,255,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 90% 50%,  rgba(77,255,176,0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, #04090f 0%, var(--void) 100%);
+  pointer-events: none;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 25%, rgba(63,255,210,0.4), transparent),
+    radial-gradient(1px 1px at 35% 65%, rgba(56,184,255,0.3), transparent),
+    radial-gradient(1px 1px at 55% 15%, rgba(63,255,210,0.25), transparent),
+    radial-gradient(1px 1px at 75% 80%, rgba(77,255,176,0.35), transparent),
+    radial-gradient(1px 1px at 90% 35%, rgba(56,184,255,0.3), transparent),
+    radial-gradient(1px 1px at 5%  75%, rgba(63,255,210,0.2), transparent),
+    radial-gradient(2px 2px at 25% 90%, rgba(63,255,210,0.15), transparent),
+    radial-gradient(1px 1px at 82% 60%, rgba(56,184,255,0.25), transparent);
+  pointer-events: none;
+  animation: drift 30s ease-in-out infinite alternate;
+}
+@keyframes drift { 0%{transform:translateY(0) translateX(0)} 100%{transform:translateY(-12px) translateX(6px)} }
+
+.app { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 48px 28px 100px; }
+
+/* Header */
+header { text-align: center; margin-bottom: 48px; }
+.wordmark {
+  font-family: 'Libre Baskerville', serif; font-style: italic;
+  font-size: clamp(2rem, 6vw, 2.8rem); letter-spacing: 0.04em;
+  color: var(--cyan); text-shadow: 0 0 30px rgba(63,255,210,0.45), 0 0 80px rgba(63,255,210,0.15);
+  line-height: 1; margin-bottom: 6px;
+}
+.tagline { font-size: 0.58rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--text-dim); }
+
+/* Session strip */
+.session-strip {
+  display: flex; align-items: center; background: var(--panel);
+  border: 1px solid var(--border); border-radius: 4px; padding: 14px 20px; margin-bottom: 28px; gap: 16px;
+}
+.session-clock {
+  font-family: 'Libre Baskerville', serif; font-size: 2.6rem; letter-spacing: 0.04em;
+  color: var(--cyan); text-shadow: 0 0 20px rgba(63,255,210,0.3); min-width: 120px; line-height: 1;
+}
+.session-meta { text-align: right; line-height: 1.7; margin-left: auto; }
+.session-meta .lbl { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); }
+.session-meta .val { font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.08em; }
+
+/* Controls */
+.controls { display: flex; gap: 10px; margin-bottom: 36px; flex-wrap: wrap; }
+.btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--border2); color: var(--text-dim);
+  padding: 9px 18px; border-radius: 3px; cursor: pointer; transition: all 0.2s;
+}
+.btn:hover { border-color: var(--cyan-dim); color: var(--cyan); background: var(--cyan-faint); }
+.btn-play {
+  border-color: rgba(63,255,210,0.4); color: var(--cyan); background: rgba(63,255,210,0.04);
+  padding: 9px 28px; flex: 1; font-size: 0.72rem;
+}
+.btn-play:hover { background: rgba(63,255,210,0.09); border-color: var(--cyan); box-shadow: 0 0 20px rgba(63,255,210,0.12); }
+.btn-play.playing { border-color: rgba(56,184,255,0.5); color: var(--blue); background: rgba(56,184,255,0.05); }
+.btn-reset-all { border-color: rgba(255,107,107,0.22); color: rgba(255,107,107,0.5); }
+.btn-reset-all:hover { border-color: var(--red); color: var(--red); background: var(--red-faint); }
+
+/* Section label */
+.section-label {
+  font-size: 0.56rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border2), transparent); }
+
+/* Timeline */
+.timeline-wrap { margin-bottom: 36px; }
+.tl-track-outer { position: relative; height: 60px; display: flex; align-items: center; }
+.tl-track { position: absolute; left: 0; right: 0; height: 2px; background: var(--border2); border-radius: 1px; }
+.tl-progress { height: 100%; background: linear-gradient(to right, rgba(63,255,210,0.6), rgba(56,184,255,0.4)); width: 0%; box-shadow: 0 0 8px rgba(63,255,210,0.4); transition: width 0.4s linear; }
+.tl-ticks { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.tl-tick { position: absolute; display: flex; flex-direction: column; align-items: center; top: 50%; transform: translateX(-50%) translateY(-50%); }
+.tl-tick-line { width: 1px; background: var(--border2); }
+.tl-tick-line.maj { height: 14px; background: rgba(63,255,210,0.2); }
+.tl-tick-line.min { height: 7px; }
+.tl-tick-lbl { font-size: 0.54rem; color: var(--text-muted); margin-top: 5px; letter-spacing: 0.05em; }
+.tl-dot { position: absolute; top: 50%; transform: translateX(-50%) translateY(-50%); z-index: 4; pointer-events: none; }
+.tl-dot-inner { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px rgba(63,255,210,0.7), 0 0 18px rgba(63,255,210,0.25); }
+.tl-dot-inner.ring-pulse { animation: dot-ring 2.4s ease-out forwards; }
+@keyframes dot-ring {
+  0%  {transform:scale(1);   box-shadow:0 0 8px rgba(63,255,210,0.7),0 0 0 rgba(63,255,210,0.5)}
+  12% {transform:scale(2.2); box-shadow:0 0 18px rgba(63,255,210,1),0 0 60px rgba(63,255,210,0.4)}
+  40% {transform:scale(1.3); box-shadow:0 0 14px rgba(63,255,210,0.8),0 0 40px rgba(63,255,210,0.2)}
+  100%{transform:scale(1);   box-shadow:0 0 8px rgba(63,255,210,0.7),0 0 18px rgba(63,255,210,0.25)}
+}
+.tl-playhead {
+  position: absolute; top: 50%; left: 0%; transform: translateX(-50%) translateY(-50%);
+  width: 2px; height: 40px; background: linear-gradient(to bottom, transparent, var(--blue), transparent);
+  box-shadow: 0 0 8px rgba(56,184,255,0.6); z-index: 6; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.tl-playhead.show { opacity: 1; }
+
+/* Presets */
+.presets-wrap { margin-bottom: 36px; }
+.presets-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; min-height: 36px; }
+.preset-chip {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em;
+  background: transparent; border: 1px solid var(--border2); color: var(--text-dim);
+  padding: 6px 13px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 7px;
+}
+.preset-chip:hover { border-color: var(--cyan-dim); color: var(--cyan); background: var(--cyan-faint); }
+.preset-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.5; flex-shrink: 0; }
+.preset-x { opacity: 0.35; cursor: pointer; font-size: 0.85rem; line-height: 1; margin-left: 2px; }
+.preset-x:hover { opacity: 0.9; color: var(--red); }
+.preset-save-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  background: transparent; border: 1px dashed var(--border2); color: var(--text-muted);
+  padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s; margin-left: auto;
+}
+.preset-save-btn:hover { border-color: var(--cyan-dim); color: var(--cyan-dim); }
+
+/* Modal */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(3,8,16,0.85); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-bg.show { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--panel); border: 1px solid var(--border2); border-radius: 8px;
+  padding: 28px 32px; min-width: 300px; max-width: 400px; width: 90%;
+  box-shadow: 0 0 60px rgba(63,255,210,0.08);
+}
+.modal-title { font-family: 'Libre Baskerville', serif; font-style: italic; font-size: 1.1rem; color: var(--cyan); margin-bottom: 16px; }
+.modal-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+  padding: 10px 14px; border-radius: 4px; outline: none; letter-spacing: 0.05em;
+  transition: border-color 0.2s; margin-bottom: 16px;
+}
+.modal-input:focus { border-color: rgba(63,255,210,0.4); }
+.modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.modal-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--border2); color: var(--text-dim);
+  padding: 8px 18px; border-radius: 3px; cursor: pointer; transition: all 0.2s;
+}
+.modal-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); background: var(--cyan-faint); }
+.modal-btn.confirm { border-color: rgba(63,255,210,0.4); color: var(--cyan); }
+
+/* Bell chain */
+.chain { display: flex; flex-direction: column; }
+.bell-row { display: flex; align-items: stretch; position: relative; animation: rowIn 0.3s ease-out both; }
+@keyframes rowIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.bell-row::before {
+  content: ''; position: absolute; left: 27px; top: -1px; bottom: 50%;
+  width: 2px; background: linear-gradient(to bottom, var(--border2), var(--cyan-dim)); z-index: 0;
+}
+.bell-row:first-child::before { display: none; }
+
+.bell-node { width: 56px; display: flex; flex-direction: column; align-items: center; padding-top: 20px; position: relative; z-index: 1; flex-shrink: 0; }
+.bell-node-dot {
+  width: 14px; height: 14px; border-radius: 50%; background: transparent;
+  border: 2px solid var(--cyan-dim); box-shadow: 0 0 8px rgba(63,255,210,0.2);
+  transition: all 0.3s; position: relative;
+}
+.bell-node-dot::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--cyan-dim); opacity: 0; transition: opacity 0.3s; }
+.bell-row.active .bell-node-dot { border-color: var(--cyan); box-shadow: 0 0 14px rgba(63,255,210,0.7), 0 0 28px rgba(63,255,210,0.25); }
+.bell-row.active .bell-node-dot::after { opacity: 1; background: var(--cyan); }
+.bell-row.fired .bell-node-dot { border-color: var(--cyan-dim); box-shadow: none; }
+.bell-row.fired .bell-node-dot::after { opacity: 1; }
+
+.bell-card {
+  flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+  margin: 8px 0; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+  transition: border-color 0.3s, box-shadow 0.3s; position: relative; overflow: hidden;
+}
+.bell-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--cyan-dim); border-radius: 3px 0 0 3px; opacity: 0.4; transition: all 0.3s;
+}
+.bell-row.active .bell-card { border-color: rgba(63,255,210,0.25); box-shadow: 0 0 24px rgba(63,255,210,0.06), inset 0 0 20px rgba(63,255,210,0.03); }
+.bell-row.active .bell-card::before { opacity: 1; background: var(--cyan); }
+.bell-row.fired .bell-card { border-color: var(--border); opacity: 0.5; }
+
+.bell-badge { font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); min-width: 32px; }
+
+/* Stepper */
+.bell-min-wrap { display: flex; align-items: center; }
+.bell-step {
+  background: transparent; border: 1px solid var(--border2); color: var(--cyan-dim);
+  font-family: 'JetBrains Mono', monospace; font-size: 1rem; line-height: 1;
+  width: 28px; height: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0; user-select: none;
+}
+.bell-step:hover { color: var(--cyan); border-color: var(--cyan-dim); background: var(--cyan-faint); }
+.bell-step:active { transform: scale(0.9); }
+.bell-step.minus { border-radius: 4px 0 0 4px; border-right: none; }
+.bell-step.plus  { border-radius: 0 4px 4px 0; border-left: none; }
+.bell-min {
+  font-family: 'Libre Baskerville', serif; font-size: 1.9rem; font-weight: 400; color: var(--cyan);
+  background: var(--surface); border: 1px solid var(--border2); border-left: none; border-right: none;
+  outline: none; width: 62px; text-align: center; line-height: 1; padding: 3px 2px;
+  transition: color 0.2s, text-shadow 0.2s; -moz-appearance: textfield;
+}
+.bell-min::-webkit-inner-spin-button, .bell-min::-webkit-outer-spin-button { -webkit-appearance: none; }
+.bell-min:focus { text-shadow: 0 0 14px rgba(63,255,210,0.5); border-color: rgba(63,255,210,0.3); }
+.bell-min.invalid { color: var(--red); }
+.bell-unit { font-size: 0.62rem; letter-spacing: 0.18em; color: var(--text-dim); text-transform: uppercase; margin-left: 7px; }
+
+.bell-name {
+  flex: 1; background: transparent; border: none; border-bottom: 1px solid transparent;
+  color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.1em; outline: none; padding: 3px 6px; transition: all 0.2s; min-width: 0;
+}
+.bell-name:focus { border-bottom-color: var(--border2); color: var(--text); }
+.bell-name::placeholder { color: var(--text-muted); }
+.bell-status { font-size: 0.55rem; letter-spacing: 0.15em; color: var(--text-muted); white-space: nowrap; }
+.bell-del {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-size: 0.75rem; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; line-height: 1;
+}
+.bell-del:hover { color: var(--red); background: var(--red-faint); }
+
+/* Add button */
+.add-row { display: flex; align-items: stretch; padding-left: 28px; margin-top: 4px; }
+.add-row-line { width: 28px; display: flex; justify-content: center; position: relative; }
+.add-row-line::before {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 50%;
+  width: 2px; background: linear-gradient(to bottom, var(--border2), transparent); transform: translateX(-50%);
+}
+.add-btn {
+  display: flex; align-items: center; gap: 10px; background: transparent;
+  border: 1px dashed var(--border2); border-radius: 6px; color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 9px 18px; cursor: pointer; flex: 1; transition: all 0.2s; margin: 6px 0;
+}
+.add-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); background: var(--cyan-faint); }
+.add-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.add-plus { font-size: 1.1rem; line-height: 1; color: var(--cyan-dim); }
+.add-btn:hover .add-plus { color: var(--cyan); }
+
+/* End timer strip */
+.end-strip {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--panel); border: 1px solid rgba(255,107,107,0.15);
+  border-radius: 6px; padding: 14px 18px; margin-top: 20px;
+}
+.end-label { font-size: 0.58rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,150,100,0.45); min-width: 56px; }
+.end-strip .bell-min { color: rgba(255,170,130,0.85); font-size: 1.9rem; }
+.end-strip .bell-min:focus { color: rgba(255,190,150,1); text-shadow: 0 0 14px rgba(255,120,80,0.35); }
+.end-strip .bell-step { color: rgba(255,107,107,0.35); }
+.end-strip .bell-step:hover { color: rgba(255,107,107,0.8); border-color: rgba(255,107,107,0.4); background: var(--red-faint); }
+.end-strip .bell-unit { color: rgba(255,107,107,0.35); }
+.end-hint { font-size: 0.56rem; color: var(--text-muted); letter-spacing: 0.1em; margin-left: auto; }
+
+/* Flash */
+.flash-overlay { position: fixed; inset: 0; background: rgba(63,255,210,0.035); pointer-events: none; z-index: 99; opacity: 0; }
+.flash-overlay.go { animation: sflash 2.8s ease-out forwards; }
+@keyframes sflash { 0%{opacity:0} 6%{opacity:1} 100%{opacity:0} }
+
+/* Footer */
+.footer { text-align: center; margin-top: 60px; font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); line-height: 2.2; }
+.footer a { color: var(--cyan-dim); text-decoration: none; }
+.footer a:hover { color: var(--cyan); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 520px) {
+  .app { padding: 28px 14px 80px; }
+  .session-clock { font-size: 2rem; min-width: 90px; }
+  .bell-min { font-size: 1.5rem; width: 52px; }
+  .bell-name { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="flash-overlay" id="flashOverlay"></div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title">Save Preset</div>
+    <input type="text" class="modal-input" id="presetNameInput" placeholder="e.g. Morning Meditation" maxlength="40">
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" onclick="confirmSavePreset()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <header>
+    <div class="wordmark">Bell Timeline</div>
+    <div class="tagline">432 hz &nbsp;·&nbsp; live synthesis &nbsp;·&nbsp; session waypoints</div>
+  </header>
+
+  <div class="session-strip">
+    <div class="session-clock" id="sessionClock">0:00</div>
+    <div class="session-meta">
+      <div class="lbl">next bell</div>
+      <div class="val" id="nextBellDisplay">—</div>
+      <div class="lbl" style="margin-top:4px;">remaining</div>
+      <div class="val" id="remainingDisplay">—</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-play" id="btnPlay" onclick="togglePlay()">▶ &nbsp;Begin Session</button>
+    <button class="btn" onclick="resetSession()">Reset</button>
+    <button class="btn" onclick="testBell()">Test Bell</button>
+    <button class="btn btn-reset-all" onclick="resetAll()">Reset All</button>
+  </div>
+
+  <div class="timeline-wrap">
+    <div class="section-label">Timeline</div>
+    <div class="tl-track-outer">
+      <div class="tl-track"><div class="tl-progress" id="tlProgress"></div></div>
+      <div class="tl-ticks" id="tlTicks"></div>
+      <div id="tlDots"></div>
+      <div class="tl-playhead" id="tlPlayhead"></div>
+    </div>
+  </div>
+
+  <div class="presets-wrap">
+    <div class="section-label">Presets</div>
+    <div class="presets-row" id="presetsRow">
+      <button class="preset-save-btn" id="savePresetBtn" onclick="openSaveModal()">+ Save current</button>
+    </div>
+  </div>
+
+  <div class="section-label">Alarms</div>
+  <div class="chain" id="chain"></div>
+
+  <div class="add-row">
+    <div class="add-row-line"></div>
+    <button class="add-btn" id="addBtn" onclick="addBell()">
+      <span class="add-plus">+</span> Add Alarm
+    </button>
+  </div>
+
+  <div class="end-strip">
+    <div class="end-label">End</div>
+    <div class="bell-min-wrap" id="endStepperWrap"></div>
+    <div class="end-hint">session duration</div>
+  </div>
+
+  <div class="footer">
+    Bell Timeline &nbsp;·&nbsp; Web Audio API synthesis &nbsp;·&nbsp; MIT License &nbsp;·&nbsp;
+    <a href="https://github.com" id="ghLink">View on GitHub</a>
+  </div>
+
+</div>
+
+<script>
+// ── Constants & defaults ──────────────────────────────────────────────────────
+const DEFAULT_END_MIN  = 60;
+const DEFAULT_ALARMS   = [1, 5]; // minutes
+
+const BUILTIN_PRESETS = [
+  { name: 'Default',     bells: [{minutes:1,label:''},{minutes:5,label:''}], endMinutes: 60 },
+  { name: 'Pomodoro',    bells: [{minutes:5,label:'break soon'}],             endMinutes: 25 },
+  { name: 'Hour Sit',    bells: [{minutes:10,label:''},{minutes:20,label:''},{minutes:40,label:''},{minutes:50,label:''}], endMinutes: 60 },
+  { name: '40 min',      bells: [{minutes:5,label:''},{minutes:15,label:''},{minutes:30,label:''}], endMinutes: 40 },
+  { name: '90 min deep', bells: [{minutes:15,label:''},{minutes:30,label:''},{minutes:45,label:''},{minutes:60,label:''},{minutes:75,label:''}], endMinutes: 90 },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let idCtr      = 1;
+let bells      = [];
+let endMin     = DEFAULT_END_MIN;
+let userPresets = [];
+let isPlaying  = false;
+let elapsedSec = 0;
+let rafId      = null;
+let lastNow    = null;
+let audioCtx   = null;
+
+// ── Audio context ─────────────────────────────────────────────────────────────
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// ── Utility: simple sine oscillator direct to destination ─────────────────────
+function sineNote(ac, freq, peakGain, attackSec, decaySec, startT) {
+  var o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(freq, startT);
+  o.frequency.exponentialRampToValueAtTime(freq * 0.978, startT + Math.min(decaySec * 0.35, 1.5));
+  o.connect(g); g.connect(ac.destination);
+  g.gain.setValueAtTime(0.0001, startT);
+  g.gain.linearRampToValueAtTime(peakGain, startT + attackSec);
+  g.gain.exponentialRampToValueAtTime(0.0001, startT + decaySec);
+  o.start(startT); o.stop(startT + decaySec + 0.3);
+}
+
+// ── Build-up: 12s ascending layers, all direct to destination ─────────────────
+function playBuildUp(ac, t) {
+  // Bowl 216 Hz: rises from 130
+  var b1=ac.createOscillator(), b1g=ac.createGain();
+  b1.type='sine'; b1.frequency.setValueAtTime(130,t); b1.frequency.exponentialRampToValueAtTime(216,t+12);
+  b1.connect(b1g); b1g.connect(ac.destination);
+  b1g.gain.setValueAtTime(0.0001,t);
+  b1g.gain.exponentialRampToValueAtTime(0.08, t+12*0.20);
+  b1g.gain.exponentialRampToValueAtTime(0.38, t+12*0.72);
+  b1g.gain.exponentialRampToValueAtTime(0.56, t+12*0.92);
+  b1g.gain.exponentialRampToValueAtTime(0.64, t+12*0.97);
+  b1g.gain.linearRampToValueAtTime(0.0001, t+12.06);
+  b1.start(t); b1.stop(t+12.2);
+
+  // 2nd harmonic 432 Hz: rises from 260, enters 1.5s in
+  var b2=ac.createOscillator(), b2g=ac.createGain();
+  b2.type='sine'; b2.frequency.setValueAtTime(260,t+1.5); b2.frequency.exponentialRampToValueAtTime(432,t+12);
+  b2.connect(b2g); b2g.connect(ac.destination);
+  b2g.gain.setValueAtTime(0.0001,t+1.5);
+  b2g.gain.exponentialRampToValueAtTime(0.05, t+12*0.35);
+  b2g.gain.exponentialRampToValueAtTime(0.24, t+12*0.78);
+  b2g.gain.exponentialRampToValueAtTime(0.38, t+12*0.97);
+  b2g.gain.linearRampToValueAtTime(0.0001, t+12.06);
+  b2.start(t+1.5); b2.stop(t+12.2);
+
+  // 3rd harmonic 648 Hz: rises from 400, enters 4s in
+  var b3=ac.createOscillator(), b3g=ac.createGain();
+  b3.type='sine'; b3.frequency.setValueAtTime(400,t+4); b3.frequency.exponentialRampToValueAtTime(648,t+12);
+  b3.connect(b3g); b3g.connect(ac.destination);
+  b3g.gain.setValueAtTime(0.0001,t+4);
+  b3g.gain.exponentialRampToValueAtTime(0.03, t+12*0.55);
+  b3g.gain.exponentialRampToValueAtTime(0.16, t+12*0.85);
+  b3g.gain.exponentialRampToValueAtTime(0.24, t+12*0.97);
+  b3g.gain.linearRampToValueAtTime(0.0001, t+12.06);
+  b3.start(t+4); b3.stop(t+12.2);
+
+  // High ping 1296 Hz: rises from 900, enters 7s in
+  var b4=ac.createOscillator(), b4g=ac.createGain();
+  b4.type='sine'; b4.frequency.setValueAtTime(900,t+7); b4.frequency.exponentialRampToValueAtTime(1296,t+12);
+  b4.connect(b4g); b4g.connect(ac.destination);
+  b4g.gain.setValueAtTime(0.0001,t+7);
+  b4g.gain.exponentialRampToValueAtTime(0.05, t+12*0.76);
+  b4g.gain.exponentialRampToValueAtTime(0.24, t+12*0.93);
+  b4g.gain.exponentialRampToValueAtTime(0.34, t+12*0.98);
+  b4g.gain.linearRampToValueAtTime(0.0001, t+12.05);
+  b4.start(t+7); b4.stop(t+12.2);
+
+  // Sub 108 Hz: rises from 70, enters 3s in
+  var b5=ac.createOscillator(), b5g=ac.createGain();
+  b5.type='sine'; b5.frequency.setValueAtTime(70,t+3); b5.frequency.exponentialRampToValueAtTime(108,t+12);
+  b5.connect(b5g); b5g.connect(ac.destination);
+  b5g.gain.setValueAtTime(0.0001,t+3);
+  b5g.gain.exponentialRampToValueAtTime(0.03, t+12*0.50);
+  b5g.gain.exponentialRampToValueAtTime(0.15, t+12*0.88);
+  b5g.gain.exponentialRampToValueAtTime(0.22, t+12*0.97);
+  b5g.gain.linearRampToValueAtTime(0.0001, t+12.06);
+  b5.start(t+3); b5.stop(t+12.2);
+}
+
+// ── Strike: bowl + harmonics, softer (supporting the chime) ──────────────────
+function playStrike(ac, t) {
+  sineNote(ac, 216,  0.26, 0.055, 22, t);
+  sineNote(ac, 432,  0.12, 0.050, 16, t);
+  sineNote(ac, 1296, 0.12, 0.022, 12, t);
+  sineNote(ac, 108,  0.06, 0.090, 16, t);
+  // FM shimmer — light
+  var fmm=ac.createOscillator(); fmm.type='sine'; fmm.frequency.value=648;
+  var fmmg=ac.createGain(); fmmg.gain.setValueAtTime(0.0001,t); fmmg.gain.linearRampToValueAtTime(14,t+0.04);
+  fmmg.gain.exponentialRampToValueAtTime(0.3,t+3.5); fmm.connect(fmmg);
+  var fmc=ac.createOscillator(); fmc.type='sine'; fmc.frequency.value=648;
+  fmmg.connect(fmc.frequency);
+  var fmcg=ac.createGain(); fmcg.gain.setValueAtTime(0.0001,t); fmcg.gain.linearRampToValueAtTime(0.07,t+0.05);
+  fmcg.gain.exponentialRampToValueAtTime(0.0001,t+4);
+  fmc.connect(fmcg); fmcg.connect(ac.destination);
+  fmm.start(t); fmm.stop(t+4.5); fmc.start(t); fmc.stop(t+4.5);
+}
+
+// ── Koshi Cascade chime: PRIMARY voice at strike ──────────────────────────────
+// Four 432-tuned overtone partials staggered 18ms — shimmering cascade
+function playKoshi(ac, t) {
+  var parts = [
+    {f:648,  g:0.52, dec:9.0, dt:0.000},
+    {f:864,  g:0.44, dec:7.5, dt:0.018},
+    {f:1080, g:0.36, dec:6.0, dt:0.036},
+    {f:1296, g:0.30, dec:5.0, dt:0.054},
+  ];
+  parts.forEach(function(p) {
+    var o=ac.createOscillator(), g=ac.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(p.f*1.0014, t+p.dt);
+    o.frequency.exponentialRampToValueAtTime(p.f*0.9987, t+p.dt+0.22);
+    o.frequency.exponentialRampToValueAtTime(p.f*0.9971, t+p.dt+p.dec);
+    o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.0001, t+p.dt);
+    g.gain.linearRampToValueAtTime(p.g, t+p.dt+0.006);
+    g.gain.exponentialRampToValueAtTime(p.g*0.70, t+p.dt+0.035);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+p.dt+p.dec);
+    o.start(t+p.dt); o.stop(t+p.dt+p.dec+0.3);
+  });
+  // Mallet tap click
+  var buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.007),ac.sampleRate);
+  var d=buf.getChannelData(0);
+  for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+  var src=ac.createBufferSource(); src.buffer=buf;
+  var hp=ac.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=2200;
+  var cg=ac.createGain(); cg.gain.setValueAtTime(0.18,t);
+  src.connect(hp); hp.connect(cg); cg.connect(ac.destination);
+  src.start(t); src.stop(t+0.01);
+}
+
+// ── Full bell: build-up (12s) → strike + Koshi chime at t+12 ─────────────────
+// Called 12s before the scheduled alarm time
+function playBell(vol) {
+  var ac = getCtx();
+  var t  = ac.currentTime + 0.05;
+  playBuildUp(ac, t);
+  playStrike(ac, t + 12);
+  playKoshi(ac,  t + 12);
+}
+
+// ── Test bell: immediate strike + chime, no build-up wait ────────────────────
+function testBell() {
+  var ac = getCtx();
+  var t  = ac.currentTime + 0.05;
+  playStrike(ac, t);
+  playKoshi(ac,  t);
+  triggerFlash();
+}
+
+function triggerFlash() {
+  var fl=document.getElementById('flashOverlay');
+  fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+}
+
+// ── Alarm helpers ─────────────────────────────────────────────────────────────
+function sortedBells() { return [...bells].sort((a,b)=>a.minutes-b.minutes); }
+
+function addBell() {
+  if (bells.length >= 29) return;
+  const taken = bells.map(b=>b.minutes).sort((a,b)=>a-b);
+  var suggest = taken.length > 0
+    ? Math.min(endMin-1, taken[taken.length-1] + Math.max(5, Math.floor((endMin-taken[taken.length-1])/2)))
+    : Math.max(1, Math.floor(endMin/2));
+  bells.push({ id: idCtr++, minutes: Math.max(1,suggest), label:'', fired:false });
+  render();
+}
+
+function removeBell(id) { bells=bells.filter(b=>b.id!==id); render(); }
+
+function setBellMin(id, val) {
+  var b=bells.find(b=>b.id===id);
+  if(b){ b.minutes=val; b.fired=false; b._pre=false; }
+  renderDots(); rebuildTicks(); updateNextBell();
+}
+
+function setBellLabel(id, val) { var b=bells.find(b=>b.id===id); if(b) b.label=val; }
+
+// ── Stepper factory ───────────────────────────────────────────────────────────
+function makeStepper(getVal, setVal, opts) {
+  opts = opts || {};
+  var wrap = document.createElement('div'); wrap.className='bell-min-wrap';
+  var minus=document.createElement('button'); minus.className='bell-step minus'; minus.textContent='−';
+  var input=document.createElement('input'); input.type='number'; input.className='bell-min';
+  input.min=1; input.max=999; input.value=getVal();
+  if(opts.inputId) input.id=opts.inputId;
+  var plus=document.createElement('button'); plus.className='bell-step plus'; plus.textContent='+';
+  var unit=document.createElement('span'); unit.className='bell-unit'; unit.textContent='min';
+
+  function step(d){
+    var v=parseInt(input.value)||getVal(), nv=Math.max(1,Math.min(999,v+d));
+    input.value=nv; input.classList.remove('invalid'); setVal(nv);
+  }
+  minus.addEventListener('click',()=>step(-1));
+  plus.addEventListener('click',()=>step(1));
+
+  var hT=null,hI=null;
+  function sh(d){ hT=setTimeout(()=>{ hI=setInterval(()=>step(d),80); },400); }
+  function eh(){ clearTimeout(hT); clearInterval(hI); }
+  minus.addEventListener('mousedown',()=>sh(-1)); plus.addEventListener('mousedown',()=>sh(1));
+  minus.addEventListener('touchstart',()=>sh(-1),{passive:true}); plus.addEventListener('touchstart',()=>sh(1),{passive:true});
+  ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>{ minus.addEventListener(ev,eh); plus.addEventListener(ev,eh); });
+
+  input.addEventListener('input',()=>{
+    var v=parseInt(input.value), ok=!isNaN(v)&&v>=1&&v<=999;
+    input.classList.toggle('invalid',!ok);
+    if(ok) setVal(v);
+  });
+  input.addEventListener('blur',()=>{
+    var v=parseInt(input.value);
+    if(isNaN(v)||v<1){ input.value=getVal(); input.classList.remove('invalid'); }
+  });
+
+  wrap.appendChild(minus); wrap.appendChild(input); wrap.appendChild(plus); wrap.appendChild(unit);
+  return wrap;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  renderChain();
+  rebuildTicks();
+  renderDots();
+  buildEndStepper();
+  document.getElementById('addBtn').disabled = bells.length >= 29;
+  updateNextBell();
+}
+
+function renderChain() {
+  var chain=document.getElementById('chain'); chain.innerHTML='';
+  sortedBells().forEach(function(b,i){
+    var row=document.createElement('div'); row.className='bell-row'; row.dataset.bid=b.id;
+    if(b.fired) row.classList.add('fired');
+
+    var node=document.createElement('div'); node.className='bell-node';
+    var dot=document.createElement('div');  dot.className='bell-node-dot';
+    node.appendChild(dot);
+
+    var card=document.createElement('div'); card.className='bell-card';
+    var badge=document.createElement('div'); badge.className='bell-badge'; badge.textContent='#'+(i+1);
+
+    var stepper=makeStepper(function(){return b.minutes;}, function(v){setBellMin(b.id,v);});
+
+    var nameIn=document.createElement('input'); nameIn.type='text'; nameIn.className='bell-name';
+    nameIn.placeholder='label'; nameIn.value=b.label;
+    nameIn.addEventListener('input',function(){ setBellLabel(b.id,nameIn.value); });
+
+    var status=document.createElement('div'); status.className='bell-status';
+    if(b.fired) status.textContent='✓';
+
+    var del=document.createElement('button'); del.className='bell-del'; del.textContent='✕';
+    del.onclick=function(){ removeBell(b.id); };
+
+    card.appendChild(badge); card.appendChild(stepper); card.appendChild(nameIn);
+    card.appendChild(status); card.appendChild(del);
+    row.appendChild(node); row.appendChild(card);
+    chain.appendChild(row);
+  });
+}
+
+function buildEndStepper() {
+  var wrap=document.getElementById('endStepperWrap'); wrap.innerHTML='';
+  var s=makeStepper(
+    function(){return endMin;},
+    function(v){ endMin=v; rebuildTicks(); renderDots(); updateNextBell(); },
+    {inputId:'endMinInput'}
+  );
+  wrap.appendChild(s);
+}
+
+function rebuildTicks() {
+  var el=document.getElementById('tlTicks'); el.innerHTML='';
+  var maj=endMin<=15?5:endMin<=60?10:15, mn=endMin<=15?1:5;
+  for(var m=0;m<=endMin;m+=mn){
+    var pct=m/endMin, isMaj=m%maj===0;
+    var tick=document.createElement('div'); tick.className='tl-tick'; tick.style.left=(pct*100)+'%';
+    var line=document.createElement('div'); line.className='tl-tick-line '+(isMaj?'maj':'min');
+    tick.appendChild(line);
+    if(isMaj){var lbl=document.createElement('div');lbl.className='tl-tick-lbl';lbl.textContent=m===0?'0':m+'m';tick.appendChild(lbl);}
+    el.appendChild(tick);
+  }
+}
+
+function renderDots() {
+  var c=document.getElementById('tlDots'); c.innerHTML='';
+  sortedBells().forEach(function(b){
+    var pct=Math.max(0,Math.min(1,b.minutes/endMin))*100;
+    var el=document.createElement('div'); el.className='tl-dot'; el.dataset.bid=b.id; el.style.left=pct+'%';
+    var inner=document.createElement('div'); inner.className='tl-dot-inner';
+    el.appendChild(inner); c.appendChild(el);
+  });
+}
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+function loadUserPresets() {
+  try { var r=localStorage.getItem('bellTimeline_v2'); userPresets=r?JSON.parse(r):[]; }
+  catch(e){ userPresets=[]; }
+}
+
+function saveUserPresets() {
+  try { localStorage.setItem('bellTimeline_v2',JSON.stringify(userPresets)); } catch(e){}
+}
+
+function openSaveModal() {
+  document.getElementById('presetNameInput').value='';
+  document.getElementById('modalBg').classList.add('show');
+  setTimeout(function(){document.getElementById('presetNameInput').focus();},120);
+}
+
+function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+
+document.getElementById('presetNameInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter') confirmSavePreset();
+  if(e.key==='Escape') closeModal();
+});
+document.getElementById('modalBg').addEventListener('click',function(e){
+  if(e.target===e.currentTarget) closeModal();
+});
+
+function confirmSavePreset() {
+  var name=document.getElementById('presetNameInput').value.trim();
+  if(!name) return;
+  var data={ name:name, bells:bells.map(function(b){return{minutes:b.minutes,label:b.label};}), endMinutes:endMin };
+  var idx=userPresets.findIndex(function(p){return p.name===name;});
+  if(idx>=0) userPresets[idx]=data; else userPresets.push(data);
+  saveUserPresets();
+  closeModal();
+  renderPresets();
+}
+
+function deleteUserPreset(name) {
+  userPresets=userPresets.filter(function(p){return p.name!==name;});
+  saveUserPresets();
+  renderPresets();
+}
+
+function applyPreset(p) {
+  pause();
+  idCtr=1; bells=p.bells.map(function(b){return{id:idCtr++,minutes:b.minutes,label:b.label||'',fired:false};});
+  endMin=p.endMinutes; elapsedSec=0;
+  document.getElementById('tlPlayhead').classList.remove('show');
+  document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
+  document.getElementById('btnPlay').classList.remove('playing');
+  render();
+}
+
+function renderPresets() {
+  var row=document.getElementById('presetsRow');
+  var saveBtn=document.getElementById('savePresetBtn');
+  row.innerHTML='';
+
+  var all=BUILTIN_PRESETS.concat(userPresets);
+  all.forEach(function(p){
+    var isBuiltin=BUILTIN_PRESETS.some(function(b){return b.name===p.name;});
+    var chip=document.createElement('div'); chip.className='preset-chip';
+    var dot=document.createElement('span'); dot.className='preset-dot';
+    var lbl=document.createElement('span'); lbl.textContent=p.name;
+    chip.appendChild(dot); chip.appendChild(lbl);
+    chip.addEventListener('click',function(){applyPreset(p);});
+
+    if(!isBuiltin){
+      var x=document.createElement('span'); x.className='preset-x'; x.textContent='×'; x.title='Delete';
+      x.addEventListener('click',function(e){e.stopPropagation();deleteUserPreset(p.name);});
+      chip.appendChild(x);
+    }
+    row.appendChild(chip);
+  });
+  row.appendChild(saveBtn);
+}
+
+// ── Session controls ──────────────────────────────────────────────────────────
+function togglePlay(){ if(isPlaying) pause(); else play(); }
+
+function play(){
+  getCtx(); isPlaying=true; lastNow=performance.now();
+  document.getElementById('btnPlay').innerHTML='⏸ &nbsp;Pause';
+  document.getElementById('btnPlay').classList.add('playing');
+  document.getElementById('tlPlayhead').classList.add('show');
+  rafId=requestAnimationFrame(tick);
+}
+
+function pause(){
+  isPlaying=false; cancelAnimationFrame(rafId);
+  document.getElementById('btnPlay').innerHTML='▶ &nbsp;Resume';
+  document.getElementById('btnPlay').classList.remove('playing');
+}
+
+function resetSession(){
+  pause(); elapsedSec=0;
+  bells.forEach(function(b){b.fired=false;b._pre=false;});
+  document.getElementById('tlPlayhead').classList.remove('show');
+  document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
+  document.getElementById('btnPlay').classList.remove('playing');
+  updateTimerUI(); renderChain(); renderDots();
+}
+
+function resetAll(){
+  pause(); idCtr=1;
+  bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false};});
+  endMin=DEFAULT_END_MIN; elapsedSec=0;
+  document.getElementById('tlPlayhead').classList.remove('show');
+  document.getElementById('btnPlay').innerHTML='▶ &nbsp;Begin Session';
+  document.getElementById('btnPlay').classList.remove('playing');
+  render();
+}
+
+// ── Timer tick ────────────────────────────────────────────────────────────────
+function tick(now){
+  if(!isPlaying) return;
+  var dt=(now-lastNow)/1000; lastNow=now;
+  elapsedSec=Math.min(elapsedSec+dt, endMin*60);
+  updateTimerUI(); checkBells();
+  if(elapsedSec>=endMin*60){ pause(); return; }
+  rafId=requestAnimationFrame(tick);
+}
+
+function checkBells(){
+  sortedBells().forEach(function(b){
+    if(b.fired) return;
+    var strike=b.minutes*60, pre=strike-12;  // 12s build-up window
+    if(elapsedSec>=pre && !b._pre){ b._pre=true; playBell(0.88); }
+    if(elapsedSec>=strike){
+      b.fired=true; b._pre=false; triggerFlash();
+      var dot=document.querySelector('.tl-dot[data-bid="'+b.id+'"] .tl-dot-inner');
+      if(dot){dot.classList.remove('ring-pulse');void dot.offsetWidth;dot.classList.add('ring-pulse');}
+      var row=document.querySelector('.bell-row[data-bid="'+b.id+'"]');
+      if(row){row.classList.add('fired');row.classList.remove('active');}
+    }
+  });
+  document.querySelectorAll('.bell-row').forEach(function(r){r.classList.remove('active');});
+  var next=sortedBells().find(function(b){return !b.fired;});
+  if(next){var row=document.querySelector('.bell-row[data-bid="'+next.id+'"]');if(row)row.classList.add('active');}
+}
+
+function updateTimerUI(){
+  var pct=elapsedSec/(endMin*60);
+  document.getElementById('sessionClock').textContent=fmt(elapsedSec);
+  document.getElementById('tlProgress').style.width=(pct*100)+'%';
+  document.getElementById('tlPlayhead').style.left=(pct*100)+'%';
+  updateNextBell();
+}
+
+function updateNextBell(){
+  var next=sortedBells().find(function(b){return !b.fired;});
+  if(next&&isPlaying){
+    var rem=next.minutes*60-elapsedSec;
+    document.getElementById('nextBellDisplay').textContent=next.minutes+'m (−'+fmt(Math.max(0,rem))+')';
+  } else if(next){
+    document.getElementById('nextBellDisplay').textContent=next.minutes+' min';
+  } else {
+    document.getElementById('nextBellDisplay').textContent='—';
+  }
+  var rem2=endMin*60-elapsedSec;
+  document.getElementById('remainingDisplay').textContent=isPlaying?fmt(Math.max(0,rem2)):fmt(endMin*60);
+}
+
+function fmt(secs){
+  var s=Math.floor(secs),m=Math.floor(s/60),ss=s%60;
+  return m+':'+String(ss).padStart(2,'0');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadUserPresets();
+idCtr=1;
+bells=DEFAULT_ALARMS.map(function(m){return{id:idCtr++,minutes:m,label:'',fired:false};});
+render();
+renderPresets();
+</script>
+</body>
+</html>
