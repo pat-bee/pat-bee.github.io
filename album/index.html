@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Album Player</title>
+
+  <style>
+    /*
+      WEB ALBUM PLAYER — FIRST DRAFT
+      --------------------------------
+      Primary design goals:
+      - Night-friendly visual design
+      - 1010px max-width layout
+      - Square album art
+      - Persistent audio element for best background playback behavior
+      - Clickable 11-track playlist
+      - Repeat mode: Off / Repeat Song / Repeat Album
+      - FLAC-first playback with AAC/MP3 fallback option
+      - Media Session API support for lock-screen / OS media controls where supported
+    */
+
+    :root {
+      --page-bg: #080806;
+      --panel-bg: #15130e;
+      --panel-bg-2: #201c13;
+      --text-main: #fff3bc;
+      --text-muted: rgba(255, 243, 188, 0.68);
+      --text-faint: rgba(255, 243, 188, 0.42);
+      --accent: #d6a94a;
+      --accent-soft: rgba(214, 169, 74, 0.22);
+      --danger: #ff8d6b;
+      --border: rgba(255, 243, 188, 0.16);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --content-width: 1010px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--page-bg);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(214, 169, 74, 0.14), transparent 32rem),
+        radial-gradient(circle at bottom right, rgba(255, 243, 188, 0.08), transparent 28rem),
+        linear-gradient(180deg, #060605 0%, #11100c 100%);
+      color: var(--text-main);
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    .page-shell {
+      width: min(var(--content-width), calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    .album-card {
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) 1fr;
+      gap: 28px;
+      padding: 28px;
+      background: rgba(21, 19, 14, 0.88);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .album-art-wrap {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+    }
+
+    .album-art {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 243, 188, 0.2);
+      background:
+        linear-gradient(135deg, rgba(255, 243, 188, 0.18), rgba(214, 169, 74, 0.05)),
+        radial-gradient(circle at 30% 25%, rgba(255, 243, 188, 0.22), transparent 35%),
+        #0f0d09;
+      display: grid;
+      place-items: center;
+    }
+
+    .album-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .album-placeholder {
+      width: 72%;
+      height: 72%;
+      border: 1px dashed rgba(255, 243, 188, 0.34);
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 24px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .album-meta {
+      margin-top: 20px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 4vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.055em;
+    }
+
+    .artist {
+      margin: 12px 0 0;
+      color: var(--text-muted);
+      font-size: 1.02rem;
+    }
+
+    .player-panel {
+      margin-top: 22px;
+      padding: 18px;
+      background: rgba(32, 28, 19, 0.72);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .now-playing {
+      min-height: 48px;
+      margin-bottom: 14px;
+    }
+
+    .now-playing-label {
+      color: var(--text-faint);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .now-playing-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+    }
+
+    .now-playing-format {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .progress-row {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      gap: 10px;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-bar {
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 243, 188, 0.16);
+      cursor: pointer;
+    }
+
+    .progress-bar::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text-main);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 6px rgba(214, 169, 74, 0.14);
+    }
+
+    .progress-bar::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text-main);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 6px rgba(214, 169, 74, 0.14);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .control-btn,
+    .repeat-btn {
+      border: 1px solid var(--border);
+      background: rgba(255, 243, 188, 0.08);
+      border-radius: 999px;
+      min-height: 44px;
+      padding: 0 16px;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .control-btn:hover,
+    .repeat-btn:hover,
+    .track-button:hover {
+      background: rgba(255, 243, 188, 0.14);
+      border-color: rgba(255, 243, 188, 0.32);
+    }
+
+    .control-btn:active,
+    .repeat-btn:active,
+    .track-button:active {
+      transform: translateY(1px);
+    }
+
+    .play-btn {
+      min-width: 92px;
+      background: var(--text-main);
+      color: #131007;
+      border-color: transparent;
+      font-weight: 800;
+    }
+
+    .repeat-btn {
+      min-width: 156px;
+      color: var(--text-main);
+    }
+
+    .repeat-btn[data-repeat-mode="song"],
+    .repeat-btn[data-repeat-mode="album"] {
+      background: var(--accent-soft);
+      border-color: rgba(214, 169, 74, 0.55);
+    }
+
+    .playlist-section {
+      min-width: 0;
+    }
+
+    .intro-copy {
+      margin: 4px 0 22px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 58ch;
+    }
+
+    .track-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .track-button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+      padding: 14px 16px;
+      background: rgba(255, 243, 188, 0.055);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .track-button[aria-current="true"] {
+      background: rgba(214, 169, 74, 0.18);
+      border-color: rgba(214, 169, 74, 0.52);
+    }
+
+    .track-number {
+      color: var(--text-faint);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .track-title {
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .track-duration {
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-line {
+      margin-top: 18px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .error-line {
+      color: var(--danger);
+      margin-top: 10px;
+      display: none;
+    }
+
+    .error-line.is-visible {
+      display: block;
+    }
+
+    /* Hide the browser's default audio UI. The persistent audio element remains active. */
+    audio {
+      position: fixed;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 850px) {
+      .page-shell {
+        width: min(100vw - 22px, var(--content-width));
+        padding-top: 14px;
+      }
+
+      .album-card {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 20px;
+      }
+
+      .album-art-wrap {
+        position: static;
+      }
+
+      .album-art {
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .track-button {
+        grid-template-columns: 32px 1fr;
+      }
+
+      .track-duration {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page-shell">
+    <section class="album-card" aria-label="Album player">
+      <div class="album-art-wrap">
+        <div class="album-art" aria-label="Album art">
+          <!--
+            ALBUM ART CONNECTION POINT
+            --------------------------
+            Replace this placeholder with your hosted square album image.
+
+            Example:
+            <img src="https://your-cdn.example.com/album-art.jpg" alt="Album title cover art">
+
+            Recommended image:
+            - Square, at least 1200x1200px for crisp lock-screen/media display
+            - JPG or PNG
+            - Keep file size reasonable, ideally under 1MB if possible
+          -->
+          <div class="album-placeholder">
+            Square Album Art Placeholder<br />Replace with hosted image URL
+          </div>
+        </div>
+
+        <div class="album-meta">
+          <!-- EDIT THESE VALUES FOR YOUR RELEASE -->
+          <p class="eyebrow">Web Album</p>
+          <h1 id="albumTitle">Album Title</h1>
+          <p class="artist" id="artistName">Artist Name</p>
+        </div>
+
+        <div class="player-panel">
+          <div class="now-playing" aria-live="polite">
+            <div class="now-playing-label">Now Playing</div>
+            <div class="now-playing-title" id="nowPlayingTitle">Select a track</div>
+            <div class="now-playing-format" id="formatStatus">Lossless FLAC will be used when supported.</div>
+          </div>
+
+          <div class="progress-row">
+            <span id="currentTime">0:00</span>
+            <input
+              id="progressBar"
+              class="progress-bar"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              step="0.1"
+              aria-label="Track progress"
+            />
+            <span id="duration">0:00</span>
+          </div>
+
+          <div class="controls" aria-label="Player controls">
+            <button class="control-btn" id="prevBtn" type="button" aria-label="Previous track">⟵ Prev</button>
+            <button class="control-btn play-btn" id="playPauseBtn" type="button" aria-label="Play">Play</button>
+            <button class="control-btn" id="nextBtn" type="button" aria-label="Next track">Next ⟶</button>
+
+            <!--
+              Repeat control cycles through three states:
+              1. Off
+              2. Repeat Song
+              3. Repeat Album
+            -->
+            <button class="repeat-btn" id="repeatBtn" type="button" data-repeat-mode="off" aria-label="Repeat mode: off">
+              Repeat: Off
+            </button>
+          </div>
+
+          <p class="status-line">
+            Tap Play once to start. After playback begins, the browser should allow audio to continue while switching tabs or locking the screen, subject to the phone/browser’s normal media behavior.
+          </p>
+          <p class="error-line" id="errorLine"></p>
+        </div>
+      </div>
+
+      <div class="playlist-section">
+        <p class="intro-copy">
+          A dark, simple web album player with clickable tracks, lock-screen metadata support, and a persistent audio element optimized for background listening.
+        </p>
+
+        <ol class="track-list" id="trackList" aria-label="Track list"></ol>
+      </div>
+    </section>
+  </main>
+
+  <!--
+    PERSISTENT AUDIO ELEMENT
+    ------------------------
+    This single audio element is reused for the entire album.
+    That is better for background playback than creating/destroying audio elements.
+
+    preload="metadata" loads duration/metadata without downloading the whole album up front.
+    playsinline helps avoid unwanted full-screen media behavior on mobile browsers.
+  -->
+  <audio id="audioPlayer" preload="metadata" playsinline></audio>
+
+  <script>
+    /**********************************************************************
+     * 1. ALBUM CONFIGURATION
+     * --------------------------------------------------------------------
+     * Replace these placeholder URLs with your real hosted file URLs.
+     *
+     * Recommended hosting setup:
+     * - Host this HTML page on GitHub Pages, Netlify, Cloudflare Pages, etc.
+     * - Host the audio files on Cloudflare R2, Backblaze B2, S3/CloudFront,
+     *   or another reliable CDN-backed object storage provider.
+     *
+     * For best compatibility:
+     * - flac: highest-fidelity file for browsers that support FLAC
+     * - fallback: AAC/M4A or MP3 version for iPhone/Safari compatibility
+     *
+     * File path examples:
+     * - "https://cdn.example.com/my-album/01-track-title.flac"
+     * - "https://cdn.example.com/my-album/01-track-title.m4a"
+     **********************************************************************/
+
+    const album = {
+      title: "Album Title",
+      artist: "Artist Name",
+
+      // ALBUM ART CONNECTION POINT
+      // Replace this with your final hosted square album image URL.
+      // This same image is used for the visible page and Media Session artwork.
+      artworkUrl: "https://example.com/path-to-your-square-album-art.jpg",
+
+      tracks: [
+        {
+          title: "Opening Signal",
+          duration: "3:42",
+          flac: "https://example.com/audio/01-opening-signal.flac",
+          fallback: "https://example.com/audio/01-opening-signal.m4a"
+        },
+        {
+          title: "Night Carrier",
+          duration: "4:18",
+          flac: "https://example.com/audio/02-night-carrier.flac",
+          fallback: "https://example.com/audio/02-night-carrier.m4a"
+        },
+        {
+          title: "Soft Machine Weather",
+          duration: "5:01",
+          flac: "https://example.com/audio/03-soft-machine-weather.flac",
+          fallback: "https://example.com/audio/03-soft-machine-weather.m4a"
+        },
+        {
+          title: "Index of Stars",
+          duration: "2:56",
+          flac: "https://example.com/audio/04-index-of-stars.flac",
+          fallback: "https://example.com/audio/04-index-of-stars.m4a"
+        },
+        {
+          title: "Gold Room Circuit",
+          duration: "4:44",
+          flac: "https://example.com/audio/05-gold-room-circuit.flac",
+          fallback: "https://example.com/audio/05-gold-room-circuit.m4a"
+        },
+        {
+          title: "Low Lantern System",
+          duration: "3:37",
+          flac: "https://example.com/audio/06-low-lantern-system.flac",
+          fallback: "https://example.com/audio/06-low-lantern-system.m4a"
+        },
+        {
+          title: "The Long Hall",
+          duration: "6:12",
+          flac: "https://example.com/audio/07-the-long-hall.flac",
+          fallback: "https://example.com/audio/07-the-long-hall.m4a"
+        },
+        {
+          title: "Manual Atmosphere",
+          duration: "4:06",
+          flac: "https://example.com/audio/08-manual-atmosphere.flac",
+          fallback: "https://example.com/audio/08-manual-atmosphere.m4a"
+        },
+        {
+          title: "Amber Data",
+          duration: "3:55",
+          flac: "https://example.com/audio/09-amber-data.flac",
+          fallback: "https://example.com/audio/09-amber-data.m4a"
+        },
+        {
+          title: "Static Orchard",
+          duration: "5:28",
+          flac: "https://example.com/audio/10-static-orchard.flac",
+          fallback: "https://example.com/audio/10-static-orchard.m4a"
+        },
+        {
+          title: "Closing Tone for the Machines",
+          duration: "4:49",
+          flac: "https://example.com/audio/11-closing-tone-for-the-machines.flac",
+          fallback: "https://example.com/audio/11-closing-tone-for-the-machines.m4a"
+        }
+      ]
+    };
+
+    /**********************************************************************
+     * 2. DOM REFERENCES
+     **********************************************************************/
+
+    const audio = document.getElementById("audioPlayer");
+    const trackList = document.getElementById("trackList");
+    const nowPlayingTitle = document.getElementById("nowPlayingTitle");
+    const formatStatus = document.getElementById("formatStatus");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const progressBar = document.getElementById("progressBar");
+    const currentTimeEl = document.getElementById("currentTime");
+    const durationEl = document.getElementById("duration");
+    const errorLine = document.getElementById("errorLine");
+
+    /**********************************************************************
+     * 3. PLAYER STATE
+     **********************************************************************/
+
+    let currentTrackIndex = 0;
+    let isTrackLoaded = false;
+
+    // Repeat mode options: "off", "song", "album"
+    let repeatMode = "off";
+
+    /**********************************************************************
+     * 4. FORMAT SUPPORT
+     * --------------------------------------------------------------------
+     * canPlayType is the safest browser-native way to detect support.
+     * If FLAC is supported, this page chooses FLAC.
+     * Otherwise it uses the fallback file, ideally AAC/M4A or MP3.
+     **********************************************************************/
+
+    function supportsFLAC() {
+      const testAudio = document.createElement("audio");
+      if (!testAudio.canPlayType) return false;
+
+      return (
+        testAudio.canPlayType("audio/flac") !== "" ||
+        testAudio.canPlayType("audio/x-flac") !== ""
+      );
+    }
+
+    function getBestAudioSource(track) {
+      const flacSupported = supportsFLAC();
+
+      return {
+        src: flacSupported ? track.flac : track.fallback,
+        formatLabel: flacSupported ? "Playing lossless FLAC" : "Playing mobile-compatible fallback audio"
+      };
+    }
+
+    /**********************************************************************
+     * 5. RENDER TRACK LIST
+     **********************************************************************/
+
+    function renderTrackList() {
+      trackList.innerHTML = "";
+
+      album.tracks.forEach((track, index) => {
+        const li = document.createElement("li");
+        const button = document.createElement("button");
+
+        button.className = "track-button";
+        button.type = "button";
+        button.setAttribute("aria-current", index === currentTrackIndex && isTrackLoaded ? "true" : "false");
+        button.innerHTML = `
+          <span class="track-number">${String(index + 1).padStart(2, "0")}</span>
+          <span class="track-title">${track.title}</span>
+          <span class="track-duration">${track.duration}</span>
+        `;
+
+        // A song click is a valid user gesture, so playback may begin here.
+        button.addEventListener("click", () => {
+          playTrack(index);
+        });
+
+        li.appendChild(button);
+        trackList.appendChild(li);
+      });
+    }
+
+    function updateActiveTrackUI() {
+      const buttons = trackList.querySelectorAll(".track-button");
+      buttons.forEach((button, index) => {
+        button.setAttribute("aria-current", index === currentTrackIndex && isTrackLoaded ? "true" : "false");
+      });
+    }
+
+    /**********************************************************************
+     * 6. LOAD + PLAYBACK FUNCTIONS
+     **********************************************************************/
+
+    function loadTrack(index) {
+      const safeIndex = Math.max(0, Math.min(index, album.tracks.length - 1));
+      const track = album.tracks[safeIndex];
+      const source = getBestAudioSource(track);
+
+      currentTrackIndex = safeIndex;
+      isTrackLoaded = true;
+
+      audio.src = source.src;
+      audio.load();
+
+      nowPlayingTitle.textContent = track.title;
+      formatStatus.textContent = source.formatLabel;
+      errorLine.classList.remove("is-visible");
+      errorLine.textContent = "";
+
+      updateActiveTrackUI();
+      updateMediaSession(track);
+    }
+
+    async function playTrack(index = currentTrackIndex) {
+      // Loading happens inside the click/tap handler, preserving user gesture context.
+      loadTrack(index);
+
+      try {
+        await audio.play();
+        playPauseBtn.textContent = "Pause";
+        playPauseBtn.setAttribute("aria-label", "Pause");
+        setMediaSessionPlaybackState("playing");
+      } catch (error) {
+        showError("Playback could not start. The browser may have blocked playback or the audio URL may be unavailable.");
+        console.warn("Playback failed:", error);
+      }
+    }
+
+    async function togglePlayPause() {
+      if (!isTrackLoaded) {
+        await playTrack(currentTrackIndex);
+        return;
+      }
+
+      if (audio.paused) {
+        try {
+          await audio.play();
+          playPauseBtn.textContent = "Pause";
+          playPauseBtn.setAttribute("aria-label", "Pause");
+          setMediaSessionPlaybackState("playing");
+        } catch (error) {
+          showError("Playback could not resume. Try tapping the track again.");
+          console.warn("Resume failed:", error);
+        }
+      } else {
+        audio.pause();
+        playPauseBtn.textContent = "Play";
+        playPauseBtn.setAttribute("aria-label", "Play");
+        setMediaSessionPlaybackState("paused");
+      }
+    }
+
+    function playPreviousTrack() {
+      const previousIndex = currentTrackIndex > 0 ? currentTrackIndex - 1 : 0;
+      playTrack(previousIndex);
+    }
+
+    function playNextTrack() {
+      if (currentTrackIndex < album.tracks.length - 1) {
+        playTrack(currentTrackIndex + 1);
+      } else if (repeatMode === "album") {
+        playTrack(0);
+      }
+    }
+
+    /**********************************************************************
+     * 7. REPEAT MODE
+     **********************************************************************/
+
+    function cycleRepeatMode() {
+      if (repeatMode === "off") {
+        repeatMode = "song";
+      } else if (repeatMode === "song") {
+        repeatMode = "album";
+      } else {
+        repeatMode = "off";
+      }
+
+      updateRepeatButton();
+    }
+
+    function updateRepeatButton() {
+      const labels = {
+        off: "Repeat: Off",
+        song: "Repeat: Song",
+        album: "Repeat: Album"
+      };
+
+      repeatBtn.textContent = labels[repeatMode];
+      repeatBtn.dataset.repeatMode = repeatMode;
+      repeatBtn.setAttribute("aria-label", `Repeat mode: ${repeatMode}`);
+    }
+
+    /**********************************************************************
+     * 8. TRACK END BEHAVIOR
+     * --------------------------------------------------------------------
+     * Off: stop at the end of the album
+     * Song: replay the same track
+     * Album: continue through album, then loop back to track 1
+     **********************************************************************/
+
+    audio.addEventListener("ended", () => {
+      if (repeatMode === "song") {
+        playTrack(currentTrackIndex);
+        return;
+      }
+
+      if (currentTrackIndex < album.tracks.length - 1) {
+        playTrack(currentTrackIndex + 1);
+        return;
+      }
+
+      if (repeatMode === "album") {
+        playTrack(0);
+        return;
+      }
+
+      playPauseBtn.textContent = "Play";
+      playPauseBtn.setAttribute("aria-label", "Play");
+      setMediaSessionPlaybackState("none");
+    });
+
+    /**********************************************************************
+     * 9. PROGRESS BAR
+     **********************************************************************/
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds)) return "0:00";
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${minutes}:${String(secs).padStart(2, "0")}`;
+    }
+
+    audio.addEventListener("loadedmetadata", () => {
+      durationEl.textContent = formatTime(audio.duration);
+      progressBar.value = 0;
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (!Number.isFinite(audio.duration) || audio.duration === 0) return;
+
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progressBar.value = percent;
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    });
+
+    progressBar.addEventListener("input", () => {
+      if (!Number.isFinite(audio.duration) || audio.duration === 0) return;
+
+      const seekTime = (Number(progressBar.value) / 100) * audio.duration;
+      audio.currentTime = seekTime;
+    });
+
+    /**********************************************************************
+     * 10. MEDIA SESSION API
+     * --------------------------------------------------------------------
+     * This helps supported browsers show:
+     * - Track title
+     * - Artist
+     * - Album title
+     * - Album artwork
+     * - Lock-screen play/pause/next/previous controls
+     *
+     * It does not force background playback, but it improves integration
+     * with phone and desktop media controls.
+     **********************************************************************/
+
+    function updateMediaSession(track) {
+      if (!("mediaSession" in navigator)) return;
+
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title,
+        artist: album.artist,
+        album: album.title,
+        artwork: [
+          {
+            src: album.artworkUrl,
+            sizes: "512x512",
+            type: "image/jpeg"
+          }
+        ]
+      });
+
+      navigator.mediaSession.setActionHandler("play", async () => {
+        try {
+          await audio.play();
+          playPauseBtn.textContent = "Pause";
+          setMediaSessionPlaybackState("playing");
+        } catch (error) {
+          console.warn("Media Session play failed:", error);
+        }
+      });
+
+      navigator.mediaSession.setActionHandler("pause", () => {
+        audio.pause();
+        playPauseBtn.textContent = "Play";
+        setMediaSessionPlaybackState("paused");
+      });
+
+      navigator.mediaSession.setActionHandler("previoustrack", playPreviousTrack);
+      navigator.mediaSession.setActionHandler("nexttrack", playNextTrack);
+    }
+
+    function setMediaSessionPlaybackState(state) {
+      if (!("mediaSession" in navigator)) return;
+      navigator.mediaSession.playbackState = state;
+    }
+
+    /**********************************************************************
+     * 11. ERROR HANDLING
+     **********************************************************************/
+
+    function showError(message) {
+      errorLine.textContent = message;
+      errorLine.classList.add("is-visible");
+    }
+
+    audio.addEventListener("error", () => {
+      showError("Audio failed to load. Check that your file URL is correct, publicly accessible, and served with the correct MIME type.");
+    });
+
+    /**********************************************************************
+     * 12. EVENT LISTENERS
+     **********************************************************************/
+
+    playPauseBtn.addEventListener("click", togglePlayPause);
+    prevBtn.addEventListener("click", playPreviousTrack);
+    nextBtn.addEventListener("click", playNextTrack);
+    repeatBtn.addEventListener("click", cycleRepeatMode);
+
+    /**********************************************************************
+     * 13. INITIALIZE PAGE
+     **********************************************************************/
+
+    document.getElementById("albumTitle").textContent = album.title;
+    document.getElementById("artistName").textContent = album.artist;
+
+    // Render the track list on page load.
+    renderTrackList();
+
+    // Preload metadata for the first track only after page setup.
+    // This helps show duration once the real files are connected,
+    // without downloading every track immediately.
+    loadTrack(0);
+
+    // Reset play button because loadTrack only prepares the first track.
+    playPauseBtn.textContent = "Play";
+    playPauseBtn.setAttribute("aria-label", "Play");
+    isTrackLoaded = true;
+  </script>
+</body>
+</html>
