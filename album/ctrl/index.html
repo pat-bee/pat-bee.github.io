@@ -1,1 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Remote CTRL Operator — Pat Bɇɇ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
 
+  <style>
+    :root {
+      --pcb-green:        #1b4d35;
+      --pcb-green-dark:   #0e2e1e;
+      --pcb-green-light:  #24643f;
+      --trace:            #2a7a50;
+      --trace-bright:     #3aaa70;
+      --chip-body:        #2c2420;
+      --chip-edge:        #3d3028;
+      --chip-shadow:      #1a1410;
+      --pin-gold:         #c8972a;
+      --pin-gold-bright:  #e8b840;
+      --pin-gold-dim:     #8a6318;
+      --solder:           #d4c896;
+      --silkscreen:       rgba(255,255,255,0.55);
+      --text-on-chip:     #d0b888;
+      --text-on-chip-dim: #8a7455;
+      --text-on-chip-muted: rgba(208,184,136,0.6);
+      --copper-trace:     rgba(200,151,42,0.22);
+      --danger:           #e05030;
+      --radius-chip:      6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      background: var(--pcb-green-dark);
+      color: var(--text-on-chip);
+    }
+
+    /* ── PCB BACKGROUND ────────────────────────────────────── */
+    body {
+      position: relative;
+      overflow-x: hidden;
+      background:
+        /* Silkscreen component labels */
+        /* Horizontal trace lines */
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 39px,
+          rgba(42,122,80,0.18) 39px,
+          rgba(42,122,80,0.18) 40px
+        ),
+        /* Vertical trace lines */
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 39px,
+          rgba(42,122,80,0.18) 39px,
+          rgba(42,122,80,0.18) 40px
+        ),
+        /* Base PCB gradient */
+        linear-gradient(160deg, #1a4d32 0%, #0e2c1c 40%, #132a1c 70%, #0a2018 100%);
+    }
+
+    /* Solder dot grid overlay (via SVG data URI) */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(212,200,150,0.25) 1px, transparent 1px),
+        radial-gradient(circle, rgba(42,122,80,0.3) 2px, transparent 2px);
+      background-size: 40px 40px, 80px 80px;
+      background-position: 0 0, 20px 20px;
+      z-index: 0;
+    }
+
+    /* Copper trace decoration lines */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0%, transparent 12%, rgba(200,151,42,0.12) 12%, rgba(200,151,42,0.12) 12.4%, transparent 12.4%),
+        linear-gradient(90deg, transparent 0%, transparent 82%, rgba(200,151,42,0.1) 82%, rgba(200,151,42,0.1) 82.5%, transparent 82.5%),
+        linear-gradient(0deg, transparent 0%, transparent 8%, rgba(200,151,42,0.1) 8%, rgba(200,151,42,0.1) 8.3%, transparent 8.3%),
+        linear-gradient(0deg, transparent 0%, transparent 91%, rgba(200,151,42,0.1) 91%, rgba(200,151,42,0.1) 91.4%, transparent 91.4%);
+      z-index: 0;
+    }
+
+    /* ── PAGE SHELL ────────────────────────────────────────── */
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px 60px;
+      gap: 0;
+    }
+
+    /* Silkscreen corner labels like on a real PCB */
+    .pcb-label {
+      position: fixed;
+      font-size: 0.62rem;
+      color: var(--silkscreen);
+      letter-spacing: 0.12em;
+      font-family: 'Share Tech Mono', monospace;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .pcb-label.tl { top: 14px; left: 18px; }
+    .pcb-label.tr { top: 14px; right: 18px; text-align: right; }
+    .pcb-label.bl { bottom: 14px; left: 18px; }
+    .pcb-label.br { bottom: 14px; right: 18px; text-align: right; }
+
+    /* ── CHIP CARD ─────────────────────────────────────────── */
+    .chip-wrap {
+      position: relative;
+      width: min(520px, calc(100vw - 40px));
+    }
+
+    /* Gold pins left + right — the IC legs */
+    .pins-left,
+    .pins-right {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      z-index: 0;
+    }
+
+    .pins-left { right: 100%; padding-right: 0; }
+    .pins-right { left: 100%; padding-left: 0; }
+
+    .pin {
+      width: 28px;
+      height: 10px;
+      background: linear-gradient(90deg, var(--pin-gold-dim) 0%, var(--pin-gold) 40%, var(--pin-gold-bright) 60%, var(--pin-gold) 80%, var(--pin-gold-dim) 100%);
+      margin: 3px 0;
+      position: relative;
+    }
+
+    .pins-left .pin {
+      border-radius: 2px 0 0 2px;
+      box-shadow: -2px 0 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+
+    .pins-right .pin {
+      border-radius: 0 2px 2px 0;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+
+    /* Solder pad at pin tips */
+    .pin::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      background: var(--solder);
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(212,200,150,0.5);
+    }
+
+    .pins-left .pin::after { left: -3px; }
+    .pins-right .pin::after { right: -3px; }
+
+    /* Active pin glow when playing */
+    .chip-wrap.is-playing .pin:nth-child(odd) {
+      animation: pin-glow 1.8s ease-in-out infinite alternate;
+    }
+
+    .chip-wrap.is-playing .pin:nth-child(even) {
+      animation: pin-glow 1.8s ease-in-out 0.9s infinite alternate;
+    }
+
+    @keyframes pin-glow {
+      from { background: linear-gradient(90deg, var(--pin-gold-dim) 0%, var(--pin-gold) 50%, var(--pin-gold-dim) 100%); }
+      to   { background: linear-gradient(90deg, var(--pin-gold) 0%, var(--pin-gold-bright) 50%, var(--pin-gold) 100%);
+             box-shadow: 0 0 8px rgba(200,151,42,0.6); }
+    }
+
+    /* The chip body itself */
+    .chip-body {
+      position: relative;
+      z-index: 1;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.03) 0%, transparent 30%),
+        linear-gradient(180deg, #332820 0%, #2a1f18 50%, #241a14 100%);
+      border: 1px solid #4a3828;
+      border-radius: var(--radius-chip);
+      box-shadow:
+        0 0 0 1px #1a1008,
+        6px 6px 0 #1a1008,
+        0 24px 80px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      padding: 32px 28px 28px;
+      overflow: hidden;
+    }
+
+    /* Mounting holes — just like the real chip */
+    .chip-body::before {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0e0a06 60%, #1a1208 100%);
+      border: 1px solid #3a2c1c;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+      top: 16px;
+      left: 16px;
+    }
+
+    .chip-body::after {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0e0a06 60%, #1a1208 100%);
+      border: 1px solid #3a2c1c;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+      bottom: 16px;
+      right: 16px;
+    }
+
+    /* Second pair of mounting holes via extra elements */
+    .chip-hole-tr,
+    .chip-hole-bl {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0e0a06 60%, #1a1208 100%);
+      border: 1px solid #3a2c1c;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .chip-hole-tr { top: 16px; right: 16px; }
+    .chip-hole-bl { bottom: 16px; left: 16px; }
+
+    /* Subtle scan-line texture over chip */
+    .chip-scanlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.07) 3px,
+        rgba(0,0,0,0.07) 4px
+      );
+      border-radius: var(--radius-chip);
+    }
+
+    /* ── CHIP HEADER ───────────────────────────────────────── */
+    .chip-header {
+      text-align: center;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .chip-maker {
+      font-size: 0.64rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-on-chip-dim);
+      margin-bottom: 4px;
+    }
+
+    .chip-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(3rem, 12vw, 5.2rem);
+      letter-spacing: 0.08em;
+      line-height: 0.9;
+      color: var(--text-on-chip);
+      text-shadow:
+        0 0 30px rgba(200,151,42,0.3),
+        2px 2px 0 rgba(0,0,0,0.6);
+    }
+
+    .chip-logo {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--text-on-chip-dim);
+      margin-left: 4px;
+      vertical-align: super;
+    }
+
+    .chip-subtitle {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      color: var(--text-on-chip-dim);
+      line-height: 1.6;
+    }
+
+    .chip-subtitle span {
+      color: var(--text-on-chip);
+    }
+
+    /* Horizontal rule — etched line style */
+    .chip-rule {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,151,42,0.4) 20%, rgba(200,151,42,0.4) 80%, transparent);
+      margin: 20px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── ALBUM ART ─────────────────────────────────────────── */
+    .art-frame {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(200,151,42,0.3);
+      box-shadow:
+        0 0 0 3px #1e1610,
+        0 0 0 4px rgba(200,151,42,0.2),
+        0 8px 32px rgba(0,0,0,0.6);
+      background:
+        linear-gradient(135deg, #1e3828 0%, #0e2018 50%, #1a2e20 100%);
+      display: grid;
+      place-items: center;
+    }
+
+    .art-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Placeholder art — PCB / chip aesthetic */
+    .art-placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .art-placeholder-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .art-placeholder-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.4rem, 10vw, 4rem);
+      color: rgba(200,151,42,0.7);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 20px rgba(200,151,42,0.3);
+    }
+
+    .art-placeholder-sub {
+      font-size: 0.7rem;
+      color: rgba(200,151,42,0.35);
+      letter-spacing: 0.2em;
+      margin-top: 6px;
+    }
+
+    /* PCB traces in the art placeholder */
+    .art-placeholder::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(42,122,80,0.15) 19px, rgba(42,122,80,0.15) 20px),
+        repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(42,122,80,0.15) 19px, rgba(42,122,80,0.15) 20px),
+        radial-gradient(circle, rgba(200,151,42,0.06) 2px, transparent 2px) 10px 10px / 20px 20px;
+    }
+
+    /* Equalizer bars overlay when playing */
+    .eq-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      padding: 0 20%;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 300ms;
+    }
+
+    .art-frame.is-playing .eq-overlay { opacity: 1; }
+
+    .eq-b {
+      flex: 1;
+      background: linear-gradient(0deg, rgba(200,151,42,0.8), rgba(200,151,42,0.2));
+      border-radius: 2px 2px 0 0;
+      min-height: 4px;
+      animation: eq-wave 0.5s ease infinite alternate;
+    }
+
+    .eq-b:nth-child(1) { animation-delay: 0.0s; }
+    .eq-b:nth-child(2) { animation-delay: 0.1s; }
+    .eq-b:nth-child(3) { animation-delay: 0.2s; }
+    .eq-b:nth-child(4) { animation-delay: 0.05s; }
+    .eq-b:nth-child(5) { animation-delay: 0.15s; }
+    .eq-b:nth-child(6) { animation-delay: 0.25s; }
+    .eq-b:nth-child(7) { animation-delay: 0.08s; }
+    .eq-b:nth-child(8) { animation-delay: 0.18s; }
+
+    @keyframes eq-wave {
+      from { height: 8%; }
+      to   { height: 80%; }
+    }
+
+    /* ── NOW PLAYING INFO ──────────────────────────────────── */
+    .track-info {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .track-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-on-chip-dim);
+      margin-bottom: 4px;
+    }
+
+    .track-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-on-chip);
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 20px rgba(200,151,42,0.25);
+    }
+
+    .track-artist {
+      margin-top: 5px;
+      font-size: 0.78rem;
+      color: var(--text-on-chip-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+
+    .badge-fmt {
+      color: rgba(200,151,42,0.9);
+      border-color: rgba(200,151,42,0.3);
+      background: rgba(200,151,42,0.08);
+    }
+
+    .badge-fmt.fallback {
+      color: rgba(80,180,120,0.9);
+      border-color: rgba(80,180,120,0.3);
+      background: rgba(80,180,120,0.08);
+    }
+
+    .badge-wake {
+      color: rgba(100,160,100,0.8);
+      border-color: rgba(100,160,100,0.25);
+      background: rgba(100,160,100,0.07);
+    }
+
+    .badge-wake.active {
+      color: rgba(58,170,112,1);
+      border-color: rgba(58,170,112,0.5);
+      background: rgba(58,170,112,0.12);
+      text-shadow: 0 0 8px rgba(58,170,112,0.4);
+    }
+
+    /* ── BUFFER BAR ────────────────────────────────────────── */
+    .buffer-wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 3px;
+      background: rgba(200,151,42,0.08);
+      margin: 18px 0 4px;
+    }
+
+    .buffer-fill {
+      height: 100%;
+      background: rgba(200,151,42,0.25);
+      width: 0%;
+      transition: width 500ms ease;
+    }
+
+    .buffer-fill.loading {
+      animation: buf-pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes buf-pulse {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ── PROGRESS ──────────────────────────────────────────── */
+    .progress-row {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 44px 1fr 44px;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--text-on-chip-dim);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-bar {
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background:
+        linear-gradient(90deg, rgba(200,151,42,0.6) 0%, rgba(200,151,42,0.3) 50%, rgba(100,160,80,0.2) 100%);
+      border: 1px solid rgba(200,151,42,0.22);
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    .progress-bar::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 20px;
+      background: var(--pin-gold);
+      border: 1px solid var(--pin-gold-bright);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(200,151,42,0.5);
+      cursor: pointer;
+    }
+
+    .progress-bar::-moz-range-thumb {
+      width: 14px;
+      height: 20px;
+      background: var(--pin-gold);
+      border: 1px solid var(--pin-gold-bright);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(200,151,42,0.5);
+      cursor: pointer;
+    }
+
+    /* ── VOLUME ────────────────────────────────────────────── */
+    .volume-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .vol-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-on-chip-dim);
+      min-width: 44px;
+    }
+
+    .volume-bar {
+      appearance: none;
+      flex: 1;
+      height: 5px;
+      background: linear-gradient(90deg, rgba(200,151,42,0.5), rgba(58,170,112,0.3));
+      border: 1px solid rgba(200,151,42,0.18);
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    .volume-bar::-webkit-slider-thumb {
+      appearance: none;
+      width: 11px;
+      height: 17px;
+      background: var(--pin-gold);
+      border: 1px solid var(--pin-gold-bright);
+      border-radius: 1px;
+      cursor: pointer;
+    }
+
+    .volume-bar::-moz-range-thumb {
+      width: 11px;
+      height: 17px;
+      background: var(--pin-gold);
+      border: 1px solid var(--pin-gold-bright);
+      border-radius: 1px;
+      cursor: pointer;
+    }
+
+    .vol-pct {
+      font-size: 0.65rem;
+      color: var(--text-on-chip-dim);
+      font-variant-numeric: tabular-nums;
+      min-width: 34px;
+      text-align: right;
+    }
+
+    /* ── CONTROLS ──────────────────────────────────────────── */
+    .controls {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .ctrl-btn {
+      border: 1px solid rgba(200,151,42,0.28);
+      background: rgba(200,151,42,0.06);
+      color: var(--text-on-chip);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0 18px;
+      min-height: 42px;
+      border-radius: 3px;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+      transition: background 150ms, border-color 150ms, box-shadow 150ms, transform 100ms;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(200,151,42,0.14);
+      border-color: rgba(200,151,42,0.6);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5), 0 0 12px rgba(200,151,42,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .ctrl-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+
+    .play-btn {
+      min-width: 110px;
+      background: rgba(200,151,42,0.16);
+      border-color: rgba(200,151,42,0.55);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .play-btn.is-loading {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .play-btn.is-loading::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(200,151,42,0.3);
+      border-top-color: var(--pin-gold);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    .repeat-btn {
+      font-size: 0.7rem;
+      padding: 0 14px;
+      min-width: 148px;
+    }
+
+    .repeat-btn[data-mode="song"] {
+      background: rgba(200,100,42,0.2);
+      border-color: rgba(200,100,42,0.5);
+      color: rgba(220,150,80,0.9);
+    }
+
+    .repeat-btn[data-mode="album"] {
+      background: rgba(58,170,112,0.15);
+      border-color: rgba(58,170,112,0.4);
+      color: rgba(80,200,130,0.9);
+    }
+
+    /* ── STATUS / ERROR ────────────────────────────────────── */
+    .status-line {
+      position: relative;
+      z-index: 2;
+      margin-top: 14px;
+      font-size: 0.66rem;
+      color: var(--text-on-chip-dim);
+      line-height: 1.5;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    .error-line {
+      position: relative;
+      z-index: 2;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      color: var(--danger);
+      display: none;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .error-line.show { display: block; }
+
+    /* ── KBD HINTS ─────────────────────────────────────────── */
+    .kbd-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .kbd-hint { font-size: 0.6rem; color: var(--text-on-chip-dim); }
+    kbd {
+      display: inline-block;
+      padding: 0 4px;
+      border: 1px solid rgba(200,151,42,0.25);
+      border-radius: 2px;
+      background: rgba(200,151,42,0.06);
+      font-size: 0.6rem;
+      font-family: inherit;
+      color: rgba(200,151,42,0.6);
+    }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    .page-footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 28px;
+      text-align: center;
+    }
+
+    .page-footer a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.76rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--silkscreen);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 2px;
+      transition: color 200ms, border-color 200ms;
+    }
+
+    .page-footer a:hover {
+      color: var(--pin-gold-bright);
+      border-color: rgba(200,151,42,0.5);
+    }
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .pins-left, .pins-right { display: none; }
+      .chip-body { padding: 24px 18px 20px; }
+      .kbd-row { display: none; }
+      .chip-title { font-size: clamp(2.8rem, 18vw, 4.5rem); }
+    }
+
+    audio {
+      position: fixed;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- PCB silkscreen labels -->
+  <span class="pcb-label tl">REV 2023-B<br/>MIX PCB</span>
+  <span class="pcb-label tr">C32 C33 C34<br/>U12 U19</span>
+  <span class="pcb-label bl">C10 C11<br/>GND</span>
+  <span class="pcb-label br">VCC 3.3V<br/>© PAT BEE</span>
+
+  <main class="page-shell">
+
+    <div class="chip-wrap" id="chipWrap">
+
+      <!-- IC Pins — left side (10 pins) -->
+      <div class="pins-left" aria-hidden="true">
+        <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+        <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+        <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+        <div class="pin"></div>
+      </div>
+
+      <!-- IC Pins — right side (10 pins) -->
+      <div class="pins-right" aria-hidden="true">
+        <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+        <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+        <div class="pin"></div><div class="pin"></div><div class="pin"></div>
+        <div class="pin"></div>
+      </div>
+
+      <!-- The chip body -->
+      <div class="chip-body">
+        <div class="chip-scanlines" aria-hidden="true"></div>
+        <div class="chip-hole-tr" aria-hidden="true"></div>
+        <div class="chip-hole-bl" aria-hidden="true"></div>
+
+        <!-- Header / chip print -->
+        <div class="chip-header">
+          <p class="chip-maker">Remote · Operator · 2023 &amp; Me MIX</p>
+          <div class="chip-title">Remote CTRL Operator<span class="chip-logo">∅</span></div>
+          <p class="chip-subtitle"><span>Pat Bɇɇ</span></p>
+        </div>
+
+        <div class="chip-rule"></div>
+
+        <!-- Album Art -->
+        <div class="art-frame" id="artFrame">
+          <!--
+            ALBUM ART CONNECTION POINT
+            Replace the placeholder div below with:
+            <img src="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/ctrl-cover.jpg" alt="CTRL cover art" />
+          -->
+          <div class="art-placeholder">
+            <div class="art-placeholder-inner">
+              <div class="art-placeholder-title">Remote CTRL Operator</div>
+              <div class="art-placeholder-sub">Replace with album art URL</div>
+            </div>
+          </div>
+          <div class="eq-overlay" id="eqOverlay" aria-hidden="true">
+            <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+            <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+            <div class="eq-b"></div><div class="eq-b"></div>
+          </div>
+        </div>
+
+        <!-- Track info -->
+        <div class="track-info">
+          <div class="track-label">Now Playing</div>
+          <div class="track-name" id="trackName" aria-live="polite">Remote CTRL Operator</div>
+          <div class="track-artist">Pat Bɇɇ</div>
+          <div class="meta-row">
+            <span class="badge badge-fmt" id="fmtBadge">FLAC</span>
+            <span class="badge badge-wake" id="wakeBadge">⬤ Background</span>
+          </div>
+        </div>
+
+        <!-- Buffer indicator -->
+        <div class="buffer-wrap" aria-hidden="true">
+          <div class="buffer-fill" id="bufFill"></div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-row">
+          <span id="curTime">0:00</span>
+          <input
+            id="progressBar"
+            class="progress-bar"
+            type="range"
+            min="0" max="100" value="0" step="0.1"
+            aria-label="Track progress"
+          />
+          <span id="durTime">0:00</span>
+        </div>
+
+        <!-- Volume -->
+        <div class="volume-row">
+          <span class="vol-label">Vol</span>
+          <input id="volBar" class="volume-bar" type="range" min="0" max="100" value="100" step="1" aria-label="Volume" />
+          <span class="vol-pct" id="volPct">100%</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls" aria-label="Player controls">
+          <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play">▶ Play</button>
+          <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button" data-mode="off" aria-label="Repeat: Off">↺ Repeat: Off</button>
+        </div>
+
+        <!-- Keyboard hints -->
+        <div class="kbd-row" aria-hidden="true">
+          <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
+          <span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd> Seek 10s</span>
+          <span class="kbd-hint"><kbd>↑</kbd><kbd>↓</kbd> Volume</span>
+          <span class="kbd-hint"><kbd>M</kbd> Mute</span>
+        </div>
+
+        <p class="status-line">Tap Play to begin. Background playback active after first tap.</p>
+        <p class="error-line" id="errLine"></p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <a
+        href="https://www.instagram.com/patbee.music/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Pat Bee on Instagram"
+      >Pat Bee</a>
+    </footer>
+
+  </main>
+
+  <audio id="audioEl" preload="metadata" playsinline x-webkit-airplay="allow"></audio>
+
+  <script>
+    /***********************************************************************
+     * SONG CONFIGURATION
+     * Replace the placeholder URLs with your real hosted file URLs.
+     ***********************************************************************/
+    const song = {
+      title:    "Remote CTRL Operator",
+      artist:   "Pat Bɇɇ",
+      album:    "Remote CTRL Operator",
+      artwork:  "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/ctrl-cover.jpg",
+      flac:     "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/R3M0T3-Ctrl_118_BPM.flac",
+      fallback: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev//R3M0T3-Ctrl_118_BPM.m4a"
+    };
+
+    /***********************************************************************
+     * DOM
+     ***********************************************************************/
+    const audio     = document.getElementById("audioEl");
+    const playBtn   = document.getElementById("playBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const progBar   = document.getElementById("progressBar");
+    const curTimeEl = document.getElementById("curTime");
+    const durTimeEl = document.getElementById("durTime");
+    const bufFill   = document.getElementById("bufFill");
+    const volBar    = document.getElementById("volBar");
+    const volPctEl  = document.getElementById("volPct");
+    const fmtBadge  = document.getElementById("fmtBadge");
+    const wakeBadge = document.getElementById("wakeBadge");
+    const errLine   = document.getElementById("errLine");
+    const artFrame  = document.getElementById("artFrame");
+    const chipWrap  = document.getElementById("chipWrap");
+
+    /***********************************************************************
+     * STATE
+     ***********************************************************************/
+    let loaded       = false;
+    let usedFallback = false;
+    let isSeeking    = false;
+    let repeatMode   = "off"; // "off" | "song"
+    let wakeLock     = null;
+
+    /***********************************************************************
+     * FORMAT DETECTION
+     ***********************************************************************/
+    const flacOk = (() => {
+      const p = document.createElement("audio");
+      return p.canPlayType && (p.canPlayType("audio/flac") !== "" || p.canPlayType("audio/x-flac") !== "");
+    })();
+
+    function getSrc(forceFallback = false) {
+      return (!forceFallback && flacOk) ? song.flac : song.fallback;
+    }
+
+    function setFmtBadge(isFlac) {
+      fmtBadge.textContent = isFlac ? "FLAC" : "AAC/MP3";
+      fmtBadge.className = "badge badge-fmt" + (isFlac ? "" : " fallback");
+    }
+
+    /***********************************************************************
+     * WAKE LOCK
+     ***********************************************************************/
+    async function acquireWake() {
+      if (!("wakeLock" in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        setWakeBadge(true);
+        wakeLock.addEventListener("release", () => {
+          setWakeBadge(false);
+          if (!audio.paused) acquireWake();
+        });
+      } catch (_) { setWakeBadge(false); }
+    }
+
+    async function dropWake() {
+      if (wakeLock) { try { await wakeLock.release(); } catch (_) {} wakeLock = null; }
+      setWakeBadge(false);
+    }
+
+    function setWakeBadge(on) {
+      wakeBadge.textContent = on ? "⬤ Wake Lock On" : "⬤ Background";
+      wakeBadge.classList.toggle("active", on);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) acquireWake();
+      // Never pause on visibility change
+    });
+
+    /***********************************************************************
+     * LOAD
+     ***********************************************************************/
+    function loadSrc(forceFallback = false) {
+      usedFallback = forceFallback;
+      const src = getSrc(forceFallback);
+      audio.src = src;
+      audio.preload = "auto";
+      audio.load();
+      setFmtBadge(flacOk && !forceFallback);
+      clearErr();
+    }
+
+    /***********************************************************************
+     * PLAYBACK
+     ***********************************************************************/
+    async function play(retry = false) {
+      setLoading(true);
+      try {
+        await audio.play();
+        loaded = true;
+        setLoading(false);
+        setPlaying(true);
+        await acquireWake();
+      } catch (e) {
+        setLoading(false);
+        if (e.name === "NotAllowedError") {
+          showErr("Tap Play to start — your browser requires a direct tap.");
+        } else if (!retry && !usedFallback) {
+          loadSrc(true);
+          await play(true);
+        } else {
+          showErr("Playback failed. Check that your audio URL is accessible.");
+        }
+      }
+    }
+
+    async function togglePlay() {
+      if (!loaded) { loadSrc(false); await play(); return; }
+      if (audio.paused) {
+        await play();
+      } else {
+        audio.pause();
+        setPlaying(false);
+        dropWake();
+      }
+    }
+
+    function setPlaying(on) {
+      playBtn.textContent = on ? "⏸ Pause" : "▶ Play";
+      playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
+      playBtn.classList.remove("is-loading");
+      artFrame.classList.toggle("is-playing", on);
+      chipWrap.classList.toggle("is-playing", on);
+    }
+
+    function setLoading(on) {
+      if (on) {
+        playBtn.innerHTML = "";
+        playBtn.classList.add("is-loading");
+        bufFill.classList.add("loading");
+      } else {
+        playBtn.classList.remove("is-loading");
+        bufFill.classList.remove("loading");
+      }
+    }
+
+    /***********************************************************************
+     * REPEAT
+     ***********************************************************************/
+    function cycleRepeat() {
+      repeatMode = repeatMode === "off" ? "song" : "off";
+      repeatBtn.dataset.mode = repeatMode;
+      repeatBtn.textContent = repeatMode === "song" ? "↺ Repeat: Song" : "↺ Repeat: Off";
+      repeatBtn.setAttribute("aria-label", `Repeat: ${repeatMode}`);
+    }
+
+    /***********************************************************************
+     * AUDIO EVENTS
+     ***********************************************************************/
+    audio.addEventListener("ended", () => {
+      if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); }
+      else { setPlaying(false); dropWake(); }
+    });
+
+    audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlaying(true); });
+    audio.addEventListener("waiting", () => { bufFill.classList.add("loading"); });
+    audio.addEventListener("pause",   () => { artFrame.classList.remove("is-playing"); chipWrap.classList.remove("is-playing"); });
+
+    // Stall recovery
+    let stallTimer;
+    audio.addEventListener("stalled", () => {
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => {
+        if (!audio.paused) {
+          const t = audio.currentTime;
+          audio.load(); audio.currentTime = t; audio.play().catch(() => {});
+        }
+      }, 5000);
+    });
+    audio.addEventListener("progress", () => clearTimeout(stallTimer));
+    audio.addEventListener("playing",  () => clearTimeout(stallTimer));
+
+    // Format fallback on error
+    audio.addEventListener("error", async () => {
+      if (!usedFallback) {
+        loadSrc(true);
+        try { await audio.play(); setPlaying(true); } catch (_) { showErr("Audio unavailable. Check your file URLs."); }
+      } else {
+        showErr("Audio failed to load. Ensure the URL is public and has the correct MIME type.");
+      }
+    });
+
+    /***********************************************************************
+     * PROGRESS
+     ***********************************************************************/
+    function fmt(s) {
+      if (!Number.isFinite(s) || s < 0) return "0:00";
+      return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+    }
+
+    audio.addEventListener("loadedmetadata", () => { durTimeEl.textContent = fmt(audio.duration); });
+
+    audio.addEventListener("timeupdate", () => {
+      if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return;
+      progBar.value = (audio.currentTime / audio.duration) * 100;
+      curTimeEl.textContent = fmt(audio.currentTime);
+      updateMediaPosition();
+    });
+
+    audio.addEventListener("progress", () => {
+      if (!audio.duration || !audio.buffered.length) return;
+      bufFill.style.width = `${(audio.buffered.end(audio.buffered.length - 1) / audio.duration) * 100}%`;
+    });
+
+    progBar.addEventListener("mousedown",  () => isSeeking = true);
+    progBar.addEventListener("touchstart", () => isSeeking = true, { passive: true });
+    progBar.addEventListener("input",  () => { if (audio.duration) curTimeEl.textContent = fmt((progBar.value / 100) * audio.duration); });
+    progBar.addEventListener("change", () => { if (audio.duration) audio.currentTime = (progBar.value / 100) * audio.duration; isSeeking = false; });
+    progBar.addEventListener("mouseup",  () => isSeeking = false);
+    progBar.addEventListener("touchend", () => isSeeking = false);
+
+    /***********************************************************************
+     * VOLUME
+     ***********************************************************************/
+    volBar.addEventListener("input", () => {
+      audio.volume = volBar.value / 100;
+      volPctEl.textContent = `${volBar.value}%`;
+    });
+
+    /***********************************************************************
+     * MEDIA SESSION
+     ***********************************************************************/
+    function initMediaSession() {
+      if (!("mediaSession" in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.title, artist: song.artist, album: song.album,
+        artwork: [
+          { src: song.artwork, sizes: "96x96",  type: "image/jpeg" },
+          { src: song.artwork, sizes: "512x512", type: "image/jpeg" }
+        ]
+      });
+      const h = {
+        play:         () => play(),
+        pause:        () => { audio.pause(); setPlaying(false); dropWake(); },
+        seekbackward: (e) => { audio.currentTime = Math.max(0, audio.currentTime - (e.seekOffset || 10)); },
+        seekforward:  (e) => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (e.seekOffset || 10)); },
+        seekto:       (e) => { audio.currentTime = e.seekTime; }
+      };
+      for (const [a, fn] of Object.entries(h)) {
+        try { navigator.mediaSession.setActionHandler(a, fn); } catch (_) {}
+      }
+    }
+
+    function updateMediaPosition() {
+      if (!("mediaSession" in navigator) || !Number.isFinite(audio.duration)) return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration,
+          playbackRate: audio.playbackRate,
+          position: audio.currentTime
+        });
+      } catch (_) {}
+    }
+
+    /***********************************************************************
+     * KEYBOARD
+     ***********************************************************************/
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT") return;
+      switch (e.key) {
+        case " ": case "MediaPlayPause": e.preventDefault(); togglePlay(); break;
+        case "ArrowRight": e.preventDefault(); audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10); break;
+        case "ArrowLeft":  e.preventDefault(); audio.currentTime = Math.max(0, audio.currentTime - 10); break;
+        case "ArrowUp":    e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); volBar.value = Math.round(audio.volume * 100); volPctEl.textContent = `${volBar.value}%`; break;
+        case "ArrowDown":  e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); volBar.value = Math.round(audio.volume * 100); volPctEl.textContent = `${volBar.value}%`; break;
+        case "r": case "R": cycleRepeat(); break;
+        case "m": case "M": audio.muted = !audio.muted; break;
+      }
+    });
+
+    /***********************************************************************
+     * ERROR HELPERS
+     ***********************************************************************/
+    function showErr(msg) { errLine.textContent = "⚠ " + msg; errLine.classList.add("show"); }
+    function clearErr()   { errLine.textContent = ""; errLine.classList.remove("show"); }
+
+    /***********************************************************************
+     * BUTTON LISTENERS
+     ***********************************************************************/
+    playBtn.addEventListener("click", togglePlay);
+    repeatBtn.addEventListener("click", cycleRepeat);
+
+    /***********************************************************************
+     * INIT
+     ***********************************************************************/
+    initMediaSession();
+    // Don't auto-load audio — wait for user tap (required for mobile autoplay policy)
+  </script>
+</body>
+</html>
