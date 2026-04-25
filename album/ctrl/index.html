@@ -279,6 +279,8 @@
       margin-bottom: 22px;
       position: relative;
       z-index: 2;
+      overflow: hidden;  /* ← ADD THIS */
+
     }
 
     .chip-maker {
@@ -292,7 +294,7 @@
     .chip-title {
       font-family: 'Orbitron', sans-serif;
       font-weight: 900;
-      font-size: clamp(1rem, 10cqi, 5.2rem);
+      font-size: clamp(0.6rem, 9cqi, 5.2rem);
       white-space: nowrap;
 
       letter-spacing: 0.08em;
@@ -306,7 +308,7 @@
     .chip-logo {
       display: inline-block;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 1.1rem;
+      font-size: 0.45em;
       color: var(--text-on-chip-dim);
       margin-left: 4px;
       vertical-align: super;
@@ -812,7 +814,6 @@
       .pins-left, .pins-right { display: none; }
       .chip-body { padding: 24px 18px 20px; container-type: inline-size;}
       .kbd-row { display: none; }
-      .chip-title { font-size: clamp(2.8rem, 18vw, 4.5rem); }
     }
 
     audio {
