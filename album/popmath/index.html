@@ -164,6 +164,7 @@
     /* ── MASTHEAD ──────────────────────────────────────────── */
     .masthead {
       container-type: inline-size;
+    overflow: hidden;              /* ← ADD THIS if not already there */
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: end;
@@ -174,6 +175,7 @@
       background: var(--bg-panel);
       position: relative;
       overflow: hidden;
+      
     }
 
     /* Measurement tick marks — IDM technical feel */
@@ -202,16 +204,19 @@
       margin-bottom: 6px;
     }
 
-    .masthead-title {
-      font-family: 'Syncopate', sans-serif;
-      font-weight: 700;
-      font-size: clamp(0.5rem, 14cqi, 3.8rem);
-      white-space: nowrap;
-      overflow: hidden;
-      line-height: 0.9;
-      letter-spacing: -0.01em;
-      color: var(--ink);
-    }
+.masthead-title {
+  font-family: 'Syncopate', sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.5rem, 11cqi, 3.8rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  /* Ensure the container establishes the cqi context */
+  max-width: 100%;
+}
 
     /* "Pop is Math" in pink — secondary title */
     .masthead-alt {
@@ -834,11 +839,18 @@
     }
 
     /* ── RESPONSIVE ────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      .page-shell { padding: 16px 12px 44px; }
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
+  @media (max-width: 640px) {
+  .masthead-title {
+    font-size: clamp(0.5rem, 13cqi, 3.8rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  .masthead-alt {
+    font-size: clamp(0.4rem, 4cqi, 0.9rem);
+    letter-spacing: 0.14em;
+  }
+}
       .col-art {
         border-right: none;
         border-bottom: 1.5px solid var(--border-strong);
