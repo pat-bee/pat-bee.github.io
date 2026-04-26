@@ -836,7 +836,7 @@
 
           <!-- Progress -->
           <div class="prog-row">
-            <span id="curTime">0:00</span>
+            <span id="cure">0:00</span>
             <input
               id="progBar"
               class="prog-bar"
@@ -844,7 +844,7 @@
               min="0" max="100" value="0" step="0.1"
               aria-label="Track progress"
             />
-            <span id="durTime">0:00</span>
+            <span id="dure">0:00</span>
           </div>
 
           <!-- Volume -->
@@ -942,8 +942,8 @@
     const nextBtn    = document.getElementById("nextBtn");
     const repeatBtn  = document.getElementById("repeatBtn");
     const progBar    = document.getElementById("progBar");
-    const curTimeEl  = document.getElementById("curTime");
-    const durTimeEl  = document.getElementById("durTime");
+    const cureEl  = document.getElementById("cure");
+    const dureEl  = document.getElementById("dure");
     const bufFill    = document.getElementById("bufFill");
     const volBar     = document.getElementById("volBar");
     const volPctEl   = document.getElementById("volPct");
@@ -1114,8 +1114,8 @@
     }
 
     function playPrev() {
-      if (audio.currentTime > 3 && isLoaded) {
-        audio.currentTime = 0;
+      if (audio.currente > 3 && isLoaded) {
+        audio.currente = 0;
       } else {
         playTrack(Math.max(0, currentIndex - 1));
       }
@@ -1168,7 +1168,7 @@
      * AUDIO EVENTS
      ***********************************************************************/
     audio.addEventListener("ended", () => {
-      if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+      if (repeatMode === "song") { audio.currente = 0; audio.play().catch(() => {}); return; }
       if (currentIndex < album.tracks.length - 1) { playTrack(currentIndex + 1); return; }
       if (repeatMode === "album") { playTrack(0); return; }
       setPlayState(false); dropWake();
@@ -1184,15 +1184,15 @@
     audio.addEventListener("play",    () => updateTrackUI());
 
     // Stall recovery
-    let stallTimer;
+    let staller;
     audio.addEventListener("stalled", () => {
-      clearTimeout(stallTimer);
-      stallTimer = setTimeout(() => {
+      cleareout(staller);
+      staller = seteout(() => {
         if (!audio.paused) {
-          const t = audio.currentTime;
-          audio.load(); audio.currentTime = t; audio.play().catch(() => {});
+          const t = audio.currente;
+          audio.load(); audio.currente = t; audio.play().catch(() => {});
         }
-      }, 5000);
+      }, 1500);
     });
     audio.addEventListener("progress", () => clearTimeout(stallTimer));
     audio.addEventListener("playing",  () => clearTimeout(stallTimer));
@@ -1229,7 +1229,40 @@
       curTimeEl.textContent = fmt(audio.currentTime);
       updateMediaPosition();
     });
+/* ── BUFFER HEALTH MONITOR ──────────────────────────────────
+   Checks every 2 seconds whether the buffer is running thin.
+   If playback is within DANGER_SECONDS of the buffer edge,
+   pauses to let it refill, then auto-resumes.
+   Adjust DANGER_SECONDS up if dropouts still occur.
+─────────────────────────────────────────────────────────── */
+const DANGER_SECONDS = 8; // pause to rebuffer if < 8s ahead
+let isRebuffering = false;
 
+setInterval(() => {
+  if (audio.paused || !audio.duration || !audio.buffered.length) return;
+
+  const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+  const aheadSeconds = bufferedEnd - audio.currentTime;
+
+  if (aheadSeconds < DANGER_SECONDS && !isRebuffering) {
+    isRebuffering = true;
+    audio.pause();
+    bufFill.classList.add("loading");
+    console.log(`Rebuffering — only ${aheadSeconds.toFixed(1)}s ahead`);
+
+    /* Resume once we have a comfortable buffer */
+    const waitForBuffer = setInterval(() => {
+      if (!audio.buffered.length) return;
+      const refilled = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+      if (refilled >= DANGER_SECONDS * 3) {
+        clearInterval(waitForBuffer);
+        isRebuffering = false;
+        bufFill.classList.remove("loading");
+        audio.play().catch(() => {});
+      }
+    }, 500);
+  }
+}, 2000);
     audio.addEventListener("progress", () => {
       if (!audio.duration || !audio.buffered.length) return;
       bufFill.style.width = `${(audio.buffered.end(audio.buffered.length - 1) / audio.duration) * 100}%`;
