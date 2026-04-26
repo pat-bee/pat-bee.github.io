@@ -163,7 +163,6 @@
 
     /* ── MASTHEAD ──────────────────────────────────────────── */
     .masthead {
-      container-type: inline-size;
     overflow: hidden;              /* ← ADD THIS if not already there */
       display: grid;
       grid-template-columns: 1fr auto;
@@ -194,7 +193,8 @@
       opacity: 0.4;
     }
 
-    .masthead-titles { min-width: 0; }
+    .masthead-titles { min-width: 0;   container-type: inline-size;  /* ← ADD THIS */
+ }
 
     .masthead-eyebrow {
       font-size: 0.6rem;
