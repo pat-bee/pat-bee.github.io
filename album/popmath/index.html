@@ -839,28 +839,48 @@
     }
 
     /* ── RESPONSIVE ────────────────────────────────────────── */
-  @media (max-width: 640px) {
-  .masthead-title {
-    font-size: clamp(0.5rem, 13cqi, 3.8rem);
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-  }
+/* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .page-shell { padding: 16px 12px 44px; }
 
-  .masthead-alt {
-    font-size: clamp(0.4rem, 4cqi, 0.9rem);
-    letter-spacing: 0.14em;
-  }
-}
+      .masthead-title {
+        font-size: clamp(0.5rem, 13cqi, 3.8rem);
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+      }
+
+      .masthead-alt {
+        font-size: clamp(0.4rem, 4cqi, 0.9rem);
+        letter-spacing: 0.14em;
+      }
+
+      .masthead-inner { grid-template-columns: 1fr; }
+      .masthead-artist { text-align: left; padding-top: 4px; }
+
+      .main-grid { grid-template-columns: 1fr; }
+
       .col-art {
         border-right: none;
         border-bottom: 1.5px solid var(--border-strong);
         padding: 16px;
       }
+
       .col-player { padding: 16px; }
+
       .art-wrap { max-width: 380px; margin: 0 auto; }
+
       .kbd-row { display: none; }
+
       .track-btn, .remix-row { grid-template-columns: 44px 1fr auto; }
+
       .track-num, .remix-icon-cell { min-width: 44px; }
+    }
+
+    audio {
+      position: fixed;
+      left: -9999px;
+      width: 1px; height: 1px;
+      opacity: 0; pointer-events: none;
     }
 
     audio {
