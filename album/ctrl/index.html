@@ -1145,7 +1145,7 @@
           const t = audio.currentTime;
           audio.load(); audio.currentTime = t; audio.play().catch(() => {});
         }
-      }, 5000);
+      }, 1500);
     });
     audio.addEventListener("progress", () => clearTimeout(stallTimer));
     audio.addEventListener("playing",  () => clearTimeout(stallTimer));
@@ -1176,7 +1176,40 @@
       curTimeEl.textContent = fmt(audio.currentTime);
       updateMediaPosition();
     });
+/* ── BUFFER HEALTH MONITOR ──────────────────────────────────
+   Checks every 2 seconds whether the buffer is running thin.
+   If playback is within DANGER_SECONDS of the buffer edge,
+   pauses to let it refill, then auto-resumes.
+   Adjust DANGER_SECONDS up if dropouts still occur.
+─────────────────────────────────────────────────────────── */
+const DANGER_SECONDS = 8; // pause to rebuffer if < 8s ahead
+let isRebuffering = false;
 
+setInterval(() => {
+  if (audio.paused || !audio.duration || !audio.buffered.length) return;
+
+  const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+  const aheadSeconds = bufferedEnd - audio.currentTime;
+
+  if (aheadSeconds < DANGER_SECONDS && !isRebuffering) {
+    isRebuffering = true;
+    audio.pause();
+    bufFill.classList.add("loading");
+    console.log(`Rebuffering — only ${aheadSeconds.toFixed(1)}s ahead`);
+
+    /* Resume once we have a comfortable buffer */
+    const waitForBuffer = setInterval(() => {
+      if (!audio.buffered.length) return;
+      const refilled = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+      if (refilled >= DANGER_SECONDS * 3) {
+        clearInterval(waitForBuffer);
+        isRebuffering = false;
+        bufFill.classList.remove("loading");
+        audio.play().catch(() => {});
+      }
+    }, 500);
+  }
+}, 2000);
     audio.addEventListener("progress", () => {
       if (!audio.duration || !audio.buffered.length) return;
       bufFill.style.width = `${(audio.buffered.end(audio.buffered.length - 1) / audio.duration) * 100}%`;
