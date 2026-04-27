@@ -1086,6 +1086,7 @@
 
     /* Update play button text and buffer bar during blob download */
     function showDownloadProgress(pct) {
+        if (pct === 0) bufFill.style.width = "0%";  
       /* Remove spinner, show text percentage instead */
       playBtn.classList.remove("is-loading");
       if (pct === 0) {
