@@ -178,26 +178,28 @@
       white-space: nowrap; align-self: start; padding-top: 8px;
     }
 
-    /* ── ANALYSIS INLINE — BPM + Key after Repeat button ────────
-       Hidden (display:none) until Essentia returns results.
-       Appears inline inside .controls, wraps gracefully on mobile.
+    /* ── ANALYSIS FOOTER — BPM + Key above footer link ──────────
+       Hidden until Essentia successfully detects values.
+       Only appears if analysis works with this song's audio.
     ────────────────────────────────────────────────────────── */
-    .analysis-inline {
-      display: none;          /* shown only when analysis succeeds */
+    .analysis-footer {
+      display: none;             /* revealed by JS when results arrive */
+      justify-content: center;
       align-items: center;
-      gap: 8px; flex-shrink: 0;
-      margin-left: 4px;
+      gap: 14px;
+      margin-top: 14px;
+      margin-bottom: -2px;       /* closes the gap to the footer link  */
     }
-    .ai-item { display: flex; align-items: baseline; gap: 5px; }
-    .ai-label {
+    .af-item { display: flex; align-items: baseline; gap: 6px; }
+    .af-label {
       font-family: 'Courier Prime', monospace; font-size: 0.44rem;
-      letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim);
+      letter-spacing: 0.26em; text-transform: uppercase; color: var(--text-dim);
     }
-    .ai-value {
+    .af-value {
       font-family: 'Electrolize', sans-serif; font-weight: 400;
-      font-size: 0.88rem; letter-spacing: 0.08em; color: var(--text);
+      font-size: 0.9rem; letter-spacing: 0.1em; color: var(--text-mid);
     }
-    .ai-dot { color: var(--text-dim); font-size: 0.72rem; line-height: 1; }
+    .af-dot { color: var(--text-dim); font-size: 0.7rem; line-height: 1; }
 
     /* ── MAIN GRID ─────────────────────────────────────────── */
     .main-grid {
@@ -558,18 +560,6 @@
             <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Next track">Next →</button>
             <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button" data-mode="off" aria-label="Repeat mode: off. Press to cycle." aria-pressed="false">↺ Repeat: Off</button>
 
-            <!-- BPM + Key — injected by Essentia worker, hidden until detected -->
-            <div class="analysis-inline" id="analysisInline" aria-live="polite" aria-label="Detected tempo and key">
-              <div class="ai-item">
-                <span class="ai-label" aria-hidden="true">BPM</span>
-                <span class="ai-value" id="bpmDisplay">—</span>
-              </div>
-              <span class="ai-dot" aria-hidden="true">·</span>
-              <div class="ai-item">
-                <span class="ai-label" aria-hidden="true">Key</span>
-                <span class="ai-value" id="notesDisplay">—</span>
-              </div>
-            </div>
           </div>
           <div class="kbd-row" aria-hidden="true">
             <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
@@ -589,6 +579,22 @@
         </div>
         <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
       </section>
+
+      <!-- ═══ ANALYSIS RESULTS — above footer, only if Essentia detects ══
+           display:none until worker/main-thread analysis succeeds.
+           bpmDisplay and notesDisplay IDs used by updateAnalysisDisplay().
+      ════════════════════════════════════════════════════════════════ -->
+      <div class="analysis-footer" id="analysisInline" aria-live="polite" aria-label="Detected tempo and key">
+        <div class="af-item">
+          <span class="af-label" aria-hidden="true">BPM</span>
+          <span class="af-value" id="bpmDisplay" aria-label="Detected tempo">—</span>
+        </div>
+        <span class="af-dot" aria-hidden="true">·</span>
+        <div class="af-item">
+          <span class="af-label" aria-hidden="true">Key</span>
+          <span class="af-value" id="notesDisplay" aria-label="Detected key">—</span>
+        </div>
+      </div>
 
       <footer class="page-footer">
         <a href="https://www.instagram.com/patbee.music/" target="_blank" rel="noopener noreferrer" aria-label="Pat Bee on Instagram (opens in new tab)">Pat Bee</a>
@@ -759,136 +765,112 @@
        CDN loaded inside the worker — main thread stays clean.
     ════════════════════════════════════════════════════════════ */
 
-    /* ── ESSENTIA WORKER — inline source ────────────────────────────
-       Step-by-step log messages let you debug in browser console.
-       All errors are caught and reported without affecting playback.
-       'degara' BPM method: faster than 'multifeature', equally
-       accurate on electronic music. sampleRate passed explicitly.
-    ─────────────────────────────────────────────────────────── */
-    const ESSENTIA_WORKER_SRC = `
-      let essentia = null;
+    /* ════════════════════════════════════════════════════════════
+       ESSENTIA.JS AUDIO ANALYSIS — BPM + KEY
+       ─────────────────────────────────────────────────────────
+       Approach: load Essentia.js via dynamic <script> tags into
+       the main page after first play. Runs on the main thread
+       with a 2-second start delay so music plays first.
 
-      async function loadEssentia() {
-        if (essentia) return true;
-        try {
-          self.postMessage({ type: 'log', msg: 'Loading Essentia scripts...' });
-          importScripts(
-            'https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.umd.js',
-            'https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.umd.js'
-          );
-          self.postMessage({ type: 'log', msg: 'Scripts loaded — initializing WASM...' });
-          const wasmModule = await EssentiaWASM();
-          self.postMessage({ type: 'log', msg: 'WASM ready — creating Essentia instance...' });
-          essentia = new Essentia(wasmModule);
-          self.postMessage({ type: 'log', msg: 'Essentia initialized OK' });
-          return true;
-        } catch(err) {
-          self.postMessage({ type: 'error', msg: 'Load failed: ' + String(err) });
-          return false;
-        }
-      }
+       Essentia WASM is 10-100x faster than pure JS DFT, so the
+       computation (~2-5s) completes quickly. The native audio
+       element runs independently of the main thread, so audio
+       is never interrupted.
 
-      self.onmessage = async function(e) {
-        if (e.data.type === 'preload') {
-          await loadEssentia();
-          return;
-        }
+       requestIdleCallback runs analysis during browser idle time
+       where available, minimising any frame rendering impact.
 
-        if (e.data.type === 'analyze') {
-          const { channelData, sampleRate } = e.data;
-          if (!(await loadEssentia())) return;
+       Results appear above the footer ONLY if detection succeeds.
+       If Essentia fails (network, codec, edge case), nothing
+       changes visually — no error, no placeholder, no noise.
 
-          self.postMessage({ type: 'log', msg: 'Analyzing ' + (channelData.byteLength / 4) + ' samples @ ' + sampleRate + 'Hz' });
+       Console logging at every step makes debugging easy:
+         [Essentia] Loading scripts...
+         [Essentia] Ready
+         [Essentia] BPM: 96
+         [Essentia] Key: C# min (strength: 0.71)
+    ════════════════════════════════════════════════════════════ */
 
-          try {
-            const signal = essentia.arrayToVector(new Float32Array(channelData));
-            let bpm = null, key = null;
+    let essentiaInstance = null;
 
-            /* BPM */
-            try {
-              const rhythm = essentia.RhythmExtractor2013(signal, 208, 40, 'degara', sampleRate);
-              const raw = Math.round(rhythm.bpm);
-              if (raw >= 40 && raw <= 250) bpm = raw;
-              self.postMessage({ type: 'log', msg: 'BPM: ' + (bpm || 'out of range: ' + raw) });
-            } catch(bpmErr) {
-              self.postMessage({ type: 'log', msg: 'BPM error: ' + String(bpmErr) });
-            }
-
-            /* Key — pass sampleRate explicitly for accuracy */
-            try {
-              const kr = essentia.KeyExtractor(
-                signal, true, 4096, 4096, 12, 3500, 60, 25, 0.2, 'bgate',
-                sampleRate, 0.0001, 440, 'cosine', 'hann'
-              );
-              key = kr.key + ' ' + (kr.scale === 'major' ? 'maj' : 'min');
-              self.postMessage({ type: 'log', msg: 'Key: ' + key + ' (strength ' + kr.strength.toFixed(2) + ')' });
-            } catch(keyErr) {
-              self.postMessage({ type: 'log', msg: 'Key error: ' + String(keyErr) });
-            }
-
-            signal.delete();
-
-            if (bpm !== null || key !== null) {
-              self.postMessage({ type: 'result', bpm, key });
-            } else {
-              self.postMessage({ type: 'error', msg: 'Analysis produced no usable results' });
-            }
-          } catch(err) {
-            self.postMessage({ type: 'error', msg: 'Analysis error: ' + String(err) });
-          }
-        }
-      };
-    `;
-
-    let essentiaWorker = null;
-
-    /* Create worker once, reuse across tracks */
-    function getEssentiaWorker() {
-      if (essentiaWorker) return essentiaWorker;
-
-      const blob = new Blob([ESSENTIA_WORKER_SRC], { type: 'application/javascript' });
-      const workerUrl = URL.createObjectURL(blob);
-      essentiaWorker = new Worker(workerUrl);
-      URL.revokeObjectURL(workerUrl);  /* release the blob URL immediately */
-
-      essentiaWorker.onmessage = function(e) {
-        const { type, bpm, key, msg } = e.data;
-        if      (type === 'result') { updateAnalysisDisplay(bpm, key); }
-        else if (type === 'error')  { console.warn('[Essentia]', msg); }
-        else if (type === 'log')    { console.log('[Essentia Worker]', msg); }
-      };
-
-      essentiaWorker.onerror = function(err) {
-        console.warn('[Essentia] Worker runtime error:', err.message);
-      };
-
-      return essentiaWorker;
+    /* Dynamically append a <script> tag and wait for it to load */
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        /* Don't double-load the same URL */
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload  = resolve;
+        s.onerror = () => reject(new Error('Script load failed: ' + src));
+        document.head.appendChild(s);
+      });
     }
 
-    /* Decode blob → PCM → transfer to Essentia worker.
-       Called after audio.play() starts — music plays first.
-       Zero-copy ArrayBuffer transfer: main thread yields ownership. */
+    /* Load Essentia from CDN the first time it's needed, cache the instance */
+    async function getEssentia() {
+      if (essentiaInstance) return essentiaInstance;
+      console.log('[Essentia] Loading scripts from CDN...');
+      await loadScript('https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.umd.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.umd.js');
+      console.log('[Essentia] Initializing WASM...');
+      const wasm = await EssentiaWASM();
+      essentiaInstance = new Essentia(wasm);
+      console.log('[Essentia] Ready');
+      return essentiaInstance;
+    }
+
+    /* Called after audio.play() starts.
+       2-second delay lets the audio start cleanly before analysis begins.
+       requestIdleCallback keeps it from competing with frame rendering. */
     function analyzeAudio(audioBlob) {
-      audioBlob.arrayBuffer()
-        .then(buffer => {
-          /* Decode to raw PCM in main thread.
-             AudioContext is created + closed immediately — no output. */
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          return audioCtx.decodeAudioData(buffer).then(decoded => {
-            audioCtx.close();
-            const ch = decoded.getChannelData(0);
-            const worker = getEssentiaWorker();
-            worker.postMessage(
-              { type: 'analyze', channelData: ch.buffer, sampleRate: decoded.sampleRate },
-              [ch.buffer]           /* transfer — zero-copy */
+      const run = async () => {
+        try {
+          const essentia  = await getEssentia();
+          const buffer    = await audioBlob.arrayBuffer();
+          const audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+          const decoded   = await audioCtx.decodeAudioData(buffer);
+          audioCtx.close();
+          console.log('[Essentia] Decoded:', decoded.duration.toFixed(1), 's @', decoded.sampleRate, 'Hz');
+
+          const signal = essentia.arrayToVector(decoded.getChannelData(0));
+          let bpm = null, key = null;
+
+          /* BPM — RhythmExtractor2013, degara method (fast + accurate) */
+          try {
+            const rhythm = essentia.RhythmExtractor2013(signal, 208, 40, 'degara', decoded.sampleRate);
+            const raw = Math.round(rhythm.bpm);
+            bpm = (raw >= 40 && raw <= 250) ? raw : null;
+            console.log('[Essentia] BPM:', bpm !== null ? bpm : 'out of range (' + raw + ')');
+          } catch(e) { console.warn('[Essentia] BPM error:', e.message || e); }
+
+          /* Key — Krumhansl-Schmuckler, sampleRate passed explicitly */
+          try {
+            const kr = essentia.KeyExtractor(
+              signal, true, 4096, 4096, 12, 3500, 60, 25, 0.2, 'bgate',
+              decoded.sampleRate, 0.0001, 440, 'cosine', 'hann'
             );
-          });
-        })
-        .catch(err => console.warn('[Essentia] Decode failed:', err));
+            key = kr.key + ' ' + (kr.scale === 'major' ? 'maj' : 'min');
+            console.log('[Essentia] Key:', key, '(strength:', kr.strength.toFixed(2) + ')');
+          } catch(e) { console.warn('[Essentia] Key error:', e.message || e); }
+
+          signal.delete();  /* free WASM memory */
+
+          if (bpm !== null || key) updateAnalysisDisplay(bpm, key);
+        } catch(err) {
+          console.warn('[Essentia] Analysis failed:', err.message || err);
+        }
+      };
+
+      setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(run, { timeout: 15000 });
+        } else {
+          run();
+        }
+      }, 2000);
     }
 
-    /* Called by worker when analysis completes.
-       Shows the inline BPM/Key element only if we have real values.  */
+    /* Reveal the analysis-footer element only when we have real values */
     function updateAnalysisDisplay(bpm, key) {
       const inlineEl = document.getElementById('analysisInline');
       const bpmEl    = document.getElementById('bpmDisplay');
@@ -906,12 +888,9 @@
         hasData = true;
       }
 
-      /* Only reveal the element if we actually have something to show */
-      if (hasData && inlineEl) {
-        inlineEl.style.display = 'flex';
-      }
+      /* Only reveal if we have at least one value */
+      if (hasData && inlineEl) inlineEl.style.display = 'flex';
     }
-
 
     /* ════════════════════════════════════════════════════════════
        FORMAT DETECTION
@@ -1474,11 +1453,7 @@
       setPlayState(false);
       updateFmtBadge(flacOk);
 
-      /* Preload Essentia WASM in the background while user reads the page.
-         By the time they tap Play and the blob downloads, WASM is ready.  */
-      if (USE_BLOB_LOADING && typeof Worker !== "undefined") {
-        setTimeout(() => getEssentiaWorker(), 500);
-      }
+      /* Essentia loads dynamically on first play — nothing to preload here */
     }
 
     init();
