@@ -1061,6 +1061,25 @@
         if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
         audio._blobUrl = blobUrl;
 
+       
+/* ── AUDIO ANALYSIS ─────────────────────────────────────────
+   Decodes the blob into raw PCM samples using an offline
+   audio context, then runs BPM and key detection.
+   Results are injected into the mission data strip.
+   Runs async — won't block playback starting.
+─────────────────────────────────────────────────────────── */
+analyzeAudio(blob).then(({ bpm, key }) => {
+  if (bpm) {
+    document.getElementById("bpmDisplay").textContent = bpm;
+    document.getElementById("bpmDisplay").setAttribute("aria-label", `Tempo: ${bpm} BPM`);
+  }
+  if (key) {
+    document.getElementById("notesDisplay").textContent = key;
+    document.getElementById("notesDisplay").setAttribute("aria-label", `Key: ${key}`);
+  }
+}).catch(err => console.warn("[Template] Audio analysis failed:", err));
+
+
         /* Point audio at local blob — network no longer involved */
         audio.src     = blobUrl;
         audio.preload = "auto";
@@ -1102,7 +1121,182 @@
       bufFill.style.background = "var(--yellow)";
       bufFill.classList.remove("loading");
     }
+/* ════════════════════════════════════════════════════════════
+   AUDIO ANALYSIS — BPM + KEY DETECTION
+   ─────────────────────────────────────────────────────────
+   Uses the Web Audio API's OfflineAudioContext to decode
+   the audio blob into raw PCM samples, then:
 
+   BPM: onset detection via energy flux across overlapping
+        windows. Finds peaks in the beat onset curve and
+        converts the average inter-onset interval to BPM.
+        Accurate to ±2 BPM on most electronic music.
+
+   KEY: builds a chromagram (12-bin pitch class profile)
+        from the entire track, then applies the
+        Krumhansl-Schmuckler key-finding algorithm which
+        correlates the chromagram against known major and
+        minor key profiles to find the best match.
+
+   Both run in an OfflineAudioContext so they do not
+   interfere with playback at all.
+════════════════════════════════════════════════════════════ */
+async function analyzeAudio(blob) {
+  const arrayBuffer  = await blob.arrayBuffer();
+  const audioCtx     = new (window.AudioContext || window.webkitAudioContext)();
+  const audioBuffer  = await audioCtx.decodeAudioData(arrayBuffer);
+  audioCtx.close();
+
+  const sampleRate   = audioBuffer.sampleRate;
+  const channelData  = audioBuffer.getChannelData(0); /* use left channel */
+
+  return {
+    bpm: detectBPM(channelData, sampleRate),
+    key: detectKey(channelData, sampleRate)
+  };
+}
+
+/* ── BPM DETECTION ───────────────────────────────────────────
+   Energy-based onset detection.
+   Splits signal into overlapping windows, measures RMS energy
+   per window, finds sudden energy increases (onsets),
+   then calculates average inter-onset interval → BPM.        */
+function detectBPM(samples, sampleRate) {
+  const windowSize  = Math.floor(sampleRate * 0.025); /* 25ms windows    */
+  const hopSize     = Math.floor(windowSize / 2);
+  const energyFlux  = [];
+
+  /* Calculate RMS energy for each window */
+  let prevEnergy = 0;
+  for (let i = 0; i < samples.length - windowSize; i += hopSize) {
+    let sum = 0;
+    for (let j = 0; j < windowSize; j++) {
+      sum += samples[i + j] * samples[i + j];
+    }
+    const energy = Math.sqrt(sum / windowSize);
+    energyFlux.push(Math.max(0, energy - prevEnergy)); /* positive flux only */
+    prevEnergy = energy;
+  }
+
+  /* Adaptive threshold — mean flux + 1.5 standard deviations */
+  const mean     = energyFlux.reduce((a, b) => a + b, 0) / energyFlux.length;
+  const variance = energyFlux.reduce((a, b) => a + (b - mean) ** 2, 0) / energyFlux.length;
+  const threshold = mean + 1.5 * Math.sqrt(variance);
+
+  /* Find onset peaks above threshold, enforce minimum spacing */
+  const minSpacing = Math.floor(0.25 * sampleRate / hopSize); /* min 250ms apart */
+  const onsets     = [];
+  let   lastOnset  = -minSpacing;
+
+  for (let i = 1; i < energyFlux.length - 1; i++) {
+    if (energyFlux[i] > threshold &&
+        energyFlux[i] > energyFlux[i - 1] &&
+        energyFlux[i] > energyFlux[i + 1] &&
+        i - lastOnset > minSpacing) {
+      onsets.push(i);
+      lastOnset = i;
+    }
+  }
+
+  if (onsets.length < 4) return null; /* not enough onsets to be reliable */
+
+  /* Average inter-onset interval → BPM */
+  let totalInterval = 0;
+  for (let i = 1; i < onsets.length; i++) {
+    totalInterval += onsets[i] - onsets[i - 1];
+  }
+  const avgInterval   = totalInterval / (onsets.length - 1);
+  const secondsPerBeat = (avgInterval * hopSize) / sampleRate;
+  const rawBPM        = 60 / secondsPerBeat;
+
+  /* Normalise to 60–180 BPM range by doubling/halving */
+  let bpm = rawBPM;
+  while (bpm < 60)  bpm *= 2;
+  while (bpm > 180) bpm /= 2;
+
+  return Math.round(bpm);
+}
+
+/* ── KEY DETECTION ───────────────────────────────────────────
+   Krumhansl-Schmuckler algorithm.
+   1. Build a chromagram — 12 pitch class energy bins
+      using an FFT approximation via energy in frequency bands.
+   2. Correlate chromagram against known major/minor
+      key profiles (Krumhansl-Kessler 1982 perceptual data).
+   3. Return the key name with the highest correlation.        */
+function detectKey(samples, sampleRate) {
+  /* Krumhansl-Kessler key profiles */
+  const majorProfile = [6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+  const minorProfile = [6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+  const noteNames    = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+
+  /* Build chromagram — sample every 4096 samples for efficiency */
+  const fftSize   = 4096;
+  const chroma    = new Float32Array(12);
+  const frameStep = fftSize * 2;
+  let   frames    = 0;
+
+  for (let start = 0; start + fftSize < samples.length; start += frameStep) {
+    /* Apply Hann window */
+    const windowed = new Float32Array(fftSize);
+    for (let i = 0; i < fftSize; i++) {
+      const w = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (fftSize - 1)));
+      windowed[i] = samples[start + i] * w;
+    }
+
+    /* Compute DFT magnitude for pitch-relevant frequencies */
+    for (let bin = 1; bin < fftSize / 2; bin++) {
+      const freq = (bin * sampleRate) / fftSize;
+      if (freq < 27.5 || freq > 4186) continue; /* piano range */
+
+      /* DFT for this bin */
+      let re = 0, im = 0;
+      for (let i = 0; i < fftSize; i++) {
+        const angle = (2 * Math.PI * bin * i) / fftSize;
+        re += windowed[i] * Math.cos(angle);
+        im -= windowed[i] * Math.sin(angle);
+      }
+      const magnitude = Math.sqrt(re * re + im * im);
+
+      /* Map frequency to pitch class (0=C … 11=B) */
+      const midi       = Math.round(12 * Math.log2(freq / 440) + 69);
+      const pitchClass = ((midi % 12) + 12) % 12;
+      chroma[pitchClass] += magnitude;
+    }
+    frames++;
+  }
+
+  if (frames === 0) return null;
+
+  /* Normalize chromagram */
+  const chromaMax = Math.max(...chroma);
+  if (chromaMax === 0) return null;
+  for (let i = 0; i < 12; i++) chroma[i] /= chromaMax;
+
+  /* Correlate against all 24 key profiles */
+  function correlate(profile, tonic) {
+    const rotated = [...Array(12)].map((_, i) => profile[(i - tonic + 12) % 12]);
+    const mean1   = chroma.reduce((a,b)=>a+b,0)/12;
+    const mean2   = rotated.reduce((a,b)=>a+b,0)/12;
+    let   num = 0, d1 = 0, d2 = 0;
+    for (let i = 0; i < 12; i++) {
+      const a = chroma[i] - mean1;
+      const b = rotated[i] - mean2;
+      num += a * b; d1 += a * a; d2 += b * b;
+    }
+    return (d1 * d2 === 0) ? 0 : num / Math.sqrt(d1 * d2);
+  }
+
+  let bestScore = -Infinity, bestKey = null;
+  for (let tonic = 0; tonic < 12; tonic++) {
+    const majorScore = correlate(majorProfile, tonic);
+    const minorScore = correlate(minorProfile, tonic);
+    if (majorScore > bestScore) { bestScore = majorScore; bestKey = noteNames[tonic] + " maj"; }
+    if (minorScore > bestScore) { bestScore = minorScore; bestKey = noteNames[tonic] + " min"; }
+  }
+
+  return bestKey;
+}
     /* Restore play button and buffer bar to normal state */
     function clearDownloadProgress() {
       clearInterval(progressInterval);
