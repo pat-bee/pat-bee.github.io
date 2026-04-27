@@ -1262,7 +1262,10 @@
        REPEAT MODE — off → song → album → off
     ════════════════════════════════════════════════════════════ */
     function cycleRepeat() {
-      repeatMode = repeatMode==="off"?"song":repeatMode==="song"?"album":"off";
+      /* On single-track pages skip "album" mode — it's the same as "song" */
+      const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"];
+      const next  = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+      repeatMode  = next;
       const m = {
         off:  { l:"↺ Repeat: Off",   p:"false" },
         song: { l:"↺ Repeat: Song",  p:"true"  },
@@ -1452,6 +1455,13 @@
       updateMediaSession(album.tracks[0]);
       setPlayState(false);
       updateFmtBadge(flacOk);
+
+      /* Single-track pages: hide Prev and Next — they serve no purpose.
+         Multi-track pages (albums): buttons remain visible as normal.   */
+      if (album.tracks.length === 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
 
       /* Essentia loads dynamically on first play — nothing to preload here */
     }
