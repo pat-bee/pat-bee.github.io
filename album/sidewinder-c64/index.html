@@ -178,28 +178,6 @@
       white-space: nowrap; align-self: start; padding-top: 8px;
     }
 
-    /* ── ANALYSIS FOOTER — BPM + Key above footer link ──────────
-       Hidden until Essentia successfully detects values.
-       Only appears if analysis works with this song's audio.
-    ────────────────────────────────────────────────────────── */
-    .analysis-footer {
-      display: none;             /* revealed by JS when results arrive */
-      justify-content: center;
-      align-items: center;
-      gap: 14px;
-      margin-top: 14px;
-      margin-bottom: -2px;       /* closes the gap to the footer link  */
-    }
-    .af-item { display: flex; align-items: baseline; gap: 6px; }
-    .af-label {
-      font-family: 'Courier Prime', monospace; font-size: 0.44rem;
-      letter-spacing: 0.26em; text-transform: uppercase; color: var(--text-dim);
-    }
-    .af-value {
-      font-family: 'Electrolize', sans-serif; font-weight: 400;
-      font-size: 0.9rem; letter-spacing: 0.1em; color: var(--text-mid);
-    }
-    .af-dot { color: var(--text-dim); font-size: 0.7rem; line-height: 1; }
 
     /* ── MAIN GRID ─────────────────────────────────────────── */
     .main-grid {
@@ -579,16 +557,6 @@
         </div>
         <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
       </section>
-
-      <!-- ═══ ANALYSIS RESULTS — above footer, only if Essentia detects ══
-           display:none until worker/main-thread analysis succeeds.
-           bpmDisplay and notesDisplay IDs used by updateAnalysisDisplay().
-      ════════════════════════════════════════════════════════════════ -->
-      <div class="analysis-footer" id="analysisInline" aria-live="polite" aria-label="Detected tempo and key">
-        <div class="af-item">
-          <span class="af-label" aria-hidden="true">BPM</span>
-          <span class="af-value" id="bpmDisplay" aria-label="Detected tempo">—</span>
-        </div>
         <span class="af-dot" aria-hidden="true">·</span>
         <div class="af-item">
           <span class="af-label" aria-hidden="true">Key</span>
@@ -740,157 +708,806 @@
 
 
     /* ════════════════════════════════════════════════════════════
-       ESSENTIA.JS AUDIO ANALYSIS — BPM + KEY
-       ─────────────────────────────────────────────────────────
-       Runs entirely in a Web Worker — never blocks the UI or
-       interrupts playback. Music starts first; analysis updates
-       the strip as a background task.
-
-       FLOW:
-         1. Page loads → worker created → Essentia WASM preloads
-         2. User taps Play → blob downloads → audio.play() starts
-         3. Immediately after play: blob data sent to worker
-         4. Worker: runs RhythmExtractor2013 + KeyExtractor
-         5. Worker: posts { bpm, key } back to main thread
-         6. Main thread: updates BPM and Key in analysis strip
-
-       The preconnect in <head> makes the CDN faster on first tap.
-       The WASM preload in init() means it's ready by the time
-       the blob finishes downloading on most connections.
-
-       If Essentia fails for any reason the display shows "—"
-       and a warning is logged to console — no user-visible error.
-
-       Powered by Essentia.js v0.1.3 (Spotify / MTG Barcelona).
-       CDN loaded inside the worker — main thread stays clean.
+       FORMAT DETECTION
     ════════════════════════════════════════════════════════════ */
+    const flacOk = (() => {
+      const p = document.createElement("audio");
+      return !!(p.canPlayType && (
+        p.canPlayType("audio/flac") !== "" || p.canPlayType("audio/x-flac") !== ""
+      ));
+    })();
+
+    function getBestSrc(track, forceFallback = false) {
+      const useFlac = flacOk && !forceFallback;
+      return { src: useFlac ? track.flac : track.fallback, isFlac: useFlac };
+    }
+
+    function updateFmtBadge(isFlac) {
+      fmtBadge.textContent = isFlac ? "FLAC" : "AAC / MP3";
+      fmtBadge.className   = "badge badge-fmt" + (isFlac ? " badge-flac" : "");
+      fmtBadge.setAttribute("aria-label", `Format: ${isFlac ? "Lossless FLAC" : "AAC or MP3"}`);
+    }
+
 
     /* ════════════════════════════════════════════════════════════
-       ESSENTIA.JS AUDIO ANALYSIS — BPM + KEY
+       SCREEN WAKE LOCK
+       Prevents OS suspending the tab during playback.
+       NEVER pause audio on visibilitychange — that's the #1 cause
+       of background dropout. Only reacquire the wake lock.
+    ════════════════════════════════════════════════════════════ */
+    async function acquireWake() {
+      if (!("wakeLock" in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        setWakeBadge(true);
+        wakeLock.addEventListener("release", () => {
+          setWakeBadge(false);
+          if (!audio.paused) acquireWake();
+        });
+      } catch (_) { setWakeBadge(false); }
+    }
+    async function dropWake() {
+      if (wakeLock) { try { await wakeLock.release(); } catch(_){} wakeLock = null; }
+      setWakeBadge(false);
+    }
+    function setWakeBadge(on) {
+      wakeBadge.textContent = on ? "Wake Lock On" : "Background";
+      wakeBadge.classList.toggle("active", on);
+      wakeBadge.setAttribute("aria-label", `Background: ${on ? "wake lock active" : "standard"}`);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) acquireWake();
+    });
+
+
+    /* ════════════════════════════════════════════════════════════
+       ADAPTIVE AUDIO LOADER
        ─────────────────────────────────────────────────────────
-       Approach: load Essentia.js via dynamic <script> tags into
-       the main page after first play. Runs on the main thread
-       with a 2-second start delay so music plays first.
+       Starts playback BEFORE the full file downloads:
 
-       Essentia WASM is 10-100x faster than pure JS DFT, so the
-       computation (~2-5s) completes quickly. The native audio
-       element runs independently of the main thread, so audio
-       is never interrupted.
+       1. Check Network Information API for estimated speed.
+       2. Calculate a start threshold: minimum % downloaded
+          before audio can play without outpacing the download.
+          threshold = (audioDataRate / downloadRate) × 1.5 safety
+          Clamped to 15% min – 60% max.
+       3. Slow connection (<0.5 Mbps) falls back to HTML5 streaming.
+       4. Download streams in chunks. At threshold%, create a
+          partial blob:// URL and start audio.play() immediately.
+       5. Background download continues. Buffer bar shows progress.
+       6. Full blob stored as _fullBlobUrl when complete.
+       7. If partial blob runs out (stall/ended), upgradeToFullBlob()
+          swaps in the complete file at the same position.
 
-       requestIdleCallback runs analysis during browser idle time
-       where available, minimising any frame rendering impact.
-
-       Results appear above the footer ONLY if detection succeeds.
-       If Essentia fails (network, codec, edge case), nothing
-       changes visually — no error, no placeholder, no noise.
-
-       Console logging at every step makes debugging easy:
-         [Essentia] Loading scripts...
-         [Essentia] Ready
-         [Essentia] BPM: 96
-         [Essentia] Key: C# min (strength: 0.71)
+       Essentia removed — caused OOM kills on mobile phones.
+       The OS kills tabs that spike memory mid-playback.
     ════════════════════════════════════════════════════════════ */
 
-    let essentiaInstance = null;
+    function getConnectionInfo() {
+      const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      return {
+        downlink:      c?.downlink      ?? 10,    /* Mbps, default fast     */
+        effectiveType: c?.effectiveType ?? '4g'
+      };
+    }
 
-    /* Dynamically append a <script> tag and wait for it to load */
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        /* Don't double-load the same URL */
-        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload  = resolve;
-        s.onerror = () => reject(new Error('Script load failed: ' + src));
-        document.head.appendChild(s);
+    /* Returns fraction 0.15–0.60 at which playback can safely start,
+       or null if the connection is too slow for blob loading at all.  */
+    function calcStartThreshold(isFlac) {
+      const { downlink, effectiveType } = getConnectionInfo();
+      if (effectiveType === 'slow-2g' || downlink < 0.5) return null; /* stream instead */
+      const audioMbps = isFlac ? 0.9 : 0.25;
+      const raw = (audioMbps / downlink) * 1.5;
+      return Math.max(0.15, Math.min(0.60, raw));
+    }
+
+    /* Swap partial blob for the full download at the current position.
+       Called by stall + ended handlers when partial blob runs dry.    */
+    function upgradeToFullBlob() {
+      if (!audio._fullBlobUrl) return false;
+      const t = audio.currentTime;
+      const wasPlaying = !audio.paused;
+      console.log('[Template] Upgrading partial → full blob at', t.toFixed(1), 's');
+      if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
+      audio._blobUrl = audio._fullBlobUrl;
+      delete audio._fullBlobUrl;
+      audio.src = audio._blobUrl;
+      audio.preload = 'auto';
+      audio.load();
+      audio.addEventListener('loadedmetadata', function seek() {
+        audio.removeEventListener('loadedmetadata', seek);
+        audio.currentTime = t;
+        if (wasPlaying) audio.play().catch(() => {});
+      }, { once: true });
+      return true;
+    }
+
+    async function loadAndPlayAsBlob(index, forceFallback = false) {
+      const safeIdx         = Math.max(0, Math.min(index, album.tracks.length - 1));
+      const track           = album.tracks[safeIdx];
+      const { src, isFlac } = getBestSrc(track, forceFallback);
+
+      currentIndex = safeIdx; usedFallback = forceFallback || !isFlac; isLoaded = true;
+      npTitle.textContent = track.title;
+      updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(track);
+
+      /* Decide whether blob loading makes sense for this connection */
+      const startThreshold = calcStartThreshold(isFlac);
+      if (startThreshold === null) {
+        console.log('[Template] Slow connection — using streaming mode');
+        loadTrack(index, forceFallback);
+        try {
+          await waitForPrebuffer();
+          await audio.play(); setPlayState(true); await acquireWake();
+        } catch (e) { showErr('// Check connection and audio URLs'); }
+        return;
+      }
+
+      const controller   = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), BLOB_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(src, { signal: controller.signal, cache: 'default' });
+        clearTimeout(fetchTimeout);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const contentLength  = response.headers.get('content-length');
+        const total          = contentLength ? parseInt(contentLength, 10) : null;
+        const mimeType       = isFlac ? 'audio/flac' : 'audio/mp4';
+        const reader         = response.body.getReader();
+        const chunks         = [];
+        let received         = 0;
+        let playbackStarted  = false;
+
+        showDownloadProgress(0);
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.length;
+          const pct = total ? received / total : 0;
+
+          if (!playbackStarted) {
+            /* Show download % in play button before playback begins */
+            showDownloadProgress(total ? Math.round(pct * 100) : null);
+
+            if (pct >= startThreshold || (!total && received > 2_000_000)) {
+              /* Enough buffered — create partial blob and start playing */
+              playbackStarted = true;
+              const label = total ? `${Math.round(pct * 100)}%` : '~2MB';
+              console.log(`[Template] Starting playback at ${label} downloaded`);
+
+              const partialBlob = new Blob([...chunks], { type: mimeType });
+              const partialUrl  = URL.createObjectURL(partialBlob);
+              if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
+              audio._blobUrl = partialUrl;
+              audio.src = partialUrl;
+              audio.preload = 'auto';
+              audio.load();
+              clearDownloadProgress();
+              await audio.play();
+              setPlayState(true);
+              await acquireWake();
+            }
+          } else {
+            /* Playback is live — show background download in buf bar */
+            if (total) {
+              bufFill.style.background = 'var(--yellow, #b08a16)';
+              bufFill.style.width      = `${Math.round(pct * 100)}%`;
+            }
+          }
+        }
+
+        /* ── Full file received ─────────────────────────────── */
+        const fullBlob = new Blob(chunks, { type: mimeType });
+        const fullUrl  = URL.createObjectURL(fullBlob);
+
+        if (!playbackStarted) {
+          /* Edge case: file was small enough threshold never triggered */
+          if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
+          audio._blobUrl = fullUrl;
+          audio.src = fullUrl; audio.preload = 'auto'; audio.load();
+          clearDownloadProgress();
+          await audio.play(); setPlayState(true); await acquireWake();
+        } else {
+          /* Store full blob — upgradeToFullBlob() uses this if partial runs dry */
+          audio._fullBlobUrl = fullUrl;
+          /* Reset buffer bar */
+          setTimeout(() => {
+            bufFill.style.background = '';
+            bufFill.style.width = '0%';
+          }, 800);
+          console.log('[Template] Full download complete');
+        }
+
+      } catch (err) {
+        clearTimeout(fetchTimeout);
+        clearDownloadProgress();
+        if (!usedFallback && !forceFallback) {
+          console.warn('[Template] FLAC failed, retrying AAC:', err.message);
+          await loadAndPlayAsBlob(index, true); return;
+        }
+        /* Both blob attempts failed → HTML5 streaming fallback */
+        console.warn('[Template] Blob failed, streaming:', err.message);
+        showErr('// Streaming mode — blob unavailable');
+        setTimeout(() => clearErr(), 3500);
+        loadTrack(index, false);
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (e) { showErr('// Playback failed — check CORS and audio URLs'); }
+      }
+    }
+
+    /* Download % shown in play button before playback starts */
+    function showDownloadProgress(pct) {
+      if (pct === 0) bufFill.style.width = '0%';
+      playBtn.classList.remove('is-loading');
+      if (pct === null) {
+        playBtn.textContent = 'Buffering…';
+        playBtn.style.fontSize = '0.75rem';
+      } else {
+        playBtn.textContent = pct === 0 ? 'Loading…' : `${pct}%`;
+        playBtn.style.fontSize = pct === 0 ? '0.75rem' : '0.9rem';
+      }
+      playBtn.style.letterSpacing = '0.06em';
+      playBtn.setAttribute('aria-label', 'Loading audio…');
+      bufFill.style.width      = pct ? `${pct}%` : '0%';
+      bufFill.style.background = 'var(--yellow, #b08a16)';
+      bufFill.classList.remove('loading');
+    }
+
+    function clearDownloadProgress() {
+      playBtn.classList.remove('is-loading');
+      playBtn.style.fontSize = '';
+      playBtn.style.letterSpacing = '';
+      bufFill.style.background = '';
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       STREAMING MODE — pre-buffer gate + health monitor
+       Active only when USE_BLOB_LOADING = false, or as fallback.
+    ════════════════════════════════════════════════════════════ */
+    function waitForPrebuffer() {
+      return new Promise((resolve) => {
+        function check() {
+          if (!audio.duration || !audio.buffered.length) { requestAnimationFrame(check); return; }
+          const buffered = audio.buffered.end(audio.buffered.length - 1);
+          const target   = Math.min(MIN_PREBUFFER_SECONDS, audio.duration);
+          if (buffered >= target) {
+            resolve();
+          } else {
+            bufFill.style.width      = `${Math.round((buffered / audio.duration) * 100)}%`;
+            bufFill.style.background = "var(--yellow)";
+            requestAnimationFrame(check);
+          }
+        }
+        check();
       });
     }
 
-    /* Load Essentia from CDN the first time it's needed, cache the instance */
-    async function getEssentia() {
-      if (essentiaInstance) return essentiaInstance;
-      console.log('[Essentia] Loading scripts from CDN...');
-      await loadScript('https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.umd.js');
-      await loadScript('https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.umd.js');
-      console.log('[Essentia] Initializing WASM...');
-      const wasm = await EssentiaWASM();
-      essentiaInstance = new Essentia(wasm);
-      console.log('[Essentia] Ready');
-      return essentiaInstance;
+    /* Buffer health monitor — streaming mode only */
+    setInterval(() => {
+      if (USE_BLOB_LOADING) return;
+      if (audio.paused || !audio.duration || !audio.buffered.length) return;
+      const aheadSeconds = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+      if (aheadSeconds < DANGER_SECONDS && !isRebuffering) {
+        isRebuffering = true; audio.pause(); bufFill.classList.add("loading");
+        console.log(`[Template] Rebuffering — ${aheadSeconds.toFixed(1)}s ahead`);
+        const poll = setInterval(() => {
+          if (!audio.buffered.length) return;
+          const refilled = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+          if (refilled >= DANGER_SECONDS * 3) {
+            clearInterval(poll); isRebuffering = false;
+            bufFill.classList.remove("loading"); audio.play().catch(() => {});
+          }
+        }, 500);
+      }
+    }, 2000);
+
+
+    /* ════════════════════════════════════════════════════════════
+       TRACK LIST RENDERING
+    ════════════════════════════════════════════════════════════ */
+    function renderTracks() {
+      trackList.innerHTML = "";
+      const countEl = document.getElementById("trackCount");
+      if (countEl) countEl.textContent =
+        `${album.tracks.length} Target${album.tracks.length !== 1 ? "s" : ""}`;
+
+      album.tracks.forEach((track, i) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.className = "track-btn"; btn.type = "button";
+        btn.setAttribute("aria-current", "false");
+        btn.setAttribute("aria-label", `Track ${i+1}: ${track.title} by ${album.artist}`);
+        btn.innerHTML = `
+          <span class="track-num" aria-hidden="true">${String(i+1).padStart(2,"0")}</span>
+          <span class="track-info-col">
+            <span class="track-title-text">${track.title}</span>
+            <span class="track-meta-text">${album.artist}</span>
+          </span>
+          <span class="track-dur" aria-label="Duration: ${track.duration}">${track.duration}</span>
+        `;
+        btn.addEventListener("click", () => {
+          if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i);
+        });
+        li.appendChild(btn); trackList.appendChild(li);
+      });
+
+      const remixLi = document.createElement("li");
+      remixLi.innerHTML = `
+        <div class="remix-row" role="button" tabindex="0"
+          aria-label="Submit a remix — click to upload m4a or flac">
+          <input class="remix-file-input" type="file"
+            accept=".m4a,.flac,audio/flac,audio/x-flac,audio/mp4"
+            aria-label="Upload remix: m4a or flac" id="remixFileInput" />
+          <div class="remix-icon-cell" aria-hidden="true">
+            <img src="${ICON_DARK}" alt="" />
+          </div>
+          <div class="remix-info">
+            <span class="remix-title">Submit a Remix</span>
+            <span class="remix-sub">Upload m4a or flac</span>
+          </div>
+          <div class="remix-cta" aria-live="polite" id="remixCta">+ Add</div>
+        </div>
+      `;
+      trackList.appendChild(remixLi);
+
+      const toast = document.createElement("p");
+      toast.className = "upload-toast"; toast.setAttribute("aria-live", "polite");
+      trackList.parentElement.appendChild(toast);
+
+      document.getElementById("remixFileInput").addEventListener("change", function() {
+        const file = this.files[0]; if (!file) return;
+        const ctaEl = document.getElementById("remixCta");
+        const ext   = file.name.split(".").pop().toLowerCase();
+        if (!["m4a","flac"].includes(ext)) {
+          ctaEl.textContent = "REJECTED";
+          toast.textContent = "⚠ Only .m4a and .flac files accepted.";
+          toast.classList.add("show"); return;
+        }
+        ctaEl.textContent = "✓ RECEIVED";
+        toast.textContent = `// RECEIVED: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+        toast.classList.add("show");
+        if (REMIX_UPLOAD_ENDPOINT) {
+          const fd = new FormData(); fd.append("remix", file);
+          fetch(REMIX_UPLOAD_ENDPOINT, {method:"POST",body:fd})
+            .catch(err => { toast.textContent += " [UPLOAD FAILED]"; console.error(err); });
+        }
+        console.log("[Template] Remix:", file.name, file.size, "bytes");
+      });
     }
 
-    /* Called after audio.play() starts.
-       2-second delay lets the audio start cleanly before analysis begins.
-       requestIdleCallback keeps it from competing with frame rendering. */
-    function analyzeAudio(audioBlob) {
-      const run = async () => {
-        try {
-          const essentia  = await getEssentia();
-          const buffer    = await audioBlob.arrayBuffer();
-          const audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
-          const decoded   = await audioCtx.decodeAudioData(buffer);
-          audioCtx.close();
-          console.log('[Essentia] Decoded:', decoded.duration.toFixed(1), 's @', decoded.sampleRate, 'Hz');
+    function updateTrackUI() {
+      trackList.querySelectorAll(".track-btn").forEach((btn, i) => {
+        const isCurrent = i === currentIndex && isLoaded;
+        btn.setAttribute("aria-current", isCurrent ? "true" : "false");
+        btn.classList.toggle("is-playing", isCurrent && !audio.paused);
+        if (isCurrent) btn.setAttribute("aria-label",
+          `Track ${i+1}: ${album.tracks[i].title} — ${audio.paused?"paused":"now playing"}`);
+      });
+    }
 
-          const signal = essentia.arrayToVector(decoded.getChannelData(0));
-          let bpm = null, key = null;
 
-          /* BPM — RhythmExtractor2013, degara method (fast + accurate) */
-          try {
-            const rhythm = essentia.RhythmExtractor2013(signal, 208, 40, 'degara', decoded.sampleRate);
-            const raw = Math.round(rhythm.bpm);
-            bpm = (raw >= 40 && raw <= 250) ? raw : null;
-            console.log('[Essentia] BPM:', bpm !== null ? bpm : 'out of range (' + raw + ')');
-          } catch(e) { console.warn('[Essentia] BPM error:', e.message || e); }
+    /* ════════════════════════════════════════════════════════════
+       STREAMING MODE PLAYBACK (USE_BLOB_LOADING = false)
+    ════════════════════════════════════════════════════════════ */
+    function loadTrack(index, forceFallback = false) {
+      const safeIdx = Math.max(0, Math.min(index, album.tracks.length - 1));
+      const track   = album.tracks[safeIdx];
+      const { src, isFlac } = getBestSrc(track, forceFallback);
+      currentIndex = safeIdx; usedFallback = forceFallback || !isFlac; isLoaded = true;
+      audio.src = src; audio.preload = "auto"; audio.load();
+      npTitle.textContent = track.title;
+      updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(track);
+    }
 
-          /* Key — Krumhansl-Schmuckler, sampleRate passed explicitly */
-          try {
-            const kr = essentia.KeyExtractor(
-              signal, true, 4096, 4096, 12, 3500, 60, 25, 0.2, 'bgate',
-              decoded.sampleRate, 0.0001, 440, 'cosine', 'hann'
-            );
-            key = kr.key + ' ' + (kr.scale === 'major' ? 'maj' : 'min');
-            console.log('[Essentia] Key:', key, '(strength:', kr.strength.toFixed(2) + ')');
-          } catch(e) { console.warn('[Essentia] Key error:', e.message || e); }
+    async function playTrack(index = currentIndex) {
+      loadTrack(index, false); setLoading(true);
+      try {
+        await waitForPrebuffer(); clearDownloadProgress();
+        await audio.play(); setPlayState(true); await acquireWake();
+      } catch (err) {
+        clearDownloadProgress();
+        if (err.name === "NotAllowedError") showErr("// TAP PLAY TO BEGIN");
+        else if (!usedFallback) { loadTrack(index, true); await playTrack(index); }
+        else { showErr("// TRANSMISSION FAILURE — CHECK AUDIO URLS"); console.warn(err); }
+      }
+    }
 
-          signal.delete();  /* free WASM memory */
+    async function togglePlay() {
+      if (!isLoaded) {
+        if (USE_BLOB_LOADING) await loadAndPlayAsBlob(currentIndex);
+        else await playTrack(currentIndex);
+        return;
+      }
+      if (audio.paused) {
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (_) { showErr("// COULD NOT RESUME — TAP PLAY AGAIN"); }
+      } else { audio.pause(); setPlayState(false); dropWake(); }
+    }
 
-          if (bpm !== null || key) updateAnalysisDisplay(bpm, key);
-        } catch(err) {
-          console.warn('[Essentia] Analysis failed:', err.message || err);
-        }
+    function playPrev() {
+      if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; }
+      const i = Math.max(0, currentIndex - 1);
+      if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i);
+    }
+
+    function playNext() {
+      if (currentIndex < album.tracks.length - 1) {
+        if (USE_BLOB_LOADING) loadAndPlayAsBlob(currentIndex + 1); else playTrack(currentIndex + 1);
+      } else if (repeatMode === "album") {
+        if (USE_BLOB_LOADING) loadAndPlayAsBlob(0); else playTrack(0);
+      } else { setPlayState(false); dropWake(); }
+    }
+
+    function setPlayState(on) {
+      playBtn.textContent = on ? "⏸ Pause" : "▶ Play";
+      playBtn.style.fontSize = ""; playBtn.style.letterSpacing = "";
+      playBtn.setAttribute("aria-label",
+        on ? `Pause ${album.tracks[currentIndex]?.title}`
+           : `Play ${album.tracks[currentIndex]?.title}`);
+      playBtn.classList.remove("is-loading");
+      artWrap.classList.toggle("is-playing", on);
+      liveDot.classList.toggle("active", on);
+      setMediaPlayState(on ? "playing" : "paused");
+      updateTrackUI();
+    }
+
+    function setLoading(on) {
+      if (on) {
+        playBtn.innerHTML = ""; playBtn.classList.add("is-loading");
+        playBtn.setAttribute("aria-label","Loading…"); bufFill.classList.add("loading");
+      } else { playBtn.classList.remove("is-loading"); bufFill.classList.remove("loading"); }
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       REPEAT MODE — off → song → album → off
+    ════════════════════════════════════════════════════════════ */
+    function cycleRepeat() {
+      /* On single-track pages skip "album" mode — it's the same as "song" */
+      const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"];
+      const next  = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+      repeatMode  = next;
+      const m = {
+        off:  { l:"↺ Repeat: Off",   p:"false" },
+        song: { l:"↺ Repeat: Song",  p:"true"  },
+        album:{ l:"↺ Repeat: Album", p:"true"  }
       };
+      repeatBtn.textContent = m[repeatMode].l; repeatBtn.dataset.mode = repeatMode;
+      repeatBtn.setAttribute("aria-label", m[repeatMode].l + ". Press to cycle.");
+      repeatBtn.setAttribute("aria-pressed", m[repeatMode].p);
+    }
 
-      setTimeout(() => {
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(run, { timeout: 15000 });
-        } else {
-          run();
+
+    /* ════════════════════════════════════════════════════════════
+       AUDIO EVENTS
+    ════════════════════════════════════════════════════════════ */
+    /* Track ended — check if partial blob ran dry first */
+    audio.addEventListener("ended", () => {
+      if (upgradeToFullBlob()) return;  /* partial blob exhausted */
+      if (repeatMode==="song") { audio.currentTime=0; audio.play().catch(()=>{}); return; }
+      playNext();
+    });
+    audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlayState(true); });
+    audio.addEventListener("waiting", () => bufFill.classList.add("loading"));
+    audio.addEventListener("pause",   () => { artWrap.classList.remove("is-playing"); liveDot.classList.remove("active"); updateTrackUI(); });
+    audio.addEventListener("play",    () => updateTrackUI());
+
+    /* Stall recovery — 1500ms, streaming mode only */
+    let stallTimer;
+    audio.addEventListener("stalled", () => {
+      if (USE_BLOB_LOADING) return;
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => {
+        if (!audio.paused) {
+          const t = audio.currentTime; audio.load(); audio.currentTime = t;
+          audio.play().catch(()=>{});
+          console.log("[Template] Stall recovery");
         }
-      }, 2000);
+      }, 1500);
+    });
+    audio.addEventListener("progress", ()=>clearTimeout(stallTimer));
+    audio.addEventListener("playing",  ()=>clearTimeout(stallTimer));
+
+    /* FLAC error → silent fallback (streaming mode only) */
+    audio.addEventListener("error", async () => {
+      if (USE_BLOB_LOADING) return;
+      if (!usedFallback) {
+        loadTrack(currentIndex, true);
+        try { await audio.play(); setPlayState(true); }
+        catch (_) { showErr("// SIGNAL LOST — CHECK FILE URLS"); }
+      } else { showErr("// TRANSMISSION FAILED — CHECK CDN AND MIME TYPES"); }
+    });
+
+
+    /* ════════════════════════════════════════════════════════════
+       PROGRESS BAR
+    ════════════════════════════════════════════════════════════ */
+    const fmt = s => !Number.isFinite(s)||s<0?"0:00"
+      : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+    audio.addEventListener("loadedmetadata", () => {
+      durTimeEl.textContent = fmt(audio.duration);
+      progBar.setAttribute("aria-valuemax", Math.floor(audio.duration));
+      const durs = trackList.querySelectorAll(".track-dur");
+      if (durs[currentIndex]) durs[currentIndex].textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return;
+      progBar.value = (audio.currentTime / audio.duration) * 100;
+      progBar.setAttribute("aria-valuenow",  Math.floor(audio.currentTime));
+      progBar.setAttribute("aria-valuetext", `${fmt(audio.currentTime)} of ${fmt(audio.duration)}`);
+      curTimeEl.textContent = fmt(audio.currentTime);
+      updateMediaPosition();
+    });
+
+    audio.addEventListener("progress", () => {
+      if (USE_BLOB_LOADING) return;
+      if (!audio.duration || !audio.buffered.length) return;
+      bufFill.style.width = `${(audio.buffered.end(audio.buffered.length-1)/audio.duration)*100}%`;
+    });
+
+    progBar.addEventListener("mousedown",  ()=>isSeeking=true);
+    progBar.addEventListener("touchstart", ()=>isSeeking=true, {passive:true});
+    progBar.addEventListener("input", () => {
+      if (audio.duration) {
+        const t = (progBar.value/100)*audio.duration;
+        curTimeEl.textContent = fmt(t);
+        progBar.setAttribute("aria-valuetext", `${fmt(t)} of ${fmt(audio.duration)}`);
+      }
+    });
+    progBar.addEventListener("change", () => {
+      if (audio.duration) audio.currentTime = (progBar.value/100)*audio.duration;
+      isSeeking = false;
+    });
+    progBar.addEventListener("mouseup",  ()=>isSeeking=false);
+    progBar.addEventListener("touchend", ()=>isSeeking=false);
+
+
+    /* ════════════════════════════════════════════════════════════
+       VOLUME
+    ════════════════════════════════════════════════════════════ */
+    volBar.addEventListener("input", () => {
+      audio.volume = volBar.value/100;
+      volPctEl.textContent = `${volBar.value}%`;
+    });
+
+
+    /* ════════════════════════════════════════════════════════════
+       MEDIA SESSION API — lock screen + hardware keys
+    ════════════════════════════════════════════════════════════ */
+    function updateMediaSession(track) {
+      if (!("mediaSession" in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title, artist: album.artist, album: album.title,
+        artwork: [
+          { src: album.artworkUrl, sizes: "96x96",   type: "image/png" },
+          { src: album.artworkUrl, sizes: "256x256",  type: "image/png" },
+          { src: album.artworkUrl, sizes: "512x512",  type: "image/png" }
+        ]
+      });
+      const h = {
+        play:          async () => { await togglePlay(); },
+        pause:         ()      => { audio.pause(); setPlayState(false); dropWake(); },
+        previoustrack: playPrev, nexttrack: playNext,
+        seekbackward:  (e) => { audio.currentTime = Math.max(0, audio.currentTime-(e.seekOffset||10)); },
+        seekforward:   (e) => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime+(e.seekOffset||10)); },
+        seekto:        (e) => { if (e.fastSeek&&"fastSeek"in audio) audio.fastSeek(e.seekTime); else audio.currentTime=e.seekTime; }
+      };
+      for (const [a,fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(a,fn); } catch(_){} }
+    }
+    function setMediaPlayState(s) { if ("mediaSession" in navigator) navigator.mediaSession.playbackState = s; }
+    function updateMediaPosition() {
+      if (!("mediaSession" in navigator) || !Number.isFinite(audio.duration)) return;
+      try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: audio.currentTime }); } catch(_){}
     }
 
-    /* Reveal the analysis-footer element only when we have real values */
-    function updateAnalysisDisplay(bpm, key) {
-      const inlineEl = document.getElementById('analysisInline');
-      const bpmEl    = document.getElementById('bpmDisplay');
-      const keyEl    = document.getElementById('notesDisplay');
-      let   hasData  = false;
 
-      if (bpm !== null && bpm !== undefined && bpmEl) {
-        bpmEl.textContent = String(bpm);
-        bpmEl.setAttribute('aria-label', `Detected tempo: ${bpm} BPM`);
-        hasData = true;
+    /* ════════════════════════════════════════════════════════════
+       KEYBOARD SHORTCUTS
+    ════════════════════════════════════════════════════════════ */
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+      switch(e.key) {
+        case " ": case "MediaPlayPause": e.preventDefault(); togglePlay(); break;
+        case "ArrowRight": e.preventDefault(); audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10); break;
+        case "ArrowLeft":  e.preventDefault(); audio.currentTime=Math.max(0,audio.currentTime-10); break;
+        case "ArrowUp":    e.preventDefault(); audio.volume=Math.min(1,audio.volume+0.05); volBar.value=Math.round(audio.volume*100); volPctEl.textContent=`${volBar.value}%`; break;
+        case "ArrowDown":  e.preventDefault(); audio.volume=Math.max(0,audio.volume-0.05); volBar.value=Math.round(audio.volume*100); volPctEl.textContent=`${volBar.value}%`; break;
+        case "n": case "N": case "MediaTrackNext":     playNext(); break;
+        case "p": case "P": case "MediaTrackPrevious": playPrev(); break;
+        case "r": case "R": cycleRepeat(); break;
+        case "m": case "M": audio.muted=!audio.muted; break;
       }
-      if (key && keyEl) {
-        keyEl.textContent = key;
-        keyEl.setAttribute('aria-label', `Detected key: ${key}`);
-        hasData = true;
+    });
+
+
+    /* ════════════════════════════════════════════════════════════
+       HELPERS
+    ════════════════════════════════════════════════════════════ */
+    function showErr(msg) { errLine.textContent=msg; errLine.classList.add("show"); }
+    function clearErr()   { errLine.textContent=""; errLine.classList.remove("show"); }
+
+    playBtn.addEventListener("click",   togglePlay);
+    prevBtn.addEventListener("click",   playPrev);
+    nextBtn.addEventListener("click",   playNext);
+    repeatBtn.addEventListener("click", cycleRepeat);
+
+
+    /* ════════════════════════════════════════════════════════════
+       INIT — runs once on page load
+    ════════════════════════════════════════════════════════════ */
+    function init() {
+      document.getElementById("albumArtImg").src = ALBUM_ART_URL;
+
+      /* BPM/Key detection removed — Essentia caused OOM restarts on mobile */
+
+      renderTracks();
+
+      /* Streaming mode: preload first track metadata (no autoplay) */
+      if (!USE_BLOB_LOADING) { loadTrack(0); isLoaded = false; }
+
+      updateMediaSession(album.tracks[0]);
+      setPlayState(false);
+      updateFmtBadge(flacOk);
+
+      /* Single-track pages: hide Prev and Next — they serve no purpose.
+         Multi-track pages (albums): buttons remain visible as normal.   */
+      if (album.tracks.length === 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
       }
 
-      /* Only reveal if we have at least one value */
-      if (hasData && inlineEl) inlineEl.style.display = 'flex';
+      /* Essentia loads dynamically on first play — nothing to preload here */
     }
+
+    init();
+  </script>
+
+</body>
+</html
+      <footer class="page-footer">
+        <a href="https://www.instagram.com/patbee.music/" target="_blank" rel="noopener noreferrer" aria-label="Pat Bee on Instagram (opens in new tab)">Pat Bee</a>
+      </footer>
+    </div>
+  </main>
+
+  <audio id="audioEl" preload="metadata" playsinline x-webkit-airplay="allow"></audio>
+
+  <script>
+    /* ╔══════════════════════════════════════════════════════════════╗
+     * ║   PAT BƎƎ — BASE SONG PAGE TEMPLATE  v2.0                   ║
+     * ║   + Essentia.js BPM/Key auto-detection (Web Worker)          ║
+     * ║   + Blob pre-loader with AbortController timeout             ║
+     * ║   + Streaming fallback if blob/CORS fails                    ║
+     * ╠══════════════════════════════════════════════════════════════╣
+     * ║  SECTION 1: URLS                                             ║
+     * ║    CDN_BASE_URL          R2/S3/CDN root URL                  ║
+     * ║    ALBUM_ART_URL         Square cover art (PNG/JPG ≥512px)   ║
+     * ║    REMIX_UPLOAD_ENDPOINT POST endpoint ("" = disabled)       ║
+     * ║    ARTIST_INSTAGRAM_URL  Footer link                         ║
+     * ║                                                              ║
+     * ║  SECTION 2: TRACK DATA (shown until Essentia detects)        ║
+     * ║    TRACK_BPM    Initial BPM ("—" = auto-detect)              ║
+     * ║    TRACK_NOTES  Initial key ("—" = auto-detect)              ║
+     * ║                                                              ║
+     * ║  SECTION 3: ALBUM OBJECT                                     ║
+     * ║    album.title / .artist / .artworkUrl                       ║
+     * ║    album.tracks[]: .title .duration .flac .fallback          ║
+     * ║                                                              ║
+     * ║  SECTION 4: BUFFER TUNING                                    ║
+     * ║    USE_BLOB_LOADING  true  = full download before play       ║
+     * ║                      false = HTML5 streaming                 ║
+     * ║    BLOB_TIMEOUT_MS   Fetch abort after N ms (default 30000)  ║
+     * ║    DANGER_SECONDS    Buffer health threshold (streaming)     ║
+     * ║    MIN_PREBUFFER_SECONDS  Gate before play (streaming)       ║
+     * ║                                                              ║
+     * ║  SECTION 5: ICONS (base64-embedded, no network)              ║
+     * ║    ICON_DARK   dark icon for light-bg pages (used here)      ║
+     * ║    ICON_LIGHT  light icon for dark-bg pages                  ║
+     * ╚══════════════════════════════════════════════════════════════╝ */
+
+
+    /* ════════════════════════════════════════════════════════════
+       SECTION 1 — URLS
+    ════════════════════════════════════════════════════════════ */
+    const CDN_BASE_URL          = "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev";
+    const ALBUM_ART_URL         = `${CDN_BASE_URL}/sidewinder.png`;
+    const REMIX_UPLOAD_ENDPOINT = "";
+    const ARTIST_INSTAGRAM_URL  = "https://www.instagram.com/patbee.music/";
+
+
+    /* ════════════════════════════════════════════════════════════
+       SECTION 2 — TRACK DATA
+       Set specific values to display immediately.
+       Leave "—" to let Essentia auto-detect after first play.
+    ════════════════════════════════════════════════════════════ */
+    const TRACK_BPM   = "—";   /* e.g. "96"     */
+    const TRACK_NOTES = "—";   /* e.g. "C# min" */
+
+
+    /* ════════════════════════════════════════════════════════════
+       SECTION 3 — ALBUM + TRACKS
+    ════════════════════════════════════════════════════════════ */
+    const album = {
+      title:      "Sidewinder",
+      artist:     "Pat Bɇɇ",
+      artworkUrl: ALBUM_ART_URL,
+      tracks: [
+        {
+          title:    "Sidewinder",
+          duration: "—",
+          flac:     `${CDN_BASE_URL}/sidewinder.flac`,
+          fallback: `${CDN_BASE_URL}/sidewinder.m4a`
+        }
+        /* Add more tracks:
+        { title: "Track", duration: "—", flac: `${CDN_BASE_URL}/x.flac`, fallback: `${CDN_BASE_URL}/x.m4a` }, */
+      ]
+    };
+
+
+    /* ════════════════════════════════════════════════════════════
+       SECTION 4 — BUFFER TUNING
+       USE_BLOB_LOADING = true (recommended):
+         Downloads entire file to RAM. Requires CORS on R2:
+           AllowedOrigins: ["https://pat-bee.github.io"]
+           AllowedMethods: ["GET", "HEAD"]
+           AllowedHeaders: ["*"]
+         If blob fails (CORS or network), auto-falls back to
+         HTML5 streaming — music plays either way.
+
+       BLOB_TIMEOUT_MS:
+         Aborts the fetch if it doesn't start receiving data
+         within this many milliseconds. Prevents infinite hang.
+    ════════════════════════════════════════════════════════════ */
+    const USE_BLOB_LOADING      = true;
+    const BLOB_TIMEOUT_MS       = 30000;  /* 30 seconds                  */
+    const DANGER_SECONDS        = 8;      /* streaming mode buffer gate  */
+    const MIN_PREBUFFER_SECONDS = 30;     /* streaming mode pre-buffer   */
+
+
+    /* ════════════════════════════════════════════════════════════
+       SECTION 5 — UPLOAD ICONS (base64, no network)
+    ════════════════════════════════════════════════════════════ */
+
+
+    /* ════════════════════════════════════════════════════════════
+       DOM REFERENCES
+    ════════════════════════════════════════════════════════════ */
+    const audio      = document.getElementById("audioEl");
+    const playBtn    = document.getElementById("playBtn");
+    const prevBtn    = document.getElementById("prevBtn");
+    const nextBtn    = document.getElementById("nextBtn");
+    const repeatBtn  = document.getElementById("repeatBtn");
+    const progBar    = document.getElementById("progBar");
+    const curTimeEl  = document.getElementById("curTime");
+    const durTimeEl  = document.getElementById("durTime");
+    const bufFill    = document.getElementById("bufFill");
+    const volBar     = document.getElementById("volBar");
+    const volPctEl   = document.getElementById("volPct");
+    const npTitle    = document.getElementById("npTitle");
+    const fmtBadge   = document.getElementById("fmtBadge");
+    const wakeBadge  = document.getElementById("wakeBadge");
+    const liveDot    = document.getElementById("liveDot");
+    const errLine    = document.getElementById("errLine");
+    const artWrap    = document.getElementById("artWrap");
+    const trackList  = document.getElementById("trackList");
+
+
+    /* ════════════════════════════════════════════════════════════
+       PLAYER STATE
+    ════════════════════════════════════════════════════════════ */
+    let currentIndex     = 0;
+    let isLoaded         = false;
+    let usedFallback     = false;
+    let isSeeking        = false;
+    let repeatMode       = "off";
+    let wakeLock         = null;
+    let isRebuffering    = false;
+    let progressInterval = null;
+
 
     /* ════════════════════════════════════════════════════════════
        FORMAT DETECTION
@@ -1010,7 +1627,6 @@
         await audio.play(); setPlayState(true); await acquireWake();
 
         /* Analysis starts AFTER playback — music plays first */
-        analyzeAudio(blob);
 
       } catch (err) {
         clearTimeout(fetchTimeout);
@@ -1280,7 +1896,9 @@
     /* ════════════════════════════════════════════════════════════
        AUDIO EVENTS
     ════════════════════════════════════════════════════════════ */
+    /* Track ended — check if partial blob ran dry first */
     audio.addEventListener("ended", () => {
+      if (upgradeToFullBlob()) return;  /* partial blob exhausted */
       if (repeatMode==="song") { audio.currentTime=0; audio.play().catch(()=>{}); return; }
       playNext();
     });
@@ -1437,15 +2055,7 @@
     function init() {
       document.getElementById("albumArtImg").src = ALBUM_ART_URL;
 
-      /* If TRACK_BPM / TRACK_NOTES are hard-coded (not "—"),
-         show them immediately without waiting for Essentia.       */
-      const inlineEl = document.getElementById("analysisInline");
-      const bpmEl    = document.getElementById("bpmDisplay");
-      const notesEl  = document.getElementById("notesDisplay");
-      let   hasStatic = false;
-      if (TRACK_BPM   !== "—" && bpmEl)   { bpmEl.textContent   = TRACK_BPM;   hasStatic = true; }
-      if (TRACK_NOTES !== "—" && notesEl) { notesEl.textContent = TRACK_NOTES; hasStatic = true; }
-      if (hasStatic && inlineEl) inlineEl.style.display = "flex";
+      /* BPM/Key detection removed — Essentia caused OOM restarts on mobile */
 
       renderTracks();
 
