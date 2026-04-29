@@ -67,7 +67,7 @@
   <meta property="og:title"        content="Birdsowong — Pat Bɇɇ" />
   <meta property="og:description"  content="Listen to Birdsowong by Pat Bɇɇ" />
   <meta property="og:url"          content="https://pat-bee.github.io/album/index_album/birdsowong/" />
-  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/birdsowong.gif" />
+  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/birdsowong.png" />
   <meta property="og:image:width"  content="1200" />
   <meta property="og:image:height" content="1200" />
   <meta property="og:image:type"   content="image/png" />
@@ -87,8 +87,7 @@
     BREAKBREAK: font imports move to partials/head.html
     Font choice is a theme-level variable (index_album theme = IM Fell English)
   -->
-  <link href="https://fonts.googleapis.com/css2?family=Grenze:ital,wght@0,200;1,200&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Grenze:ital,wght@0,200;0,700;1,200&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
 
   <!-- BREAKBREAK: this entire <style> block → styles/index_album.css -->
   <style>
@@ -157,7 +156,7 @@
       content: "Ch.A · Signal · Unverified · Last sweep unknown · Ch.A · Signal ·";
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       display: flex; align-items: center; justify-content: center;
-      font-family: 'IM Fell English', serif; font-style: italic;
+      font-family: 'Grenze', serif; font-weight: 200; font-style: italic;
       font-size: 0.44rem; letter-spacing: 0.18em; color: rgba(80,136,106,0.045);
       text-align: center; line-height: 5; word-break: break-all;
     }
@@ -192,11 +191,19 @@
     /* IM Fell English italic — mixed case, no forced uppercase.
        To change the display font globally: change font-family here AND in
        .np-title, .track-title-text, .album-label-name, .play-btn, .remix-title */
-.masthead-title   { font-family: 'Grenze', serif; font-weight: 200; 
-      font-size: clamp(0.6rem, 9.5cqi, 4.8rem);
+    /*
+    .masthead-title: Grenze 200 upright — bold monumental display.
+    To change globally: replace 'Grenze' here and in .np-title,
+    .track-title-text, .album-label-name, .remix-title, .play-btn
+    */
+    .masthead-title {
+      font-family: 'Grenze', serif;
+      font-weight: 200;
+      font-style: normal;
+      font-size: clamp(2.2rem, 13cqi, 6rem);
       white-space: nowrap; overflow: hidden; text-overflow: clip;
-      line-height: 1.05; color: var(--ink);
-      text-shadow: 1px 1px 2px rgba(22,14,4,0.55);
+      line-height: 1.0; color: var(--ink);
+      text-shadow: 1px 2px 4px rgba(22,14,4,0.65);
     }
 
     /* ── SHARE STRIP ─────────────────────────────────────────────────────────
@@ -207,7 +214,7 @@
     ──────────────────────────────────────────────────────────────────────── */
     .share-strip {
       display: flex; justify-content: center; align-items: center;
-      gap: 18px; margin: 10px 0 6px;
+      gap: 18px; margin: 18px 0 10px;
     }
     .share-btn {
       display: flex; align-items: center; justify-content: center;
@@ -236,7 +243,7 @@
       display: block; text-align: center;
       font-family: 'Courier Prime', monospace; font-size: 0.58rem;
       letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mid);
-      text-decoration: none; transition: color 160ms; margin-top: 2px;
+      text-decoration: none; transition: color 160ms; margin-top: 4px;
     }
     .masthead-artist-link:hover { color: var(--sage); }
 
@@ -300,7 +307,7 @@
 
     /* Now Playing */
     .np-label { font-family: 'Courier Prime', monospace; font-size: 0.5rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 3px; }
-   .np-title         { font-family: 'Grenze', serif; font-weight: 200; font-size: 1.3rem; line-height: 1.1; color: var(--ink); word-break: break-word; }
+    .np-title { font-family: 'Grenze', serif; font-weight: 200; font-style: italic; font-size: 1.3rem; line-height: 1.1; color: var(--ink); word-break: break-word; }
     .np-meta { display: flex; gap: 8px; margin-top: 7px; flex-wrap: wrap; align-items: center; }
     .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-ghost); border: 1px solid var(--border); flex-shrink: 0; transition: all 200ms; }
     .live-dot.active { background: var(--sage); border-color: var(--sage-bright); box-shadow: 0 0 6px rgba(80,136,106,0.35); animation: sage-pulse 1.5s ease-in-out infinite; }
@@ -333,7 +340,7 @@
     .ctrl-btn:hover { background: var(--sage-faint); border-color: var(--sage-border); color: var(--ink); }
     .ctrl-btn:active { transform: translate(1px,1px); }
     /* Play button — muted ochre (old brass). NOT green. */
-    .play-btn { min-width: 136px; min-height: 50px; font-family: 'Grenze', serif; font-weight: 200; font-size: 1.1rem; letter-spacing: 0.02em; background: var(--ochre); color: var(--ochre-text); border: 1px solid var(--ochre-bright); box-shadow: 2px 2px 0 rgba(22,14,4,0.65), 0 0 8px rgba(122,92,42,0.08); }
+    .play-btn { min-width: 136px; min-height: 50px; font-family: 'Grenze', serif; font-weight: 200; font-style: italic; font-size: 1.2rem; letter-spacing: 0.04em; background: var(--ochre); color: var(--ochre-text); border: 1px solid var(--ochre-bright); box-shadow: 2px 2px 0 rgba(22,14,4,0.65), 0 0 8px rgba(122,92,42,0.08); }
     .play-btn:hover { background: var(--ochre-bright); color: #F0E0B0; box-shadow: 3px 3px 0 rgba(22,14,4,0.65); }
     .play-btn:active { transform: translate(2px,2px); box-shadow: none; }
     .play-btn.is-loading { background: var(--bg-raised); border-color: var(--border); cursor: wait; }
@@ -354,7 +361,7 @@
     ──────────────────────────────────────────────────────────────────────── */
     .playlist-section { border: 1px solid var(--border-strong); border-top: none; background: var(--bg-panel); }
     .playlist-header { padding: 8px 20px; border-bottom: 1px solid var(--border); font-family: 'Courier Prime', monospace; font-size: 0.48rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-dim); display: flex; justify-content: space-between; align-items: center; }
-    .playlist-header::before { content: "Recording Log"; font-family: 'IM Fell English', serif; font-size: 0.7rem; color: rgba(80,136,106,0.24); letter-spacing: 0.04em; font-style: italic; }
+    .playlist-header::before { content: "Recording Log"; font-family: 'Grenze', serif; font-weight: 200; font-size: 0.8rem; color: rgba(80,136,106,0.24); letter-spacing: 0.04em; font-style: italic; }
     .track-list { list-style: none; }
     .track-btn, .remix-row { width: 100%; display: grid; grid-template-columns: 52px 1fr auto; align-items: stretch; text-align: left; border: none; border-bottom: 1px solid var(--border); transition: background 100ms; }
     .track-list li:last-child .track-btn, .track-list li:last-child .remix-row { border-bottom: none; }
@@ -365,7 +372,7 @@
     .track-btn[aria-current="true"].is-playing .track-num { animation: sage-pulse 1.5s ease-in-out infinite; }
     .track-num { display: flex; align-items: center; justify-content: center; padding: 16px 0; border-right: 1px solid var(--border); font-family: 'Courier Prime', monospace; font-size: 0.88rem; letter-spacing: 0.06em; color: var(--ink-dim); min-width: 52px; }
     .track-info-col { padding: 13px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
-    .track-title-text { font-family: 'Grenze', serif; font-weight: 200;.album-label-name { font-family: 'Grenze', serif; font-weight: 200; }
+    .track-title-text { font-family: 'Grenze', serif; font-weight: 200; font-style: italic; font-size: 1.05rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .track-meta-text { font-family: 'Courier Prime', monospace; font-size: 0.48rem; color: var(--ink-dim); letter-spacing: 0.12em; text-transform: uppercase; }
     .track-dur { display: flex; align-items: center; padding: 13px 14px; font-family: 'Courier Prime', monospace; font-size: 0.64rem; color: var(--ink-dim); border-left: 1px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
@@ -381,7 +388,7 @@
     .remix-icon-cell { display: flex; align-items: center; justify-content: center; padding: 12px 0; border-right: 1px dashed var(--sage-border); min-width: 52px; }
     .remix-icon-cell img { width: 24px; height: 24px; object-fit: contain; opacity: 0.4; }
     .remix-info { padding: 11px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
-    .remix-title { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.9rem; color: var(--sage); }
+    .remix-title { font-family: 'Grenze', serif; font-weight: 200; font-style: italic; font-size: 0.95rem; color: var(--sage); }
     .remix-sub { font-family: 'Courier Prime', monospace; font-size: 0.46rem; color: var(--ink-dim); letter-spacing: 0.12em; text-transform: uppercase; }
     .remix-status { display: flex; align-items: center; padding: 11px 14px; font-family: 'Courier Prime', monospace; font-size: 0.54rem; color: var(--sage); border-left: 1px dashed var(--sage-border); white-space: nowrap; letter-spacing: 0.1em; text-transform: uppercase; }
     .upload-toast { display: none; padding: 8px 20px; font-family: 'Courier Prime', monospace; font-size: 0.52rem; color: var(--ink-mid); letter-spacing: 0.06em; background: var(--sage-faint); border-top: 1px solid var(--border); }
@@ -427,32 +434,7 @@
           <h1 class="masthead-title" id="mastheadTitle">Birdsowong</h1>
         </div>
 
-        <!-- SHARE STRIP — wired by initShareStrip() -->
-        <div class="share-strip" id="shareStrip" aria-label="Share this page">
-
-          <!-- Button 1: Native Share (iOS / Android / Chrome) -->
-          <button class="share-btn" id="btnNativeShare" aria-label="Share this page" title="Share">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/>
-              <polyline points="16 6 12 2 8 6"/>
-              <line x1="12" y1="2" x2="12" y2="15"/>
-            </svg>
-          </button>
-
-          <!-- Button 2: Copy link to clipboard -->
-          <button class="share-btn" id="btnCopyLink" aria-label="Copy link" title="Copy link">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
-              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-            </svg>
-          </button>
-
-          <!-- Button 3: Reserved for future (QR code, embed, etc.) -->
-
-        </div>
-
-        <!-- Artist link — one occurrence here. One more in footer.
-             Both rendered from SONG_CONFIG.artistUrl by initMasthead/initFooter. -->
+        <!-- Artist link — rendered by initMasthead() from SONG_CONFIG -->
         <a class="masthead-artist-link" id="mastheadArtistLink"
            href="https://www.instagram.com/patbee.music/"
            target="_blank" rel="noopener noreferrer"
@@ -521,6 +503,31 @@
         </div>
         <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
       </section>
+
+      <!-- SHARE STRIP — placed above artist footer link
+           BREAKBREAK: components/share-strip.js -->
+      <div class="share-strip" id="shareStrip" aria-label="Share this page">
+
+        <!-- Button 1: Native Share (iOS / Android / Chrome) -->
+        <button class="share-btn" id="btnNativeShare" aria-label="Share this page" title="Share">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+        </button>
+
+        <!-- Button 2: Copy link to clipboard -->
+        <button class="share-btn" id="btnCopyLink" aria-label="Copy link" title="Copy link">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 007.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+        </button>
+
+        <!-- Button 3: Reserved (QR code, embed, etc.) -->
+
+      </div>
 
       <!-- BREAKBREAK: partials/footer.html
            href set from SONG_CONFIG by initFooter(). utm_source=footer. -->
