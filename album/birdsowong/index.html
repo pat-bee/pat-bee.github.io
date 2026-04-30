@@ -18,7 +18,7 @@
   ║  pat-bee.github.io/album/index_album/birdsowong/index.html              ║
   ║                                                                          ║
   ║  CDN FILE STRUCTURE (all derived from SONG_CONFIG.slug)                 ║
-  ║  {cdnBase}/{slug}.png          album art                                ║
+  ║  {cdnBase}/{slug}.gif          album art                                ║
   ║  {cdnBase}/{slug}.flac         lossless audio                           ║
   ║  {cdnBase}/{slug}.m4a          AAC fallback                             ║
   ║  {cdnBase}/remixes/{slug}/     remix submissions land here              ║
@@ -75,7 +75,7 @@
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Birdsowong — Pat Bɇɇ" />
   <meta name="twitter:description" content="Listen to Birdsowong by Pat Bɇɇ" />
-  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/birdsowong.png" />
+  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/birdsowong.gif" />
 
   <link rel="preconnect" href="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -593,7 +593,7 @@
 
     /* Derived paths — always computed from slug, never hardcoded */
     const CDN           = SONG_CONFIG.cdnBase;
-    const ALBUM_ART_URL = CDN + "/" + SONG_CONFIG.slug + ".png";
+    const ALBUM_ART_URL = CDN + "/" + SONG_CONFIG.slug + ".gif";
 
     /* Artist URL with tracking param.
        source: "header" | "footer" — creates separate measurable paths. */
