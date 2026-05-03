@@ -562,7 +562,8 @@
     }
     scheduleGlitch();
 
-BREAKBREAK → engine/audio.js — ADAPTIVE BLOB LOADER
+       /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → engine/audio.js — ADAPTIVE BLOB LOADER
     ════════════════════════════════════════════════════════════════════════ */
     function getConn() { const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection; return { downlink: c?.downlink ?? 10, effectiveType: c?.effectiveType ?? "4g" }; }
     function calcThr(isFlac) { const { downlink, effectiveType } = getConn(); if (effectiveType === "slow-2g" || downlink < 0.5) return null; return Math.max(0.15, Math.min(0.60, ((isFlac ? 0.9 : 0.25) / downlink) * 1.5)); }
@@ -664,14 +665,15 @@ BREAKBREAK → engine/audio.js — ADAPTIVE BLOB LOADER
       }
     }, 2000);
 
-    /* ════════════════════════════════════════════════════════════════════════
-       
-BREAKBREAK → components/track-list.js
+ 
+
+       /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → components/track-list.js
     ════════════════════════════════════════════════════════════════════════ */
     function renderTracks() {
       trackList.innerHTML = "";
       const el = document.getElementById("trackCount");
-      if (el) el.textContent = album.tracks.length + " Recording" + (album.tracks.length !== 1 ? "s" : "");
+      if (el) el.textContent = album.tracks.length + " Target" + (album.tracks.length !== 1 ? "s" : "");
 
       album.tracks.forEach((tr, i) => {
         const li = document.createElement("li"), btn = document.createElement("button");
@@ -793,8 +795,9 @@ BREAKBREAK → components/track-list.js
       }
     });
 
-    /* 
-BREAKBREAK → components/share-strip.js */
+
+
+        /* BREAKBREAK → components/share-strip.js */
     function initShareStrip() {
       const btnNative = document.getElementById("btnNativeShare");
       const btnCopy   = document.getElementById("btnCopyLink");
@@ -816,8 +819,9 @@ BREAKBREAK → components/share-strip.js */
       } else { btnCopy.classList.add("hidden"); }
     }
 
-    /* 
-BREAKBREAK → components/masthead.js
+    
+
+    /* BREAKBREAK → components/masthead.js
        Eyebrow: [album up-link] · [artist link] — built from SONG_CONFIG.
        albumUrl empty = album index page — up-link omitted.
     */
@@ -840,13 +844,6 @@ BREAKBREAK → components/masthead.js
 
     function showErr(m) { errLine.textContent = m; errLine.classList.add("show"); }
     function clearErr()  { errLine.textContent = ""; errLine.classList.remove("show"); }
-
-    playBtn.addEventListener("click",   togglePlay);
-    prevBtn.addEventListener("click",   playPrev);
-    nextBtn.addEventListener("click",   playNext);
-    repeatBtn.addEventListener("click", cycleRepeat);
-
-    /* BREAKBREAK → main.js — INIT */
 
     playBtn.addEventListener("click",   togglePlay);
     prevBtn.addEventListener("click",   playPrev);
