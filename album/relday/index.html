@@ -28,7 +28,7 @@
   ║  is hardcoded anywhere else in this file.                               ║
   ║                                                                          ║
   ║  CDN FILE STRUCTURE (pat-bee_relday prefix — non-slug naming):         ║
-  ║    Art:      relday.gif                                         ║
+  ║    Art:      pat-bee_relday.png                                          ║
   ║    Lossless: pat-bee_relday.flac                                         ║
   ║    Fallback: pat-bee_relday.m4a                                          ║
   ║    Remixes:  /remixes/relday/                                            ║
@@ -52,7 +52,7 @@
   <meta property="og:title"        content="Relday — Pat Bɇɇ" />
   <meta property="og:description"  content="Listen to Relday by Pat Bɇɇ" />
   <meta property="og:url"          content="https://pat-bee.github.io/album/index_album/relday/" />
-  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/relday.gif" />
+  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_relday.gif" />
   <meta property="og:image:width"  content="1200" />
   <meta property="og:image:height" content="1200" />
   <meta property="og:image:type"   content="image/png" />
@@ -60,7 +60,7 @@
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Relday — Pat Bɇɇ" />
   <meta name="twitter:description" content="Listen to Relday by Pat Bɇɇ" />
-  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/relday.gif" />
+  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_relday.gif" />
 
   <link rel="preconnect" href="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -670,11 +670,11 @@
         <div class="col-art">
           <div class="art-wrap" id="artWrap">
             <img id="albumArtImg" src="" alt="Relday by Pat Bɇɇ — cover art" />
-            <!-- L<div class="eq-overlay" aria-hidden="true">
+            <div class="eq-overlay" aria-hidden="true">
               <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
               <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
               <div class="eq-b"></div><div class="eq-b"></div>
-            </div>-->
+            </div>
           </div>
         </div>
 
@@ -702,7 +702,7 @@
 
           <div class="controls" role="group" aria-label="Playback controls">
             <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Previous track">← Prev</button>
-            <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play Relday">▶ Play</button>
+            <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play Relday">PLAY</button>
             <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Next track">Next →</button>
             <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button"
               data-mode="off" aria-label="Repeat mode: off. Press to cycle." aria-pressed="false">↺ Repeat: Off</button>
@@ -823,7 +823,7 @@
       remixEndpoint: "",
 
       /* Relday-specific CDN filenames — pat-bee_ prefix naming */
-      artFile:      "relday.gif",
+      artFile:      "pat-bee_relday.gif",
       flacFile:     "pat-bee_relday.flac",
       fallbackFile: "pat-bee_relday.m4a",
     };
@@ -935,7 +935,7 @@
       currentIndex = si; usedFallback = ff || !isFlac; isLoaded = true;
       npTitle.textContent = tr.title; updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(tr);
       const thr = calcThr(isFlac);
-      if (thr === null) { loadTrack(idx, ff); try { await waitForPrebuffer(); await audio.play(); setPlayState(true); await acquireWake(); } catch (e) { showErr("// Check connection"); } return; }
+      if (thr === null) { loadTrack(idx, ff); try { await waitForPrebuffer(); clearDLP(); setPlayState(false); /* ready — user taps PLAY */ } catch (e) { showErr("// Check connection"); } return; }
       const ctrl = new AbortController(), tout = setTimeout(() => ctrl.abort(), BLOB_TIMEOUT_MS);
       try {
         const res = await fetch(src, { signal: ctrl.signal, cache: "default" }); clearTimeout(tout);
@@ -953,18 +953,18 @@
               const blob = new Blob([...chunks], { type: mime }), url = URL.createObjectURL(blob);
               if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
               audio._blobUrl = url; audio.src = url; audio.preload = "auto"; audio.load();
-              clearDLP(); await audio.play(); setPlayState(true); await acquireWake();
+              clearDLP(); setPlayState(false); /* audio ready — user taps PLAY to start */
             }
           } else if (total) { bufFill.style.background = "var(--blue)"; bufFill.style.width = Math.round(pct * 100) + "%"; }
         }
         const fb = new Blob(chunks, { type: mime }), fu = URL.createObjectURL(fb);
-        if (!started) { if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl); audio._blobUrl = fu; audio.src = fu; audio.preload = "auto"; audio.load(); clearDLP(); await audio.play(); setPlayState(true); await acquireWake(); }
+        if (!started) { if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl); audio._blobUrl = fu; audio.src = fu; audio.preload = "auto"; audio.load(); clearDLP(); setPlayState(false); /* audio ready — user taps PLAY to start */ }
         else { audio._fullBlobUrl = fu; setTimeout(() => { bufFill.style.background = ""; bufFill.style.width = "0%"; }, 800); }
       } catch (err) {
         clearTimeout(tout); clearDLP();
         if (!usedFallback && !ff) { await loadAndPlayAsBlob(idx, true); return; }
         showErr("// Streaming mode"); setTimeout(() => clearErr(), 3500);
-        loadTrack(idx, false); try { await audio.play(); setPlayState(true); await acquireWake(); } catch (e) { showErr("// Playback failed — check CORS and audio URLs"); }
+        loadTrack(idx, false); setPlayState(false); /* ready — user taps PLAY */
       }
     }
 
@@ -974,9 +974,9 @@
       if (pct === 0) bufFill.style.width = "0%";
       playBtn.classList.remove("is-loading");
       playBtn.classList.add("is-loading-text");
-      playBtn.textContent = "Loading…";
+      playBtn.textContent = "LOADING";
       playBtn.style.fontSize = "";               /* keep full size — no shrink */
-      playBtn.setAttribute("aria-label", "Loading audio…");
+      playBtn.setAttribute("aria-label", "Loading audio");
       /* Advance buffer bar silently — listener never sees the number         */
       if (pct !== null && pct > 0) bufFill.style.width = pct + "%";
       bufFill.style.background = "var(--blue)";
@@ -1073,11 +1073,11 @@
 
     /* Playback controls */
     function loadTrack(idx, f = false) { const si = Math.max(0, Math.min(idx, album.tracks.length - 1)), tr = album.tracks[si], { src, isFlac } = getBestSrc(tr, f); currentIndex = si; usedFallback = f || !isFlac; isLoaded = true; audio.src = src; audio.preload = "auto"; audio.load(); npTitle.textContent = tr.title; updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(tr); }
-    async function playTrack(idx = currentIndex) { loadTrack(idx, false); setLoading(true); try { await waitForPrebuffer(); clearDLP(); await audio.play(); setPlayState(true); await acquireWake(); } catch (err) { clearDLP(); if (err.name === "NotAllowedError") showErr("// Tap Play to begin"); else if (!usedFallback) { loadTrack(idx, true); await playTrack(idx); } else showErr("// Playback failed"); } }
+    async function playTrack(idx = currentIndex) { loadTrack(idx, false); setLoading(true); try { await waitForPrebuffer(); clearDLP(); setPlayState(false); /* ready — user taps PLAY */ } catch (err) { clearDLP(); showErr("// Playback failed"); } }
     async function togglePlay() { if (!isLoaded) { if (USE_BLOB_LOADING) await loadAndPlayAsBlob(currentIndex); else await playTrack(currentIndex); return; } if (audio.paused) { try { await audio.play(); setPlayState(true); await acquireWake(); } catch (_) { showErr("// Could not resume"); } } else { audio.pause(); setPlayState(false); dropWake(); } }
     function playPrev() { if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; } const i = Math.max(0, currentIndex - 1); if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i); }
     function playNext() { if (currentIndex < album.tracks.length - 1) { if (USE_BLOB_LOADING) loadAndPlayAsBlob(currentIndex + 1); else playTrack(currentIndex + 1); } else if (repeatMode === "album") { if (USE_BLOB_LOADING) loadAndPlayAsBlob(0); else playTrack(0); } else { setPlayState(false); dropWake(); } }
-    function setPlayState(on) { playBtn.classList.remove("is-loading-text"); playBtn.textContent = on ? "⏸ Pause" : "▶ Play"; playBtn.style.fontSize = ""; playBtn.setAttribute("aria-label", on ? "Pause " + album.tracks[currentIndex]?.title : "Play " + album.tracks[currentIndex]?.title); playBtn.classList.remove("is-loading"); artWrap.classList.toggle("is-playing", on); liveDot.classList.toggle("active", on); setMediaPlayState(on ? "playing" : "paused"); updateTrackUI(); }
+    function setPlayState(on) { playBtn.classList.remove("is-loading-text"); playBtn.textContent = on ? "PAUSE" : "PLAY"; playBtn.style.fontSize = ""; playBtn.setAttribute("aria-label", on ? "Pause " + album.tracks[currentIndex]?.title : "Play " + album.tracks[currentIndex]?.title); playBtn.classList.remove("is-loading"); artWrap.classList.toggle("is-playing", on); liveDot.classList.toggle("active", on); setMediaPlayState(on ? "playing" : "paused"); updateTrackUI(); }
     function setLoading(on) { if (on) { playBtn.innerHTML = ""; playBtn.classList.add("is-loading"); playBtn.setAttribute("aria-label", "Loading…"); bufFill.classList.add("loading"); } else { playBtn.classList.remove("is-loading"); bufFill.classList.remove("loading"); } }
     function cycleRepeat() { const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"]; repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length]; const m = { off:{l:"↺ Repeat: Off",p:"false"}, song:{l:"↺ Repeat: Song",p:"true"}, album:{l:"↺ Repeat: Album",p:"true"} }; repeatBtn.textContent = m[repeatMode].l; repeatBtn.dataset.mode = repeatMode; repeatBtn.setAttribute("aria-label", m[repeatMode].l + ". Press to cycle."); repeatBtn.setAttribute("aria-pressed", m[repeatMode].p); }
 
