@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!--
+  ══════════════════════════════════════════════════════════════════════
+  GHOST LIVES — Pat Bɇɇ  ·  SOP v1.2
+  ══════════════════════════════════════════════════════════════════════
+  Design: Digital echoes, web archives, residual signals.
+  Palette: Navy-black · Pale ghost-white · Verdigris teal — NO RED.
+
+  CDN filenames (non-standard — confirmed from view-source):
+    Art:      ghostlives.png
+    Ghost:    ghostlives01.png   (hover swap)
+    FLAC:     133_GhostLives_2026mix.flac
+    Fallback: 133_GhostLives_2026mix.m4a
+
+  Play button — 3-state machine (SOP v1.2):
+    State 1 (unloaded): solid teal fill      — energised signal
+    Loading:            % counter            — acquiring
+    State 2 (armed):    HOLLOW ghost teal    — signal present, awaiting tap
+    Playing:            solid teal resumes   — PAUSE
+  ══════════════════════════════════════════════════════════════════════
+  -->
+
+  <title>Ghost Lives — Pat Bɇɇ</title>
+
+  <meta property="og:type"         content="music.song" />
+  <meta property="og:site_name"    content="Pat Bɇɇ" />
+  <meta property="og:title"        content="Ghost Lives — Pat Bɇɇ" />
+  <meta property="og:description"  content="Listen to Ghost Lives by Pat Bɇɇ" />
+  <meta property="og:url"          content="https://pat-bee.github.io/album/ghostlives/" />
+  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/ghostlives.png" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="1200" />
+  <meta property="og:image:type"   content="image/png" />
+  <meta property="og:image:alt"    content="Ghost Lives by Pat Bɇɇ — cover art" />
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Ghost Lives — Pat Bɇɇ" />
+  <meta name="twitter:description" content="Listen to Ghost Lives by Pat Bɇɇ" />
+  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/ghostlives.png" />
+
+  <link rel="preconnect" href="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <!--
+    Readex Pro: variable-weight display — titles, track names, play button.
+      Weight 300 gives Ghost Lives its ghostly thinness; 400 for presence.
+    Electrolize: geometric UI chrome — badges, labels, timestamps, status.
+  -->
+  <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400&family=Electrolize&display=swap" rel="stylesheet" />
+
+  <style>
+    /*
+    ══════════════════════════════════════════════════════════════════════
+    DESIGN SYSTEM — GHOST LIVES
+    Palette: stark, cold, no red.
+      #060810  Deep navy-black    — the void
+      #0A0D1A  Panel
+      #101420  Raised surface
+      #BEC8D8  Ghost white        — pale cold light
+      #5A6878  Signal mid
+      #252E3C  Signal dim
+      #68C4B0  Verdigris teal     — THE SIGNAL
+    ══════════════════════════════════════════════════════════════════════
+    */
+    :root {
+      --bg:              #060810;
+      --bg-panel:        #0A0D1A;
+      --bg-raised:       #101420;
+      --bg-inset:        #040610;
+      --bg-deep:         #020408;
+
+      --ink:             #BEC8D8;
+      --ink-mid:         #5A6878;
+      --ink-dim:         #252E3C;
+      --ink-ghost:       rgba(190,200,216,0.06);
+
+      --signal:          #68C4B0;
+      --signal-bright:   #8AD8C4;
+      --signal-dim:      #3A7868;
+      --signal-pale:     rgba(104,196,176,0.10);
+      --signal-faint:    rgba(104,196,176,0.05);
+      --signal-border:   rgba(104,196,176,0.30);
+
+      --border:          rgba(90,104,120,0.22);
+      --border-mid:      rgba(90,104,120,0.38);
+      --border-strong:   rgba(90,104,120,0.60);
+
+      --focus-ring:      #68C4B0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 12px; z-index: 99999;
+      background: var(--signal); color: var(--bg);
+      padding: 8px 18px; font-family: 'Electrolize', sans-serif;
+      font-size: 0.8rem; letter-spacing: 0.1em; text-decoration: none; transition: top 200ms;
+    }
+    .skip-link:focus { top: 0; }
+    :focus-visible { outline: 1px solid var(--focus-ring); outline-offset: 3px; }
+
+    html {
+      background-color: #060810; background: var(--bg);
+      color: var(--ink); font-family: 'Electrolize', sans-serif;
+      min-height: 100%; -webkit-text-size-adjust: 100%;
+    }
+
+    /* CRT scan-line overlay */
+    body {
+      min-height: 100vh; background-color: #060810;
+      background:
+        repeating-linear-gradient(
+          0deg, transparent, transparent 2px,
+          rgba(190,200,216,0.022) 2px, rgba(190,200,216,0.022) 3px
+        ),
+        #060810;
+      color: var(--ink); position: relative; overflow-x: hidden;
+    }
+
+    /* Dot grain */
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(circle, rgba(104,196,176,0.04) 1px, transparent 1px);
+      background-size: 24px 24px; background-position: 12px 12px;
+    }
+
+    /* Ghost text watermark */
+    body::after {
+      content: "CACHED · STALE · RESIDUAL SIGNAL · ECHO LAYER · NOT VERIFIED · LAST CRAWLED UNKNOWN · CACHED · STALE · RESIDUAL SIGNAL ·";
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Electrolize', sans-serif; font-size: 0.38rem;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: rgba(104,196,176,0.04);
+      text-align: center; line-height: 5; word-break: break-all;
+    }
+
+    button { font-family: 'Electrolize', sans-serif; color: inherit; cursor: pointer; }
+
+    .page-shell {
+      position: relative; z-index: 1; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 32px 20px 56px;
+    }
+    .inner { width: 100%; max-width: 880px; }
+
+    /* ── MASTHEAD ─────────────────────────────────────────────── */
+    .masthead {
+      position: relative; padding: 20px 24px 16px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      border-bottom: 2px solid var(--signal); overflow: hidden;
+    }
+    .masthead::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--signal-border) 30%, var(--signal-border) 70%, transparent);
+    }
+    .masthead::after {
+      content: "×"; position: absolute; top: 6px; right: 10px;
+      font-size: 0.6rem; color: var(--ink-dim); pointer-events: none; letter-spacing: 0;
+    }
+
+    .masthead-inner {
+      display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 12px; padding-top: 6px;
+    }
+    .masthead-titles { min-width: 0; overflow: hidden; container-type: inline-size; }
+
+    .masthead-eyebrow {
+      font-size: 0.5rem; letter-spacing: 0.36em;
+      text-transform: uppercase; color: var(--ink-dim); margin-bottom: 6px;
+    }
+    /* Album-Index up-link + artist link — inherits eyebrow styling */
+    .masthead-eyebrow a {
+      color: var(--ink-dim); text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 160ms, border-color 160ms;
+    }
+    .masthead-eyebrow a:hover { color: var(--signal); border-bottom-color: var(--signal-border); }
+
+    /*
+    Double Title effect: slow 4-second melt at 132-second intervals.
+    rgb(3,6,16) ≈ the dark panel background — title dissolves into page.
+    CSS transition is set here; JS triggers the color change.
+    */
+    .masthead-title {
+      font-family: 'Readex Pro', sans-serif; font-weight: 300;
+      font-size: clamp(0.5rem, 10cqi, 5.5rem);
+      white-space: nowrap; overflow: hidden; text-overflow: clip;
+      line-height: 0.9; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink);
+      transition: color 4000ms ease;
+    }
+
+    .masthead-sub {
+      margin-top: 6px; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mid);
+    }
+
+    .masthead-artist {
+      text-align: right; font-size: 0.58rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--ink-mid);
+      white-space: nowrap; align-self: start; padding-top: 6px;
+    }
+
+    /* ── MAIN GRID ─────────────────────────────────────────────── */
+    .main-grid {
+      display: grid; grid-template-columns: minmax(210px, 340px) 1fr;
+      border: 1px solid var(--border-strong); border-top: none; background: var(--bg-panel);
+    }
+    .col-art { border-right: 1px solid var(--border-strong); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .col-player { padding: 20px; display: flex; flex-direction: column; gap: 13px; min-width: 0; }
+
+    /* ── ALBUM ART ─────────────────────────────────────────────── */
+    .art-wrap {
+      position: relative; width: 100%; aspect-ratio: 1/1;
+      border: 1px solid var(--border-mid); overflow: hidden; background: var(--bg-inset);
+    }
+    .art-wrap img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      position: relative; z-index: 2;
+      filter: brightness(0.85) saturate(0.7) hue-rotate(10deg);
+      transition: filter 800ms, opacity 180ms ease;
+    }
+    .art-wrap.is-playing img { animation: ghost-shimmer 8s ease-in-out infinite alternate; }
+    @keyframes ghost-shimmer {
+      from { filter: brightness(0.85) saturate(0.7) hue-rotate(10deg); }
+      to   { filter: brightness(0.95) saturate(0.82) hue-rotate(14deg); }
+    }
+
+    /* Ghost vignette */
+    .art-wrap::before {
+      content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(4,6,16,0.7) 100%);
+    }
+
+    /* "ARCHIVE COPY" annotation */
+    .art-stamp {
+      position: absolute; bottom: 8px; left: 8px; z-index: 5;
+      font-family: 'Electrolize', sans-serif; font-size: 0.4rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(104,196,176,0.45); pointer-events: none;
+    }
+
+    /* EQ overlay */
+    .eq-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 22%; display: flex; align-items: flex-end;
+      gap: 2px; padding: 0 12%;
+      opacity: 0; transition: opacity 600ms; z-index: 4;
+    }
+    .art-wrap.is-playing .eq-overlay { opacity: 1; }
+    .eq-b {
+      flex: 1; background: var(--signal); min-height: 1px;
+      animation: eq-ghost 0.55s ease infinite alternate; opacity: 0.45;
+    }
+    .eq-b:nth-child(1){animation-delay:0.00s}.eq-b:nth-child(2){animation-delay:0.09s}
+    .eq-b:nth-child(3){animation-delay:0.18s}.eq-b:nth-child(4){animation-delay:0.05s}
+    .eq-b:nth-child(5){animation-delay:0.14s}.eq-b:nth-child(6){animation-delay:0.23s}
+    .eq-b:nth-child(7){animation-delay:0.07s}.eq-b:nth-child(8){animation-delay:0.16s}
+    @keyframes eq-ghost { from { height: 3%; opacity: 0.3; } to { height: 75%; opacity: 0.55; } }
+
+    .album-label { text-align: center; }
+    .album-label-name { font-family: 'Readex Pro', sans-serif; font-weight: 400; font-size: 0.84rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+    .album-label-artist { font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim); margin-top: 4px; }
+
+    /* ── NOW PLAYING ────────────────────────────────────────────── */
+    .np-label { font-size: 0.5rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 3px; }
+    .np-title { font-family: 'Readex Pro', sans-serif; font-weight: 300; font-size: 1.15rem; line-height: 1.0; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); word-break: break-word; }
+    .np-meta { display: flex; gap: 8px; margin-top: 7px; flex-wrap: wrap; align-items: center; }
+
+    .live-dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--ink-ghost); border: 1px solid var(--border); flex-shrink: 0; transition: all 200ms;
+    }
+    .live-dot.active {
+      background: var(--signal); border-color: var(--signal-bright);
+      box-shadow: 0 0 8px rgba(104,196,176,0.5);
+      animation: signal-pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes signal-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .badge { font-family: 'Electrolize', sans-serif; font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--border); color: var(--ink-mid); }
+    .badge-flac  { border-color: var(--signal-border); color: var(--signal); }
+    .badge-wake.active { border-color: var(--border-mid); color: var(--ink-mid); }
+
+    /* ── BUFFER BAR ──────────────────────────────────────────────── */
+    .buf-wrap { width: 100%; height: 2px; background: var(--ink-ghost); }
+    .buf-fill { height: 100%; background: var(--ink-dim); width: 0%; transition: width 400ms; }
+    .buf-fill.loading { animation: buf-ghost 1s ease-in-out infinite; }
+    @keyframes buf-ghost { 0%,100%{opacity:0.2} 50%{opacity:0.7} }
+
+    /* ── SEEK BAR ──────────────────────────────────────────────── */
+    .prog-row {
+      display: grid; grid-template-columns: 46px 1fr 46px; gap: 8px; align-items: center;
+      font-size: 0.64rem; color: var(--ink-mid); font-variant-numeric: tabular-nums;
+    }
+    .prog-bar {
+      appearance: none; width: 100%; height: 5px;
+      background: var(--signal-faint); border: 1px solid var(--border); border-radius: 0; cursor: pointer;
+    }
+    .prog-bar::-webkit-slider-thumb {
+      appearance: none; width: 10px; height: 20px;
+      background: var(--signal); border: 1px solid var(--bg);
+      box-shadow: 0 0 0 1px var(--signal-border); border-radius: 0; cursor: pointer;
+    }
+    .prog-bar::-moz-range-thumb { width: 10px; height: 20px; background: var(--signal); border: none; border-radius: 0; cursor: pointer; }
+
+    /* ── CONTROLS ──────────────────────────────────────────────── */
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .ctrl-btn {
+      border: 1px solid var(--border-mid); background: var(--bg-raised);
+      color: var(--ink-mid); font-family: 'Electrolize', sans-serif;
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0 14px; min-height: 36px;
+      transition: background 120ms, border-color 120ms, color 120ms, transform 80ms;
+      position: relative; overflow: hidden;
+    }
+    .ctrl-btn:hover { background: var(--signal-faint); border-color: var(--signal-border); color: var(--ink); }
+    .ctrl-btn:active { transform: translate(1px,1px); }
+
+    /* ═══════════════════════════════════════════════════════════
+       PLAY BUTTON — 3-STATE MACHINE (SOP v1.2)
+       ───────────────────────────────────────────────────────────
+       State 1 (unloaded):  SOLID teal fill    — energised signal
+       Loading:             % counter          — acquiring
+       State 2 (armed):     HOLLOW ghost teal  — signal present,
+                             transparent bg,     awaiting tap.
+                             A literal ghost     Thematically exact.
+                             of the button.
+       Playing / Paused:    Solid teal resumes
+    ═══════════════════════════════════════════════════════════ */
+
+    /* State 1 — unloaded (default) */
+    .play-btn {
+      min-width: 136px; min-height: 50px;
+      font-family: 'Readex Pro', sans-serif; font-weight: 400;
+      font-size: 1.05rem; letter-spacing: 0.1em;
+      background: var(--signal); color: var(--bg);
+      border: 1px solid var(--signal-bright);
+      box-shadow: 0 0 18px rgba(104,196,176,0.14), 2px 2px 0 rgba(104,196,176,0.12);
+      transition: background 140ms, color 140ms, border-color 140ms,
+                  box-shadow 140ms, transform 80ms, text-shadow 140ms;
+    }
+    .play-btn:hover {
+      background: var(--signal-bright);
+      box-shadow: 0 0 28px rgba(104,196,176,0.22), 3px 3px 0 rgba(104,196,176,0.18);
+    }
+    .play-btn:active { transform: translate(2px,2px); box-shadow: 0 0 8px rgba(104,196,176,0.1); }
+
+    /* Loading — download in progress */
+    .play-btn.is-loading {
+      background: var(--bg-raised); border-color: var(--border);
+      color: transparent; cursor: wait; box-shadow: none;
+    }
+    .play-btn.is-loading::after {
+      content: ""; position: absolute; top:50%; left:50%;
+      width: 14px; height: 14px;
+      border: 1.5px solid rgba(104,196,176,0.2); border-top-color: var(--signal);
+      border-radius: 50%; transform: translate(-50%,-50%);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    /* State 2 — Armed: hollow/ghost treatment
+       Transparent bg + teal outline + glowing text.
+       The button becomes a ghost of itself — solid → hollow.
+       Perceptibly different at a glance: the fill is gone. */
+    .play-btn.is-armed {
+      background: transparent;
+      color: var(--signal);
+      border: 1px solid var(--signal);
+      box-shadow: 0 0 22px rgba(104,196,176,0.28),
+                  inset 0 0 16px rgba(104,196,176,0.05),
+                  2px 2px 0 rgba(104,196,176,0.10);
+      text-shadow: 0 0 10px rgba(104,196,176,0.55);
+    }
+    .play-btn.is-armed:hover {
+      background: rgba(104,196,176,0.07);
+      color: var(--signal-bright);
+      border-color: var(--signal-bright);
+      box-shadow: 0 0 32px rgba(104,196,176,0.42),
+                  inset 0 0 22px rgba(104,196,176,0.08),
+                  3px 3px 0 rgba(104,196,176,0.15);
+      text-shadow: 0 0 14px rgba(104,196,176,0.75);
+    }
+    .play-btn.is-armed:active {
+      transform: translate(2px,2px);
+      box-shadow: 0 0 10px rgba(104,196,176,0.2), inset 0 0 8px rgba(104,196,176,0.04);
+    }
+
+    .repeat-btn { min-width: 130px; font-size: 0.62rem; }
+    .repeat-btn[data-mode="song"]  { border-style: dashed; border-color: var(--signal-border); color: var(--signal); }
+    .repeat-btn[data-mode="album"] { border-style: dotted; }
+
+    /* Keyboard hints */
+    .kbd-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .kbd-hint { font-size: 0.48rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+    kbd { display: inline-block; padding: 0 4px; border: 1px solid var(--border); font-size: 0.48rem; font-family: inherit; color: var(--ink-mid); background: var(--bg-inset); }
+
+    .status-line { font-size: 0.52rem; color: var(--ink-dim); line-height: 1.5; letter-spacing: 0.04em; }
+    .err-line { font-size: 0.6rem; color: var(--signal); display: none; line-height: 1.4; border-left: 1px solid var(--signal-border); padding-left: 8px; }
+    .err-line.show { display: block; }
+
+    /* ══ PLAYLIST ════════════════════════════════════════════════ */
+    .playlist-section { border: 1px solid var(--border-strong); border-top: none; background: var(--bg-panel); }
+    .playlist-header {
+      padding: 8px 20px; border-bottom: 1px solid var(--border);
+      font-size: 0.48rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink-dim);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .playlist-header::before { content: "// ECHO LOG"; font-size: 0.42rem; color: rgba(104,196,176,0.2); letter-spacing: 0.12em; }
+
+    .track-list { list-style: none; }
+    .track-btn, .remix-row {
+      width: 100%; display: grid; grid-template-columns: 52px 1fr auto;
+      align-items: stretch; text-align: left;
+      border: none; border-bottom: 1px solid var(--border); transition: background 100ms;
+    }
+    .track-list li:last-child .track-btn,
+    .track-list li:last-child .remix-row { border-bottom: none; }
+
+    .track-btn { background: transparent; cursor: pointer; }
+    .track-btn:hover { background: var(--signal-faint); }
+    .track-btn[aria-current="true"] { background: var(--signal-faint); box-shadow: inset 3px 0 0 var(--signal); }
+    .track-btn[aria-current="true"] .track-num { color: var(--signal); }
+    .track-btn[aria-current="true"].is-playing .track-num { animation: signal-pulse 1.2s ease-in-out infinite; }
+
+    .track-num {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 0; border-right: 1px solid var(--border);
+      font-family: 'Electrolize', sans-serif; font-size: 0.9rem;
+      letter-spacing: 0.06em; color: var(--ink-dim); min-width: 52px;
+    }
+    .track-info-col { padding: 13px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
+    .track-title-text { font-family: 'Readex Pro', sans-serif; font-weight: 300; font-size: 0.84rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-meta-text { font-size: 0.48rem; color: var(--ink-dim); letter-spacing: 0.14em; text-transform: uppercase; }
+    .track-dur { display: flex; align-items: center; padding: 13px 14px; font-size: 0.64rem; color: var(--ink-dim); border-left: 1px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+    /* Remix row */
+    .remix-row { background: var(--signal-faint); border-top: 1px dashed var(--signal-border); cursor: pointer; position: relative; }
+    .remix-row:hover { background: var(--signal-pale); }
+    .remix-row:focus-within { outline: 1px solid var(--focus-ring); outline-offset: -2px; }
+    .remix-file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
+    .remix-icon-cell { display: flex; align-items: center; justify-content: center; padding: 12px 0; border-right: 1px dashed var(--signal-border); min-width: 52px; }
+    .remix-icon-cell img { width: 24px; height: 24px; object-fit: contain; opacity: 0.45; }
+    .remix-info { padding: 11px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
+    .remix-title { font-family: 'Readex Pro', sans-serif; font-weight: 400; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal); }
+    .remix-sub { font-size: 0.46rem; color: var(--ink-dim); letter-spacing: 0.12em; text-transform: uppercase; }
+    .remix-status { display: flex; align-items: center; padding: 11px 14px; font-size: 0.54rem; color: var(--signal); border-left: 1px dashed var(--signal-border); white-space: nowrap; letter-spacing: 0.1em; text-transform: uppercase; }
+    .upload-toast { display: none; padding: 8px 20px; font-size: 0.52rem; color: var(--ink-mid); letter-spacing: 0.06em; background: var(--signal-faint); border-top: 1px solid var(--border); }
+    .upload-toast.show { display: block; }
+
+    /* ── FOOTER ─────────────────────────────────────────────────── */
+    .page-footer { margin-top: 22px; text-align: center; width: 100%; }
+    .page-footer a {
+      font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--ink-mid); text-decoration: none; border-bottom: 1px solid var(--border);
+      padding-bottom: 2px; transition: color 160ms, border-color 160ms;
+    }
+    .page-footer a:hover { color: var(--signal); border-color: var(--signal-border); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .page-shell { padding: 14px 12px 44px; }
+      .masthead-inner { grid-template-columns: 1fr; }
+      .masthead-artist { text-align: left; padding-top: 4px; }
+      .main-grid { grid-template-columns: 1fr; }
+      .col-art { border-right: none; border-bottom: 1px solid var(--border-strong); padding: 14px; }
+      .col-player { padding: 14px; }
+      .art-wrap { max-width: 360px; margin: 0 auto; }
+      .kbd-row { display: none; }
+      .track-btn, .remix-row { grid-template-columns: 44px 1fr auto; }
+      .track-num, .remix-icon-cell { min-width: 44px; }
+    }
+
+    /*
+    ── CURSOR ECHO TRAIL ─────────────────────────────────────────
+    Six ghost circles follow the cursor at increasing delays.
+    */
+    .cursor-ghost {
+      position: fixed; width: 10px; height: 10px; border-radius: 50%;
+      pointer-events: none; z-index: 99998; transform: translate(-50%, -50%);
+      opacity: 0; left: -100px; top: -100px; transition: opacity 60ms linear;
+    }
+
+    audio { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <main class="page-shell" id="main-content">
+    <div class="inner">
+
+      <header class="masthead" role="banner">
+        <div class="masthead-inner">
+          <div class="masthead-titles">
+            <!-- Album-Index up-link per SOP v1.2 -->
+            <p class="masthead-eyebrow">
+              <a href="../">Album-Index</a> &nbsp;·&nbsp; Pat Bɇɇ
+            </p>
+            <h1 class="masthead-title">Ghost Lives</h1>
+            <p class="masthead-sub">Residual Signal</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="main-grid">
+        <div class="col-art">
+          <div class="art-wrap" id="artWrap">
+            <img id="albumArtImg" src="" alt="Ghost Lives by Pat Bɇɇ — cover art" />
+            <div class="art-stamp" aria-hidden="true">*</div>
+            <div class="eq-overlay" aria-hidden="true">
+              <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+              <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+              <div class="eq-b"></div><div class="eq-b"></div>
+            </div>
+          </div>
+          <div class="album-label">
+            <div class="album-label-name">Ghost Lives</div>
+            <div class="album-label-artist">Pat Bɇɇ</div>
+          </div>
+        </div>
+
+        <div class="col-player">
+          <div aria-live="polite" aria-atomic="true">
+            <p class="np-label">Now Playing</p>
+            <p class="np-title" id="npTitle">Ghost Lives</p>
+            <div class="np-meta">
+              <span class="live-dot" id="liveDot" aria-hidden="true"></span>
+              <span class="badge badge-fmt" id="fmtBadge" aria-label="Audio format">—</span>
+              <span class="badge badge-wake" id="wakeBadge" aria-label="Background status">Background</span>
+            </div>
+          </div>
+
+          <div class="buf-wrap" aria-hidden="true"><div class="buf-fill" id="bufFill"></div></div>
+
+          <div class="prog-row">
+            <span id="curTime" aria-label="Current time">0:00</span>
+            <input id="progBar" class="prog-bar" type="range" min="0" max="100" value="0" step="0.1"
+              aria-label="Track progress" aria-valuetext="0 seconds" />
+            <span id="durTime" aria-label="Total duration">0:00</span>
+          </div>
+
+          <!-- Volume slider intentionally removed — system volume used -->
+
+          <div class="controls" role="group" aria-label="Playback controls">
+            <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Previous track">← Prev</button>
+            <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play Ghost Lives">▶ Play</button>
+            <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Next track">Next →</button>
+            <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button"
+              data-mode="off" aria-label="Repeat mode: off. Press to cycle." aria-pressed="false">↺ Repeat: Off</button>
+          </div>
+
+          <div class="kbd-row" aria-hidden="true">
+            <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
+            <span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd> Seek 10s</span>
+            <span class="kbd-hint"><kbd>N</kbd><kbd>P</kbd> Track</span>
+            <span class="kbd-hint"><kbd>M</kbd> Mute</span>
+          </div>
+
+          <p class="status-line" id="statusLine">
+            // Signal recovered. Tap Play to begin. Background playback active after first interaction.
+          </p>
+          <p class="err-line" id="errLine" role="alert" aria-live="assertive"></p>
+        </div>
+      </div>
+
+      <section class="playlist-section" aria-label="Tracklist">
+        <div class="playlist-header" aria-hidden="true">
+          <span id="trackCount">0 Instances</span>
+        </div>
+        <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
+      </section>
+
+      <footer class="page-footer">
+        <a href="https://www.instagram.com/patbee.music/"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Pat Bee on Instagram (opens in new tab)">Pat Bee</a>
+      </footer>
+
+    </div>
+  </main>
+
+  <audio id="audioEl" preload="metadata" playsinline x-webkit-airplay="allow"></audio>
+
+  <script>
+    /*
+    ╔══════════════════════════════════════════════════════════════════════╗
+    ║  GHOST LIVES — Pat Bɇɇ  ·  SOP v1.2                                 ║
+    ║  Three subtle effects: cursor echo trail, art ghost swap,            ║
+    ║  double title colour fade.                                           ║
+    ║  3-state play button: State 1 (solid teal) → Loading (%) →          ║
+    ║  State 2 (hollow ghost) → Playing.                                  ║
+    ╚══════════════════════════════════════════════════════════════════════╝
+    */
+
+
+    /* ════════════════════════════════════════════════════════════
+       EFFECT 1 — CURSOR ECHO TRAIL
+       Six ghost circles trail behind the cursor at increasing
+       delays. Verdigris teal, fading to transparent.
+    ════════════════════════════════════════════════════════════ */
+    (function initCursorEchoTrail() {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
+
+      const GHOST_COUNT = 6;
+      const OFFSETS     = [4, 10, 18, 28, 40, 55];
+      const OPACITIES   = [0.55, 0.38, 0.26, 0.16, 0.09, 0.04];
+      const SIZES       = [9, 8, 7, 6, 5, 4];
+      const BUFFER_LEN  = 80;
+      const posBuffer   = new Array(BUFFER_LEN).fill({ x: -200, y: -200 });
+      let   bufHead     = 0;
+
+      const ghosts = Array.from({ length: GHOST_COUNT }, (_, i) => {
+        const el = document.createElement('div');
+        el.className = 'cursor-ghost';
+        el.style.width      = `${SIZES[i]}px`;
+        el.style.height     = `${SIZES[i]}px`;
+        el.style.background = `rgba(104, 196, 176, ${OPACITIES[i]})`;
+        if (i === 0) el.style.boxShadow = '0 0 6px rgba(104,196,176,0.35)';
+        document.body.appendChild(el);
+        return el;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        bufHead = (bufHead + 1) % BUFFER_LEN;
+        posBuffer[bufHead] = { x: e.clientX, y: e.clientY };
+      });
+
+      function tick() {
+        ghosts.forEach((ghost, i) => {
+          const offset = OFFSETS[i];
+          const idx    = (bufHead - offset + BUFFER_LEN) % BUFFER_LEN;
+          const pos    = posBuffer[idx];
+          ghost.style.left    = `${pos.x}px`;
+          ghost.style.top     = `${pos.y}px`;
+          ghost.style.opacity = OPACITIES[i];
+        });
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+
+
+    /* ════════════════════════════════════════════════════════════
+       EFFECT 2 — ALBUM ART IMAGE GHOST SWAP
+       Mouse enter: swap to ghostlives01.png (the "twin" image).
+       Mouse leave: swap back. Brief opacity dip for smoothness.
+    ════════════════════════════════════════════════════════════ */
+    function initArtGhostSwap(imgEl) {
+      const normalSrc = imgEl.src;
+      const ghostSrc  = normalSrc.replace(/(\.\w+)$/, '01$1');
+      const preload   = new Image(); preload.src = ghostSrc;
+      let isSwapped   = false;
+
+      imgEl.addEventListener('mouseenter', () => {
+        if (isSwapped) return; isSwapped = true;
+        imgEl.style.opacity = '0.0';
+        setTimeout(() => { imgEl.src = ghostSrc; imgEl.style.opacity = '1'; }, 140);
+      });
+      imgEl.addEventListener('mouseleave', () => {
+        if (!isSwapped) return; isSwapped = false;
+        imgEl.style.opacity = '0.0';
+        setTimeout(() => { imgEl.src = normalSrc; imgEl.style.opacity = '1'; }, 140);
+      });
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       EFFECT 3 — DOUBLE TITLE COLOUR FADE
+       Every 132s the masthead title dissolves to near-black (same
+       as panel bg), holds for 5s, then rematerialises.
+       The title of the thing is the thing that disappears.
+    ════════════════════════════════════════════════════════════ */
+    function initDoubleTitleFade() {
+      const titleEl = document.querySelector('.masthead-title');
+      if (!titleEl) return;
+      const VISIBLE_MS   = 132000;
+      const FADE_MS      = 4000;
+      const HOLD_DARK_MS = 5000;
+      const COLOUR_NORMAL = 'rgb(190, 200, 216)';
+      const COLOUR_GHOST  = 'rgb(3, 6, 16)';
+
+      function cycle() {
+        titleEl.style.color = COLOUR_GHOST;
+        setTimeout(() => {
+          titleEl.style.color = COLOUR_NORMAL;
+          setTimeout(cycle, VISIBLE_MS + FADE_MS);
+        }, FADE_MS + HOLD_DARK_MS);
+      }
+      setTimeout(cycle, VISIBLE_MS);
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       CONFIG
+       CDN filenames confirmed from view-source (non-standard):
+         ghostlives.png / 133_GhostLives_2026mix.flac / .m4a
+    ════════════════════════════════════════════════════════════ */
+    const CDN_BASE_URL     = "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev";
+    const ALBUM_ART_URL    = `${CDN_BASE_URL}/ghostlives.png`;
+    const USE_BLOB_LOADING = true;
+    const BLOB_TIMEOUT_MS  = 30000;
+    const DANGER_SECONDS   = 8;
+    const MIN_PREBUFFER_S  = 30;
+
+    const album = {
+      title:      "Ghost Lives",
+      artist:     "Pat Bɇɇ",
+      artworkUrl: ALBUM_ART_URL,
+      tracks: [
+        {
+          title:    "Ghost Lives",
+          duration: "—",
+          flac:     `${CDN_BASE_URL}/133_GhostLives_2026mix.flac`,
+          fallback: `${CDN_BASE_URL}/133_GhostLives_2026mix.m4a`
+        }
+      ]
+    };
+
+    /* Remix icon — ICON_LIGHT for dark background */
+    const ICON_LIGHT = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAFsAWwDASIAAhEBAxEB/8QAHQABAAIDAAMBAAAAAAAAAAAAAAcIAQYJAgMEBf/EAFYQAAEDAgQCAwgNCQMKBgMAAAEAAgMEBQYHERITIQgxdRgiN0FRs7TTCRQVFzZTVVaSk5XR0hYjMlJhcZGU1HSxsiUzNDVjc3aBoaMnQkNmcsFEgsL/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAWEQEBAQAAAAAAAAAAAAAAAAAAARH/2gAMAwEAAhEDEQA/AKdIiLIIiICLyjY+SRsbGue9x0a1o1JPkC+v3JunybWfUO+5B8SL7fcm6/JtZ9Q77k9yrp8m1n1DvuQfEi+z3JunybWfUO+5Z9ybp8m1n1DvuQfEi+33JuvybWfUO+5Pcq6fJtZ9Q77kHxIvs9ybp8m1n1DvuWfcm6fJtZ9Q77kHxIvt9ybr8m1n1DvuT3KunybWfUO+5B8SL7Pcm6fJtZ9Q77ln3JunybWfUO+5B8SL7fcm6/JtZ9Q77k9yrp8m1n1DvuQfEi+z3JunybWfUO+5Z9ybp8m1n1DvuQfEi+33JuvybWfUO+5Pcq6fJtZ9Q77kHxIvs9ybp8m1n1DvuWfcm6fJtZ9Q77kHxIvt9ybr8m1n1DvuX58pkilfG9ha5riHNcNCCPEVR5ovVxHeQL2NJI1KDKIigIiICLLWue4MY1z3OOga0akn9ysx0W+j27GEYxFimnqYKJr9YoXs2iUDhPBLZIiCCHOHI81RWqCCecPMMEj+G0udtYToB1nkvXz102kaeULqfZcmctrZR+148H2OUuZse+S205c4aAEE8Ma66LW8wOjrl3iShMNDY6Czy6cn0NJBASdHdZER8bh/AeRMHNRFJWfuVV1yxxXJRSQ1Eltk1fBUua4tIMkga3dsa3XbHroP3qNetQEREBERAREQEREHnBFLUTxwQRvllkcGRsY0uc5xOgAA6yT4lZ/ITorV+J6GkxBjOaa32+XZLHTRudFO5pEbxubJCQWlrnA8+sfvX6HQiyVoMQwOx7iWje6KlqzFSU08bS2RzRBMyXY+M6tIc4bg793lV24IoqeCOCCJkUUbQxjGNDWsaBoAAOQAHiVEeYbyQywsjKcR4Psla+CFsbZKy200j3Lunfk8Mav5df7Sth977AXzIwz9lQfhWyoqNa977AXzIwz9lQfhWPe+wF8yMM/ZUH4VsyINZ977AXzIwz9lQfhWfe+wF8yMM/ZUH4VsqINa977AXzIwz9lQfhWPe+wF8yMM/ZUH4VsyINZ977AXzIwz9lQfhWfe+wF8yMM/ZUH4VsqINa977AXzIwz9lQfhWPe+wF8yMM/ZUH4VsyINZ977AXzIwz9lQfhWfe+wF8yMM/ZUH4VsqINa977AXzIwz9lQfhWPe+wF8yMM/ZUH4VsyINZ977AXzIwz9lQfhWfe+wF8yMM/ZUH4VsqINa977AXzIwz9lQfhWPe+wF8yMM/ZUH4VsyINZ977AXzIwz9lQfhWfe+wF8yMM/ZUH4VsqINa977AXzIwz9lQfhXLvOunp6TOXG1JSQRU9PDiGvjiiiYGsjYKiQBrQOQAAAAC60rk3nrzzwx5/wAS3H0mRBp0bdXL2rDBoFlQERFAREQbbkzbYrxmthq2TtY+KpudLE5rwC0h07GnUEHy+RdUsOWmksllpLbR00EEdPCyPSFgaDtaG68gPIPEuafRUp4KjOiwOmYHmO4Uz2agHQiph0PNdPVoEREEH9M7CsOIso5pm0kb6mildUcURgvDGU8503bSdurtdOS5wyMMU0kR643lv8OS6q586e9PiLUA/wCTqnr/ANxIuWFz/wBa1v8AaJP8RUo+dERQEREBERAX7mX1p938e4esWrB7pXSmpO//AEfzkrWc+R5c/If3L8NSR0aIopc7cLcWJkmy6Uj27mg7XCpi0I8h/aqOlmAsPUuFcH2qxUtNTQe06SGGXgMDWyPZG1hfyA1J29ZGpX7iIqCIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgLk9niNc78eH/3LcfSZF1hXJ/PHw248/4luPpMiUaeiIsgiJqEBE1HlTUeUIJY6Jvhmsn9tg9IhXThcx+ib4ZrJ/bYPSIV04WgREQaNnz4J8RdnVXmJFywuf8ArWt/tEn+Irqfnx4J8RdnVXmJFyvuZ/yrW/2h/wDiKlHoRNR5U1HlCgIn/NEBERAUl9GPw24Z7SpPSYlGikvox+G3DPaVJ6TEqOoqIioIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAuT+eHhtx5/xLcfSZF1gXJ/PDw248/wCJbj6TIlGnryjY+SRsUbHSSPIa1jRq5xPUAPGV4k6AlWI6H+T1LjXEEGIbnNDJS0MzZfa7nAlxY+F+ha6NwIIcR1hQaplx0eswsaULLjT0cdDRucOdZFPG4ghrtRpER1O/6FSZa+h9fZKcur7hE2XdyEczwNNB5YP3q7trt9HbKKOjoKaGmgjaGtZFGGDkAOoADqAX1K4KRdx1cPlP/vu9QncdXD5T/wC+71Cu6iYKr5LdGSfBmNaO/wBTcHv9qzMla0TE6lsjH9RhH6vlVqERAREQa3mVZKjEWDbhZaYta6sglgJcSNA+NzdeQP63kVSanofXGaqnmNy04kjn/wCfd4zr8QrtIgpF3HVw+U/++71Cdx1cPlP/AL7vUK7qJgozdOh7e46CR9BcY3VIB2CSZ5brodNdINevRQnmhlHjTLt7XX2iEkD9NJqaKYsGu/rc9jR1MJ/guqS1XNDBlqxthKvtNwo4JZZKeRsEj4mucx5je1pBLXaabj1DVTByZHNFs+aeFqjBuOrnY5mOa2CplbGSDoWtlewaagfq+RawoCkvox+G3DPaVJ6TEo0Ul9GPw24Z7SpPSYlR1FREVBERAREQEREBERAREQEREBERAREQEREBERAREQFyfzw8NuPP+Jbj6TIusC5PZ4n/AMbseD/3LcfSZEo0936J/cr4dAC3RR4JqrgJ9ZHyvjMe8cgYqd2umioeRqCFZ/oQZn27DV9fh29VfAp6sFkLpJGtZxHOgY39J4HU09Q1UF8kXrpp4amnjqKeVksUjQ9j2OBDgRqCCOvkvYqCIiAiIgIiICIiAiIgIi/Cx/f6fDGC7xfZ5Yo/aVFPPGHuA4j2RueGjUjUnb1ahBz76aEdC3NusdTVBkmMj+I3e07T7Yn1Gg5jn5VCC2XNDE0uL8d3W/S7h7Yqpnta7XvQ6V7wBzOn6XlWtKApL6Mfhtwz2lSekxKNFJfRj8NuGe0qT0mJB1FREVBERAREQEREBERAREQEREBERAREQEREBERAREQDy5rk3nkf/HDHZB5flLcPSZF1au84pbVV1JOnChe/X9zSVybzgn9s5tYxqQdeLfq1+v753lBrq9lNPPS1MdTTTPhmieHsexxaQQdQdRz616I3ajTxrzUFk8rulfiDCmG4LNc6MXLgBrWzSxSTP2tYxoG50w/VJ6vGpCi6ZdAYYy+0EPLQXD2s3kfH/wCuqVLG0eQJoux3Zdu+ST/Lt9endl275JP8u316pPtb+qE2t8g/gg6B5U9J2gxvi6ksDbeYX1MrI2uMLW/pSMZ8c79fyKxy5jdE0D35rIdB/ptP6RCunKoIiIPwseX78mcK197MXEbSQSTObt15MY53lH6vlVZZ+mPQRVM0LrQ7WORzP9Gb4jp8ep+z58E2IuzqrzEi5X3MD3VreQ/0h/8AiKC6Hdl275JP8u316d2Xbvkk/wAu316pPtb+qE2t8g/goLo3DpnU0dKXUlm3zE6AOpQR1HyT69eigzOHP3GGYDpKX21NRW6TXdTxSSxsOu8EFvEc096/T/kohAHiAWUDrJJ6ydSiIoCkvox+G3DPaVJ6TEo0Ul9GPw24Z7SpPSYlR1FREVBERAREQEREBERAREQEREBERAREQEREBFr+JMb4Lw1XMoMR4vw/ZquSITMgr7lDTyOYSQHBr3AlurXDXq1B8i+3DeIbBiWhfX4cvlsvNJHKYnz0FWyoja8AEtLmEgO0c06dehHlQfpovyqvEVhpsQ02HJ75bIb1VRGant0lWxtTMwBxLmRE7nN7x/MDTvXeQr9RvVzCD8bHTnMwbeXM/SFBOR9W5cncwXF+PcQud+kbpUk/WuXW3EdP7asFwptNeLSys0/ewj/7XJ3Nikkosz8U00kbo9l4qw0ObpqBO8aj9nJBrPUvYx/iK9SIPoRepj9ORXtBBUBERQSx0TfDNZP7bB6RCunC5jdE5zG5zWMPkawmupwNx01PtiHkF05WgREQaNnz4J8RdnVXmJFywuf+ta3+0Sf4iup2fb2MymxDvkYzW3VIG46angScv3rlhcud0rNDqPbD/wDEVKPQiIoCIiAiIgKS+jH4bcM9pUnpMSjRSX0Y/DbhntKk9JiVHUVERUEREBERAREQEREBa/iTG+C8NVzKHEeL8P2arkiEzIK+5Q08jmEkB4a9wJbq1w16tQfItfzhx3R4Xsjoo77QWypkdtlqJJojLTx7Xkuijedr5dWbWh/etLtxDwzhvqrivOfKWCsmhpctMK3J4c7dWVdogqqid2pBfJM+Uvle7rL3EucSSSSUF18N4hsGJaF9dhy+Wy80kcphfPQVbKiNrwASwuYSA7RzTp16EeVa5mTmNRYJ4MbsL4wxFUybTwLDZZarYw7u+dJ3sQ0LNC3fv75p26HVU4qulXdqelhobLQsoKOnjbFTwQROijiY0aNY1rZtGtA0AA5ABa9cOk1jep3bKqaMH9WSYeX/AGyC8WXmZcOMONJJg/FWGaaHcOPiCngo97xt71sfGMp1DtQ7Zs71w3ajRfbjvFFbR2SX8kqnDFTdnAtZ7q3N0FPF3rtHnhse5+jturO81GvftI587Lnnrjus3f5WrGa69VTOPL/tP2rW67M7G1WTxMQXJuv6tbMP/wC/2oL14czDzNpr2z8uMS5T0tpj0dL7kCpnqJNHDVg4s7Gs1bv787tCB3jgTp+5dc6cvLfbKuhp8SzUr5eMW1IroJpYXyOe4uYZpHjvXOO1pBY0BrQ3aA1c4qnFuJKjXjXq4Sa9e6qkP97l+fPX11TqZqqZ/l3SOP8AeUFurljHALL665y515qVxNSaiWl/KmCKnl74udHsgczYw9WkZZoDo3by02yo6V2G7VQw0duYaiOnibFG6eQTyODRoC57qgue7kNXOJJPMkkqh/MkknUpogtBiXP3LmurKmskyowbWVdTI6Weomw9TySSvcSXPc7iaucSdSTzJK/RtHS7mt0VLR0lkp6ahp2Mihp4aQsjijboGsa0T6NaAAAByACqbos6ILoYfxjkzmTimz3etpPySxHT1xqjcLDPFa6irdLtbLHNIyXe9sm925wIf+ltc3c7dYW9Zm4JwXX4ZsF3ub6Klu0G233KtrWPp3Niic55lqJJC7c0CIFzzq91RHtLzxCzlfRVVRQ1UdTSyviljcHNc1xBBB1HMftAVo8hcyLPj20RZb5iRRV1MZIpKOepayV0E7TCyKRnGe5pcNXd6WOa4FzXNc1zmkL2vaHNLSORGi53dOLBMuH8zHXmCmLKO4MMrntYQ0yyTVDjzDQNdG+UlXiseN8HNxeMvKW+QG70dvppYoKi4Nlnma9khDAXvdLJK2OLiPLtTtkY4k7tVqnSiy3hzAy6rGRQB9xo431FOQwFznMhl2t/QcT3z+oIOYSL7r7a6yy3irtdfC+GoppnxPa9padWuLTyIB6wfEvhQF5NcQvFEHua4FeS9A5Lza/yqYNyyZuHuXmphuudUCnZDc6V7nuftaAJ2E6nUcuS6p4erWXGx0VfHLHKyop45Q9jtzXBzQdQeeo5rj9FK6OVskTyx7SC1wOhBCuL0TukLFT0MGEsW1TWR08bWU9RLIBo1ohja3dJL/8AI6Af/aQXLRa3ZsdYRu0TpKTEFrO0kEGti18XkcfKF8WLszMF4atE9xrb/bpWQh2scNZCXkhrnaAF4596VRqHS0u1vt+UlfFVXCGmkmEjGNdM1heTBMAOZ566dS5pVBDqqdwOodK4g+UaqYuk1nNVZnYjkp6QOhs9K8sgYNWh4a+UNeQJHNLi2TmR/coaHIaKUERFAREQEREBSX0Y/DbhntKk9JiUaKS+jH4bcM9pUnpMSo6ioiKgiIgIiICIiAtAzfzIs2CsKXSu9v0stZSboXwsmYXxSmAyta5u9paS3Y7Tr0c0+MFeeduO6nAmG7fJbKGGsvN8utPZbU2pcW00dVPu2STlvfcJoa4kNBcdABpruFJelRiGqtrbXgKG4urWW2lbHV1WhYayoD52zTvAe7v5HudI4nUlzySSSSQjrNbMm+45xFVVdXXVHtV8r+HFxn7Q0veRyL3DqfotGfoXf3rw1QdSDy0CyOfUvqo7ZcatodT0c8oPjbE4/wBw/av0abCWJKggQ2eudr5KaQ/3NQfiOBA5rw8a3OjyyxtWOAjsledfLSTfg/av36HIjMGq2bbJV99p/wDiz/s/2aCLSgOinu1dGPG9TsNRRVEQdprrFM3Tq8sK3GzdES61Ow1VW+LXTXdI5vk8sCCqeqyNT1BXctvQ4omBpqbm13VqOOD5PLAvsy66PGXOJbXJdLJXx3WgjqZKYVTYhwpnxuDXmJ76cCVm4EcRhcwkEAnQ6BRgMkPUxx/cFg6g6EEHyK72ILV0YcEXiWxYixFavdGIFs0dPQis4Tg4scx7oadwY8OY4FjiHDxjmFqObuS2EL5gGTHOXFS2oomgvMbYDBIBwnzDdFwGvbuY6J7dwG5j2OGrXNJCp7l+lhO5z2fElvuMEr43QVMUhLXEahrw7TkR5F8FVDJT1EtPK0tkieWOBGhBB0K9YOh1HWg6N5fWNuYldlvmfQVFDBc8OU76WpdJFq+aGWmj11IJc/aHSta0uaGunMmp2GKWe3ta9pa4BzSNCCORCo9ltjm+Yb6JGLrjaah0VbTUzKeCXe9roeKaSAyMc1wLXtbKXNI6nAHn1G8SCqHS46Pjb9HUYvwlSNbXsa6Spp4o9OKBxpHENjiJc8ktGpPP/qqQXW3V1rrpaG4Us1LURPLHxyxuY4EEg8iAesH+C7GSMZIxzJGtc1w0LXDUEKEM7+jrhPHsM9dRU0VtupDnCSBkUQe/84e+Iic46ueNf3IObCKXcz+j9j7BUtRKbXPcqKMudxaOnnlDWDfzceE0Dk3Unq5hRLLHJFK6KVjmSMJa5rhoWkdYI8SDwREQZXnDPNDIJIZXxvHU5jiCP+YXrRB+xSYoxLRgilxFd6cHr4VbI3X+B/YvCtxBfK+MxV97udVG46ubPVPe0n9oJ/af4r8pEHvBb4iAsr0DrC946goCIigIiICIiApL6Mfhtwz2lSekxKNFJfRj8NuGe0qT0mJUdRURFQREQEREBERBFmdVklxjebFaHW+5wUWGa6HFFRcwGMp3uijqmxU8bjq58vFDHPaGgCPXV7XOYDz2z4ub7nmffHvcXcOuqIxqdeQmk/afKumOL8S2qO41eDuLvu1RYKy58NjmnhQRmOLc8a7hudL3p00PDk56t0PLrNcaZkYi7UqfPPQaupa6OWVVRmPimOGRrm0cLg+Rx1AID4gR+g4dT/GolV8OgHb6VmGKitEbeM7c0u2jXTZTnya9aDb8scvMtrlbLe/Ctmpb3a2zz09XdjBEynDoGtYeC50INTuk0AewcMhkp4m5rWP/AGseWCTDIgiwRky3F0ztrpJPblvoYI298CN0mry8FrDpw9ujtd2o0UsUFJSUFDBQUFNBS0lNG2GCCGMMjiY0ANY1o5NaAAAByAC945IIawbZMf4iuttqrzguy5c2miqXyVlLHVU1yrbkGtbw4w5sPChhJLtzgTIdgDdmu8yJi2yXersclHhG52vD9fJq327PahWcJpa4asZxGDeCWuBdub3uhadeWwogjHBmBs0Lde4qvFGdVXfLfFo72lTYboaLiODmnR8m152Foc0hu13MEOGnPe6Kw2yiw66wUUU1NQuikjPCqZGTHial8nGDuJxXOc5xl3by5xcXbjqv00QRN3OGTDr57t1GDfbtean21JLW3OrqeNLu3F0gklcJNXc3B4IdqdddSpToKSloKGnoaGmhpaSmibDBBDGGRxMaNGta0cmtAAAA5ABe5EBRfnhiez4IsdntE+GZJ7die6SWx01KIWR0tTUtlcJHMJBc6SRznOIHVxHE7trXygo9zzwV+WlpsHEqODTWG8tvc+1+17+BTz8Nre9cDrK6LcDp3m/Qg6IOaebFLFR5h36CBoaxtxqAAAByEzx4v3LVVuWc/hLxB2jU+eetOQXZ6G+GbVi/LWqsV7i49BJUwVEsJa1zZeBJRzCN7XAhzHOjDXAjm0kctdVb5UOypxNdcIdFfGl9skvAr46VtPFMHOa6Ljuo4TIxzSC17WyFzSDycAeemivigIiIPRW0dJXU76etpYKmGRpY+OaMPa5pGhBB5EEEqJswejjlfjGZ00tobZZHM2udaKampy4ncS4/mjq7vuv9g8imBEFZu4qys+X8Z/zlN/Tp3FWVny/jP+cpv6dWZRBWbuKsrPl/Gf8AOU39OncVZWfL+M/5ym/p1ZlEFZu4qys+X8Z/zlN/Tp3FWVny/jP+cpv6dWZRBWcdCrKwHX3fxn/OU39OvLuLsrfl7GX85Tf06ssiCtPcXZW/L2Mv5ym/p07i7K75fxl/OU39OrLIgrT3F2Vvy/jL+cpv6dVy6V2UmG8p8RUFuw7W3aqiqaSOd7q+WN7g5z5mnTYxvLSNv8Sukao97Iv8N7P2bB52pUFUERFAUl9GPw24Z7SpPSYlGikvox+G3DPaVJ6TEqOoqIioIiICIiAiIgiHEeGbrJ0gL/jHhbLTT5ee5nEe1w4s8lXNLow6bTtbF3w11HEj5aO1HO7NnwkYi7TqfPPXUTF2JrVHcavB3G33aosFZc+GxzTwoIzHFq8a7hudLo06aHhyc9W6Hl3mz4SMRdp1PnnoNWVrMq8TXXCHROxlfLJNwK+OBtPFMHOa6LjmjhMjHNILXtbIXNIPJwB56aKqau/0OsM2rF+VtTYr3Dx6CSrgqJYS1rmy8B9HMI3tcCHMc6MNcCObSRy11QW3aOZXksDrKygIiICIiAiIgKPc+8a/kXhK3cOn41TfrzSWSDczcxnHf+cc7vmkaRNl2ka9/s1BGqkJR7nngr8tLTYOJUcGmsN5be59r9r38Cnn4bW964HWV0W4HTvN+hB0Qc285/CXiDtGp889ad4luOc/hLxB2jU+eetO8SC7PQ4wzasX5bVVivcXHoJKmColhLWubLwJKOYRva4EOY50Ya4Ec2lw5a6q3yodlTia64Q6K+NL7ZJuBcI6VtPFMHOa6Ljuo4S9jmkFr2iQuaQeTgDz00V8UBERAREQEREBERAREQEREBERAVHvZF/hvZ+zYPO1KvCqPeyL/Dez9mwedqUoqgiIsgpL6Mfhtwz2lSekxKNFJfRj8NuGe0qT0mJUdRURFQREQEREBERBEOI8M3WTpAX/ABjwdlpp8vPcziPa4cWeSrml0YdNp2ti1cNdRxI+WjtRzuzY8JGIu06nzz11ExdiW1R3Kqwbxd92qLBWXPhtc08KCMxxbnjXcNzpe9Omh4cnPVuh5d5seEnEXalT556DVlazKvE11wh0TsZX2yTcCvjgbTxTBzmui45o4TIxzSC17WyFzSDycGnnpoqqEK73Q6wzasX5W1NivcXHoJKuColhLWubLwH0cwje1wIcxzow1wI5tJHLXVBbgdZWVgdaygIiICIiAiIgKPc+8a/kXhK3cOn41TfrzSWSDczcxnHf+cc7vgRpE2XaRr3+zUEaqQlHueeCvy0tNg4lRwaaw3lt7n2v2vfwKefhtb3rgdZXRbgdO836EHRBzbzn8JeIO0anzz1pq3LOfwl4g7RqfPPWmoLs9DbDVqxflvV2K9xcegkqYKiWEta5svAko5hG9rgQ5jnRhrgRzaSOWuqt+qGZUYmuuEOi1jS+2SXgV8dKKeKYOc10XHfRwmRjmkFr2tkLmkHk4A89NFfNAREQEREBERAREQEREBERAREQFR72Rf4b2fs2DzlSrwqj3si/w3s/ZsHnalKKoIiLIKS+jH4bcM9pUnpMSjRSX0Y/DbhntKk9JiVHUVERUEREBERAREQRDiLDN1k6QN+xjwtlpp8vBbOI9rhxZ5KuaXRh02na2LvhrqOJHy0dqOd+bPhJxF2pU+eeuoeLcTWqO5VWDuNvu1RYay58NjmnhQRuji1eNdw3Ol0adNDw5OerdDy8zZ8JOIu1Knzz0GrHqVq8q8TXXCHROxlfbJNwK+OBtPFMHOa6LjmjhMjHNILXtbIXNIPJwB56aKqhV3uh1hm1YvysqbFe4ePQSVcFRLCWtc2XgPo5hG9rgQ5jnRhrgRzaSOWuqC3A61lYHWsoCIiAiIgIiICj3PvGv5F4St3Dp+NU3680lkg3M3MZx3/nHO75pGkTZdpGvf7NQRqpCUe554K/LS02DiVHBprDeW3ufa/a9/Ap5+G1veuB1ldFuB07zfoQdEHNvOfwl4g7RqfPPWmrcs5/CXiDtGp889aagux0NsM2rF+XFXYr3Fx7fJUQ1EsJa1zZeBJRzCN7XAhzHOjDXAjm0uHLXVXAVDMp8TXXCHRaxpfbJNwLhHSinimDnNdFx30cJexzSC17WyFzSDycAeemivmgIiICIiAiIgIiICIiAiIgIiACIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIg//Z";
+
+    /* ── DOM ─────────────────────────────────────────────────── */
+    const audio      = document.getElementById("audioEl");
+    const playBtn    = document.getElementById("playBtn");
+    const prevBtn    = document.getElementById("prevBtn");
+    const nextBtn    = document.getElementById("nextBtn");
+    const repeatBtn  = document.getElementById("repeatBtn");
+    const progBar    = document.getElementById("progBar");
+    const curTimeEl  = document.getElementById("curTime");
+    const durTimeEl  = document.getElementById("durTime");
+    const bufFill    = document.getElementById("bufFill");
+    const npTitle    = document.getElementById("npTitle");
+    const fmtBadge   = document.getElementById("fmtBadge");
+    const wakeBadge  = document.getElementById("wakeBadge");
+    const liveDot    = document.getElementById("liveDot");
+    const errLine    = document.getElementById("errLine");
+    const artWrap    = document.getElementById("artWrap");
+    const trackList  = document.getElementById("trackList");
+
+    /* ── STATE ───────────────────────────────────────────────── */
+    let currentIndex  = 0;
+    let isLoaded      = false;
+    let usedFallback  = false;
+    let isSeeking     = false;
+    let repeatMode    = "off";
+    let wakeLock      = null;
+    let isRebuffering = false;
+
+    /* ── FORMAT DETECTION ────────────────────────────────────── */
+    const flacOk = (() => {
+      const p = document.createElement("audio");
+      return !!(p.canPlayType && (p.canPlayType("audio/flac") !== "" || p.canPlayType("audio/x-flac") !== ""));
+    })();
+    function getBestSrc(track, force = false) {
+      const use = flacOk && !force;
+      return { src: use ? track.flac : track.fallback, isFlac: use };
+    }
+    function updateFmtBadge(isFlac) {
+      fmtBadge.textContent = isFlac ? "FLAC" : "AAC / MP3";
+      fmtBadge.className   = "badge badge-fmt" + (isFlac ? " badge-flac" : "");
+      fmtBadge.setAttribute("aria-label", `Format: ${isFlac ? "Lossless FLAC" : "AAC or MP3"}`);
+    }
+
+    /* ── WAKE LOCK ───────────────────────────────────────────── */
+    async function acquireWake() {
+      if (!("wakeLock" in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        setWakeBadge(true);
+        wakeLock.addEventListener("release", () => { setWakeBadge(false); if (!audio.paused) acquireWake(); });
+      } catch (_) { setWakeBadge(false); }
+    }
+    async function dropWake() {
+      if (wakeLock) { try { await wakeLock.release(); } catch(_){} wakeLock = null; }
+      setWakeBadge(false);
+    }
+    function setWakeBadge(on) {
+      wakeBadge.textContent = on ? "Wake Lock On" : "Background";
+      wakeBadge.classList.toggle("active", on);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) acquireWake();
+    });
+
+    /* ════════════════════════════════════════════════════════════
+       PLAY BUTTON HELPERS — 3-STATE MACHINE
+
+       showDownloadProgress(pct) — Loading state (% counter in btn)
+       clearDownloadProgress()   — clears loading styles only
+       setArmedState()           — State 2: hollow ghost button
+       setPlayState(on)          — Playing/paused; always removes is-armed
+    ════════════════════════════════════════════════════════════ */
+
+    function showDownloadProgress(pct) {
+      if (pct === 0) bufFill.style.width = "0%";
+      playBtn.classList.remove("is-loading", "is-armed");
+      playBtn.textContent        = pct === null ? "Acquiring…" : pct === 0 ? "Loading…" : `${pct}%`;
+      playBtn.style.fontSize     = pct === 0 ? "0.75rem" : "0.88rem";
+      playBtn.style.letterSpacing = "0.08em";
+      playBtn.setAttribute("aria-label", pct === null ? "Loading…" : `Downloading ${pct}%`);
+      bufFill.style.width      = pct ? `${pct}%` : "0%";
+      bufFill.style.background = "var(--signal)";
+      bufFill.classList.remove("loading");
+    }
+
+    function clearDownloadProgress() {
+      playBtn.classList.remove("is-loading");
+      playBtn.style.fontSize      = "";
+      playBtn.style.letterSpacing = "";
+      bufFill.style.background    = "";
+    }
+
+    /* State 2 — Armed: hollow/ghost — solid teal → transparent outline.
+       The button becomes a ghost of itself. Thematically exact. */
+    function setArmedState() {
+      clearDownloadProgress();
+      playBtn.classList.remove("is-loading");
+      playBtn.classList.add("is-armed");
+      playBtn.textContent        = "▶ Play";
+      playBtn.style.fontSize     = "";
+      playBtn.style.letterSpacing = "";
+      playBtn.setAttribute("aria-label",
+        `Play ${album.tracks[currentIndex]?.title} — ready`);
+      bufFill.classList.remove("loading");
+      bufFill.style.width = "0%";
+    }
+
+    /* Playing / paused — always strips armed + loading states */
+    function setPlayState(on) {
+      playBtn.classList.remove("is-armed", "is-loading");
+      playBtn.textContent         = on ? "⏸ Pause" : "▶ Play";
+      playBtn.style.fontSize      = "";
+      playBtn.style.letterSpacing = "";
+      playBtn.setAttribute("aria-label",
+        on ? `Pause ${album.tracks[currentIndex]?.title}`
+           : `Play ${album.tracks[currentIndex]?.title}`);
+      artWrap.classList.toggle("is-playing", on);
+      liveDot.classList.toggle("active", on);
+      setMediaPlayState(on ? "playing" : "paused");
+      updateTrackUI();
+    }
+
+    /* Loading spinner for streaming fallback path */
+    function setLoading(on) {
+      if (on) {
+        playBtn.classList.remove("is-armed");
+        playBtn.classList.add("is-loading");
+        playBtn.innerHTML = "";
+        playBtn.setAttribute("aria-label", "Loading…");
+        bufFill.classList.add("loading");
+      } else {
+        playBtn.classList.remove("is-loading");
+        bufFill.classList.remove("loading");
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       BLOB PRE-LOADER — FULL DOWNLOAD BEFORE ARMED STATE
+       Downloads 100 % → shows State 2 (armed/ghost) → user taps.
+       No auto-play. Streaming fallback auto-plays as exception.
+    ════════════════════════════════════════════════════════════ */
+    async function loadAndPlayAsBlob(index, forceFallback = false) {
+      const safeIdx         = Math.max(0, Math.min(index, album.tracks.length - 1));
+      const track           = album.tracks[safeIdx];
+      const { src, isFlac } = getBestSrc(track, forceFallback);
+
+      /* Clear any previous armed state */
+      playBtn.classList.remove("is-armed");
+
+      currentIndex = safeIdx; usedFallback = forceFallback || !isFlac; isLoaded = true;
+      npTitle.textContent = track.title;
+      updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(track);
+      showDownloadProgress(0);
+
+      const controller   = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), BLOB_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(src, { signal: controller.signal, cache: "default" });
+        clearTimeout(fetchTimeout);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const contentLength = response.headers.get("content-length");
+        const total  = contentLength ? parseInt(contentLength, 10) : null;
+        const reader = response.body.getReader();
+        const chunks = [];
+        let received = 0;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value); received += value.length;
+          if (total) showDownloadProgress(Math.round((received / total) * 100));
+        }
+
+        const blob    = new Blob(chunks, { type: isFlac ? "audio/flac" : "audio/mp4" });
+        const blobUrl = URL.createObjectURL(blob);
+        if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
+        audio._blobUrl = blobUrl;
+        audio.src = blobUrl; audio.preload = "auto"; audio.load();
+
+        /* ── Transition to State 2 (Armed) ──────────────────────
+           Blob in memory, audio element loaded.
+           DO NOT call audio.play() here — user must tap.        */
+        setArmedState();
+
+      } catch (err) {
+        clearTimeout(fetchTimeout);
+        clearDownloadProgress();
+
+        if (!usedFallback && !forceFallback) {
+          console.warn("[Ghost Lives] FLAC blob failed, retrying AAC:", err.message);
+          await loadAndPlayAsBlob(index, true); return;
+        }
+
+        /* Streaming fallback — auto-plays as exception */
+        console.warn("[Ghost Lives] Blob failed, streaming mode:", err.message);
+        showErr("// Streaming mode — buffering");
+        setTimeout(() => clearErr(), 3500);
+        loadTrack(index, false);
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (e) { showErr("// Playback failed — check audio URLs and CORS"); }
+      }
+    }
+
+    /* ── STREAMING FALLBACK ──────────────────────────────────── */
+    function waitForPrebuffer() {
+      return new Promise((resolve) => {
+        function check() {
+          if (!audio.duration || !audio.buffered.length) { requestAnimationFrame(check); return; }
+          const buf = audio.buffered.end(audio.buffered.length - 1);
+          if (buf >= Math.min(MIN_PREBUFFER_S, audio.duration)) {
+            resolve();
+          } else {
+            bufFill.style.width      = `${Math.round((buf / audio.duration) * 100)}%`;
+            bufFill.style.background = "var(--signal)";
+            requestAnimationFrame(check);
+          }
+        }
+        check();
+      });
+    }
+
+    setInterval(() => {
+      if (USE_BLOB_LOADING) return;
+      if (audio.paused || !audio.duration || !audio.buffered.length) return;
+      const ahead = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+      if (ahead < DANGER_SECONDS && !isRebuffering) {
+        isRebuffering = true; audio.pause(); bufFill.classList.add("loading");
+        const poll = setInterval(() => {
+          if (!audio.buffered.length) return;
+          const r = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+          if (r >= DANGER_SECONDS * 3) { clearInterval(poll); isRebuffering = false; bufFill.classList.remove("loading"); audio.play().catch(() => {}); }
+        }, 500);
+      }
+    }, 2000);
+
+    /* ── TRACK LIST ──────────────────────────────────────────── */
+    function renderTracks() {
+      trackList.innerHTML = "";
+      const el = document.getElementById("trackCount");
+      if (el) el.textContent = `${album.tracks.length} Instance${album.tracks.length !== 1 ? "s" : ""}`;
+
+      album.tracks.forEach((track, i) => {
+        const li = document.createElement("li"); const btn = document.createElement("button");
+        btn.className = "track-btn"; btn.type = "button";
+        btn.setAttribute("aria-current", "false");
+        btn.setAttribute("aria-label", `Track ${i+1}: ${track.title} by ${album.artist}`);
+        btn.innerHTML = `
+          <span class="track-num" aria-hidden="true">${String(i+1).padStart(2,"0")}</span>
+          <span class="track-info-col">
+            <span class="track-title-text">${track.title}</span>
+            <span class="track-meta-text">${album.artist}</span>
+          </span>
+          <span class="track-dur" aria-label="Duration: ${track.duration}">${track.duration}</span>`;
+        btn.addEventListener("click", () => { if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i); });
+        li.appendChild(btn); trackList.appendChild(li);
+      });
+
+      /* Remix row — ICON_LIGHT for dark bg */
+      const remixLi = document.createElement("li");
+      remixLi.innerHTML = `
+        <div class="remix-row" role="button" tabindex="0" aria-label="Submit a remix">
+          <input class="remix-file-input" type="file"
+            accept=".m4a,.flac,audio/flac,audio/x-flac,audio/mp4" id="remixFileInput" />
+          <div class="remix-icon-cell" aria-hidden="true"><img src="${ICON_LIGHT}" alt="" /></div>
+          <div class="remix-info">
+            <span class="remix-title">Submit a Remix</span>
+            <span class="remix-sub">Upload m4a or flac</span>
+          </div>
+          <div class="remix-status" aria-live="polite" id="remixStatus">+ Add</div>
+        </div>`;
+      trackList.appendChild(remixLi);
+      const toast = document.createElement("p"); toast.className = "upload-toast"; toast.setAttribute("aria-live","polite");
+      trackList.parentElement.appendChild(toast);
+      document.getElementById("remixFileInput").addEventListener("change", function() {
+        const file = this.files[0]; if (!file) return;
+        const cta = document.getElementById("remixStatus");
+        const ext = file.name.split(".").pop().toLowerCase();
+        if (!["m4a","flac"].includes(ext)) {
+          cta.textContent = "REJECTED"; toast.textContent = "// Only .m4a and .flac accepted."; toast.classList.add("show"); return;
+        }
+        cta.textContent = "✓ Received";
+        toast.textContent = `// Received: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+        toast.classList.add("show");
+        console.log("[Ghost Lives] Remix:", file.name, file.size, "bytes");
+      });
+
+      if (album.tracks.length === 1) { prevBtn.style.display = "none"; nextBtn.style.display = "none"; }
+    }
+
+    function updateTrackUI() {
+      trackList.querySelectorAll(".track-btn").forEach((btn, i) => {
+        const cur = i === currentIndex && isLoaded;
+        btn.setAttribute("aria-current", cur ? "true" : "false");
+        btn.classList.toggle("is-playing", cur && !audio.paused);
+        if (cur) btn.setAttribute("aria-label",
+          `Track ${i+1}: ${album.tracks[i].title} — ${audio.paused ? "paused" : "now playing"}`);
+      });
+    }
+
+    /* ── STREAMING LOAD ──────────────────────────────────────── */
+    function loadTrack(index, force = false) {
+      const safeIdx = Math.max(0, Math.min(index, album.tracks.length-1));
+      const track   = album.tracks[safeIdx];
+      const { src, isFlac } = getBestSrc(track, force);
+      currentIndex = safeIdx; usedFallback = force || !isFlac; isLoaded = true;
+      audio.src = src; audio.preload = "auto"; audio.load();
+      npTitle.textContent = track.title;
+      updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(track);
+    }
+
+    async function playTrack(index = currentIndex) {
+      loadTrack(index, false); setLoading(true);
+      try {
+        await waitForPrebuffer(); clearDownloadProgress();
+        await audio.play(); setPlayState(true); await acquireWake();
+      } catch (err) {
+        clearDownloadProgress();
+        if (err.name === "NotAllowedError") showErr("// Tap Play to begin");
+        else if (!usedFallback) { loadTrack(index, true); await playTrack(index); }
+        else showErr("// Playback failed — check audio URLs");
+      }
+    }
+
+    /* ── TOGGLE PLAY — handles all three states ──────────────── */
+    async function togglePlay() {
+      if (!isLoaded) {
+        /* State 1 → Loading → State 2 (armed) */
+        if (USE_BLOB_LOADING) await loadAndPlayAsBlob(currentIndex);
+        else await playTrack(currentIndex);
+        return;
+      }
+      if (audio.paused) {
+        /* State 2 (armed) or resuming from pause → play */
+        playBtn.classList.remove("is-armed");
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (_) { showErr("// Could not resume — tap Play again."); }
+      } else {
+        /* Playing → pause */
+        audio.pause(); setPlayState(false); dropWake();
+      }
+    }
+
+    function playPrev() {
+      if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; }
+      const i = Math.max(0, currentIndex - 1);
+      if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i);
+    }
+
+    function playNext() {
+      if (currentIndex < album.tracks.length - 1) {
+        if (USE_BLOB_LOADING) loadAndPlayAsBlob(currentIndex + 1); else playTrack(currentIndex + 1);
+      } else if (repeatMode === "album") {
+        if (USE_BLOB_LOADING) loadAndPlayAsBlob(0); else playTrack(0);
+      } else { setPlayState(false); dropWake(); }
+    }
+
+    /* ── REPEAT ──────────────────────────────────────────────── */
+    function cycleRepeat() {
+      const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"];
+      repeatMode  = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+      const m = { off:{l:"↺ Repeat: Off",p:"false"}, song:{l:"↺ Repeat: Song",p:"true"}, album:{l:"↺ Repeat: Album",p:"true"} };
+      repeatBtn.textContent  = m[repeatMode].l;
+      repeatBtn.dataset.mode = repeatMode;
+      repeatBtn.setAttribute("aria-label", m[repeatMode].l + ". Press to cycle.");
+      repeatBtn.setAttribute("aria-pressed", m[repeatMode].p);
+    }
+
+    /* ── AUDIO EVENTS ────────────────────────────────────────── */
+    audio.addEventListener("ended", () => {
+      if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+      playNext();
+    });
+    audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlayState(true); });
+    audio.addEventListener("waiting", () => bufFill.classList.add("loading"));
+    audio.addEventListener("pause",   () => { artWrap.classList.remove("is-playing"); liveDot.classList.remove("active"); updateTrackUI(); });
+    audio.addEventListener("play",    () => updateTrackUI());
+
+    let stallTimer;
+    audio.addEventListener("stalled", () => {
+      if (USE_BLOB_LOADING) return;
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => {
+        if (!audio.paused) { const t = audio.currentTime; audio.load(); audio.currentTime = t; audio.play().catch(() => {}); }
+      }, 1500);
+    });
+    audio.addEventListener("progress", () => clearTimeout(stallTimer));
+    audio.addEventListener("playing",  () => clearTimeout(stallTimer));
+    audio.addEventListener("error", async () => {
+      if (USE_BLOB_LOADING) return;
+      if (!usedFallback) { loadTrack(currentIndex, true); try { await audio.play(); setPlayState(true); } catch (_) { showErr("// Signal lost"); } }
+      else showErr("// Playback failed — check URL and MIME type");
+    });
+
+    /* ── PROGRESS ────────────────────────────────────────────── */
+    const fmt = s => !Number.isFinite(s)||s<0 ? "0:00" : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+    audio.addEventListener("loadedmetadata", () => {
+      durTimeEl.textContent = fmt(audio.duration);
+      progBar.setAttribute("aria-valuemax", Math.floor(audio.duration));
+      const durs = trackList.querySelectorAll(".track-dur");
+      if (durs[currentIndex]) durs[currentIndex].textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return;
+      progBar.value = (audio.currentTime / audio.duration) * 100;
+      progBar.setAttribute("aria-valuenow",  Math.floor(audio.currentTime));
+      progBar.setAttribute("aria-valuetext", `${fmt(audio.currentTime)} of ${fmt(audio.duration)}`);
+      curTimeEl.textContent = fmt(audio.currentTime);
+      updateMediaPosition();
+    });
+
+    audio.addEventListener("progress", () => {
+      if (USE_BLOB_LOADING) return;
+      if (!audio.duration || !audio.buffered.length) return;
+      bufFill.style.width = `${(audio.buffered.end(audio.buffered.length-1)/audio.duration)*100}%`;
+    });
+
+    progBar.addEventListener("mousedown",  () => isSeeking = true);
+    progBar.addEventListener("touchstart", () => isSeeking = true, {passive: true});
+    progBar.addEventListener("input", () => {
+      if (audio.duration) {
+        const t = (progBar.value/100)*audio.duration;
+        curTimeEl.textContent = fmt(t);
+        progBar.setAttribute("aria-valuetext", `${fmt(t)} of ${fmt(audio.duration)}`);
+      }
+    });
+    progBar.addEventListener("change", () => {
+      if (audio.duration) audio.currentTime = (progBar.value/100)*audio.duration;
+      isSeeking = false;
+    });
+    progBar.addEventListener("mouseup",  () => isSeeking = false);
+    progBar.addEventListener("touchend", () => isSeeking = false);
+
+    /* ── MEDIA SESSION ───────────────────────────────────────── */
+    function updateMediaSession(track) {
+      if (!("mediaSession" in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title, artist: album.artist, album: album.title,
+        artwork: [{ src: album.artworkUrl, sizes: "512x512", type: "image/png" }]
+      });
+      const h = {
+        play:          async () => { await togglePlay(); },
+        pause:         ()      => { audio.pause(); setPlayState(false); dropWake(); },
+        previoustrack: playPrev, nexttrack: playNext,
+        seekbackward:  (e) => { audio.currentTime = Math.max(0, audio.currentTime-(e.seekOffset||10)); },
+        seekforward:   (e) => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime+(e.seekOffset||10)); },
+        seekto:        (e) => { if (e.fastSeek&&"fastSeek"in audio) audio.fastSeek(e.seekTime); else audio.currentTime=e.seekTime; }
+      };
+      for (const [a,fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(a,fn); } catch(_){} }
+    }
+    function setMediaPlayState(s) { if ("mediaSession" in navigator) navigator.mediaSession.playbackState = s; }
+    function updateMediaPosition() {
+      if (!("mediaSession" in navigator)||!Number.isFinite(audio.duration)) return;
+      try { navigator.mediaSession.setPositionState({ duration:audio.duration, playbackRate:audio.playbackRate, position:audio.currentTime }); } catch(_){}
+    }
+
+    /* ── KEYBOARD — volume removed, ArrowUp/Down adjust audio.volume directly */
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+      switch(e.key) {
+        case " ": case "MediaPlayPause": e.preventDefault(); togglePlay(); break;
+        case "ArrowRight": e.preventDefault(); audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10); break;
+        case "ArrowLeft":  e.preventDefault(); audio.currentTime=Math.max(0,audio.currentTime-10); break;
+        case "ArrowUp":    e.preventDefault(); audio.volume=Math.min(1,audio.volume+0.05); break;
+        case "ArrowDown":  e.preventDefault(); audio.volume=Math.max(0,audio.volume-0.05); break;
+        case "n": case "N": case "MediaTrackNext":     playNext(); break;
+        case "p": case "P": case "MediaTrackPrevious": playPrev(); break;
+        case "r": case "R": cycleRepeat(); break;
+        case "m": case "M": audio.muted=!audio.muted; break;
+      }
+    });
+
+    function showErr(m) { errLine.textContent = m; errLine.classList.add("show"); }
+    function clearErr()  { errLine.textContent = ""; errLine.classList.remove("show"); }
+
+    playBtn.addEventListener("click",   togglePlay);
+    prevBtn.addEventListener("click",   playPrev);
+    nextBtn.addEventListener("click",   playNext);
+    repeatBtn.addEventListener("click", cycleRepeat);
+
+    /* ── INIT ────────────────────────────────────────────────── */
+    function init() {
+      document.getElementById("albumArtImg").src = ALBUM_ART_URL;
+      renderTracks();
+      if (!USE_BLOB_LOADING) { loadTrack(0); isLoaded = false; }
+      updateMediaSession(album.tracks[0]);
+      setPlayState(false);
+      updateFmtBadge(flacOk);
+
+      /* Activate the three signature effects */
+      const artImg = document.getElementById("albumArtImg");
+      if (artImg) initArtGhostSwap(artImg);
+      initDoubleTitleFade();
+      /* Cursor echo trail: already running (IIFE above) */
+    }
+    init();
+  </script>
+</body>
+</html>
