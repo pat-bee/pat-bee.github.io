@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,10 +20,8 @@
       --color-primary: #041e42;
       --color-link: #0b57d0;
       --color-url: #0b6b43;
-      --color-highlight: #fff2a8;
       --shadow-sm: 0 2px 12px rgba(4, 30, 66, 0.07);
       --shadow-lg: 0 18px 42px rgba(4, 30, 66, 0.14);
-      --radius-md: 14px;
       --radius-lg: 24px;
       --space-2: 0.5rem;
       --space-3: 0.75rem;
@@ -32,12 +29,10 @@
       --space-5: 1.25rem;
       --space-6: 1.5rem;
       --space-8: 2rem;
-      --space-10: 2.5rem;
       --space-12: 3rem;
       --content: 1240px;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       min-height: 100vh;
@@ -71,13 +66,6 @@
       gap: var(--space-5);
       margin-bottom: var(--space-8);
     }
-    .brand-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-4);
-      flex-wrap: wrap;
-    }
     .brand {
       display: inline-flex;
       align-items: center;
@@ -108,7 +96,14 @@
       backdrop-filter: blur(12px);
       padding: clamp(1.1rem, 1rem + 1vw, 1.6rem);
     }
+    .search-form {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
     .search-line {
+      flex: 1 1 520px;
       display: flex;
       align-items: center;
       gap: .85rem;
@@ -129,11 +124,21 @@
       font-size: 1rem;
       font-family: var(--font-body);
     }
+    .search-button {
+      min-height: 62px;
+      padding: 0 1.25rem;
+      border: 0;
+      border-radius: 999px;
+      background: var(--color-primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: .98rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .search-button:hover,
+    .search-button:focus-visible { background: #0a2b5d; outline: none; }
     .search-meta {
-      display: flex;
-      justify-content: space-between;
-      gap: var(--space-4);
-      flex-wrap: wrap;
       margin-top: var(--space-4);
       color: var(--color-muted);
       font-size: .96rem;
@@ -156,13 +161,13 @@
       text-decoration: none;
       transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
-    .card:hover, .card:focus-visible {
+    .card:hover,
+    .card:focus-visible {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
       border-color: rgba(11, 87, 208, 0.26);
       outline: none;
     }
-    .card[hidden] { display: none; }
     .media {
       position: relative;
       aspect-ratio: 16 / 9;
@@ -173,9 +178,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform .25s ease;
     }
-    .card:hover .media img, .card:focus-visible .media img { transform: scale(1.03); }
     .media::after {
       content: '';
       position: absolute;
@@ -199,7 +202,6 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .04em;
-      backdrop-filter: blur(6px);
     }
     .body {
       display: flex;
@@ -230,25 +232,9 @@
       font-weight: 700;
       padding-top: var(--space-2);
     }
-    .empty {
-      display: none;
-      padding: 2.25rem 1.5rem;
-      text-align: center;
-      border-radius: var(--radius-lg);
-      background: rgba(255,255,255,.8);
-      border: 1px solid var(--color-border);
-      box-shadow: var(--shadow-sm);
-      color: var(--color-muted);
-    }
-    .empty.show { display: block; }
-    mark {
-      background: var(--color-highlight);
-      color: inherit;
-      padding: 0 .12em;
-      border-radius: .16rem;
-    }
     @media (max-width: 980px) {
       .cards { grid-template-columns: 1fr; }
+      .search-button { width: 100%; }
     }
     @media (max-width: 640px) {
       .shell { width: min(calc(100% - 1rem), var(--content)); padding-top: var(--space-5); }
@@ -261,118 +247,73 @@
   <a href="#results" class="skip-link">Skip to results</a>
   <main class="shell">
     <section class="hero" aria-label="Search header">
-      <div class="brand-row">
-        <a class="brand" href="https://msb.georgetown.edu" target="_blank" rel="noopener noreferrer" aria-label="Open Georgetown McDonough website">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="4" y="4" width="40" height="40" rx="10" stroke="currentColor" stroke-width="2.5"/>
-            <path d="M14 30.5V17.5H31.5V21H18V23.4H29.5V26.8H18V30.5H14Z" fill="currentColor"/>
-            <path d="M34 15V33" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-          <span class="brand-copy">
-            <span class="brand-kicker">McDonough search</span>
-            <span class="brand-name">Georgetown</span>
-          </span>
-        </a>
-      </div>
+      <a class="brand" href="https://msb.georgetown.edu" target="_blank" rel="noopener noreferrer" aria-label="Open Georgetown McDonough website">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="4" y="4" width="40" height="40" rx="10" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M14 30.5V17.5H31.5V21H18V23.4H29.5V26.8H18V30.5H14Z" fill="currentColor"/>
+          <path d="M34 15V33" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="brand-copy">
+          <span class="brand-kicker">Google site search</span>
+          <span class="brand-name">Georgetown</span>
+        </span>
+      </a>
+
       <div class="search-panel">
-        <label class="search-line" for="searchInput">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"></circle>
-            <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-          </svg>
-          <input id="searchInput" class="search-input" type="search" placeholder="Search Georgetown McDonough pages" value="mba" autocomplete="off" />
-        </label>
-        <div class="search-meta">
-          <span>Searches only the three curated pages from <strong>msb.georgetown.edu</strong>.</span>
-          <span id="resultCount">3 results</span>
-        </div>
+        <form class="search-form" action="https://www.google.com/search" method="get" target="_blank">
+          <label class="search-line" for="q">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <input id="q" class="search-input" type="search" name="q" placeholder="Search Georgetown McDonough pages" value="site:msb.georgetown.edu mba" autocomplete="off" />
+          </label>
+          <button class="search-button" type="submit">Search with Google</button>
+        </form>
+        <p class="search-meta">This version sends searches to Google with a site restriction for the <strong>msb.georgetown.edu</strong> subdomain, which is a practical static-site approach for domain-limited search. Google documents site-restricted search configurations for specific domains in its Programmable Search tooling. [web:26][web:33]</p>
       </div>
     </section>
 
-    <section id="results" class="cards" aria-live="polite" aria-label="Search results"></section>
-    <div id="emptyState" class="empty" role="status">No matching pages found. Try terms like MBA, admissions, application, or programs.</div>
+    <section id="results" class="cards" aria-label="Featured Georgetown pages">
+      <a class="card" href="https://msb.georgetown.edu/mba/" target="_blank" rel="noopener noreferrer">
+        <div class="media">
+          <span class="pill">MBA</span>
+          <img src="https://msb.georgetown.edu/wp-content/uploads/2026/05/msbserp.png" alt="Georgetown McDonough search preview image" width="1200" height="675" loading="lazy">
+        </div>
+        <div class="body">
+          <div class="url">msb.georgetown.edu/mba/</div>
+          <div class="title">Master of Business Administration (MBA) | Georgetown University</div>
+          <p class="snippet">Explore Georgetown’s MBA pathways, including full-time, part-time, and online options within the McDonough School of Business. [web:5]</p>
+          <div class="cta">Open MBA page →</div>
+        </div>
+      </a>
+
+      <a class="card" href="https://msb.georgetown.edu/mba/application-components/" target="_blank" rel="noopener noreferrer">
+        <div class="media">
+          <span class="pill">Admissions</span>
+          <img src="https://msb.georgetown.edu/wp-content/uploads/2026/05/msbserp.png" alt="Georgetown McDonough search preview image" width="1200" height="675" loading="lazy">
+        </div>
+        <div class="body">
+          <div class="url">msb.georgetown.edu/mba/application-components/</div>
+          <div class="title">MBA Application Components | Georgetown University</div>
+          <p class="snippet">Review deadlines, recommendations, test waiver guidance, and required materials for Georgetown MBA applicants. [web:7]</p>
+          <div class="cta">Open admissions page →</div>
+        </div>
+      </a>
+
+      <a class="card" href="https://msb.georgetown.edu/programs/" target="_blank" rel="noopener noreferrer">
+        <div class="media">
+          <span class="pill">Programs</span>
+          <img src="https://msb.georgetown.edu/wp-content/uploads/2026/05/msbserp.png" alt="Georgetown McDonough search preview image" width="1200" height="675" loading="lazy">
+        </div>
+        <div class="body">
+          <div class="url">msb.georgetown.edu/programs/</div>
+          <div class="title">Programs - Georgetown University's McDonough School of Business</div>
+          <p class="snippet">Browse undergraduate, MBA, executive, and specialized master’s offerings across Georgetown McDonough. [web:4]</p>
+          <div class="cta">Explore programs →</div>
+        </div>
+      </a>
+    </section>
   </main>
-
-  <script>
-    const fallbackImage = 'https://msb.georgetown.edu/wp-content/uploads/2026/05/msbserp.png';
-    const pages = [
-      {
-        tag: 'MBA',
-        title: 'Master of Business Administration (MBA) | Georgetown University',
-        url: 'https://msb.georgetown.edu/mba/',
-        image: fallbackImage,
-        snippet: 'A Georgetown MBA is described as a launchpad for lasting impact, helping students build leadership, ethical decision-making, and AI fluency while exploring full-time, part-time, and online MBA options.',
-        keywords: ['mba', 'leadership', 'ai', 'full-time', 'part-time', 'online', 'career', 'legacy']
-      },
-      {
-        tag: 'Admissions',
-        title: 'MBA Application Components | Georgetown University',
-        url: 'https://msb.georgetown.edu/mba/application-components/',
-        image: fallbackImage,
-        snippet: 'This admissions page explains the Georgetown MBA application process, including deadlines, essays, recommendation requirements, test waivers, interviews, and rolling admissions for multiple MBA formats.',
-        keywords: ['admissions', 'application', 'deadline', 'essays', 'recommendation', 'test', 'waiver', 'interview', 'rolling']
-      },
-      {
-        tag: 'Programs',
-        title: "Programs - Georgetown University's McDonough School of Business",
-        url: 'https://msb.georgetown.edu/programs/',
-        image: fallbackImage,
-        snippet: 'The programs page showcases undergraduate, MBA, executive, and specialized master\'s offerings, emphasizing Georgetown McDonough\'s global mindset, Jesuit values, and Washington, D.C. advantage.',
-        keywords: ['programs', 'undergraduate', 'mba', 'executive', 'masters', 'global', 'jesuit', 'washington']
-      }
-    ];
-
-    const resultsEl = document.getElementById('results');
-    const inputEl = document.getElementById('searchInput');
-    const countEl = document.getElementById('resultCount');
-    const emptyEl = document.getElementById('emptyState');
-
-    function escapeRegExp(text) {
-      return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function highlight(text, terms) {
-      if (!terms.length) return text;
-      const pattern = terms.filter(Boolean).map(escapeRegExp).join('|');
-      if (!pattern) return text;
-      return text.replace(new RegExp(`(${pattern})`, 'gi'), '<mark>$1</mark>');
-    }
-
-    function scorePage(page, terms) {
-      if (!terms.length) return 1;
-      const haystack = [page.title, page.snippet, page.keywords.join(' ')].join(' ').toLowerCase();
-      return terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0);
-    }
-
-    function renderResults(query) {
-      const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
-      const ranked = pages
-        .map(page => ({ page, score: scorePage(page, terms) }))
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score || a.page.title.localeCompare(b.page.title));
-
-      resultsEl.innerHTML = ranked.map(({ page }) => `
-        <a class="card" href="${page.url}" target="_blank" rel="noopener noreferrer">
-          <div class="media">
-            <span class="pill">${page.tag}</span>
-            <img src="${page.image}" alt="Preview image for ${page.title}" width="1200" height="675" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImage}'">
-          </div>
-          <div class="body">
-            <div class="url">${page.url.replace('https://', '')}</div>
-            <div class="title">${highlight(page.title, terms)}</div>
-            <p class="snippet">${highlight(page.snippet, terms)}</p>
-            <div class="cta">Open page →</div>
-          </div>
-        </a>
-      `).join('');
-
-      const count = ranked.length;
-      countEl.textContent = `${count} result${count === 1 ? '' : 's'}`;
-      emptyEl.classList.toggle('show', count === 0);
-    }
-
-    inputEl.addEventListener('input', (event) => renderResults(event.target.value));
-    renderResults(inputEl.value);
-  </script>
 </body>
 </html>
