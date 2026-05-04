@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>EYE 2 EYE — Pat Bɇɇ</title>
+
+  <!-- ═══ SOCIAL / MESSAGE PREVIEW META TAGS ═══════════════════
+       Open Graph — Instagram, iMessage, WhatsApp, Slack, Discord.
+       After deploying: developers.facebook.com/tools/debug → Scrape Again
+  ════════════════════════════════════════════════════════════ -->
+  <meta property="og:type"         content="music.song" />
+  <meta property="og:site_name"    content="Pat Bɇɇ" />
+  <meta property="og:title"        content="Eye 2 Eye — Pat Bɇɇ" />
+  <meta property="og:description"  content="Listen to Eye 2 Eye by Pat Bɇɇ" />
+  <meta property="og:url"          content="https://pat-bee.github.io/album/eye2eye/" />
+  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/eye2eye.jpg" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="1200" />
+  <meta property="og:image:alt"    content="Eye 2 Eye by Pat Bɇɇ — cover art" />
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Eye 2 Eye — Pat Bɇɇ" />
+  <meta name="twitter:description" content="Listen to Eye 2 Eye by Pat Bɇɇ" />
+  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/eye2eye.jpg" />
+
+  <link rel="preconnect" href="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── VARIABLES ─────────────────────────────────────────── */
+    :root {
+      --black:       #060606;
+      --white:       #ececea;
+      --white-mid:   rgba(236,236,234,0.62);
+      --white-dim:   rgba(236,236,234,0.34);
+      --white-faint: rgba(236,236,234,0.16);
+      --red:         #ff0000;
+      --heavy:       2px solid var(--white);
+      --thin:        1px solid var(--white-dim);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Special Elite', 'Courier New', monospace;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--black);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Scan-line overlay */
+    body::before {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent, transparent 3px,
+        rgba(236,236,234,0.018) 3px, rgba(236,236,234,0.018) 4px
+      );
+    }
+
+    /* Halftone dot texture */
+    body::after {
+      content: "";
+      position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+      background-image: radial-gradient(circle, rgba(236,236,234,0.09) 1px, transparent 1px);
+      background-size: 12px 12px;
+    }
+
+    button { font-family: 'Special Elite', 'Courier New', monospace; color: inherit; cursor: pointer; }
+
+    /* ADA focus */
+    :focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute; top: -100%; left: 12px; z-index: 99999;
+      background: var(--white); color: var(--black);
+      padding: 8px 18px; font-family: 'Special Elite', monospace;
+      font-weight: 700; font-size: 0.8rem;
+      letter-spacing: 0.1em; text-decoration: none; transition: top 200ms;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ── SQUAT CORNER STAMPS ───────────────────────────────── */
+    .squat-label {
+      position: fixed;
+      font-family: 'Special Elite', monospace; font-size: 0.58rem;
+      color: var(--white-dim); letter-spacing: 0.1em;
+      pointer-events: none; z-index: 2; line-height: 1.6; text-transform: uppercase;
+    }
+    .squat-label.tl { top: 12px; left: 14px; }
+    .squat-label.tr { top: 12px; right: 14px; text-align: right; }
+    .squat-label.bl { bottom: 12px; left: 14px; }
+    .squat-label.br { bottom: 12px; right: 14px; text-align: right; }
+
+    /* ── PAGE SHELL ────────────────────────────────────────── */
+    .page-shell {
+      position: relative; z-index: 1; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 44px 20px 56px;
+    }
+    .inner { width: 100%; max-width: 860px; }
+
+    /* ── MASTHEAD ──────────────────────────────────────────── */
+    .masthead {
+      container-type: inline-size;
+      text-align: center; margin-bottom: 0;
+      border: var(--heavy); border-bottom: none;
+      padding: 22px 24px 18px; position: relative;
+    }
+    .masthead::before, .masthead::after {
+      content: "";
+      position: absolute; top: -4px;
+      width: 18px; height: 8px;
+      background: var(--white-mid); border-radius: 1px;
+    }
+    .masthead::before { left: 28px; }
+    .masthead::after  { right: 28px; }
+
+    .masthead-sub {
+      font-size: 0.62rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--white-dim); margin-bottom: 6px;
+    }
+    /* Album-Index up-link — inherits masthead-sub styling */
+    .masthead-sub a {
+      color: var(--white-dim); text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 160ms, border-color 160ms;
+    }
+    .masthead-sub a:hover { color: var(--white); border-bottom-color: var(--white-dim); }
+
+    .masthead-title {
+      font-family: 'Anton', 'Impact', sans-serif;
+      font-size: clamp(0.6rem, 20cqi, 7.5rem);
+      white-space: nowrap; line-height: 0.88;
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--white);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8), -1px 0px 0 rgba(236,236,234,0.08), 3px 3px 0 rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .masthead-artist {
+      margin-top: 8px; font-size: 0.82rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--white-mid);
+    }
+
+    /* RED ACCENT 1 */
+    .red-rule { width: 100%; height: 2px; background: var(--red); }
+
+    /* ── MAIN GRID ─────────────────────────────────────────── */
+    .main-grid {
+      display: grid; grid-template-columns: minmax(220px, 360px) 1fr;
+      border: var(--heavy); border-top: none;
+    }
+    .col-art { border-right: var(--heavy); padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+    .col-player { padding: 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+    /* ── ALBUM ART ─────────────────────────────────────────── */
+    .art-wrap {
+      position: relative; width: 100%; aspect-ratio: 1/1;
+      border: var(--heavy); overflow: hidden; background: #111;
+    }
+    .art-wrap img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      filter: contrast(1.08) brightness(0.96); transition: filter 600ms;
+    }
+    .art-wrap.is-playing img { animation: art-pulse 3s ease-in-out infinite alternate; }
+    @keyframes art-pulse {
+      from { filter: contrast(1.08) brightness(0.96); }
+      to   { filter: contrast(1.15) brightness(1.04); }
+    }
+
+    .eq-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 30%; display: flex; align-items: flex-end;
+      gap: 3px; padding: 0 16px; opacity: 0; transition: opacity 400ms; mix-blend-mode: screen;
+    }
+    .art-wrap.is-playing .eq-overlay { opacity: 1; }
+    .eq-b {
+      flex: 1; background: var(--white); border-radius: 1px 1px 0 0; min-height: 3px;
+      animation: eq-wave 0.45s ease infinite alternate; opacity: 0.35;
+    }
+    .eq-b:nth-child(1){animation-delay:0.00s} .eq-b:nth-child(2){animation-delay:0.08s}
+    .eq-b:nth-child(3){animation-delay:0.16s} .eq-b:nth-child(4){animation-delay:0.04s}
+    .eq-b:nth-child(5){animation-delay:0.12s} .eq-b:nth-child(6){animation-delay:0.20s}
+    .eq-b:nth-child(7){animation-delay:0.06s} .eq-b:nth-child(8){animation-delay:0.14s}
+    @keyframes eq-wave { from { height: 6%; } to { height: 78%; } }
+
+    .album-label { text-align: center; }
+    .album-label-title {
+      font-family: 'Anton', sans-serif; font-size: 1.1rem;
+      letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.1;
+    }
+    .album-label-artist {
+      font-size: 0.7rem; color: var(--white-mid);
+      letter-spacing: 0.18em; margin-top: 4px; text-transform: uppercase;
+    }
+
+    /* ── NOW PLAYING ───────────────────────────────────────── */
+    .np-label {
+      font-size: 0.6rem; letter-spacing: 0.24em;
+      text-transform: uppercase; color: var(--white-dim); margin-bottom: 2px;
+    }
+    .np-title {
+      font-family: 'Anton', sans-serif; font-size: 1.3rem;
+      letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.05; word-break: break-word;
+    }
+    .np-meta { display: flex; gap: 8px; margin-top: 7px; flex-wrap: wrap; align-items: center; }
+
+    .badge {
+      font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 2px 7px; border: 1px solid var(--white-dim);
+      color: var(--white-mid); background: transparent;
+    }
+    .badge-fmt.is-flac { border-color: rgba(236,236,234,0.5); color: var(--white); }
+
+    /* RED ACCENT 2 — playing dot */
+    .playing-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--white-dim); flex-shrink: 0;
+    }
+    .playing-dot.is-playing {
+      background: var(--red); box-shadow: 0 0 8px rgba(255,0,0,0.6);
+      animation: dot-pulse 1s ease-in-out infinite;
+    }
+    @keyframes dot-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── BUFFER BAR ────────────────────────────────────────── */
+    .buf-wrap { width: 100%; height: 2px; background: var(--white-faint); }
+    .buf-fill { height: 100%; background: var(--white-dim); width: 0%; transition: width 500ms ease; }
+    .buf-fill.loading { animation: buf-pulse 1.1s ease-in-out infinite; }
+    @keyframes buf-pulse { 0%,100%{opacity:0.2} 50%{opacity:0.7} }
+
+    /* ── PROGRESS ──────────────────────────────────────────── */
+    .prog-row {
+      display: grid; grid-template-columns: 44px 1fr 44px;
+      gap: 8px; align-items: center; font-size: 0.68rem;
+      color: var(--white-mid); font-variant-numeric: tabular-nums; letter-spacing: 0.04em;
+    }
+    .prog-bar {
+      appearance: none; width: 100%; height: 7px;
+      background: var(--white-faint); border: 1px solid var(--white-dim);
+      border-radius: 0; cursor: pointer;
+    }
+    .prog-bar::-webkit-slider-thumb {
+      appearance: none; width: 12px; height: 20px;
+      background: var(--white); border: 1px solid rgba(0,0,0,0.5);
+      border-radius: 0; cursor: pointer;
+    }
+    .prog-bar::-moz-range-thumb {
+      width: 12px; height: 20px;
+      background: var(--white); border: 1px solid rgba(0,0,0,0.5);
+      border-radius: 0; cursor: pointer;
+    }
+
+    /* ── CONTROLS ──────────────────────────────────────────── */
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .ctrl-btn {
+      border: var(--heavy); background: transparent; color: var(--white);
+      font-family: 'Special Elite', monospace; font-size: 0.75rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0 14px; min-height: 40px; cursor: pointer;
+      box-shadow: 3px 3px 0 var(--white-faint);
+      transition: background 120ms, box-shadow 120ms, transform 80ms;
+      position: relative; overflow: hidden;
+    }
+    .ctrl-btn:hover { background: var(--white-faint); box-shadow: 4px 4px 0 var(--white-dim); }
+    .ctrl-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--white-faint); }
+
+    .play-btn {
+      min-width: 100px; font-family: 'Anton', sans-serif;
+      font-size: 0.9rem; letter-spacing: 0.1em;
+      background: var(--white); color: var(--black); border-color: var(--white);
+    }
+    .play-btn:hover { background: rgba(236,236,234,0.88); }
+    .play-btn.is-loading { background: var(--white-dim); cursor: wait; }
+    .play-btn.is-loading::after {
+      content: ""; position: absolute; top:50%; left:50%;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--black);
+      border-radius: 50%; transform: translate(-50%,-50%);
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    .repeat-btn { font-size: 0.66rem; min-width: 130px; }
+    .repeat-btn[data-mode="song"]  { border-style: dashed; color: var(--white); }
+    .repeat-btn[data-mode="album"] { border-style: dotted; color: var(--white-mid); }
+
+    /* ── KBD HINTS ─────────────────────────────────────────── */
+    .kbd-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .kbd-hint { font-size: 0.56rem; color: var(--white-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+    kbd {
+      display: inline-block; padding: 0 4px; border: 1px solid var(--white-dim);
+      font-size: 0.56rem; font-family: inherit; color: var(--white-mid);
+    }
+
+    .status-line { font-size: 0.62rem; color: var(--white-dim); line-height: 1.5; letter-spacing: 0.04em; }
+    .err-line { font-size: 0.66rem; color: var(--red); display: none; line-height: 1.4; }
+    .err-line.show { display: block; }
+
+    /* ── PLAYLIST ──────────────────────────────────────────── */
+    .playlist-section { border: var(--heavy); border-top: none; }
+    .playlist-header {
+      padding: 10px 22px; border-bottom: var(--thin);
+      font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase;
+      color: var(--white-dim); display: flex; justify-content: space-between;
+    }
+    .track-list { list-style: none; margin: 0; padding: 0; }
+
+    .track-btn {
+      width: 100%; display: grid; grid-template-columns: 48px 1fr auto;
+      align-items: stretch; text-align: left;
+      background: transparent; border: none; border-bottom: var(--thin);
+      cursor: pointer; transition: background 120ms;
+    }
+    .track-list li:last-child .track-btn { border-bottom: none; }
+    .track-btn:hover { background: var(--white-faint); }
+    .track-btn[aria-current="true"] { background: var(--white-faint); }
+
+    .track-num {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 0; border-right: var(--thin);
+      font-family: 'Anton', sans-serif; font-size: 1.1rem;
+      color: var(--white-dim); letter-spacing: 0.04em; min-width: 48px;
+    }
+    /* RED ACCENT 3 */
+    .track-btn[aria-current="true"] .track-num { color: var(--red); }
+    .track-btn[aria-current="true"].is-playing .track-num {
+      animation: num-blink 1.2s ease-in-out infinite;
+    }
+    @keyframes num-blink { 0%,100%{color:var(--red)} 50%{color:rgba(255,0,0,0.3)} }
+
+    .track-info-col {
+      padding: 14px 18px; display: flex; flex-direction: column;
+      justify-content: center; gap: 4px; min-width: 0;
+    }
+    .track-title-text {
+      font-family: 'Anton', sans-serif; font-size: 0.95rem;
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .track-meta-text { font-size: 0.6rem; color: var(--white-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+    .track-dur {
+      display: flex; align-items: center; padding: 14px 16px;
+      font-size: 0.7rem; color: var(--white-dim);
+      font-variant-numeric: tabular-nums; border-left: var(--thin); white-space: nowrap;
+    }
+
+    /* ── ANALYSIS FOOTER — BPM + Key ──────────────────────── */
+    .analysis-footer {
+      display: none;
+      justify-content: center; align-items: center;
+      gap: 14px; margin-top: 18px; margin-bottom: -4px;
+    }
+    .af-item { display: flex; align-items: baseline; gap: 6px; }
+    .af-label {
+      font-family: 'Special Elite', monospace; font-size: 0.52rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--white-dim);
+    }
+    .af-value {
+      font-family: 'Anton', sans-serif; font-size: 1rem;
+      letter-spacing: 0.06em; color: var(--white-mid);
+    }
+    .af-dot { color: var(--white-dim); font-size: 0.7rem; line-height: 1; }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    .page-footer { margin-top: 24px; text-align: center; width: 100%; }
+    .page-footer a {
+      font-family: 'Special Elite', monospace; font-size: 0.72rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--white-mid);
+      text-decoration: none; border-bottom: 1px solid var(--white-dim);
+      padding-bottom: 2px; transition: color 180ms, border-color 180ms;
+    }
+    .page-footer a:hover { color: var(--white); border-color: var(--white); }
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .squat-label { display: none; }
+      .page-shell { padding: 20px 12px 44px; }
+      .main-grid { grid-template-columns: 1fr; }
+      .col-art { border-right: none; border-bottom: var(--heavy); padding: 16px; }
+      .col-player { padding: 16px; }
+      .art-wrap { max-width: 400px; margin: 0 auto; }
+      .kbd-row { display: none; }
+      .track-btn { grid-template-columns: 40px 1fr auto; }
+    }
+
+    audio { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <span class="squat-label tl">NO GODS<br/>NO MASTERS</span>
+  <span class="squat-label tr">EST. 1993<br/>NYC / LES</span>
+  <span class="squat-label bl">DO IT<br/>YOURSELF</span>
+  <span class="squat-label br">DUPE FREE<br/>© NOBODY</span>
+
+  <main class="page-shell" id="main-content">
+    <div class="inner">
+
+      <header class="masthead">
+        <p class="masthead-sub"><a href="../">Album-Index</a> &nbsp;/&nbsp; Pat Bɇɇ</p>
+        <h1 class="masthead-title">EYE 2 EYE</h1>
+        <p class="masthead-artist">Pat Bɇɇ</p>
+      </header>
+
+      <div class="red-rule" aria-hidden="true"></div>
+
+      <div class="main-grid">
+
+        <div class="col-art">
+          <div class="art-wrap" id="artWrap">
+            <img
+              src="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/eye2eye.jpg"
+              alt="Eye 2 Eye — Pat Bɇɇ cover art"
+            />
+            <div class="eq-overlay" aria-hidden="true">
+              <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+              <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+              <div class="eq-b"></div><div class="eq-b"></div>
+            </div>
+          </div>
+          <div class="album-label">
+            <div class="album-label-title">Eye 2 Eye</div>
+            <div class="album-label-artist">Pat Bɇɇ</div>
+          </div>
+        </div>
+
+        <div class="col-player">
+          <div aria-live="polite" aria-atomic="true">
+            <p class="np-label">Now Playing</p>
+            <p class="np-title" id="npTitle">Select a track</p>
+            <div class="np-meta">
+              <span class="playing-dot" id="playingDot" aria-hidden="true"></span>
+              <span class="badge badge-fmt" id="fmtBadge" aria-label="Audio format">—</span>
+              <span class="badge" id="wakeBadge">Background</span>
+            </div>
+          </div>
+
+          <div class="buf-wrap" aria-hidden="true">
+            <div class="buf-fill" id="bufFill"></div>
+          </div>
+
+          <div class="prog-row">
+            <span id="cure" aria-label="Current time">0:00</span>
+            <input id="progBar" class="prog-bar" type="range"
+              min="0" max="100" value="0" step="0.1"
+              aria-label="Track progress" aria-valuetext="0 seconds" />
+            <span id="dure" aria-label="Total duration">0:00</span>
+          </div>
+
+          <div class="controls" role="group" aria-label="Player controls">
+            <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Previous track">← Prev</button>
+            <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play">▶ Play</button>
+            <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Next track">Next →</button>
+            <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button"
+              data-mode="off" aria-label="Repeat: Off. Press to cycle." aria-pressed="false">↺ Repeat: Off</button>
+          </div>
+
+          <div class="kbd-row" aria-hidden="true">
+            <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
+            <span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd> Seek 10s</span>
+            <span class="kbd-hint"><kbd>N</kbd><kbd>P</kbd> Track</span>
+            <span class="kbd-hint"><kbd>M</kbd> Mute</span>
+          </div>
+
+          <p class="status-line" id="statusLine">Tap a track or Play to begin. Background playback active after first tap.</p>
+          <p class="err-line" id="errLine" role="alert" aria-live="assertive"></p>
+        </div>
+      </div>
+
+      <section class="playlist-section" aria-label="Track list">
+        <div class="playlist-header">
+          <span>Tracklist</span>
+          <span id="trackCount">2 Tracks</span>
+        </div>
+        <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
+      </section>
+
+      <!-- BPM + Key — revealed only if Essentia analysis succeeds -->
+      <div class="analysis-footer" id="analysisInline" aria-live="polite" aria-label="Detected tempo and key">
+        <div class="af-item">
+          <span class="af-label" aria-hidden="true">BPM</span>
+          <span class="af-value" id="bpmDisplay" aria-label="Detected tempo">—</span>
+        </div>
+        <span class="af-dot" aria-hidden="true">·</span>
+        <div class="af-item">
+          <span class="af-label" aria-hidden="true">Key</span>
+          <span class="af-value" id="notesDisplay" aria-label="Detected key">—</span>
+        </div>
+      </div>
+
+      <footer class="page-footer">
+        <a href="https://www.instagram.com/patbee.music/"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Pat Bee on Instagram (opens in new tab)">Pat Bee</a>
+      </footer>
+
+    </div>
+  </main>
+
+  <audio id="audioEl" preload="metadata" playsinline x-webkit-airplay="allow"></audio>
+
+  <script>
+    /* ════════════════════════════════════════════════════════════
+       EYE 2 EYE — Pat Bɇɇ
+       Functional engine: pat-bee-template v2 standards
+       Design: original Eye 2 Eye xerox/squat aesthetic
+    ════════════════════════════════════════════════════════════ */
+
+    /* ── CONFIG ──────────────────────────────────────────────────
+       USE_BLOB_LOADING = true: downloads full file before play.
+       Eliminates CDN buffering dropouts. Requires CORS on R2:
+         AllowedOrigins: ["https://pat-bee.github.io"]
+         AllowedMethods: ["GET","HEAD"]  AllowedHeaders: ["*"]
+       Falls back to HTML5 streaming if blob fails.
+    ─────────────────────────────────────────────────────────── */
+    const CDN              = "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev";
+    const USE_BLOB_LOADING = true;
+    const BLOB_TIMEOUT_MS  = 30000;
+    const DANGER_SECONDS   = 8;
+    const MIN_PREBUFFER_S  = 30;
+
+    const album = {
+      title:      "Eye 2 Eye",
+      artist:     "Pat Bɇɇ",
+      artworkUrl: `${CDN}/eye2eye.jpg`,
+      tracks: [
+        {
+          title:    "Eye 2 Eye (Tuff Kid Mix)",
+          duration: "—",
+          flac:     `${CDN}/eye2eye-tuff.flac`,
+          fallback: `${CDN}/eye2eye-tuff.m4a`
+        },
+        {
+          title:    "Eye 2 Eye (Original)",
+          duration: "—",
+          flac:     `${CDN}/eye2eye.flac`,
+          fallback: `${CDN}/eye2eye.m4a`
+        }
+      ]
+    };
+
+    /* ── DOM ─────────────────────────────────────────────────── */
+    const audio      = document.getElementById("audioEl");
+    const playBtn    = document.getElementById("playBtn");
+    const prevBtn    = document.getElementById("prevBtn");
+    const nextBtn    = document.getElementById("nextBtn");
+    const repeatBtn  = document.getElementById("repeatBtn");
+    const progBar    = document.getElementById("progBar");
+    const cureEl     = document.getElementById("cure");
+    const dureEl     = document.getElementById("dure");
+    const bufFill    = document.getElementById("bufFill");
+    const npTitle    = document.getElementById("npTitle");
+    const fmtBadge   = document.getElementById("fmtBadge");
+    const wakeBadge  = document.getElementById("wakeBadge");
+    const playingDot = document.getElementById("playingDot");
+    const errLine    = document.getElementById("errLine");
+    const artWrap    = document.getElementById("artWrap");
+    const trackList  = document.getElementById("trackList");
+
+    /* ── STATE ───────────────────────────────────────────────── */
+    let currentIndex  = 0;
+    let isLoaded      = false;
+    let usedFallback  = false;
+    let isSeeking     = false;
+    let repeatMode    = "off";
+    let wakeLock      = null;
+    let isRebuffering = false;
+
+    /* ── FORMAT DETECTION ────────────────────────────────────── */
+    const flacOk = (() => {
+      const p = document.createElement("audio");
+      return !!(p.canPlayType && (
+        p.canPlayType("audio/flac") !== "" || p.canPlayType("audio/x-flac") !== ""
+      ));
+    })();
+
+    function getBestSrc(track, forceFallback = false) {
+      const useFlac = flacOk && !forceFallback;
+      return { src: useFlac ? track.flac : track.fallback, isFlac: useFlac };
+    }
+
+    function updateFmtBadge(isFlac) {
+      fmtBadge.textContent = isFlac ? "FLAC" : "AAC / MP3";
+      fmtBadge.className   = "badge badge-fmt" + (isFlac ? " is-flac" : "");
+      fmtBadge.setAttribute("aria-label", `Format: ${isFlac ? "Lossless FLAC" : "AAC or MP3"}`);
+    }
+
+    /* ── SCREEN WAKE LOCK ────────────────────────────────────── */
+    async function acquireWake() {
+      if (!("wakeLock" in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        setWakeBadge(true);
+        wakeLock.addEventListener("release", () => {
+          setWakeBadge(false);
+          if (!audio.paused) acquireWake();
+        });
+      } catch (_) { setWakeBadge(false); }
+    }
+    async function dropWake() {
+      if (wakeLock) { try { await wakeLock.release(); } catch(_){} wakeLock = null; }
+      setWakeBadge(false);
+    }
+    function setWakeBadge(on) {
+      wakeBadge.textContent = on ? "Wake Lock On" : "Background";
+      wakeBadge.style.borderColor = on ? "rgba(236,236,234,0.5)" : "";
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) acquireWake();
+    });
+
+    /* ════════════════════════════════════════════════════════════
+       BLOB PRE-LOADER
+    ════════════════════════════════════════════════════════════ */
+    async function loadAndPlayAsBlob(index, forceFallback = false) {
+      const safeIdx         = Math.max(0, Math.min(index, album.tracks.length - 1));
+      const track           = album.tracks[safeIdx];
+      const { src, isFlac } = getBestSrc(track, forceFallback);
+
+      currentIndex = safeIdx; usedFallback = forceFallback || !isFlac; isLoaded = true;
+      npTitle.textContent = track.title;
+      updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(track);
+      showDownloadProgress(0);
+
+      const controller   = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), BLOB_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(src, { signal: controller.signal, cache: "default" });
+        clearTimeout(fetchTimeout);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const contentLength = response.headers.get("content-length");
+        const total  = contentLength ? parseInt(contentLength, 10) : null;
+        const reader = response.body.getReader();
+        const chunks = [];
+        let received = 0;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value); received += value.length;
+          if (total) showDownloadProgress(Math.round((received / total) * 100));
+        }
+
+        const blob    = new Blob(chunks, { type: isFlac ? "audio/flac" : "audio/mp4" });
+        const blobUrl = URL.createObjectURL(blob);
+        if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
+        audio._blobUrl = blobUrl;
+        audio.src = blobUrl; audio.preload = "auto"; audio.load();
+
+        clearDownloadProgress();
+        await audio.play(); setPlayState(true); await acquireWake();
+        analyzeAudio(blob);
+
+      } catch (err) {
+        clearTimeout(fetchTimeout);
+        clearDownloadProgress();
+
+        if (!usedFallback && !forceFallback) {
+          console.warn("[Eye2Eye] FLAC blob failed, retrying AAC:", err.message);
+          await loadAndPlayAsBlob(index, true);
+          return;
+        }
+
+        console.warn("[Eye2Eye] Blob failed, falling back to streaming:", err.message);
+        showErr("/ Buffering — streaming mode active");
+        setTimeout(() => clearErr(), 3500);
+        loadTrack(index, false);
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (playErr) { showErr("/ Playback failed — check audio URLs and CORS"); }
+      }
+    }
+
+    function showDownloadProgress(pct) {
+      if (pct === 0) bufFill.style.width = "0%";
+      playBtn.classList.remove("is-loading");
+      playBtn.textContent    = pct === 0 ? "Loading…" : `${pct}%`;
+      playBtn.style.fontSize = pct === 0 ? "0.7rem" : "0.85rem";
+      playBtn.style.color    = "var(--black)";
+      playBtn.setAttribute("aria-label", pct === 0 ? "Loading…" : `Downloading ${pct}%`);
+      bufFill.style.width      = `${pct}%`;
+      bufFill.style.background = "var(--white)";
+      bufFill.classList.remove("loading");
+    }
+
+    function clearDownloadProgress() {
+      playBtn.classList.remove("is-loading");
+      playBtn.style.fontSize   = "";
+      playBtn.style.color      = "";
+      bufFill.style.background = "";
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       ESSENTIA.JS — BPM + KEY AUTO-DETECTION
+    ════════════════════════════════════════════════════════════ */
+    let essentiaInstance = null;
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement("script");
+        s.src = src; s.onload = resolve;
+        s.onerror = () => reject(new Error("Script failed: " + src));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function getEssentia() {
+      if (essentiaInstance) return essentiaInstance;
+      await loadScript("https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.umd.js");
+      await loadScript("https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.umd.js");
+      const wasm = await EssentiaWASM();
+      essentiaInstance = new Essentia(wasm);
+      return essentiaInstance;
+    }
+
+    function analyzeAudio(audioBlob) {
+      const run = async () => {
+        try {
+          const essentia = await getEssentia();
+          const buffer   = await audioBlob.arrayBuffer();
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const decoded  = await audioCtx.decodeAudioData(buffer);
+          audioCtx.close();
+
+          const signal = essentia.arrayToVector(decoded.getChannelData(0));
+          let bpm = null, key = null;
+
+          try {
+            const rhythm = essentia.RhythmExtractor2013(signal, 208, 40, "degara", decoded.sampleRate);
+            const raw = Math.round(rhythm.bpm);
+            bpm = (raw >= 40 && raw <= 250) ? raw : null;
+          } catch(e) { console.warn("[Essentia] BPM error:", e.message || e); }
+
+          try {
+            const kr = essentia.KeyExtractor(
+              signal, true, 4096, 4096, 12, 3500, 60, 25, 0.2, "bgate",
+              decoded.sampleRate, 0.0001, 440, "cosine", "hann"
+            );
+            key = kr.key + " " + (kr.scale === "major" ? "maj" : "min");
+          } catch(e) { console.warn("[Essentia] Key error:", e.message || e); }
+
+          signal.delete();
+          if (bpm !== null || key) updateAnalysisDisplay(bpm, key);
+        } catch(err) { console.warn("[Essentia] Analysis failed:", err.message || err); }
+      };
+
+      setTimeout(() => {
+        if ("requestIdleCallback" in window) requestIdleCallback(run, { timeout: 15000 });
+        else run();
+      }, 2000);
+    }
+
+    function updateAnalysisDisplay(bpm, key) {
+      const inlineEl = document.getElementById("analysisInline");
+      const bpmEl    = document.getElementById("bpmDisplay");
+      const keyEl    = document.getElementById("notesDisplay");
+      let   hasData  = false;
+
+      if (bpm !== null && bpm !== undefined && bpmEl) {
+        bpmEl.textContent = String(bpm);
+        bpmEl.setAttribute("aria-label", `Detected tempo: ${bpm} BPM`);
+        hasData = true;
+      }
+      if (key && keyEl) {
+        keyEl.textContent = key;
+        keyEl.setAttribute("aria-label", `Detected key: ${key}`);
+        hasData = true;
+      }
+      if (hasData && inlineEl) inlineEl.style.display = "flex";
+    }
+
+    /* ── STREAMING MODE — pre-buffer gate ───────────────────── */
+    function waitForPrebuffer() {
+      return new Promise((resolve) => {
+        function check() {
+          if (!audio.duration || !audio.buffered.length) { requestAnimationFrame(check); return; }
+          const buffered = audio.buffered.end(audio.buffered.length - 1);
+          const target   = Math.min(MIN_PREBUFFER_S, audio.duration);
+          if (buffered >= target) {
+            resolve();
+          } else {
+            bufFill.style.width      = `${Math.round((buffered / audio.duration) * 100)}%`;
+            bufFill.style.background = "var(--white)";
+            requestAnimationFrame(check);
+          }
+        }
+        check();
+      });
+    }
+
+    setInterval(() => {
+      if (USE_BLOB_LOADING) return;
+      if (audio.paused || !audio.duration || !audio.buffered.length) return;
+      const aheadSeconds = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+      if (aheadSeconds < DANGER_SECONDS && !isRebuffering) {
+        isRebuffering = true; audio.pause(); bufFill.classList.add("loading");
+        const poll = setInterval(() => {
+          if (!audio.buffered.length) return;
+          const refilled = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+          if (refilled >= DANGER_SECONDS * 3) {
+            clearInterval(poll); isRebuffering = false;
+            bufFill.classList.remove("loading"); audio.play().catch(() => {});
+          }
+        }, 500);
+      }
+    }, 2000);
+
+    /* ── TRACK LIST ──────────────────────────────────────────── */
+    function renderTracks() {
+      trackList.innerHTML = "";
+      const countEl = document.getElementById("trackCount");
+      if (countEl) countEl.textContent =
+        `${album.tracks.length} Track${album.tracks.length !== 1 ? "s" : ""}`;
+
+      album.tracks.forEach((track, i) => {
+        const li  = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.className = "track-btn"; btn.type = "button";
+        btn.setAttribute("aria-current", "false");
+        btn.setAttribute("aria-label", `Track ${i+1}: ${track.title}`);
+        btn.innerHTML = `
+          <span class="track-num" aria-hidden="true">${String(i+1).padStart(2,"0")}</span>
+          <span class="track-info-col">
+            <span class="track-title-text">${track.title}</span>
+            <span class="track-meta-text">Pat Bɇɇ</span>
+          </span>
+          <span class="track-dur" aria-label="Duration: ${track.duration}">${track.duration}</span>
+        `;
+        btn.addEventListener("click", () => {
+          if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i);
+        });
+        li.appendChild(btn); trackList.appendChild(li);
+      });
+
+      if (album.tracks.length === 1) {
+        prevBtn.style.display = "none";
+        nextBtn.style.display = "none";
+      }
+    }
+
+    function updateTrackUI() {
+      trackList.querySelectorAll(".track-btn").forEach((btn, i) => {
+        const isCurrent = i === currentIndex && isLoaded;
+        btn.setAttribute("aria-current", isCurrent ? "true" : "false");
+        btn.classList.toggle("is-playing", isCurrent && !audio.paused);
+        if (isCurrent) btn.setAttribute("aria-label",
+          `Track ${i+1}: ${album.tracks[i].title} — ${audio.paused?"paused":"now playing"}`);
+      });
+    }
+
+    /* ── STREAMING MODE PLAYBACK ─────────────────────────────── */
+    function loadTrack(index, forceFallback = false) {
+      const safeIdx         = Math.max(0, Math.min(index, album.tracks.length - 1));
+      const track           = album.tracks[safeIdx];
+      const { src, isFlac } = getBestSrc(track, forceFallback);
+      currentIndex = safeIdx; usedFallback = forceFallback || !isFlac; isLoaded = true;
+      audio.src = src; audio.preload = "auto"; audio.load();
+      npTitle.textContent = track.title;
+      updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(track);
+    }
+
+    async function playTrack(index = currentIndex) {
+      loadTrack(index, false); setLoading(true);
+      try {
+        await waitForPrebuffer(); clearDownloadProgress();
+        await audio.play(); setPlayState(true); await acquireWake();
+      } catch (err) {
+        clearDownloadProgress();
+        if (err.name === "NotAllowedError") showErr("/ Tap Play — browser requires a direct tap.");
+        else if (!usedFallback) { loadTrack(index, true); await playTrack(index); }
+        else { showErr("/ Playback failed. Check audio URLs."); console.warn(err); }
+      }
+    }
+
+    async function togglePlay() {
+      if (!isLoaded) {
+        if (USE_BLOB_LOADING) await loadAndPlayAsBlob(currentIndex);
+        else await playTrack(currentIndex);
+        return;
+      }
+      if (audio.paused) {
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (_) { showErr("/ Could not resume — tap Play again."); }
+      } else { audio.pause(); setPlayState(false); dropWake(); }
+    }
+
+    function playPrev() {
+      if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; }
+      const i = Math.max(0, currentIndex - 1);
+      if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i);
+    }
+
+    function playNext() {
+      if (currentIndex < album.tracks.length - 1) {
+        if (USE_BLOB_LOADING) loadAndPlayAsBlob(currentIndex + 1); else playTrack(currentIndex + 1);
+      } else if (repeatMode === "album") {
+        if (USE_BLOB_LOADING) loadAndPlayAsBlob(0); else playTrack(0);
+      } else { setPlayState(false); dropWake(); }
+    }
+
+    function setPlayState(on) {
+      playBtn.textContent = on ? "⏸ Pause" : "▶ Play";
+      playBtn.style.fontSize = ""; playBtn.style.color = "";
+      playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
+      playBtn.classList.remove("is-loading");
+      artWrap.classList.toggle("is-playing", on);
+      playingDot.classList.toggle("is-playing", on);
+      setMediaPlayState(on ? "playing" : "paused");
+      updateTrackUI();
+    }
+
+    function setLoading(on) {
+      if (on) {
+        playBtn.innerHTML = ""; playBtn.classList.add("is-loading");
+        bufFill.classList.add("loading");
+      } else {
+        playBtn.classList.remove("is-loading"); bufFill.classList.remove("loading");
+      }
+    }
+
+    /* ── REPEAT ──────────────────────────────────────────────── */
+    function cycleRepeat() {
+      const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"];
+      repeatMode  = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+      const labels = { off:"↺ Repeat: Off", song:"↺ Repeat: Song", album:"↺ Repeat: Album" };
+      repeatBtn.textContent  = labels[repeatMode];
+      repeatBtn.dataset.mode = repeatMode;
+      repeatBtn.setAttribute("aria-label", labels[repeatMode] + ". Press to cycle.");
+      repeatBtn.setAttribute("aria-pressed", repeatMode !== "off" ? "true" : "false");
+    }
+
+    /* ── AUDIO EVENTS ────────────────────────────────────────── */
+    audio.addEventListener("ended", () => {
+      if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+      playNext();
+    });
+    audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlayState(true); });
+    audio.addEventListener("waiting", () => bufFill.classList.add("loading"));
+    audio.addEventListener("pause",   () => { artWrap.classList.remove("is-playing"); playingDot.classList.remove("is-playing"); updateTrackUI(); });
+    audio.addEventListener("play",    () => updateTrackUI());
+
+    let stallTimer;
+    audio.addEventListener("stalled", () => {
+      if (USE_BLOB_LOADING) return;
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => {
+        if (!audio.paused) {
+          const t = audio.currentTime; audio.load(); audio.currentTime = t;
+          audio.play().catch(() => {});
+        }
+      }, 1500);
+    });
+    audio.addEventListener("progress", () => clearTimeout(stallTimer));
+    audio.addEventListener("playing",  () => clearTimeout(stallTimer));
+
+    audio.addEventListener("error", async () => {
+      if (USE_BLOB_LOADING) return;
+      if (!usedFallback) {
+        loadTrack(currentIndex, true);
+        try { await audio.play(); setPlayState(true); }
+        catch (_) { showErr("/ Audio unavailable — check file URLs."); }
+      } else { showErr("/ Audio failed — check URL and MIME type."); }
+    });
+
+    /* ── PROGRESS ────────────────────────────────────────────── */
+    const fmt = s => !Number.isFinite(s)||s<0?"0:00"
+      :`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+    audio.addEventListener("loadedmetadata", () => {
+      dureEl.textContent = fmt(audio.duration);
+      progBar.setAttribute("aria-valuemax", Math.floor(audio.duration));
+      const durs = trackList.querySelectorAll(".track-dur");
+      if (durs[currentIndex]) durs[currentIndex].textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return;
+      progBar.value = (audio.currentTime / audio.duration) * 100;
+      progBar.setAttribute("aria-valuenow",  Math.floor(audio.currentTime));
+      progBar.setAttribute("aria-valuetext", `${fmt(audio.currentTime)} of ${fmt(audio.duration)}`);
+      cureEl.textContent = fmt(audio.currentTime);
+      updateMediaPosition();
+    });
+
+    audio.addEventListener("progress", () => {
+      if (USE_BLOB_LOADING) return;
+      if (!audio.duration || !audio.buffered.length) return;
+      bufFill.style.width = `${(audio.buffered.end(audio.buffered.length-1)/audio.duration)*100}%`;
+    });
+
+    progBar.addEventListener("mousedown",  ()=>isSeeking=true);
+    progBar.addEventListener("touchstart", ()=>isSeeking=true, {passive:true});
+    progBar.addEventListener("input", () => {
+      if (audio.duration) {
+        const t = (progBar.value/100)*audio.duration;
+        cureEl.textContent = fmt(t);
+        progBar.setAttribute("aria-valuetext", `${fmt(t)} of ${fmt(audio.duration)}`);
+      }
+    });
+    progBar.addEventListener("change", () => {
+      if (audio.duration) audio.currentTime = (progBar.value/100)*audio.duration;
+      isSeeking = false;
+    });
+    progBar.addEventListener("mouseup",  ()=>isSeeking=false);
+    progBar.addEventListener("touchend", ()=>isSeeking=false);
+
+    /* ── MEDIA SESSION — lock screen / hardware keys ─────────── */
+    function updateMediaSession(track) {
+      if (!("mediaSession" in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title, artist: album.artist, album: album.title,
+        artwork: [
+          { src: album.artworkUrl, sizes: "96x96",   type: "image/jpeg" },
+          { src: album.artworkUrl, sizes: "256x256",  type: "image/jpeg" },
+          { src: album.artworkUrl, sizes: "512x512",  type: "image/jpeg" }
+        ]
+      });
+      const h = {
+        play:          async () => { await togglePlay(); },
+        pause:         ()      => { audio.pause(); setPlayState(false); dropWake(); },
+        previoustrack: playPrev, nexttrack: playNext,
+        seekbackward:  (e) => { audio.currentTime = Math.max(0, audio.currentTime-(e.seekOffset||10)); },
+        seekforward:   (e) => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime+(e.seekOffset||10)); },
+        seekto:        (e) => { if (e.fastSeek&&"fastSeek"in audio) audio.fastSeek(e.seekTime); else audio.currentTime=e.seekTime; }
+      };
+      for (const [a,fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(a,fn); } catch(_){} }
+    }
+    function setMediaPlayState(s) { if ("mediaSession" in navigator) navigator.mediaSession.playbackState = s; }
+    function updateMediaPosition() {
+      if (!("mediaSession" in navigator)||!Number.isFinite(audio.duration)) return;
+      try { navigator.mediaSession.setPositionState({ duration:audio.duration, playbackRate:audio.playbackRate, position:audio.currentTime }); } catch(_){}
+    }
+
+    /* ── KEYBOARD SHORTCUTS ──────────────────────────────────── */
+    /* Volume slider removed — ArrowUp/Down still adjust audio.volume directly */
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+      switch(e.key) {
+        case " ": case "MediaPlayPause": e.preventDefault(); togglePlay(); break;
+        case "ArrowRight": e.preventDefault(); audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10); break;
+        case "ArrowLeft":  e.preventDefault(); audio.currentTime=Math.max(0,audio.currentTime-10); break;
+        case "ArrowUp":    e.preventDefault(); audio.volume=Math.min(1,audio.volume+0.05); break;
+        case "ArrowDown":  e.preventDefault(); audio.volume=Math.max(0,audio.volume-0.05); break;
+        case "n": case "N": case "MediaTrackNext":     playNext(); break;
+        case "p": case "P": case "MediaTrackPrevious": playPrev(); break;
+        case "r": case "R": cycleRepeat(); break;
+        case "m": case "M": audio.muted=!audio.muted; break;
+      }
+    });
+
+    /* ── ERROR HELPERS ───────────────────────────────────────── */
+    function showErr(msg) { errLine.textContent = msg; errLine.classList.add("show"); }
+    function clearErr()   { errLine.textContent = ""; errLine.classList.remove("show"); }
+
+    /* ── BUTTON LISTENERS ────────────────────────────────────── */
+    playBtn.addEventListener("click",   togglePlay);
+    prevBtn.addEventListener("click",   playPrev);
+    nextBtn.addEventListener("click",   playNext);
+    repeatBtn.addEventListener("click", cycleRepeat);
+
+    /* ── INIT ────────────────────────────────────────────────── */
+    renderTracks();
+    if (!USE_BLOB_LOADING) { loadTrack(0); isLoaded = false; }
+    updateMediaSession(album.tracks[0]);
+    setPlayState(false);
+    updateFmtBadge(flacOk);
+  </script>
+</body>
+</html>
