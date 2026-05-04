@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Georgetown SERP Cards</title>
+  <title>Georgetown McDonough Search</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,21 +12,20 @@
     :root {
       --font-display: 'EB Garamond', Georgia, serif;
       --font-body: 'Inter', Arial, sans-serif;
-      --color-bg: #f5f7fb;
+      --color-bg: #f3f6fb;
       --color-surface: #ffffff;
-      --color-surface-alt: #eef2f7;
+      --color-surface-2: #edf2f8;
       --color-border: rgba(4, 30, 66, 0.12);
       --color-text: #162033;
-      --color-muted: #586174;
+      --color-muted: #5a667b;
       --color-primary: #041e42;
-      --color-secondary: #6c7a89;
       --color-link: #0b57d0;
       --color-url: #0b6b43;
       --color-highlight: #fff2a8;
-      --shadow-sm: 0 2px 10px rgba(4, 30, 66, 0.06);
-      --shadow-lg: 0 16px 38px rgba(4, 30, 66, 0.12);
+      --shadow-sm: 0 2px 12px rgba(4, 30, 66, 0.07);
+      --shadow-lg: 0 18px 42px rgba(4, 30, 66, 0.14);
       --radius-md: 14px;
-      --radius-lg: 22px;
+      --radius-lg: 24px;
       --space-2: 0.5rem;
       --space-3: 0.75rem;
       --space-4: 1rem;
@@ -34,9 +34,8 @@
       --space-8: 2rem;
       --space-10: 2.5rem;
       --space-12: 3rem;
-      --content-width: 1240px;
+      --content: 1240px;
     }
-
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
@@ -45,18 +44,16 @@
       font-family: var(--font-body);
       color: var(--color-text);
       background:
-        radial-gradient(circle at top left, rgba(155, 177, 207, 0.25), transparent 28%),
+        radial-gradient(circle at top left, rgba(154, 179, 211, 0.22), transparent 28%),
         linear-gradient(180deg, #f9fbfe 0%, var(--color-bg) 100%);
       line-height: 1.55;
     }
-
     img { display: block; max-width: 100%; }
     a { color: inherit; }
-
     .skip-link {
       position: absolute;
-      left: 1rem;
       top: -3rem;
+      left: 1rem;
       background: var(--color-primary);
       color: #fff;
       padding: .8rem 1rem;
@@ -64,27 +61,23 @@
       z-index: 100;
     }
     .skip-link:focus { top: 1rem; }
-
-    .site-shell {
-      width: min(calc(100% - 2rem), var(--content-width));
+    .shell {
+      width: min(calc(100% - 2rem), var(--content));
       margin: 0 auto;
       padding: var(--space-8) 0 var(--space-12);
     }
-
     .hero {
       display: grid;
       gap: var(--space-5);
       margin-bottom: var(--space-8);
     }
-
     .brand-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: var(--space-4);
       flex-wrap: wrap;
     }
-
     .brand {
       display: inline-flex;
       align-items: center;
@@ -92,54 +85,42 @@
       text-decoration: none;
       color: var(--color-primary);
     }
-
     .brand svg { width: 42px; height: 42px; }
-
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-      gap: .15rem;
-    }
-
+    .brand-copy { display: flex; flex-direction: column; }
     .brand-kicker {
       text-transform: uppercase;
       letter-spacing: .16em;
       font-size: .74rem;
-      color: var(--color-secondary);
       font-weight: 700;
+      color: var(--color-muted);
     }
-
     .brand-name {
       font-family: var(--font-display);
       font-size: clamp(2rem, 1.7rem + 1vw, 3rem);
       line-height: .95;
       font-weight: 700;
     }
-
     .search-panel {
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(255,255,255,.65);
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.7);
       border-radius: 28px;
-      padding: clamp(1.1rem, 1rem + 1vw, 1.6rem);
       box-shadow: var(--shadow-lg);
       backdrop-filter: blur(12px);
+      padding: clamp(1.1rem, 1rem + 1vw, 1.6rem);
     }
-
     .search-line {
       display: flex;
       align-items: center;
       gap: .85rem;
-      min-height: 60px;
+      min-height: 62px;
       background: #fff;
       border: 1px solid var(--color-border);
       border-radius: 999px;
       padding: 0 1rem 0 1.15rem;
       box-shadow: var(--shadow-sm);
     }
-
     .search-line svg { width: 20px; height: 20px; color: var(--color-muted); flex: 0 0 auto; }
-
-    .search-line input {
+    .search-input {
       width: 100%;
       border: 0;
       outline: 0;
@@ -148,24 +129,21 @@
       font-size: 1rem;
       font-family: var(--font-body);
     }
-
-    .intro-copy {
+    .search-meta {
       display: flex;
       justify-content: space-between;
       gap: var(--space-4);
-      margin-top: var(--space-4);
       flex-wrap: wrap;
+      margin-top: var(--space-4);
       color: var(--color-muted);
-      font-size: .98rem;
+      font-size: .96rem;
     }
-
     .cards {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: var(--space-6);
       align-items: stretch;
     }
-
     .card {
       display: flex;
       flex-direction: column;
@@ -178,120 +156,110 @@
       text-decoration: none;
       transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
-
-    .card:hover,
-    .card:focus-visible {
+    .card:hover, .card:focus-visible {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
-      border-color: rgba(11, 87, 208, 0.24);
+      border-color: rgba(11, 87, 208, 0.26);
       outline: none;
     }
-
-    .card-media {
+    .card[hidden] { display: none; }
+    .media {
       position: relative;
       aspect-ratio: 16 / 9;
       overflow: hidden;
-      background: var(--color-surface-alt);
+      background: var(--color-surface-2);
     }
-
-    .card-media img {
+    .media img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform .28s ease;
+      transition: transform .25s ease;
     }
-
-    .card:hover .card-media img,
-    .card:focus-visible .card-media img {
-      transform: scale(1.03);
-    }
-
-    .card-media::after {
+    .card:hover .media img, .card:focus-visible .media img { transform: scale(1.03); }
+    .media::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, transparent 30%, rgba(4, 30, 66, 0.58) 100%);
+      background: linear-gradient(180deg, transparent 28%, rgba(4, 30, 66, 0.62) 100%);
       pointer-events: none;
     }
-
     .pill {
       position: absolute;
       left: 1rem;
       top: 1rem;
       z-index: 1;
+      min-height: 34px;
       display: inline-flex;
       align-items: center;
-      min-height: 34px;
       padding: 0 .8rem;
       border-radius: 999px;
       background: rgba(255,255,255,.9);
       color: var(--color-primary);
       font-size: .78rem;
       font-weight: 700;
-      letter-spacing: .04em;
       text-transform: uppercase;
+      letter-spacing: .04em;
       backdrop-filter: blur(6px);
     }
-
-    .card-body {
+    .body {
       display: flex;
       flex-direction: column;
       gap: var(--space-3);
       padding: var(--space-5);
       flex: 1;
     }
-
-    .card-url {
+    .url {
       color: var(--color-url);
       font-size: .88rem;
       word-break: break-word;
     }
-
-    .card-title {
+    .title {
       color: var(--color-link);
-      font-size: clamp(1.15rem, 1.05rem + .35vw, 1.45rem);
+      font-size: clamp(1.15rem, 1.04rem + .35vw, 1.45rem);
       line-height: 1.25;
       font-weight: 600;
     }
-
-    .card-copy {
+    .snippet {
       color: var(--color-muted);
       font-size: .98rem;
     }
-
-    .card-cta {
+    .cta {
       margin-top: auto;
-      padding-top: var(--space-2);
       color: var(--color-primary);
       font-size: .95rem;
       font-weight: 700;
+      padding-top: var(--space-2);
     }
-
+    .empty {
+      display: none;
+      padding: 2.25rem 1.5rem;
+      text-align: center;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,.8);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      color: var(--color-muted);
+    }
+    .empty.show { display: block; }
     mark {
       background: var(--color-highlight);
       color: inherit;
       padding: 0 .12em;
       border-radius: .16rem;
     }
-
     @media (max-width: 980px) {
-      .cards {
-        grid-template-columns: 1fr;
-      }
+      .cards { grid-template-columns: 1fr; }
     }
-
     @media (max-width: 640px) {
-      .site-shell { width: min(calc(100% - 1rem), var(--content-width)); padding-top: var(--space-5); }
+      .shell { width: min(calc(100% - 1rem), var(--content)); padding-top: var(--space-5); }
       .search-panel { border-radius: 22px; }
-      .card-body { padding: 1rem; }
-      .intro-copy { font-size: .94rem; }
+      .body { padding: 1rem; }
     }
   </style>
 </head>
 <body>
   <a href="#results" class="skip-link">Skip to results</a>
-
-  <main class="site-shell">
+  <main class="shell">
     <section class="hero" aria-label="Search header">
       <div class="brand-row">
         <a class="brand" href="https://msb.georgetown.edu" target="_blank" rel="noopener noreferrer" aria-label="Open Georgetown McDonough website">
@@ -300,68 +268,111 @@
             <path d="M14 30.5V17.5H31.5V21H18V23.4H29.5V26.8H18V30.5H14Z" fill="currentColor"/>
             <path d="M34 15V33" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
-          <span class="brand-text">
+          <span class="brand-copy">
             <span class="brand-kicker">McDonough search</span>
             <span class="brand-name">Georgetown</span>
           </span>
         </a>
       </div>
-
       <div class="search-panel">
-        <div class="search-line" role="search" aria-label="Site search prototype">
+        <label class="search-line" for="searchInput">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"></circle>
             <path d="M20 20L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
           </svg>
-          <input type="text" value="georgetown mba admissions programs" readonly aria-label="Search query" />
-        </div>
-        <div class="intro-copy">
-          <span>Three curated results from <strong>msb.georgetown.edu</strong>.</span>
-          <span>Desktop shows cards horizontally, mobile stacks them vertically.</span>
+          <input id="searchInput" class="search-input" type="search" placeholder="Search Georgetown McDonough pages" value="mba" autocomplete="off" />
+        </label>
+        <div class="search-meta">
+          <span>Searches only the three curated pages from <strong>msb.georgetown.edu</strong>.</span>
+          <span id="resultCount">3 results</span>
         </div>
       </div>
     </section>
 
-    <section id="results" class="cards" aria-label="Search results cards">
-      <a class="card" href="https://msb.georgetown.edu/mba/" target="_blank" rel="noopener noreferrer">
-        <div class="card-media">
-          <span class="pill">MBA</span>
-          <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80" alt="Students walking through a collegiate campus" width="1200" height="675" loading="lazy">
-        </div>
-        <div class="card-body">
-          <div class="card-url">msb.georgetown.edu/mba/</div>
-          <div class="card-title">Master of Business Administration (MBA) | Georgetown University</div>
-          <p class="card-copy">A Georgetown <mark>MBA</mark> is positioned as a launchpad for leadership, ethical decision-making, and AI fluency, with clear paths into full-time, part-time, and online <mark>MBA programs</mark>.</p>
-          <div class="card-cta">Open MBA page →</div>
-        </div>
-      </a>
-
-      <a class="card" href="https://msb.georgetown.edu/mba/application-components/" target="_blank" rel="noopener noreferrer">
-        <div class="card-media">
-          <span class="pill">Admissions</span>
-          <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80" alt="Notebook and pen prepared for an application process" width="1200" height="675" loading="lazy">
-        </div>
-        <div class="card-body">
-          <div class="card-url">msb.georgetown.edu/mba/application-components/</div>
-          <div class="card-title">MBA Application Components | Georgetown University</div>
-          <p class="card-copy">This <mark>admissions</mark> page outlines required materials, round deadlines, test waiver guidance, and the school’s holistic review process for Georgetown MBA applicants.</p>
-          <div class="card-cta">View application details →</div>
-        </div>
-      </a>
-
-      <a class="card" href="https://msb.georgetown.edu/programs/" target="_blank" rel="noopener noreferrer">
-        <div class="card-media">
-          <span class="pill">Programs</span>
-          <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80" alt="Students collaborating around a table" width="1200" height="675" loading="lazy">
-        </div>
-        <div class="card-body">
-          <div class="card-url">msb.georgetown.edu/programs/</div>
-          <div class="card-title">Programs - Georgetown University's McDonough School of Business</div>
-          <p class="card-copy">The <mark>programs</mark> page helps visitors explore undergraduate, MBA, and specialized master’s options, highlighting Georgetown McDonough’s global and values-based approach.</p>
-          <div class="card-cta">Explore programs →</div>
-        </div>
-      </a>
-    </section>
+    <section id="results" class="cards" aria-live="polite" aria-label="Search results"></section>
+    <div id="emptyState" class="empty" role="status">No matching pages found. Try terms like MBA, admissions, application, or programs.</div>
   </main>
+
+  <script>
+    const fallbackImage = 'https://msb.georgetown.edu/wp-content/uploads/2026/05/msbserp.png';
+    const pages = [
+      {
+        tag: 'MBA',
+        title: 'Master of Business Administration (MBA) | Georgetown University',
+        url: 'https://msb.georgetown.edu/mba/',
+        image: fallbackImage,
+        snippet: 'A Georgetown MBA is described as a launchpad for lasting impact, helping students build leadership, ethical decision-making, and AI fluency while exploring full-time, part-time, and online MBA options.',
+        keywords: ['mba', 'leadership', 'ai', 'full-time', 'part-time', 'online', 'career', 'legacy']
+      },
+      {
+        tag: 'Admissions',
+        title: 'MBA Application Components | Georgetown University',
+        url: 'https://msb.georgetown.edu/mba/application-components/',
+        image: fallbackImage,
+        snippet: 'This admissions page explains the Georgetown MBA application process, including deadlines, essays, recommendation requirements, test waivers, interviews, and rolling admissions for multiple MBA formats.',
+        keywords: ['admissions', 'application', 'deadline', 'essays', 'recommendation', 'test', 'waiver', 'interview', 'rolling']
+      },
+      {
+        tag: 'Programs',
+        title: "Programs - Georgetown University's McDonough School of Business",
+        url: 'https://msb.georgetown.edu/programs/',
+        image: fallbackImage,
+        snippet: 'The programs page showcases undergraduate, MBA, executive, and specialized master\'s offerings, emphasizing Georgetown McDonough\'s global mindset, Jesuit values, and Washington, D.C. advantage.',
+        keywords: ['programs', 'undergraduate', 'mba', 'executive', 'masters', 'global', 'jesuit', 'washington']
+      }
+    ];
+
+    const resultsEl = document.getElementById('results');
+    const inputEl = document.getElementById('searchInput');
+    const countEl = document.getElementById('resultCount');
+    const emptyEl = document.getElementById('emptyState');
+
+    function escapeRegExp(text) {
+      return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function highlight(text, terms) {
+      if (!terms.length) return text;
+      const pattern = terms.filter(Boolean).map(escapeRegExp).join('|');
+      if (!pattern) return text;
+      return text.replace(new RegExp(`(${pattern})`, 'gi'), '<mark>$1</mark>');
+    }
+
+    function scorePage(page, terms) {
+      if (!terms.length) return 1;
+      const haystack = [page.title, page.snippet, page.keywords.join(' ')].join(' ').toLowerCase();
+      return terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0);
+    }
+
+    function renderResults(query) {
+      const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      const ranked = pages
+        .map(page => ({ page, score: scorePage(page, terms) }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score || a.page.title.localeCompare(b.page.title));
+
+      resultsEl.innerHTML = ranked.map(({ page }) => `
+        <a class="card" href="${page.url}" target="_blank" rel="noopener noreferrer">
+          <div class="media">
+            <span class="pill">${page.tag}</span>
+            <img src="${page.image}" alt="Preview image for ${page.title}" width="1200" height="675" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImage}'">
+          </div>
+          <div class="body">
+            <div class="url">${page.url.replace('https://', '')}</div>
+            <div class="title">${highlight(page.title, terms)}</div>
+            <p class="snippet">${highlight(page.snippet, terms)}</p>
+            <div class="cta">Open page →</div>
+          </div>
+        </a>
+      `).join('');
+
+      const count = ranked.length;
+      countEl.textContent = `${count} result${count === 1 ? '' : 's'}`;
+      emptyEl.classList.toggle('show', count === 0);
+    }
+
+    inputEl.addEventListener('input', (event) => renderResults(event.target.value));
+    renderResults(inputEl.value);
+  </script>
 </body>
 </html>
