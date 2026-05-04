@@ -8,10 +8,6 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <title>EYE 2 EYE — Pat Bɇɇ</title>
 
-  <!-- ═══ SOCIAL / MESSAGE PREVIEW META TAGS ═══════════════════
-       Open Graph — Instagram, iMessage, WhatsApp, Slack, Discord.
-       After deploying: developers.facebook.com/tools/debug → Scrape Again
-  ════════════════════════════════════════════════════════════ -->
   <meta property="og:type"         content="music.song" />
   <meta property="og:site_name"    content="Pat Bɇɇ" />
   <meta property="og:title"        content="Eye 2 Eye — Pat Bɇɇ" />
@@ -79,11 +75,8 @@
     }
 
     button { font-family: 'Special Elite', 'Courier New', monospace; color: inherit; cursor: pointer; }
-
-    /* ADA focus */
     :focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
 
-    /* Skip link */
     .skip-link {
       position: absolute; top: -100%; left: 12px; z-index: 99999;
       background: var(--white); color: var(--black);
@@ -278,21 +271,61 @@
     .ctrl-btn:hover { background: var(--white-faint); box-shadow: 4px 4px 0 var(--white-dim); }
     .ctrl-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--white-faint); }
 
+    /* ═══════════════════════════════════════════════════════
+       PLAY BUTTON — 3-STATE MACHINE (SOP v1.2)
+       ───────────────────────────────────────────────────────
+       State 1 (unloaded):  white fill, black text — default
+       Loading:             muted bg, % counter, wait cursor
+       State 2 (armed):     RED fill — loaded, tap to fire
+       Playing / Paused:    white fill resumes (PAUSE / PLAY)
+    ═══════════════════════════════════════════════════════ */
+
+    /* State 1 — unloaded (default) */
     .play-btn {
       min-width: 100px; font-family: 'Anton', sans-serif;
       font-size: 0.9rem; letter-spacing: 0.1em;
       background: var(--white); color: var(--black); border-color: var(--white);
+      box-shadow: 3px 3px 0 var(--white-faint);
+      transition: background 140ms, color 140ms, border-color 140ms,
+                  box-shadow 140ms, transform 80ms, filter 140ms;
     }
     .play-btn:hover { background: rgba(236,236,234,0.88); }
-    .play-btn.is-loading { background: var(--white-dim); cursor: wait; }
+
+    /* Loading — download in progress */
+    .play-btn.is-loading {
+      background: var(--white-dim); border-color: var(--white-dim);
+      cursor: wait; color: transparent;
+      box-shadow: none;
+    }
     .play-btn.is-loading::after {
-      content: ""; position: absolute; top:50%; left:50%;
+      content: ""; position: absolute; top: 50%; left: 50%;
       width: 14px; height: 14px;
       border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--black);
       border-radius: 50%; transform: translate(-50%,-50%);
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+    /* State 2 — Armed (blob ready, not yet playing)
+       RED fill signals: "loaded and ready — tap to start." */
+    .play-btn.is-armed {
+      background: var(--red);
+      color: var(--white);
+      border-color: var(--red);
+      box-shadow: 0 0 16px rgba(255,0,0,0.45),
+                  3px 3px 0 rgba(255,0,0,0.25);
+    }
+    .play-btn.is-armed:hover {
+      background: var(--red);
+      color: var(--white);
+      filter: brightness(1.12);
+      box-shadow: 0 0 24px rgba(255,0,0,0.6),
+                  4px 4px 0 rgba(255,0,0,0.3);
+    }
+    .play-btn.is-armed:active {
+      transform: translate(2px,2px);
+      box-shadow: 0 0 8px rgba(255,0,0,0.3), 1px 1px 0 rgba(255,0,0,0.15);
+    }
 
     .repeat-btn { font-size: 0.66rem; min-width: 130px; }
     .repeat-btn[data-mode="song"]  { border-style: dashed; color: var(--white); }
@@ -413,6 +446,7 @@
     <div class="inner">
 
       <header class="masthead">
+        <!-- Album-Index up-link per SOP v1.2 — albumLabel = "Album-Index", albumUrl = "../" -->
         <p class="masthead-sub"><a href="../">Album-Index</a> &nbsp;/&nbsp; Pat Bɇɇ</p>
         <h1 class="masthead-title">EYE 2 EYE</h1>
         <p class="masthead-artist">Pat Bɇɇ</p>
@@ -463,6 +497,8 @@
             <span id="dure" aria-label="Total duration">0:00</span>
           </div>
 
+          <!-- Volume slider intentionally removed — system volume used -->
+
           <div class="controls" role="group" aria-label="Player controls">
             <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Previous track">← Prev</button>
             <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play">▶ Play</button>
@@ -491,7 +527,6 @@
         <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
       </section>
 
-      <!-- BPM + Key — revealed only if Essentia analysis succeeds -->
       <div class="analysis-footer" id="analysisInline" aria-live="polite" aria-label="Detected tempo and key">
         <div class="af-item">
           <span class="af-label" aria-hidden="true">BPM</span>
@@ -518,17 +553,15 @@
   <script>
     /* ════════════════════════════════════════════════════════════
        EYE 2 EYE — Pat Bɇɇ
-       Functional engine: pat-bee-template v2 standards
-       Design: original Eye 2 Eye xerox/squat aesthetic
+       Built per SOP v1.2 — 3-state play button implemented.
+
+       Play button state machine:
+         State 1 (unloaded)  → white fill    → user taps → fetch begins
+         Loading             → % counter     → download in progress
+         State 2 (armed)     → RED fill+glow → blob ready, awaiting tap
+         Playing             → white fill    → "⏸ Pause"
     ════════════════════════════════════════════════════════════ */
 
-    /* ── CONFIG ──────────────────────────────────────────────────
-       USE_BLOB_LOADING = true: downloads full file before play.
-       Eliminates CDN buffering dropouts. Requires CORS on R2:
-         AllowedOrigins: ["https://pat-bee.github.io"]
-         AllowedMethods: ["GET","HEAD"]  AllowedHeaders: ["*"]
-       Falls back to HTML5 streaming if blob fails.
-    ─────────────────────────────────────────────────────────── */
     const CDN              = "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev";
     const USE_BLOB_LOADING = true;
     const BLOB_TIMEOUT_MS  = 30000;
@@ -626,12 +659,87 @@
     });
 
     /* ════════════════════════════════════════════════════════════
+       PLAY BUTTON HELPERS — 3-STATE MACHINE
+
+       showDownloadProgress(pct) — Loading state (% counter)
+       clearDownloadProgress()   — clears loading styles only
+       setArmedState()           — State 2: blob ready, red fill
+       setPlayState(on)          — Playing (true) or paused (false)
+                                   always removes is-armed
+    ════════════════════════════════════════════════════════════ */
+
+    /* Loading state — % counter shown inside button text */
+    function showDownloadProgress(pct) {
+      if (pct === 0) bufFill.style.width = "0%";
+      playBtn.classList.remove("is-loading", "is-armed");
+      playBtn.textContent    = pct === 0 ? "Loading…" : `${pct}%`;
+      playBtn.style.fontSize = pct === 0 ? "0.7rem" : "0.85rem";
+      playBtn.style.color    = "var(--black)";
+      playBtn.setAttribute("aria-label", pct === 0 ? "Loading…" : `Downloading ${pct}%`);
+      bufFill.style.width      = `${pct}%`;
+      bufFill.style.background = "var(--white)";
+      bufFill.classList.remove("loading");
+    }
+
+    /* Clear loading styles without committing to any post-load state */
+    function clearDownloadProgress() {
+      playBtn.classList.remove("is-loading");
+      playBtn.style.fontSize   = "";
+      playBtn.style.color      = "";
+      bufFill.style.background = "";
+    }
+
+    /* State 2 — Armed: blob in memory, audio.src set, awaiting user tap */
+    function setArmedState() {
+      clearDownloadProgress();
+      playBtn.classList.remove("is-loading");
+      playBtn.classList.add("is-armed");
+      playBtn.textContent = "▶ Play";
+      playBtn.setAttribute("aria-label",
+        `Play ${album.tracks[currentIndex]?.title} — ready`);
+      bufFill.classList.remove("loading");
+      bufFill.style.width = "0%";
+    }
+
+    /* Playing / paused — always removes armed state */
+    function setPlayState(on) {
+      playBtn.classList.remove("is-armed", "is-loading");
+      playBtn.textContent    = on ? "⏸ Pause" : "▶ Play";
+      playBtn.style.fontSize = "";
+      playBtn.style.color    = "";
+      playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
+      artWrap.classList.toggle("is-playing", on);
+      playingDot.classList.toggle("is-playing", on);
+      setMediaPlayState(on ? "playing" : "paused");
+      updateTrackUI();
+    }
+
+    /* Loading spinner (streaming fallback path only) */
+    function setLoading(on) {
+      if (on) {
+        playBtn.classList.remove("is-armed");
+        playBtn.classList.add("is-loading");
+        playBtn.innerHTML = "";
+        playBtn.setAttribute("aria-label", "Loading…");
+        bufFill.classList.add("loading");
+      } else {
+        playBtn.classList.remove("is-loading");
+        bufFill.classList.remove("loading");
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════
        BLOB PRE-LOADER
+       State flow: State 1 → Loading (%) → State 2 (Armed)
+       User must tap Play (State 2) to start audio — no auto-play.
     ════════════════════════════════════════════════════════════ */
     async function loadAndPlayAsBlob(index, forceFallback = false) {
       const safeIdx         = Math.max(0, Math.min(index, album.tracks.length - 1));
       const track           = album.tracks[safeIdx];
       const { src, isFlac } = getBestSrc(track, forceFallback);
+
+      /* Clear any previous armed state before starting a new load */
+      playBtn.classList.remove("is-armed");
 
       currentIndex = safeIdx; usedFallback = forceFallback || !isFlac; isLoaded = true;
       npTitle.textContent = track.title;
@@ -665,8 +773,12 @@
         audio._blobUrl = blobUrl;
         audio.src = blobUrl; audio.preload = "auto"; audio.load();
 
-        clearDownloadProgress();
-        await audio.play(); setPlayState(true); await acquireWake();
+        /* ── Transition to State 2 (Armed) ────────────────────
+           Blob is in memory, audio element is loaded.
+           DO NOT call audio.play() here — user must tap.      */
+        setArmedState();
+
+        /* Essentia analysis runs non-blocking after arm */
         analyzeAudio(blob);
 
       } catch (err) {
@@ -679,7 +791,8 @@
           return;
         }
 
-        console.warn("[Eye2Eye] Blob failed, falling back to streaming:", err.message);
+        /* Blob unavailable — fall back to HTML5 streaming (auto-plays in this path) */
+        console.warn("[Eye2Eye] Blob failed, streaming fallback:", err.message);
         showErr("/ Buffering — streaming mode active");
         setTimeout(() => clearErr(), 3500);
         loadTrack(index, false);
@@ -688,27 +801,8 @@
       }
     }
 
-    function showDownloadProgress(pct) {
-      if (pct === 0) bufFill.style.width = "0%";
-      playBtn.classList.remove("is-loading");
-      playBtn.textContent    = pct === 0 ? "Loading…" : `${pct}%`;
-      playBtn.style.fontSize = pct === 0 ? "0.7rem" : "0.85rem";
-      playBtn.style.color    = "var(--black)";
-      playBtn.setAttribute("aria-label", pct === 0 ? "Loading…" : `Downloading ${pct}%`);
-      bufFill.style.width      = `${pct}%`;
-      bufFill.style.background = "var(--white)";
-      bufFill.classList.remove("loading");
-    }
-
-    function clearDownloadProgress() {
-      playBtn.classList.remove("is-loading");
-      playBtn.style.fontSize   = "";
-      playBtn.style.color      = "";
-      bufFill.style.background = "";
-    }
-
     /* ════════════════════════════════════════════════════════════
-       ESSENTIA.JS — BPM + KEY AUTO-DETECTION
+       ESSENTIA.JS — BPM + KEY
     ════════════════════════════════════════════════════════════ */
     let essentiaInstance = null;
 
@@ -747,7 +841,7 @@
             const rhythm = essentia.RhythmExtractor2013(signal, 208, 40, "degara", decoded.sampleRate);
             const raw = Math.round(rhythm.bpm);
             bpm = (raw >= 40 && raw <= 250) ? raw : null;
-          } catch(e) { console.warn("[Essentia] BPM error:", e.message || e); }
+          } catch(e) { console.warn("[Essentia] BPM:", e.message || e); }
 
           try {
             const kr = essentia.KeyExtractor(
@@ -755,11 +849,11 @@
               decoded.sampleRate, 0.0001, 440, "cosine", "hann"
             );
             key = kr.key + " " + (kr.scale === "major" ? "maj" : "min");
-          } catch(e) { console.warn("[Essentia] Key error:", e.message || e); }
+          } catch(e) { console.warn("[Essentia] Key:", e.message || e); }
 
           signal.delete();
           if (bpm !== null || key) updateAnalysisDisplay(bpm, key);
-        } catch(err) { console.warn("[Essentia] Analysis failed:", err.message || err); }
+        } catch(err) { console.warn("[Essentia] Failed:", err.message || err); }
       };
 
       setTimeout(() => {
@@ -773,7 +867,6 @@
       const bpmEl    = document.getElementById("bpmDisplay");
       const keyEl    = document.getElementById("notesDisplay");
       let   hasData  = false;
-
       if (bpm !== null && bpm !== undefined && bpmEl) {
         bpmEl.textContent = String(bpm);
         bpmEl.setAttribute("aria-label", `Detected tempo: ${bpm} BPM`);
@@ -793,8 +886,7 @@
         function check() {
           if (!audio.duration || !audio.buffered.length) { requestAnimationFrame(check); return; }
           const buffered = audio.buffered.end(audio.buffered.length - 1);
-          const target   = Math.min(MIN_PREBUFFER_S, audio.duration);
-          if (buffered >= target) {
+          if (buffered >= Math.min(MIN_PREBUFFER_S, audio.duration)) {
             resolve();
           } else {
             bufFill.style.width      = `${Math.round((buffered / audio.duration) * 100)}%`;
@@ -809,8 +901,8 @@
     setInterval(() => {
       if (USE_BLOB_LOADING) return;
       if (audio.paused || !audio.duration || !audio.buffered.length) return;
-      const aheadSeconds = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
-      if (aheadSeconds < DANGER_SECONDS && !isRebuffering) {
+      const ahead = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
+      if (ahead < DANGER_SECONDS && !isRebuffering) {
         isRebuffering = true; audio.pause(); bufFill.classList.add("loading");
         const poll = setInterval(() => {
           if (!audio.buffered.length) return;
@@ -886,20 +978,27 @@
         clearDownloadProgress();
         if (err.name === "NotAllowedError") showErr("/ Tap Play — browser requires a direct tap.");
         else if (!usedFallback) { loadTrack(index, true); await playTrack(index); }
-        else { showErr("/ Playback failed. Check audio URLs."); console.warn(err); }
+        else { showErr("/ Playback failed. Check audio URLs."); }
       }
     }
 
+    /* ── TOGGLE PLAY — handles all three states ──────────────── */
     async function togglePlay() {
       if (!isLoaded) {
+        /* Not loaded yet — begin fetch (→ State 1 → Loading → State 2) */
         if (USE_BLOB_LOADING) await loadAndPlayAsBlob(currentIndex);
         else await playTrack(currentIndex);
         return;
       }
       if (audio.paused) {
+        /* Armed (State 2) or resuming from pause — remove armed class, play */
+        playBtn.classList.remove("is-armed");
         try { await audio.play(); setPlayState(true); await acquireWake(); }
         catch (_) { showErr("/ Could not resume — tap Play again."); }
-      } else { audio.pause(); setPlayState(false); dropWake(); }
+      } else {
+        /* Currently playing — pause */
+        audio.pause(); setPlayState(false); dropWake();
+      }
     }
 
     function playPrev() {
@@ -914,26 +1013,6 @@
       } else if (repeatMode === "album") {
         if (USE_BLOB_LOADING) loadAndPlayAsBlob(0); else playTrack(0);
       } else { setPlayState(false); dropWake(); }
-    }
-
-    function setPlayState(on) {
-      playBtn.textContent = on ? "⏸ Pause" : "▶ Play";
-      playBtn.style.fontSize = ""; playBtn.style.color = "";
-      playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
-      playBtn.classList.remove("is-loading");
-      artWrap.classList.toggle("is-playing", on);
-      playingDot.classList.toggle("is-playing", on);
-      setMediaPlayState(on ? "playing" : "paused");
-      updateTrackUI();
-    }
-
-    function setLoading(on) {
-      if (on) {
-        playBtn.innerHTML = ""; playBtn.classList.add("is-loading");
-        bufFill.classList.add("loading");
-      } else {
-        playBtn.classList.remove("is-loading"); bufFill.classList.remove("loading");
-      }
     }
 
     /* ── REPEAT ──────────────────────────────────────────────── */
@@ -954,7 +1033,11 @@
     });
     audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlayState(true); });
     audio.addEventListener("waiting", () => bufFill.classList.add("loading"));
-    audio.addEventListener("pause",   () => { artWrap.classList.remove("is-playing"); playingDot.classList.remove("is-playing"); updateTrackUI(); });
+    audio.addEventListener("pause",   () => {
+      artWrap.classList.remove("is-playing");
+      playingDot.classList.remove("is-playing");
+      updateTrackUI();
+    });
     audio.addEventListener("play",    () => updateTrackUI());
 
     let stallTimer;
@@ -1006,23 +1089,23 @@
       bufFill.style.width = `${(audio.buffered.end(audio.buffered.length-1)/audio.duration)*100}%`;
     });
 
-    progBar.addEventListener("mousedown",  ()=>isSeeking=true);
-    progBar.addEventListener("touchstart", ()=>isSeeking=true, {passive:true});
+    progBar.addEventListener("mousedown",  () => isSeeking = true);
+    progBar.addEventListener("touchstart", () => isSeeking = true, {passive: true});
     progBar.addEventListener("input", () => {
       if (audio.duration) {
-        const t = (progBar.value/100)*audio.duration;
+        const t = (progBar.value / 100) * audio.duration;
         cureEl.textContent = fmt(t);
         progBar.setAttribute("aria-valuetext", `${fmt(t)} of ${fmt(audio.duration)}`);
       }
     });
     progBar.addEventListener("change", () => {
-      if (audio.duration) audio.currentTime = (progBar.value/100)*audio.duration;
+      if (audio.duration) audio.currentTime = (progBar.value / 100) * audio.duration;
       isSeeking = false;
     });
-    progBar.addEventListener("mouseup",  ()=>isSeeking=false);
-    progBar.addEventListener("touchend", ()=>isSeeking=false);
+    progBar.addEventListener("mouseup",  () => isSeeking = false);
+    progBar.addEventListener("touchend", () => isSeeking = false);
 
-    /* ── MEDIA SESSION — lock screen / hardware keys ─────────── */
+    /* ── MEDIA SESSION ───────────────────────────────────────── */
     function updateMediaSession(track) {
       if (!("mediaSession" in navigator)) return;
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -1049,8 +1132,7 @@
       try { navigator.mediaSession.setPositionState({ duration:audio.duration, playbackRate:audio.playbackRate, position:audio.currentTime }); } catch(_){}
     }
 
-    /* ── KEYBOARD SHORTCUTS ──────────────────────────────────── */
-    /* Volume slider removed — ArrowUp/Down still adjust audio.volume directly */
+    /* ── KEYBOARD — volume slider removed, ArrowUp/Down adjust audio.volume directly */
     document.addEventListener("keydown", (e) => {
       if (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
       switch(e.key) {
@@ -1066,11 +1148,9 @@
       }
     });
 
-    /* ── ERROR HELPERS ───────────────────────────────────────── */
     function showErr(msg) { errLine.textContent = msg; errLine.classList.add("show"); }
     function clearErr()   { errLine.textContent = ""; errLine.classList.remove("show"); }
 
-    /* ── BUTTON LISTENERS ────────────────────────────────────── */
     playBtn.addEventListener("click",   togglePlay);
     prevBtn.addEventListener("click",   playPrev);
     nextBtn.addEventListener("click",   playNext);
