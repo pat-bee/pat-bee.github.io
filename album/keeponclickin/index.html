@@ -1,0 +1,440 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keep On Clickn — Pat Bɇɇ</title>
+  <meta name="description" content="Listen to Keep On Clickn by Pat Bɇɇ" />
+
+  <meta property="og:type" content="music.song" />
+  <meta property="og:title" content="Keep On Clickn — Pat Bɇɇ" />
+  <meta property="og:description" content="Listen to Keep On Clickn by Pat Bɇɇ" />
+  <meta property="og:url" content="https://pat-bee.github.io/album/keep-on-clickn/" />
+  <meta property="og:image" content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_keep-on-clickn.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Keep On Clickn — Pat Bɇɇ" />
+  <meta name="twitter:description" content="Listen to Keep On Clickn by Pat Bɇɇ" />
+  <meta name="twitter:image" content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_keep-on-clickn.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Nova+Round&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --canvas:        #D4FCD4;
+      --bg:            #D4FCD4;
+      --bg-panel:      #ECFFEC;
+      --bg-raised:     #F7FFF7;
+      --bg-inset:      #BFF4C1;
+
+      --grid:          #0B1B0A;
+      --grid-mid:      #1C4E1D;
+      --grid-dim:      #429B46;
+      --ink:           #0B1B0A;
+      --ink-mid:       #1C4E1D;
+      --ink-dim:       #429B46;
+      --ink-ghost:     rgba(11,27,10,0.07);
+
+      --red:           #1C4E1D;
+      --red-bright:    #429B46;
+      --red-dim:       #0B1B0A;
+      --red-faint:     rgba(28,78,29,0.10);
+      --red-pale:      rgba(28,78,29,0.18);
+      --red-border:    rgba(66,155,70,0.45);
+      --red-text:      #D4FCD4;
+
+      --blue:          #77DF7E;
+      --blue-bright:   #D4FCD4;
+      --blue-dim:      #429B46;
+      --blue-faint:    rgba(119,223,126,0.18);
+      --blue-border:   rgba(119,223,126,0.48);
+
+      --green:         #429B46;
+      --green-bright:  #77DF7E;
+      --green-dim:     #1C4E1D;
+      --green-faint:   rgba(66,155,70,0.12);
+      --green-border:  rgba(66,155,70,0.38);
+
+      --border:        rgba(11,27,10,0.16);
+      --border-mid:    rgba(11,27,10,0.32);
+      --border-strong: rgba(11,27,10,0.62);
+      --focus-ring:    #1C4E1D;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, var(--ink-ghost) 1px, transparent 1px),
+        linear-gradient(0deg, var(--ink-ghost) 1px, transparent 1px),
+        radial-gradient(circle at 12% 0%, rgba(119,223,126,0.28), transparent 31rem),
+        var(--canvas);
+      background-size: 22px 22px, 22px 22px, auto, auto;
+      color: var(--ink);
+      font-family: "Courier Prime", ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.01em;
+    }
+
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: absolute; left: 1rem; top: -4rem; z-index: 20;
+      padding: .7rem 1rem; background: var(--bg-raised); border: 1px solid var(--border-strong);
+    }
+    .skip-link:focus { top: 1rem; }
+
+    .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 30px 0 42px; }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: end;
+      padding: 0 0 22px;
+      border-bottom: 1px solid var(--border-strong);
+    }
+    .masthead-eyebrow, .footer, .meta-row, .track-meta, .keymap {
+      font-size: .78rem; text-transform: uppercase; letter-spacing: .1em;
+    }
+    .masthead-eyebrow a { text-decoration: none; border-bottom: 1px solid transparent; }
+    .masthead-eyebrow a:hover { color: var(--red); border-bottom-color: var(--red); }
+    .masthead-title {
+      margin: .35rem 0 .2rem;
+      font-family: "Nova Round", system-ui, sans-serif;
+      font-size: clamp(3.15rem, 10vw, 9.2rem);
+      line-height: .82;
+      letter-spacing: -.075em;
+      color: var(--grid);
+      text-wrap: balance;
+    }
+    .masthead-sub { margin: 0; color: var(--ink-mid); }
+    .status-pill { border: 1px solid var(--border-mid); padding: .5rem .7rem; background: var(--bg-panel); box-shadow: 4px 4px 0 var(--grid); }
+
+    .main-grid { display: grid; grid-template-columns: minmax(290px, 48%) 1fr; gap: 28px; padding: 28px 0; align-items: start; }
+    .art-panel, .player-panel, .playlist, .share-strip, .remix-row {
+      border: 1px solid var(--border-strong); background: var(--bg-panel); box-shadow: 8px 8px 0 var(--grid);
+    }
+    .art-panel { padding: 13px; position: relative; }
+    .art-frame { aspect-ratio: 1 / 1; position: relative; overflow: hidden; background: var(--bg-inset); border: 1px solid var(--border-mid); }
+    .art-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .art-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(11,27,10,.05) 8px); mix-blend-mode: multiply; }
+    .eq { position: absolute; left: 20px; right: 20px; bottom: 20px; height: 50px; display: flex; gap: 7px; align-items: end; opacity: 0; transition: opacity .2s ease; }
+    .is-playing .eq { opacity: 1; }
+    .eq span { flex: 1; min-width: 4px; background: var(--blue); border: 1px solid var(--grid); animation: bounce 1s infinite ease-in-out; transform-origin: bottom; }
+    .eq span:nth-child(2n) { animation-duration: .72s; background: var(--green-bright); }
+    .eq span:nth-child(3n) { animation-duration: .91s; background: var(--red-bright); }
+    @keyframes bounce { 0%, 100% { height: 18%; } 50% { height: 100%; } }
+
+    .player-panel { padding: clamp(18px, 3vw, 30px); }
+    .meta-row { display: flex; justify-content: space-between; gap: 1rem; color: var(--ink-mid); border-bottom: 1px solid var(--border); padding-bottom: .7rem; }
+    .np-title { font-family: "Nova Round", system-ui, sans-serif; font-size: clamp(2rem, 5vw, 4.6rem); line-height: .9; letter-spacing: -.05em; margin: 1.1rem 0 .35rem; }
+    .np-artist { margin: 0 0 1.3rem; color: var(--ink-mid); }
+    .play-row { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 15px; align-items: center; }
+    .play-btn {
+      font-family: "Nova Round", system-ui, sans-serif;
+      border: 1px solid var(--red-bright);
+      background: var(--red);
+      color: var(--red-text);
+      min-height: 74px;
+      font-size: 1.45rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 5px 5px 0 var(--grid);
+    }
+    .play-btn:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--grid); }
+    .play-btn.is-loading { background: var(--bg-raised); color: var(--red-dim); border-color: var(--border); cursor: wait; }
+    .play-btn.is-armed { background: var(--red-bright); color: #F7FFF7; border-color: var(--red-dim); box-shadow: 0 0 0 3px var(--red-border), 5px 5px 0 var(--grid); }
+    .play-btn.is-playing { background: var(--grid); color: var(--blue-bright); border-color: var(--blue); }
+
+    .time-box { display: grid; gap: .55rem; }
+    .seek { width: 100%; accent-color: var(--blue-dim); }
+    .time-row { display: flex; justify-content: space-between; font-size: .88rem; color: var(--ink-mid); }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+    .mini-btn { font: inherit; background: var(--bg-raised); border: 1px solid var(--border-mid); color: var(--ink); padding: .58rem .7rem; cursor: pointer; }
+    .mini-btn:hover, .mini-btn[aria-pressed="true"] { background: var(--blue-faint); border-color: var(--blue-dim); }
+    .keymap { margin-top: 18px; color: var(--ink-dim); line-height: 1.6; }
+
+    .playlist { margin-bottom: 14px; }
+    .playlist-head { padding: .8rem 1rem; border-bottom: 1px solid var(--border-strong); background: var(--blue-faint); display: flex; justify-content: space-between; }
+    .track { width: 100%; border: 0; border-bottom: 1px solid var(--border); background: transparent; padding: 1rem; text-align: left; display: grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items: center; cursor: pointer; color: var(--ink); }
+    .track.is-active { background: var(--red-faint); box-shadow: inset 7px 0 0 var(--red); }
+    .track-title-text { font-family: "Nova Round", system-ui, sans-serif; font-size: 1.25rem; }
+    .track-meta { color: var(--ink-mid); }
+    .format-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--grid-dim); display: inline-block; }
+    .format-dot.lossless { background: var(--green-bright); }
+    .notice { padding: .8rem 1rem; color: var(--ink-mid); border-bottom: 1px solid var(--border); }
+
+    .remix-row { padding: 1rem; margin-bottom: 14px; background: var(--green-faint); display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; }
+    .remix-title { font-family: "Nova Round", system-ui, sans-serif; margin: 0 0 .25rem; }
+    .remix-row p { margin: 0; color: var(--ink-mid); }
+    .share-strip { padding: .9rem 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-bottom: 18px; }
+    .share-label { margin-right: auto; color: var(--ink-mid); text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; }
+    .footer { display: flex; justify-content: space-between; gap: 1rem; padding-top: 14px; color: var(--ink-mid); border-top: 1px solid var(--border-strong); }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 22px, 680px); padding-top: 18px; }
+      .masthead { grid-template-columns: 1fr; }
+      .status-pill { width: max-content; box-shadow: 3px 3px 0 var(--grid); }
+      .main-grid { grid-template-columns: 1fr; gap: 18px; }
+      .play-row { grid-template-columns: 1fr; }
+      .play-btn { width: 100%; }
+      .art-panel, .player-panel, .playlist, .share-strip, .remix-row { box-shadow: 5px 5px 0 var(--grid); }
+      .footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        <div class="masthead-eyebrow" id="mastheadEyebrow"></div>
+        <h1 class="masthead-title" id="mastheadTitle">Keep On Clickn</h1>
+        <p class="masthead-sub">Pat Bɇɇ &nbsp;·&nbsp; index_album</p>
+      </div>
+      <div class="status-pill">index_album · Release</div>
+    </header>
+
+    <main id="main" class="main-grid">
+      <section class="art-panel" id="artPanel" aria-label="Cover art">
+        <div class="art-frame">
+          <img id="albumArtImg" src="" alt="Keep On Clickn by Pat Bɇɇ — cover art" />
+          <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </section>
+
+      <section class="player-panel" aria-label="Audio player">
+        <div class="meta-row"><span>Now Playing</span><span><span class="format-dot" id="fmtDot"></span> <span id="fmtLabel">— Background</span></span></div>
+        <p class="np-title" id="npTitle">Keep On Clickn</p>
+        <p class="np-artist">Pat Bɇɇ</p>
+        <div class="play-row">
+          <button class="play-btn" id="playBtn" type="button" aria-label="Play Keep On Clickn">PLAY</button>
+          <div class="time-box">
+            <input class="seek" id="seek" type="range" min="0" max="1000" value="0" aria-label="Seek" />
+            <div class="time-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
+          </div>
+        </div>
+        <div class="controls" aria-label="Playback controls">
+          <button class="mini-btn" id="prevBtn" type="button">← Prev</button>
+          <button class="mini-btn" id="nextBtn" type="button">Next →</button>
+          <button class="mini-btn" id="repeatBtn" type="button" aria-pressed="false">↺ Repeat: Off</button>
+        </div>
+        <div class="keymap"><code>Space</code> Play/Pause&nbsp;&nbsp; <code>←</code><code>→</code> Seek 10s&nbsp;&nbsp; <code>N</code> <code>P</code> Track</div>
+      </section>
+    </main>
+
+    <section class="playlist" aria-label="Playlist">
+      <div class="playlist-head"><span>0 Recordings</span><span id="playlistCount">1 Track</span></div>
+      <div class="notice" id="notice">// Signal detected. Tap Play to begin.</div>
+      <button class="track is-active" id="trackBtn" type="button" aria-current="true">
+        <span>01</span><span><span class="track-title-text">Keep On Clickn</span><br><span class="track-meta">Pat Bɇɇ · index_album</span></span><span>▶</span>
+      </button>
+    </section>
+
+    <section class="remix-row" aria-label="Submit a remix">
+      <div><h2 class="remix-title">Submit a Remix</h2><p>Send a version, variation, or alternate signal.</p></div>
+      <button class="mini-btn" type="button" id="remixBtn">Upload</button>
+    </section>
+
+    <nav class="share-strip" aria-label="Share this track">
+      <span class="share-label">Share</span>
+      <button class="mini-btn" type="button" id="copyBtn">Copy Link</button>
+      <a class="mini-btn" id="downloadM4a" href="#">AAC</a>
+      <a class="mini-btn" id="downloadFlac" href="#">FLAC</a>
+    </nav>
+
+    <footer class="footer" id="footer">
+      <span>Pat Bɇɇ</span>
+      <a id="artistFooter" href="https://www.instagram.com/patbee.music/" rel="noopener">Pat Bɇɇ on Instagram</a>
+    </footer>
+  </div>
+
+  <audio id="audio" preload="metadata"></audio>
+
+  <script>
+    const SONG_CONFIG = {
+      title:        "Keep On Clickn",
+      artist:       "Pat Bɇɇ",
+      album:        "index_album",
+      slug:         "keep-on-clickn",
+      cdnBase:      "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev",
+      pageUrl:      "https://pat-bee.github.io/album/keep-on-clickn/",
+      artistUrl:    "https://www.instagram.com/patbee.music/",
+      artistLabel:  "Pat Bɇɇ on Instagram",
+      albumUrl:     "../",
+      albumLabel:   "Album-Index",
+      remixEndpoint: "",
+      artFile:      "pat-bee_keep-on-clickn.png",
+      flacFile:     "pat-bee_keep-on-clickn.flac",
+      fallbackFile: "pat-bee_keep-on-clickn.m4a"
+    };
+
+    const USE_BLOB_LOADING = true;
+    const $ = (id) => document.getElementById(id);
+    const audio = $("audio");
+    const playBtn = $("playBtn");
+    const seek = $("seek");
+    const notice = $("notice");
+    const artPanel = $("artPanel");
+    const fmtDot = $("fmtDot");
+    const fmtLabel = $("fmtLabel");
+    let isLoaded = false;
+    let isLoading = false;
+    let repeat = false;
+    let objectUrl = null;
+
+    const urls = {
+      art: `${SONG_CONFIG.cdnBase}/${SONG_CONFIG.artFile}`,
+      flac: `${SONG_CONFIG.cdnBase}/${SONG_CONFIG.flacFile}`,
+      fallback: `${SONG_CONFIG.cdnBase}/${SONG_CONFIG.fallbackFile}`
+    };
+
+    function initMasthead() {
+      $("mastheadEyebrow").innerHTML = `<a href="${SONG_CONFIG.albumUrl}">${SONG_CONFIG.albumLabel}</a> &nbsp;·&nbsp; <a href="${SONG_CONFIG.artistUrl}?utm_source=header" rel="noopener">${SONG_CONFIG.artist}</a>`;
+      $("artistFooter").href = `${SONG_CONFIG.artistUrl}?utm_source=footer`;
+      $("artistFooter").textContent = SONG_CONFIG.artistLabel;
+    }
+
+    function initMedia() {
+      $("albumArtImg").src = urls.art;
+      $("downloadM4a").href = urls.fallback;
+      $("downloadFlac").href = urls.flac;
+      audio.loop = repeat;
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: SONG_CONFIG.title,
+          artist: SONG_CONFIG.artist,
+          album: SONG_CONFIG.album,
+          artwork: [{ src: urls.art, sizes: "512x512", type: "image/png" }]
+        });
+        navigator.mediaSession.setActionHandler("play", togglePlay);
+        navigator.mediaSession.setActionHandler("pause", togglePlay);
+      }
+    }
+
+    function fmtTime(seconds) {
+      if (!Number.isFinite(seconds)) return "0:00";
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function setPlayState(playing) {
+      playBtn.classList.toggle("is-playing", playing);
+      artPanel.classList.toggle("is-playing", playing);
+      playBtn.textContent = playing ? "PAUSE" : "PLAY";
+      playBtn.setAttribute("aria-label", `${playing ? "Pause" : "Play"} ${SONG_CONFIG.title}`);
+      notice.textContent = playing ? "// Playback active." : "// Signal paused.";
+    }
+
+    function clearDownloadProgress() {
+      playBtn.classList.remove("is-loading");
+      playBtn.classList.add("is-armed");
+      playBtn.textContent = "PLAY";
+      playBtn.setAttribute("aria-label", `Play ${SONG_CONFIG.title} — ready`);
+      notice.textContent = "// Loaded. Tap PLAY to start.";
+    }
+
+    async function loadAndArmAsBlob() {
+      if (isLoading) return;
+      isLoading = true;
+      playBtn.classList.add("is-loading");
+      playBtn.textContent = "Loading…";
+      notice.textContent = "// Loading lossless file.";
+      try {
+        const response = await fetch(urls.flac);
+        if (!response.ok) throw new Error("FLAC unavailable");
+        const total = Number(response.headers.get("content-length"));
+        const reader = response.body && response.body.getReader ? response.body.getReader() : null;
+        if (!reader) throw new Error("Streaming unavailable");
+        const chunks = [];
+        let received = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.length;
+          if (total) playBtn.textContent = `${Math.round((received / total) * 100)}%`;
+        }
+        const blob = new Blob(chunks, { type: "audio/flac" });
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = URL.createObjectURL(blob);
+        audio.src = objectUrl;
+        isLoaded = true;
+        fmtDot.classList.add("lossless");
+        fmtLabel.textContent = "Lossless Blob";
+        clearDownloadProgress();
+      } catch (err) {
+        audio.src = urls.fallback;
+        isLoaded = true;
+        playBtn.classList.remove("is-loading");
+        playBtn.classList.add("is-armed");
+        playBtn.textContent = "PLAY";
+        fmtDot.classList.remove("lossless");
+        fmtLabel.textContent = "AAC Fallback";
+        notice.textContent = "// Lossless unavailable. AAC fallback armed.";
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    async function togglePlay() {
+      if (!isLoaded) { await loadAndArmAsBlob(); return; }
+      if (audio.paused) {
+        playBtn.classList.remove("is-armed");
+        await audio.play();
+        setPlayState(true);
+      } else {
+        audio.pause();
+        setPlayState(false);
+      }
+    }
+
+    playBtn.addEventListener("click", togglePlay);
+    $("trackBtn").addEventListener("click", togglePlay);
+    $("prevBtn").addEventListener("click", () => { audio.currentTime = 0; });
+    $("nextBtn").addEventListener("click", () => { audio.currentTime = Math.max(0, audio.duration || 0); });
+    $("repeatBtn").addEventListener("click", () => {
+      repeat = !repeat;
+      audio.loop = repeat;
+      $("repeatBtn").setAttribute("aria-pressed", String(repeat));
+      $("repeatBtn").textContent = `↺ Repeat: ${repeat ? "On" : "Off"}`;
+    });
+    $("copyBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(SONG_CONFIG.pageUrl);
+      notice.textContent = "// Link copied.";
+    });
+    $("remixBtn").addEventListener("click", () => {
+      notice.textContent = "// Remix endpoint not configured yet.";
+    });
+
+    audio.addEventListener("loadedmetadata", () => { $("duration").textContent = fmtTime(audio.duration); });
+    audio.addEventListener("timeupdate", () => {
+      $("currentTime").textContent = fmtTime(audio.currentTime);
+      if (audio.duration) seek.value = String(Math.round((audio.currentTime / audio.duration) * 1000));
+    });
+    audio.addEventListener("ended", () => setPlayState(false));
+    seek.addEventListener("input", () => { if (audio.duration) audio.currentTime = (Number(seek.value) / 1000) * audio.duration; });
+    document.addEventListener("keydown", (event) => {
+      if (event.target && ["INPUT", "TEXTAREA", "BUTTON"].includes(event.target.tagName)) return;
+      if (event.code === "Space") { event.preventDefault(); togglePlay(); }
+      if (event.key === "ArrowLeft") audio.currentTime = Math.max(0, audio.currentTime - 10);
+      if (event.key === "ArrowRight") audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
+      if (event.key.toLowerCase() === "n") audio.currentTime = Math.max(0, audio.duration || 0);
+      if (event.key.toLowerCase() === "p") audio.currentTime = 0;
+    });
+
+    initMasthead();
+    initMedia();
+  </script>
+</body>
+</html>
