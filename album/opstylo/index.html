@@ -878,6 +878,8 @@
     let currentIndex  = 0, isLoaded = false, usedFallback = false;
     let isSeeking     = false, repeatMode = "off";
     let wakeLock      = null, isRebuffering = false;
+    let blobDownloadInProgress = false;   /* true while background chunk download is in flight */
+    let _blobReadyResolve      = null;    /* resolve fn — settled by signalBlobReady() */
 
     /* Format detection */
     const flacOk = (() => { const p = document.createElement("audio"); return !!(p.canPlayType && (p.canPlayType("audio/flac") !== "" || p.canPlayType("audio/x-flac") !== "")); })();
@@ -917,12 +919,29 @@
       return true;
     }
 
+    /* signalBlobReady — called when the background download finishes (any path).
+       Clears the in-flight flag and settles any waiting promise in the ended handler. */
+    function signalBlobReady() {
+      blobDownloadInProgress = false;
+      if (_blobReadyResolve) { _blobReadyResolve(); _blobReadyResolve = null; }
+    }
+
+    /* waitForBlobReady — returns a Promise that resolves when signalBlobReady() is called.
+       If no download is in flight, resolves immediately. */
+    function waitForBlobReady() {
+      return new Promise(resolve => {
+        if (!blobDownloadInProgress) { resolve(); return; }
+        _blobReadyResolve = resolve;
+      });
+    }
+
     async function loadAndPlayAsBlob(idx, ff = false) {
       const si = Math.max(0, Math.min(idx, album.tracks.length - 1)), tr = album.tracks[si], { src, isFlac } = getBestSrc(tr, ff);
       currentIndex = si; usedFallback = ff || !isFlac; isLoaded = true;
       npTitle.textContent = tr.title; updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(tr);
       const thr = calcThr(isFlac);
       if (thr === null) { loadTrack(idx, ff); try { await waitForPrebuffer(); clearDLP(); setPlayState(false); /* ready — user taps PLAY */ } catch (e) { showErr("// Check connection"); } return; }
+      blobDownloadInProgress = true; _blobReadyResolve = null;
       const ctrl = new AbortController(), tout = setTimeout(() => ctrl.abort(), BLOB_TIMEOUT_MS);
       try {
         const res = await fetch(src, { signal: ctrl.signal, cache: "default" }); clearTimeout(tout);
@@ -953,14 +972,15 @@
           if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
           audio._blobUrl = fu; audio.src = fu; audio.preload = "auto"; audio.load();
           clearDLP();
+          signalBlobReady(); /* download complete — full blob is primary, no upgrade needed */
           /* State 2 — Armed */
           playBtn.classList.add("is-armed");
           playBtn.textContent = "PLAY";
           playBtn.setAttribute("aria-label", "Play " + tr.title + " — ready");
         }
-        else { audio._fullBlobUrl = fu; setTimeout(() => { bufFill.style.background = ""; bufFill.style.width = "0%"; }, 800); }
+        else { audio._fullBlobUrl = fu; signalBlobReady(); setTimeout(() => { bufFill.style.background = ""; bufFill.style.width = "0%"; }, 800); }
       } catch (err) {
-        clearTimeout(tout); clearDLP();
+        clearTimeout(tout); clearDLP(); signalBlobReady();
         if (!usedFallback && !ff) { await loadAndPlayAsBlob(idx, true); return; }
         showErr("// Streaming mode"); setTimeout(() => clearErr(), 3500);
         loadTrack(idx, false); setPlayState(false); /* ready — user taps PLAY */
@@ -1076,7 +1096,33 @@
     function cycleRepeat() { const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"]; repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length]; const m = { off:{l:"↺ Repeat: Off",p:"false"}, song:{l:"↺ Repeat: Song",p:"true"}, album:{l:"↺ Repeat: Album",p:"true"} }; repeatBtn.textContent = m[repeatMode].l; repeatBtn.dataset.mode = repeatMode; repeatBtn.setAttribute("aria-label", m[repeatMode].l + ". Press to cycle."); repeatBtn.setAttribute("aria-pressed", m[repeatMode].p); }
 
     /* Audio events */
-    audio.addEventListener("ended", () => { if (upgradeToFullBlob()) return; if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; } playNext(); });
+    /* PARTIAL BLOB EXHAUSTION FIX
+       When playback begins on a partial blob and reaches its end before the
+       background download completes, the ended event fires prematurely.
+       The fix: wait for signalBlobReady(), upgrade to the full blob,
+       seek to the saved position, and resume — invisible to the listener. */
+    audio.addEventListener("ended", async () => {
+      if (upgradeToFullBlob()) return;                /* full blob already ready — seamless */
+      if (blobDownloadInProgress) {
+        const resumeAt = audio.currentTime;           /* save position at end of partial blob */
+        await waitForBlobReady();                     /* block until download signals complete */
+        if (audio._fullBlobUrl) {
+          /* Manual upgrade with forced resume from saved position */
+          if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
+          audio._blobUrl = audio._fullBlobUrl; delete audio._fullBlobUrl;
+          audio.src = audio._blobUrl; audio.preload = "auto"; audio.load();
+          audio.addEventListener("loadedmetadata", function s() {
+            audio.removeEventListener("loadedmetadata", s);
+            audio.currentTime = resumeAt;
+            audio.play().catch(() => {});
+            setPlayState(true);
+          }, { once: true });
+          return;
+        }
+      }
+      if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+      playNext();
+    });
     audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlayState(true); });
     audio.addEventListener("waiting", () => bufFill.classList.add("loading"));
     audio.addEventListener("pause",   () => { artWrap.classList.remove("is-playing"); liveDot.classList.remove("active"); updateTrackUI(); });
