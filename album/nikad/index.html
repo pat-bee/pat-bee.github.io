@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Nikad — Pat Bɇɇ</title>
+  <meta property="og:type"         content="music.song" />
+  <meta property="og:site_name"    content="Pat Bɇɇ" />
+  <meta property="og:title"        content="Nikad — Pat Bɇɇ" />
+  <meta property="og:description"  content="Listen to Nikad by Pat Bɇɇ" />
+  <meta property="og:url"          content="https://pat-bee.github.io/album/nikad/" />
+  <meta property="og:image"        content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_nikad.png" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="1200" />
+  <meta property="og:image:type"   content="image/png" />
+  <meta property="og:image:alt"    content="Nikad by Pat Bɇɇ — cover art" />
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Nikad — Pat Bɇɇ" />
+  <meta name="twitter:description" content="Listen to Nikad by Pat Bɇɇ" />
+  <meta name="twitter:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_nikad.png" />
+  <link rel="preconnect" href="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --canvas:        #0B0C0D;
+      --bg:            #0B0C0D;
+      --bg-panel:      #0F1011;
+      --bg-raised:     #161819;
+      --bg-inset:      #080809;
+      --grid:          #3A3D40;
+      --ink:           #A0A8AD;
+      --ink-mid:       #6B7278;
+      --ink-dim:       #3E4448;
+      --ink-ghost:     rgba(160,168,173,0.05);
+      --red:           #FF4D00;
+      --red-bright:    #FF6A1F;
+      --red-dim:       #B33500;
+      --red-faint:     rgba(255,77,0,0.07);
+      --red-pale:      rgba(255,77,0,0.14);
+      --red-border:    rgba(255,77,0,0.42);
+      --red-text:      #0B0C0D;
+      --blue:          #C8FF00;
+      --blue-bright:   #D8FF40;
+      --blue-dim:      #7DAA00;
+      --blue-faint:    rgba(200,255,0,0.07);
+      --blue-border:   rgba(200,255,0,0.32);
+      --green:         #6B1A00;
+      --green-bright:  #8B2500;
+      --green-dim:     #3D0E00;
+      --green-faint:   rgba(107,26,0,0.15);
+      --green-border:  rgba(107,26,0,0.35);
+      --border:        rgba(58,61,64,0.55);
+      --border-mid:    rgba(58,61,64,0.80);
+      --border-strong: rgba(80,84,88,0.90);
+      --focus-ring:    #FF4D00;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .skip-link { position:absolute;top:-100%;left:12px;z-index:99999;background:var(--red);color:var(--red-text);padding:8px 18px;font-family:'Courier Prime',monospace;font-size:0.8rem;letter-spacing:0.08em;text-decoration:none;transition:top 200ms; }
+    .skip-link:focus { top:0; }
+    :focus-visible { outline:2px solid var(--focus-ring);outline-offset:3px; }
+    html { background:var(--bg);color:var(--ink);font-family:'Courier Prime','Courier New',monospace;min-height:100%;-webkit-text-size-adjust:100%; }
+    body {
+      min-height:100vh;
+      background-color:#0B0C0D;
+      background:
+        repeating-linear-gradient(-55deg,transparent,transparent 28px,rgba(255,77,0,0.018) 28px,rgba(255,77,0,0.018) 32px,transparent 32px,transparent 60px,rgba(200,255,0,0.012) 60px,rgba(200,255,0,0.012) 64px),
+        #0B0C0D;
+      position:relative;overflow-x:hidden;
+    }
+    body::before { content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,transparent 40%,rgba(0,0,0,0.72) 100%); }
+    button { font-family:'Courier Prime',monospace;color:inherit;cursor:pointer; }
+    .page-shell { position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 64px; }
+    .inner { width:100%;max-width:880px; }
+    .masthead { position:relative;padding:22px 28px 20px 32px;background:var(--bg-raised);border:1px solid var(--border-mid);border-bottom:2px solid var(--red);border-left:5px solid var(--red);overflow:hidden; }
+    .masthead::before { content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(-55deg,transparent,transparent 18px,rgba(255,77,0,0.055) 18px,rgba(255,77,0,0.055) 22px,transparent 22px,transparent 40px,rgba(200,255,0,0.030) 40px,rgba(200,255,0,0.030) 44px); }
+    .masthead::after { content:"";position:absolute;top:0;right:0;width:4px;height:100%;background:linear-gradient(180deg,var(--blue),var(--blue-dim));opacity:0.35;pointer-events:none; }
+    .masthead-eyebrow { font-family:'Courier Prime',monospace;font-size:0.52rem;letter-spacing:0.36em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;position:relative;z-index:1; }
+    .masthead-eyebrow a { color:var(--ink-dim);text-decoration:none;border-bottom:1px solid transparent;transition:color 140ms,border-color 140ms; }
+    .masthead-eyebrow a:hover { color:var(--red);border-bottom-color:var(--red-border); }
+    .masthead-titles { min-width:0;overflow:hidden;container-type:inline-size;position:relative;z-index:1; }
+    .masthead-title { font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:clamp(2rem,13cqi,6.5rem);white-space:nowrap;overflow:hidden;text-overflow:clip;line-height:1.0;color:var(--ink);letter-spacing:0.04em;text-transform:uppercase; }
+    .masthead-sub { margin-top:8px;font-family:'Courier Prime',monospace;font-size:0.52rem;letter-spacing:0.30em;text-transform:uppercase;color:var(--ink-dim);position:relative;z-index:1; }
+    .main-grid { display:grid;grid-template-columns:minmax(210px,340px) 1fr;border:1px solid var(--border-mid);border-top:none;background:var(--bg-panel); }
+    .col-art { border-right:1px solid var(--border-mid); }
+    .col-player { padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0; }
+    .art-wrap { position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--bg-inset);display:block;transition:box-shadow 800ms; }
+    .art-wrap.is-playing { box-shadow:inset 0 0 0 2px var(--red),0 0 30px rgba(255,77,0,0.18),0 0 60px rgba(255,77,0,0.07); }
+    .art-wrap img { width:100%;height:100%;object-fit:cover;object-position:center;display:block;position:relative;z-index:2;filter:brightness(0.88) saturate(0.75);transition:filter 800ms; }
+    .art-wrap.is-playing img { filter:brightness(0.92) saturate(0.80) sepia(0.08); }
+    .eq-overlay { position:absolute;bottom:0;left:0;right:0;height:22%;display:flex;align-items:flex-end;gap:3px;padding:0 14%;opacity:0;transition:opacity 800ms;z-index:5; }
+    .art-wrap.is-playing .eq-overlay { opacity:1; }
+    .eq-b { flex:1;min-height:2px;animation:vu-bar 0.7s ease infinite alternate; }
+    .eq-b:nth-child(odd)  { background:var(--red); }
+    .eq-b:nth-child(even) { background:var(--blue); }
+    .eq-b:nth-child(1){animation-delay:0.00s}.eq-b:nth-child(2){animation-delay:0.11s}
+    .eq-b:nth-child(3){animation-delay:0.22s}.eq-b:nth-child(4){animation-delay:0.06s}
+    .eq-b:nth-child(5){animation-delay:0.17s}.eq-b:nth-child(6){animation-delay:0.28s}
+    .eq-b:nth-child(7){animation-delay:0.09s}.eq-b:nth-child(8){animation-delay:0.20s}
+    @keyframes vu-bar { from{height:4%} to{height:88%} }
+    .np-label { font-family:'Courier Prime',monospace;font-size:0.5rem;letter-spacing:0.36em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:4px; }
+    .np-title { font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.5rem;line-height:1.05;color:var(--ink);word-break:break-word;letter-spacing:0.05em;text-transform:uppercase; }
+    .np-meta { display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center; }
+    .live-dot { display:inline-block;width:8px;height:8px;background:transparent;border:1px solid var(--border-mid);flex-shrink:0;transition:all 200ms; }
+    .live-dot.active { background:var(--red);border-color:var(--red-bright);box-shadow:0 0 6px rgba(255,77,0,0.6);animation:warning-flash 1.4s ease-in-out infinite; }
+    @keyframes warning-flash {
+      0%  {opacity:1;box-shadow:0 0 6px rgba(255,77,0,0.6)}
+      18% {opacity:0.2;box-shadow:none}
+      36% {opacity:1;box-shadow:0 0 6px rgba(255,77,0,0.6)}
+      60% {opacity:0.15;box-shadow:none}
+      100%{opacity:1;box-shadow:0 0 6px rgba(255,77,0,0.6)}
+    }
+    .fmt-dot { display:inline-block;width:8px;height:8px;background:var(--ink-ghost);border:1px solid var(--border);flex-shrink:0;transition:all 300ms; }
+    .fmt-dot.is-lossless { background:var(--blue);border-color:var(--blue-dim);box-shadow:0 0 4px rgba(200,255,0,0.3); }
+    .fmt-dot.is-lossy    { background:var(--ink-dim);border-color:var(--border); }
+    .badge { font-family:'Courier Prime',monospace;font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--ink-dim); }
+    .badge-flac { border-color:var(--blue-border);color:var(--blue); }
+    .badge-download { border:1px solid var(--blue-dim);background:transparent;color:var(--blue);text-decoration:none;cursor:pointer;transition:background 120ms,border-color 120ms,box-shadow 120ms; }
+    .badge-download:hover { background:var(--blue-faint);border-color:var(--blue);box-shadow:0 0 6px rgba(200,255,0,0.2); }
+    .buf-wrap { width:100%;height:2px;background:var(--ink-ghost); }
+    .buf-fill { height:100%;background:var(--ink-dim);width:0%;transition:width 400ms; }
+    .buf-fill.loading { animation:buf-flicker 1.2s ease-in-out infinite; }
+    @keyframes buf-flicker { 0%,100%{opacity:0.15} 50%{opacity:0.8} }
+    .prog-row { display:grid;grid-template-columns:46px 1fr 46px;gap:8px;align-items:center;font-family:'Courier Prime',monospace;font-size:0.64rem;color:var(--ink-dim);font-variant-numeric:tabular-nums; }
+    .prog-bar { appearance:none;width:100%;height:3px;background:rgba(58,61,64,0.6);border:none;border-radius:0;cursor:pointer; }
+    .prog-bar::-webkit-slider-thumb { appearance:none;width:10px;height:20px;background:var(--red);border:none;border-radius:0;cursor:pointer; }
+    .prog-bar::-moz-range-thumb { width:10px;height:20px;background:var(--red);border:none;border-radius:0;cursor:pointer; }
+    .controls { display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
+    .ctrl-btn { border:1px solid var(--border);background:transparent;color:var(--ink-dim);font-family:'Courier Prime',monospace;font-size:0.64rem;letter-spacing:0.1em;text-transform:uppercase;padding:0 14px;min-height:38px;transition:border-color 120ms,color 120ms,transform 80ms;position:relative;overflow:hidden; }
+    .ctrl-btn:hover { border-color:var(--grid);color:var(--ink); }
+    .ctrl-btn:active { transform:translate(1px,1px); }
+    .play-btn { min-width:136px;min-height:52px;font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.4rem;letter-spacing:0.1em;text-transform:uppercase;background:var(--red);color:var(--red-text);border:none;box-shadow:2px 2px 0 var(--red-dim);transition:background 120ms,box-shadow 120ms; }
+    .play-btn:hover { background:var(--red-bright);box-shadow:3px 3px 0 var(--red-dim),0 0 14px rgba(255,77,0,0.3); }
+    .play-btn:active { transform:translate(2px,2px);box-shadow:none; }
+    .play-btn.is-loading-text { font-family:'Courier Prime',monospace;font-weight:400;font-size:0.72rem;letter-spacing:0.08em;background:var(--red-faint);color:var(--red);box-shadow:0 0 0 1px var(--red-dim);animation:warn-pulse 2s ease-in-out infinite; }
+    @keyframes warn-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+    .play-btn.is-armed { background:var(--red-bright);color:var(--red-text);box-shadow:2px 2px 0 var(--red-dim),0 0 18px rgba(255,77,0,0.35); }
+    .play-btn.is-loading { background:var(--bg-raised);border:1px solid var(--border);cursor:wait;box-shadow:none; }
+    .play-btn.is-loading::after { content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;border:2px solid var(--red-faint);border-top-color:var(--red);border-radius:50%;transform:translate(-50%,-50%);animation:spin 0.9s linear infinite; }
+    @keyframes spin { to{transform:translate(-50%,-50%) rotate(360deg)} }
+    .repeat-btn { min-width:130px;font-size:0.6rem; }
+    .repeat-btn[data-mode="song"]  { border-color:rgba(255,77,0,0.35);color:var(--red); }
+    .repeat-btn[data-mode="album"] { border-style:dashed; }
+    .kbd-row { display:flex;gap:10px;flex-wrap:wrap; }
+    .kbd-hint { font-size:0.48rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:0.06em; }
+    kbd { display:inline-block;padding:1px 5px;border:1px solid var(--border);font-size:0.48rem;font-family:inherit;color:var(--ink-dim);background:var(--bg-inset); }
+    .status-line { font-family:'Courier Prime',monospace;font-size:0.52rem;color:var(--ink-dim);line-height:1.6;letter-spacing:0.04em; }
+    .err-line { font-family:'Courier Prime',monospace;font-size:0.6rem;color:var(--red);display:none;line-height:1.4;border-left:2px solid var(--red-border);padding-left:8px; }
+    .err-line.show { display:block; }
+    .playlist-section { border:1px solid var(--border-mid);border-top:none;background:var(--bg-panel); }
+    .playlist-header { padding:8px 20px;border-bottom:1px solid var(--border-mid);font-family:'Courier Prime',monospace;font-size:0.48rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--ink-dim);display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--red-dim); }
+    .playlist-header::before { content:"Recording Log";font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:0.7rem;color:rgba(255,77,0,0.14);letter-spacing:0.08em; }
+    .track-list { list-style:none; }
+    .track-btn,.remix-row { width:100%;display:grid;grid-template-columns:52px 1fr auto;align-items:stretch;text-align:left;border:none;border-bottom:1px solid var(--border);transition:background 80ms; }
+    .track-list li:last-child .track-btn,.track-list li:last-child .remix-row { border-bottom:none; }
+    .track-btn { background:transparent;cursor:pointer; }
+    .track-btn:hover { background:var(--red-faint); }
+    .track-btn[aria-current="true"] { background:var(--red-faint);box-shadow:inset 3px 0 0 var(--red); }
+    .track-btn[aria-current="true"] .track-num { color:var(--red); }
+    .track-btn[aria-current="true"].is-playing .track-num { animation:warning-flash 1.4s ease-in-out infinite; }
+    .track-num { display:flex;align-items:center;justify-content:center;padding:16px 0;border-right:1px solid var(--border);font-family:'Courier Prime',monospace;font-size:0.88rem;letter-spacing:0.06em;color:var(--ink-dim);min-width:52px; }
+    .track-info-col { padding:13px 16px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0; }
+    .track-title-text { font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:1.05rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.06em;text-transform:uppercase; }
+    .track-meta-text { font-family:'Courier Prime',monospace;font-size:0.48rem;color:var(--ink-dim);letter-spacing:0.12em;text-transform:uppercase; }
+    .track-dur { display:flex;align-items:center;padding:13px 14px;font-family:'Courier Prime',monospace;font-size:0.64rem;color:var(--ink-dim);border-left:1px solid var(--border);white-space:nowrap;font-variant-numeric:tabular-nums; }
+    .remix-row { background:rgba(107,26,0,0.12);border-top:1px dashed rgba(107,26,0,0.40);cursor:pointer;position:relative; }
+    .remix-row:hover { background:rgba(107,26,0,0.18); }
+    .remix-row:focus-within { outline:2px solid var(--focus-ring);outline-offset:-2px; }
+    .remix-file-input { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2; }
+    .remix-icon-cell { display:flex;align-items:center;justify-content:center;padding:12px 0;border-right:1px dashed rgba(107,26,0,0.40);min-width:52px; }
+    .remix-icon-cell img { width:24px;height:24px;object-fit:contain;opacity:0.4;filter:sepia(1) hue-rotate(-10deg); }
+    .remix-info { padding:11px 16px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0; }
+    .remix-title { font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:0.9rem;color:#6B3020;letter-spacing:0.06em; }
+    .remix-sub { font-family:'Courier Prime',monospace;font-size:0.46rem;color:var(--ink-dim);letter-spacing:0.12em;text-transform:uppercase; }
+    .remix-status { display:flex;align-items:center;padding:11px 14px;font-family:'Courier Prime',monospace;font-size:0.54rem;color:#6B3020;border-left:1px dashed rgba(107,26,0,0.40);white-space:nowrap;letter-spacing:0.1em;text-transform:uppercase; }
+    .upload-toast { display:none;padding:8px 20px;font-family:'Courier Prime',monospace;font-size:0.52rem;color:var(--ink-dim);letter-spacing:0.06em;background:var(--red-faint);border-top:1px solid var(--border); }
+    .upload-toast.show { display:block; }
+    .share-strip { display:flex;justify-content:center;align-items:center;gap:20px;margin:20px 0 10px; }
+    .share-btn { display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:transparent;border:1px solid var(--border);color:var(--ink-dim);cursor:pointer;transition:border-color 140ms,color 140ms,box-shadow 140ms;padding:0;position:relative; }
+    .share-btn:hover { border-color:var(--red);color:var(--red);box-shadow:0 0 8px rgba(255,77,0,0.22); }
+    .share-btn:active { transform:translate(1px,1px); }
+    .share-btn svg { width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+    .share-btn.copied { border-color:var(--blue);color:var(--blue); }
+    .share-btn.copied::after { content:"Copied";position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Courier Prime',monospace;font-size:0.44rem;letter-spacing:0.1em;color:var(--blue);white-space:nowrap;pointer-events:none; }
+    .share-btn.hidden { display:none; }
+    .page-footer { margin-top:10px;text-align:center;width:100%; }
+    .page-footer a { font-family:'Courier Prime',monospace;font-size:0.6rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--ink-dim);text-decoration:none;border-bottom:1px solid var(--border);padding-bottom:2px;transition:color 140ms,border-color 140ms; }
+    .page-footer a:hover { color:var(--red);border-color:var(--red-border); }
+    @media (max-width:640px) {
+      .page-shell{padding:16px 12px 48px}
+      .main-grid{grid-template-columns:1fr}
+      .col-art{border-right:none;border-bottom:1px solid var(--border-mid)}
+      .col-player{padding:16px}
+      .kbd-row{display:none}
+      .track-btn,.remix-row{grid-template-columns:44px 1fr auto}
+      .track-num,.remix-icon-cell{min-width:44px}
+      .playlist-header{border-left-width:2px}
+    }
+    audio { position:fixed;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <main class="page-shell" id="main-content">
+    <div class="inner">
+      <header class="masthead" role="banner">
+        <p class="masthead-eyebrow" id="mastheadEyebrow">index_album · Pat Bɇɇ</p>
+        <div class="masthead-titles">
+          <h1 class="masthead-title" id="mastheadTitle">Nikad</h1>
+        </div>
+        <p class="masthead-sub">Pat Bɇɇ &nbsp;·&nbsp; index_album</p>
+      </header>
+      <div class="main-grid">
+        <div class="col-art">
+          <div class="art-wrap" id="artWrap">
+            <img id="albumArtImg" src="" alt="Nikad by Pat Bɇɇ — cover art" />
+            <div class="eq-overlay" aria-hidden="true">
+              <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+              <div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div>
+              <div class="eq-b"></div><div class="eq-b"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-player">
+          <div aria-live="polite" aria-atomic="true">
+            <p class="np-label">Now Playing</p>
+            <p class="np-title" id="npTitle">Nikad</p>
+            <div class="np-meta">
+              <span class="live-dot" id="liveDot" aria-hidden="true"></span>
+              <span class="fmt-dot" id="fmtDot" aria-hidden="true" title="Format indicator"></span>
+              <span class="badge badge-fmt" id="fmtBadge" aria-label="Audio format">M4A</span>
+              <a class="badge badge-download" id="downloadFlac" href="" target="_blank" rel="noopener" aria-label="Download lossless FLAC file">&#8595; FLAC</a>
+            </div>
+          </div>
+          <div class="buf-wrap" aria-hidden="true"><div class="buf-fill" id="bufFill"></div></div>
+          <div class="prog-row">
+            <span id="curTime" aria-label="Current time">0:00</span>
+            <input id="progBar" class="prog-bar" type="range" min="0" max="100" value="0" step="0.1" aria-label="Track progress" aria-valuetext="0 seconds" />
+            <span id="durTime" aria-label="Total duration">0:00</span>
+          </div>
+          <div class="controls" role="group" aria-label="Playback controls">
+            <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Previous track">&#8592; Prev</button>
+            <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play Nikad">PLAY</button>
+            <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Next track">Next &#8594;</button>
+            <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button" data-mode="off" aria-label="Repeat mode: off. Press to cycle." aria-pressed="false">&#8634; Repeat: Off</button>
+          </div>
+          <div class="kbd-row" aria-hidden="true">
+            <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
+            <span class="kbd-hint"><kbd>&#8592;</kbd><kbd>&#8594;</kbd> Seek 10s</span>
+            <span class="kbd-hint"><kbd>N</kbd><kbd>P</kbd> Track</span>
+            <span class="kbd-hint"><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Vol</span>
+            <span class="kbd-hint"><kbd>M</kbd> Mute</span>
+          </div>
+          <p class="status-line" id="statusLine">// Signal ready. Tap Play to begin.</p>
+          <p class="err-line" id="errLine" role="alert" aria-live="assertive"></p>
+        </div>
+      </div>
+      <section class="playlist-section" aria-label="Tracklist">
+        <div class="playlist-header" aria-hidden="true">
+          <span id="trackCount">0 Recordings</span>
+        </div>
+        <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
+      </section>
+      <div class="share-strip" id="shareStrip" aria-label="Share this page">
+        <button class="share-btn" id="btnNativeShare" aria-label="Share this page" title="Share">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+        <button class="share-btn" id="btnCopyLink" aria-label="Copy link" title="Copy link">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+      <footer class="page-footer">
+        <a id="footerArtistLink" href="https://www.instagram.com/patbee.music/" target="_blank" rel="noopener noreferrer" aria-label="Pat Bɇɇ on Instagram (opens in new tab)">Pat Bɇɇ</a>
+      </footer>
+    </div>
+  </main>
+  <audio id="audioEl" preload="metadata" playsinline x-webkit-airplay="allow"></audio>
+  <script>
+    const SONG_CONFIG = {
+      title:"Nikad", artist:"Pat B\u0207\u0207", album:"index_album", slug:"nikad",
+      cdnBase:"https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev",
+      pageUrl:"https://pat-bee.github.io/album/nikad/",
+      artistUrl:"https://www.instagram.com/patbee.music/",
+      artistLabel:"Pat B\u0207\u0207 on Instagram",
+      albumUrl:"../", albumLabel:"Album-Index", remixEndpoint:"",
+      artFile:"pat-bee_nikad.png",
+      flacFile:"Pat-Bee_Nikad.flac",
+      fallbackFile:"Pat-Bee_Nikad.m4a",
+    };
+    const CDN = SONG_CONFIG.cdnBase;
+    const ALBUM_ART_URL = CDN + "/" + SONG_CONFIG.artFile;
+    function buildArtistUrl(s) { return SONG_CONFIG.artistUrl + "?utm_source=" + s + "&utm_medium=songpage&utm_campaign=" + SONG_CONFIG.slug; }
+    const album = {
+      title: SONG_CONFIG.album, artist: SONG_CONFIG.artist, artworkUrl: ALBUM_ART_URL,
+      tracks: [{ title: SONG_CONFIG.title, duration: "\u2014", src: CDN + "/" + SONG_CONFIG.fallbackFile, flac: CDN + "/" + SONG_CONFIG.flacFile }]
+    };
+    const ICON_DARK = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/wAARCABAAEADASIAAhEBAxEB/8QAGwABAAIDAQAAAAAAAAAAAAAAAAUGAwQHAf/EACkQAAIBAwMEAgIDAQAAAAAAAAECAwQFERIhMUFRYRMiBoEUMpH/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAWEQEBAQAAAAAAAAAAAAAAAAAAARH/2gAMAwEAAhEDEQA/AOuAAAAAAAAADHuLmnbU3UqPCX8mEW5PCKK3vrq9qONGDhT75PN/EuhXrk6VCo4w+a5x7l8AW7QAAAAAAAAB5q04VoOFSKlF8pp5QAAAAAAB4qU4VYOFSKlF8pp5QAAAAHqnSp0oKNOEYRXCilhIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//2Q==";
+    const audio=document.getElementById("audioEl"),playBtn=document.getElementById("playBtn"),prevBtn=document.getElementById("prevBtn"),nextBtn=document.getElementById("nextBtn"),repeatBtn=document.getElementById("repeatBtn"),progBar=document.getElementById("progBar"),curTimeEl=document.getElementById("curTime"),durTimeEl=document.getElementById("durTime"),bufFill=document.getElementById("bufFill"),npTitle=document.getElementById("npTitle"),fmtBadge=document.getElementById("fmtBadge"),liveDot=document.getElementById("liveDot"),errLine=document.getElementById("errLine"),artWrap=document.getElementById("artWrap"),trackList=document.getElementById("trackList");
+    let currentIndex=0,isLoaded=false,usedFallback=false,isSeeking=false,repeatMode="off",wakeLock=null;
+    async function acquireWake(){if(!("wakeLock" in navigator))return;try{wakeLock=await navigator.wakeLock.request("screen");wakeLock.addEventListener("release",()=>{if(!audio.paused)acquireWake()});}catch(_){}}
+    async function dropWake(){if(wakeLock){try{await wakeLock.release();}catch(_){}wakeLock=null;}}
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&!audio.paused)acquireWake();});
+    function loadTrack(idx,tryFlac=false){const si=Math.max(0,Math.min(idx,album.tracks.length-1)),tr=album.tracks[si];currentIndex=si;isLoaded=false;usedFallback=tryFlac;npTitle.textContent=tr.title;if(fmtBadge)fmtBadge.textContent=tryFlac?"FLAC":"M4A";clearErr();updateTrackUI();updateMediaSession(tr);audio.src=tryFlac?tr.flac:tr.src;audio.preload="auto";audio.load();}
+    function showLoadingState(){playBtn.classList.remove("is-armed");playBtn.classList.add("is-loading-text");playBtn.textContent="LOADING";playBtn.setAttribute("aria-label","Loading audio");bufFill.classList.add("loading");bufFill.style.background="rgba(255,77,0,0.35)";}
+    function armButton(){playBtn.classList.remove("is-loading","is-loading-text");playBtn.classList.add("is-armed");playBtn.textContent="PLAY";playBtn.setAttribute("aria-label","Play "+album.tracks[currentIndex].title+" \u2014 ready");bufFill.classList.remove("loading");bufFill.style.background="";bufFill.style.width="0%";}
+    audio.addEventListener("canplay",()=>{if(!isLoaded){isLoaded=true;armButton();}});
+    async function togglePlay(){if(!isLoaded){loadTrack(currentIndex,false);showLoadingState();return;}if(audio.paused){playBtn.classList.remove("is-armed");try{await audio.play();setPlayState(true);await acquireWake();}catch(_){showErr("// Could not start \u2014 try again");}}else{audio.pause();setPlayState(false);dropWake();}}
+    function playPrev(){if(audio.currentTime>3&&isLoaded){audio.currentTime=0;return;}loadTrack(Math.max(0,currentIndex-1),false);showLoadingState();}
+    function playNext(){if(currentIndex<album.tracks.length-1){loadTrack(currentIndex+1,false);showLoadingState();}else if(repeatMode==="album"){loadTrack(0,false);showLoadingState();}else{setPlayState(false);dropWake();}}
+    function setPlayState(on){playBtn.classList.remove("is-loading-text","is-armed","is-loading");playBtn.textContent=on?"PAUSE":"PLAY";playBtn.setAttribute("aria-label",on?"Pause "+album.tracks[currentIndex]?.title:"Play "+album.tracks[currentIndex]?.title);artWrap.classList.toggle("is-playing",on);liveDot.classList.toggle("active",on);setMediaPlayState(on?"playing":"paused");updateTrackUI();}
+    function cycleRepeat(){const modes=album.tracks.length===1?["off","song"]:["off","song","album"];repeatMode=modes[(modes.indexOf(repeatMode)+1)%modes.length];const m={off:{l:"\u21ba Repeat: Off",p:"false"},song:{l:"\u21ba Repeat: Song",p:"true"},album:{l:"\u21ba Repeat: Album",p:"true"}};repeatBtn.textContent=m[repeatMode].l;repeatBtn.dataset.mode=repeatMode;repeatBtn.setAttribute("aria-label",m[repeatMode].l+". Press to cycle.");repeatBtn.setAttribute("aria-pressed",m[repeatMode].p);}
+    audio.addEventListener("ended",()=>{if(repeatMode==="song"){audio.currentTime=0;audio.play().catch(()=>{});return;}playNext();});
+    audio.addEventListener("playing",()=>{bufFill.classList.remove("loading");bufFill.style.background="";setPlayState(true);});
+    audio.addEventListener("waiting",()=>{bufFill.classList.add("loading");bufFill.style.background="rgba(255,77,0,0.25)";});
+    audio.addEventListener("pause",()=>{artWrap.classList.remove("is-playing");liveDot.classList.remove("active");updateTrackUI();});
+    audio.addEventListener("play",()=>updateTrackUI());
+    audio.addEventListener("error",()=>{if(!usedFallback){loadTrack(currentIndex,true);return;}isLoaded=false;playBtn.classList.remove("is-loading-text","is-armed","is-loading");playBtn.textContent="PLAY";showErr("// Signal lost \u2014 check connection");});
+    let stallTimer;
+    audio.addEventListener("stalled",()=>{clearTimeout(stallTimer);stallTimer=setTimeout(()=>{if(!audio.paused)audio.play().catch(()=>{});},1200);});
+    audio.addEventListener("progress",()=>clearTimeout(stallTimer));
+    audio.addEventListener("playing",()=>clearTimeout(stallTimer));
+    const fmt=s=>!Number.isFinite(s)||s<0?"0:00":Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+    audio.addEventListener("loadedmetadata",()=>{durTimeEl.textContent=fmt(audio.duration);progBar.setAttribute("aria-valuemax",Math.floor(audio.duration));const d=trackList.querySelectorAll(".track-dur");if(d[currentIndex])d[currentIndex].textContent=fmt(audio.duration);});
+    audio.addEventListener("timeupdate",()=>{if(isSeeking||!Number.isFinite(audio.duration)||!audio.duration)return;progBar.value=(audio.currentTime/audio.duration)*100;progBar.setAttribute("aria-valuenow",Math.floor(audio.currentTime));progBar.setAttribute("aria-valuetext",fmt(audio.currentTime)+" of "+fmt(audio.duration));curTimeEl.textContent=fmt(audio.currentTime);updateMediaPosition();});
+    audio.addEventListener("progress",()=>{if(!audio.duration||!audio.buffered.length)return;bufFill.style.width=(audio.buffered.end(audio.buffered.length-1)/audio.duration)*100+"%";});
+    progBar.addEventListener("mousedown",()=>isSeeking=true);
+    progBar.addEventListener("touchstart",()=>isSeeking=true,{passive:true});
+    progBar.addEventListener("input",()=>{if(audio.duration){const t=(progBar.value/100)*audio.duration;curTimeEl.textContent=fmt(t);progBar.setAttribute("aria-valuetext",fmt(t)+" of "+fmt(audio.duration));}});
+    progBar.addEventListener("change",()=>{if(audio.duration)audio.currentTime=(progBar.value/100)*audio.duration;isSeeking=false;});
+    progBar.addEventListener("mouseup",()=>isSeeking=false);
+    progBar.addEventListener("touchend",()=>isSeeking=false);
+    function updateMediaSession(tr){if(!("mediaSession" in navigator))return;navigator.mediaSession.metadata=new MediaMetadata({title:tr.title,artist:album.artist,album:album.title,artwork:[{src:album.artworkUrl,sizes:"512x512",type:"image/png"}]});const h={play:async()=>{await togglePlay();},pause:()=>{audio.pause();setPlayState(false);dropWake();},previoustrack:playPrev,nexttrack:playNext,seekbackward:e=>{audio.currentTime=Math.max(0,audio.currentTime-(e.seekOffset||10));},seekforward:e=>{audio.currentTime=Math.min(audio.duration||0,audio.currentTime+(e.seekOffset||10));},seekto:e=>{if(e.fastSeek&&"fastSeek" in audio)audio.fastSeek(e.seekTime);else audio.currentTime=e.seekTime;}};for(const[a,fn]of Object.entries(h)){try{navigator.mediaSession.setActionHandler(a,fn);}catch(_){}}}
+    function setMediaPlayState(s){if("mediaSession" in navigator)navigator.mediaSession.playbackState=s;}
+    function updateMediaPosition(){if(!("mediaSession" in navigator)||!Number.isFinite(audio.duration))return;try{navigator.mediaSession.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate,position:audio.currentTime});}catch(_){}}
+    document.addEventListener("keydown",e=>{if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;switch(e.key){case" ":case"MediaPlayPause":e.preventDefault();togglePlay();break;case"ArrowRight":e.preventDefault();audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10);break;case"ArrowLeft":e.preventDefault();audio.currentTime=Math.max(0,audio.currentTime-10);break;case"ArrowUp":e.preventDefault();audio.volume=Math.min(1,audio.volume+0.05);break;case"ArrowDown":e.preventDefault();audio.volume=Math.max(0,audio.volume-0.05);break;case"n":case"N":case"MediaTrackNext":playNext();break;case"p":case"P":case"MediaTrackPrevious":playPrev();break;case"r":case"R":cycleRepeat();break;case"m":case"M":audio.muted=!audio.muted;break;}});
+    function initShareStrip(){const bN=document.getElementById("btnNativeShare"),bC=document.getElementById("btnCopyLink"),sd={title:SONG_CONFIG.title+" \u2014 "+SONG_CONFIG.artist,text:"Listen to "+SONG_CONFIG.title+" by "+SONG_CONFIG.artist,url:SONG_CONFIG.pageUrl};if(navigator.share){bN.addEventListener("click",()=>{navigator.share(sd).catch(()=>{});});}else{bN.classList.add("hidden");}if(navigator.clipboard){bC.addEventListener("click",()=>{navigator.clipboard.writeText(SONG_CONFIG.pageUrl).then(()=>{bC.classList.add("copied");setTimeout(()=>bC.classList.remove("copied"),2000);}).catch(()=>{});});}else{bC.classList.add("hidden");}}
+    function initMasthead(){const ey=document.getElementById("mastheadEyebrow");if(ey){const ap=SONG_CONFIG.albumUrl?'<a href="'+SONG_CONFIG.albumUrl+'">'+SONG_CONFIG.albumLabel+'</a>':'',artp='<a href="'+buildArtistUrl("header")+'" target="_blank" rel="noopener noreferrer" aria-label="'+SONG_CONFIG.artistLabel+' (opens in new tab)">'+SONG_CONFIG.artist+'</a>';ey.innerHTML=ap?ap+' \u00B7 '+artp:artp;}}
+    function initFooter(){const lk=document.getElementById("footerArtistLink");if(lk){lk.href=buildArtistUrl("footer");lk.textContent=SONG_CONFIG.artist;lk.setAttribute("aria-label",SONG_CONFIG.artistLabel+" (opens in new tab)");}}
+    function updateTrackUI(){trackList.querySelectorAll(".track-btn").forEach((btn,i)=>{const cur=i===currentIndex&&isLoaded;btn.setAttribute("aria-current",cur?"true":"false");btn.classList.toggle("is-playing",cur&&!audio.paused);if(cur)btn.setAttribute("aria-label","Track "+(i+1)+": "+album.tracks[i].title+" \u2014 "+(audio.paused?"paused":"now playing"));});}
+    function renderTracks(){
+      trackList.innerHTML="";
+      const el=document.getElementById("trackCount");
+      if(el)el.textContent=album.tracks.length+" Recording"+(album.tracks.length!==1?"s":"");
+      album.tracks.forEach((tr,i)=>{
+        const li=document.createElement("li"),btn=document.createElement("button");
+        btn.className="track-btn";btn.type="button";btn.setAttribute("aria-current","false");
+        btn.setAttribute("aria-label","Track "+(i+1)+": "+tr.title+" by "+album.artist);
+        btn.innerHTML='<span class="track-num" aria-hidden="true">'+String(i+1).padStart(2,"0")+'</span><span class="track-info-col"><span class="track-title-text">'+tr.title+'</span><span class="track-meta-text">'+album.artist+'</span></span><span class="track-dur" aria-label="Duration: '+tr.duration+'">'+tr.duration+'</span>';
+        btn.addEventListener("click",()=>{loadTrack(i,false);showLoadingState();});
+        li.appendChild(btn);trackList.appendChild(li);
+      });
+      const EXTS=["m4a","flac","wav","mp3"],MIME=["audio/mp4","audio/flac","audio/x-flac","audio/wav","audio/x-wav","audio/mpeg"],rl=document.createElement("li");
+      rl.innerHTML='<div class="remix-row" role="button" tabindex="0" aria-label="Submit a remix"><input class="remix-file-input" type="file" accept=".m4a,.flac,.wav,.mp3,audio/mp4,audio/flac,audio/x-flac,audio/wav,audio/mpeg" id="remixFileInput"/><div class="remix-icon-cell" aria-hidden="true"><img src="'+ICON_DARK+'" alt=""/></div><div class="remix-info"><span class="remix-title">Submit a Remix</span><span class="remix-sub">m4a \u00B7 flac \u00B7 wav \u00B7 mp3</span></div><div class="remix-status" aria-live="polite" id="remixStatus">+ Add</div></div>';
+      trackList.appendChild(rl);
+      const toast=document.createElement("p");toast.className="upload-toast";toast.setAttribute("aria-live","polite");trackList.parentElement.appendChild(toast);
+      document.getElementById("remixFileInput").addEventListener("change",function(){
+        const file=this.files[0];if(!file)return;
+        const cta=document.getElementById("remixStatus"),ext=file.name.split(".").pop().toLowerCase(),mime=(file.type||"").toLowerCase();
+        if(!EXTS.includes(ext)||(!MIME.some(m=>mime.startsWith(m))&&mime!=="")){cta.textContent="REJECTED";toast.textContent="// Only .m4a, .flac, .wav, and .mp3 accepted.";toast.classList.add("show");return;}
+        cta.textContent="\u2713 Received";toast.textContent="// Received: "+file.name+" ("+(file.size/1024/1024).toFixed(2)+" MB)";toast.classList.add("show");
+        if(SONG_CONFIG.remixEndpoint){const fd=new FormData();fd.append("remix",file);fd.append("song",SONG_CONFIG.slug);fetch(SONG_CONFIG.remixEndpoint,{method:"POST",body:fd}).catch(err=>{toast.textContent+=" [Upload failed]";console.error(err);});}
+      });
+      if(album.tracks.length===1){prevBtn.style.display="none";nextBtn.style.display="none";}
+    }
+    function showErr(m){errLine.textContent=m;errLine.classList.add("show");}
+    function clearErr(){errLine.textContent="";errLine.classList.remove("show");}
+    playBtn.addEventListener("click",togglePlay);
+    prevBtn.addEventListener("click",playPrev);
+    nextBtn.addEventListener("click",playNext);
+    repeatBtn.addEventListener("click",cycleRepeat);
+    function init(){
+      document.getElementById("albumArtImg").src=ALBUM_ART_URL;
+      const dlBtn=document.getElementById("downloadFlac");if(dlBtn)dlBtn.href=album.tracks[0].flac;
+      if(fmtBadge){fmtBadge.textContent="M4A";fmtBadge.className="badge badge-fmt";}
+      const fmtDot=document.getElementById("fmtDot");if(fmtDot){fmtDot.classList.add("is-lossy");fmtDot.title="AAC M4A";}
+      initMasthead();initFooter();initShareStrip();renderTracks();updateMediaSession(album.tracks[0]);setPlayState(false);
+    }
+    init();
+  </script>
+</body>
+</html>
