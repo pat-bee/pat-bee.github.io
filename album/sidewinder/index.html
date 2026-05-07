@@ -587,7 +587,7 @@
     /* ════════════════════════════════════════════════════════════
        STATE
     ════════════════════════════════════════════════════════════ */
-    let currentIndex = 0, isLoaded = false;
+    let currentIndex = 0, isLoaded = false, usedFallback = false;
     let isSeeking = false, repeatMode = "off";
     let wakeLock = null;
 
@@ -614,13 +614,15 @@
        Browser handles HTTP range requests natively.
        canplay fires when enough is buffered → armButton().
     ════════════════════════════════════════════════════════════ */
-    function loadTrack(idx) {
+    function loadTrack(idx, tryFlac = false) {
       const si = Math.max(0, Math.min(idx, album.tracks.length - 1));
       const tr = album.tracks[si];
-      currentIndex = si; isLoaded = false;
+      currentIndex = si; isLoaded = false; usedFallback = tryFlac;
       npTitle.textContent = tr.title;
+      /* Update format badge to reflect what we're actually playing */
+      if (fmtBadge) { fmtBadge.textContent = tryFlac ? "FLAC" : "M4A"; }
       clearErr(); updateTrackUI(); updateMediaSession(tr);
-      audio.src = tr.src;   /* M4A */
+      audio.src = tryFlac ? tr.flac : tr.src;   /* M4A default, FLAC fallback */
       audio.preload = "auto";
       audio.load();
     }
@@ -669,14 +671,14 @@
 
     function playPrev() {
       if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; }
-      loadTrack(Math.max(0, currentIndex - 1));
+      loadTrack(Math.max(0, currentIndex - 1), false);
       showLoadingState();
     }
     function playNext() {
       if (currentIndex < album.tracks.length - 1) {
-        loadTrack(currentIndex + 1); showLoadingState();
+        loadTrack(currentIndex + 1, false); showLoadingState();
       } else if (repeatMode === "album") {
-        loadTrack(0); showLoadingState();
+        loadTrack(0, false); showLoadingState();
       } else { setPlayState(false); dropWake(); }
     }
 
@@ -723,10 +725,18 @@
     });
     audio.addEventListener("play",  () => updateTrackUI());
     audio.addEventListener("error", () => {
+      if (!usedFallback) {
+        /* M4A failed — silently try FLAC. canplay will re-arm the button. */
+        console.warn("[Sidewinder] M4A error — retrying with FLAC");
+        loadTrack(currentIndex, true);
+        return;
+      }
+      /* Both M4A and FLAC failed */
       isLoaded = false;
       playBtn.classList.remove("is-loading-text", "is-armed", "is-loading");
       playBtn.textContent = "▶ Play";
-      showErr("// TRANSMISSION FAILURE — CHECK CONNECTION");
+      const code = audio.error ? audio.error.code : 0;
+      showErr("// SIGNAL LOST — CODE " + code + " — CHECK CDN AND CONNECTION");
     });
 
     /* Stall recovery */
@@ -857,7 +867,7 @@
           '<span class="track-info-col"><span class="track-title-text">' + tr.title + '</span>' +
           '<span class="track-meta-text">' + album.artist + '</span></span>' +
           '<span class="track-dur" aria-label="Duration: ' + tr.duration + '">' + tr.duration + '</span>';
-        btn.addEventListener("click", () => { loadTrack(i); showLoadingState(); });
+        btn.addEventListener("click", () => { loadTrack(i, false); showLoadingState(); });
         li.appendChild(btn); trackList.appendChild(li);
       });
 
