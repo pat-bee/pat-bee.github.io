@@ -365,7 +365,13 @@
       padding: 2px 7px; border: 1px solid var(--border); color: var(--ink-mid);
     }
     .badge-flac  { border-color: var(--blue-border); color: var(--blue-dim); }
-    .badge-wake.active { border-color: var(--border-mid); color: var(--ink-mid); }
+    /* Download FLAC badge — copper/bronze, clearly interactive */
+    .badge-download {
+      border-color: var(--green-border); color: var(--green-dim);
+      text-decoration: none; cursor: pointer;
+      transition: background 120ms, border-color 120ms, color 120ms;
+    }
+    .badge-download:hover { background: var(--green-faint); border-color: var(--green-dim); color: var(--green); }
 
     /* Buffer bar */
     .buf-wrap { width: 100%; height: 2px; background: var(--ink-ghost); }
@@ -674,8 +680,8 @@
             <div class="np-meta">
               <span class="live-dot" id="liveDot" aria-hidden="true"></span>
               <span class="fmt-dot" id="fmtDot" aria-hidden="true" title="Format indicator"></span>
-              <span class="badge badge-fmt" id="fmtBadge" aria-label="Audio format">—</span>
-              <span class="badge badge-wake" id="wakeBadge" aria-label="Background status">Background</span>
+              <span class="badge badge-fmt" id="fmtBadge" aria-label="Audio format">M4A</span>
+              <a class="badge badge-download" id="downloadFlac" href="" target="_blank" rel="noopener" aria-label="Download lossless FLAC file">↓ FLAC</a>
             </div>
           </div>
 
@@ -759,7 +765,7 @@
   ══════════════════════════════════════════════════════════════════════════
   SCRIPT BLOCK — BREAKBREAK split plan:
     config/song.js            ← SONG_CONFIG object
-    engine/audio.js           ← blob loader, streaming, upgradeToFullBlob
+    engine/audio.js           ← M4A streaming engine
     engine/media-session.js   ← OS lock-screen controls
     engine/wake-lock.js       ← Screen Wake Lock
     components/track-list.js  ← renderTracks(), updateTrackUI()
@@ -772,54 +778,30 @@
   <script>
     /* ════════════════════════════════════════════════════════════════════════
        BREAKBREAK → config/song.js
-
-       SONG_CONFIG — single source of truth.
-       A future CMS/generator injects these values to produce any song page.
-       Nothing song-specific is hardcoded anywhere else in this file.
-
-       NOTE: OpStylo uses non-standard CDN filenames.
-       artFile / flacFile / fallbackFile confirmed from view-source.
+       SONG_CONFIG — single source of truth for this song page.
+       M4A is the playback format (universal, streaming-friendly).
+       FLAC is offered as a lossless download via the ↓ FLAC button.
     ════════════════════════════════════════════════════════════════════════ */
     const SONG_CONFIG = {
-      /* Identity */
       title:        "OpStylo",
       artist:       "Pat Bɇɇ",
       album:        "index_album",
       slug:         "opstylo",
-
-      /* CDN root — no trailing slash */
       cdnBase:      "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev",
-
-      /* Canonical page URL for share and OG tags */
       pageUrl:      "https://pat-bee.github.io/album/opstylo/",
-
-      /* Artist link — masthead (utm_source=header) AND footer (utm_source=footer).
-         Change once here to update both placements.                         */
       artistUrl:    "https://www.instagram.com/patbee.music/",
       artistLabel:  "Pat Bɇɇ on Instagram",
-
-      /* Album folder link — one level up from this song page.
-         SONG pages:  set to relative path e.g. "../"
-         ALBUM index pages: set to "" to suppress the up-link.               */
       albumUrl:     "../",
-
-      /* Remix upload endpoint.
-         Empty = client-side only (console.log, no POST).
-         Set to Cloudflare Worker URL when deployed.
-         Worker writes: /remixes/{slug}/{filename} in R2.                    */
+      albumLabel:   "Album-Index",
       remixEndpoint: "",
-
-      /* CDN filenames — non-standard naming confirmed from provided URLs */
       artFile:      "pat-bee-opstylo.png",
-      flacFile:     "Pat-Bee_OpStylo.flac",
-      fallbackFile: "Pat-Bee_OpStylo.m4a",
+      flacFile:     "Pat-Bee_OpStylo.flac",   /* download only */
+      fallbackFile: "Pat-Bee_OpStylo.m4a",    /* playback */
     };
 
-    /* Derived paths — always computed, never hardcoded elsewhere */
     const CDN           = SONG_CONFIG.cdnBase;
     const ALBUM_ART_URL = CDN + "/" + SONG_CONFIG.artFile;
 
-    /* Artist URL with utm tracking. source: "header" | "footer" */
     function buildArtistUrl(source) {
       return SONG_CONFIG.artistUrl
         + "?utm_source=" + source
@@ -827,7 +809,7 @@
         + "&utm_campaign=" + SONG_CONFIG.slug;
     }
 
-    /* Album object — consumed by audio engine and Media Session API */
+    /* Album — tracks use .src for M4A playback, .flac for download link */
     const album = {
       title:      SONG_CONFIG.album,
       artist:     SONG_CONFIG.artist,
@@ -836,23 +818,22 @@
         {
           title:    SONG_CONFIG.title,
           duration: "—",
-          flac:     CDN + "/" + SONG_CONFIG.flacFile,
-          fallback: CDN + "/" + SONG_CONFIG.fallbackFile,
+          src:      CDN + "/" + SONG_CONFIG.fallbackFile,  /* M4A — streamed */
+          flac:     CDN + "/" + SONG_CONFIG.flacFile,      /* FLAC — download */
         }
       ]
     };
 
     /* ════════════════════════════════════════════════════════════════════════
-       BREAKBREAK → engine/audio.js + engine/wake-lock.js — CONSTANTS
+       BREAKBREAK → engine/audio.js — M4A STREAMING ENGINE
+       No blob loading. No partial blobs. No concurrent downloads.
+       The browser streams the M4A natively via HTTP range requests.
+       State machine: Unloaded → Loading → Armed → Playing.
     ════════════════════════════════════════════════════════════════════════ */
-    const USE_BLOB_LOADING      = true;
-    const BLOB_TIMEOUT_MS       = 30000;
-    const DANGER_SECONDS        = 8;
-    const MIN_PREBUFFER_SECONDS = 4;   /* 4s is enough to start; blob continues downloading */
 
-    /* Upload icons — base64 embedded, no network request needed */
-    const ICON_DARK  = "data:image/png;base64,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";
-    const ICON_LIGHT = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/wAARCAFsAWwDASIAAhEBAxEB/8QAHQABAAIDAAMBAAAAAAAAAAAAAAcIAQYJAgMEBf/EAFYQAAEDAgQCAwgNCQMKBgMAAAEAAgMEBQYHERITIQgxdRgiN0FRs7TTCRQVFzZTVVaSk5XR0hYjMlJhcZGU1HSxsiUzNDVjc3aBoaMnQkNmcsFEgsL/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAWEQEBAQAAAAAAAAAAAAAAAAAAARH/2gAMAwEAAhEDEQA/AKdIiLIIiICLyjY+SRsbGue9x0a1o1JPkC+v3JunybWfUO+5B8SL7fcm6/JtZ9Q77k9yrp8m1n1DvuQfEi+z3JunybWfUO+5Pcq6fJtZ9Q77kHxIvs9ybp8m1n1DvuWfcm6fJtZ9Q77kHxIvt9ybr8m1n1DvuT3KunybWfUO+5B8SL7Pcm6fJtZ9Q77ln3JunybWfUO+5B8SL7fcm6/JtZ9Q77k9yrp8m1n1DvuQfEi+z3JunybWfUO+5Z9ybp8m1n1DvuQfEi+33JuvybWfUO+5Pcq6fJtZ9Q77kHxIvs9ybp8m1n1DvuWfcm6fJtZ9Q77kHxIvt9ybr8m1n1DvuX58pkilfG9ha5riHNcNCCPEVR5ovVxHeQL2NJI1KDKIigIiIC/9k=";
+    /* Upload icons for remix row */
+    const ICON_DARK  = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/wAARCABAAEADASIAAhEBAxEB/8QAGwABAAIDAQAAAAAAAAAAAAAAAAUGAwQHAf/EACkQAAIBAwMEAgIDAQAAAAAAAAECAwQFERIhMUFRYRMiBoEUMpH/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAWEQEBAQAAAAAAAAAAAAAAAAAAARH/2gAMAwEAAhEDEQA/AOuAAAAAAAAADHuLmnbU3UqPCX8mEW5PCKK3vrq9qONGDhT75PN/EuhXrk6VCo4w+a5x7l8AW7QAAAAAAAAB5q04VoOFSKlF8pp5QAAAAAAB4qU4VYOFSKlF8pp5QAAAAHqnSp0oKNOEYRXCilhIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//2Q==";
+    const ICON_LIGHT = "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/wAARCABAAEADASIAAhEBAxEB/8QAGwABAAIDAQAAAAAAAAAAAAAAAAUGAwQHAf/EACkQAAIBAwMEAgIDAQAAAAAAAAECAwQFERIhMUFRYRMiBoEUMpH/xAAWAQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAWEQEBAQAAAAAAAAAAAAAAAAAAARH/2gAMAwEAAhEDEQA/AOuAAAAAAAAADHuLmnbU3UqPCX8mEW5PCKK3vrq9qONGDhT75PN/EuhXrk6VCo4w+a5x7l8AW7QAAAAAAAAB5q04VoOFSKlF8pp5QAAAAAAB4qU4VYOFSKlF8pp5QAAAAHqnSp0oKNOEYRXCilhIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//2Q==";
 
     /* DOM refs */
     const audio      = document.getElementById("audioEl");
@@ -864,307 +845,224 @@
     const curTimeEl  = document.getElementById("curTime");
     const durTimeEl  = document.getElementById("durTime");
     const bufFill    = document.getElementById("bufFill");
-    const volBar     = document.getElementById("volBar");   /* hidden — system volume used */
-    const volPctEl   = { textContent: "" };                  /* stub — vol slider removed */
     const npTitle    = document.getElementById("npTitle");
     const fmtBadge   = document.getElementById("fmtBadge");
-    const wakeBadge  = document.getElementById("wakeBadge");
     const liveDot    = document.getElementById("liveDot");
     const errLine    = document.getElementById("errLine");
     const artWrap    = document.getElementById("artWrap");
     const trackList  = document.getElementById("trackList");
 
     /* State */
-    let currentIndex  = 0, isLoaded = false, usedFallback = false;
-    let isSeeking     = false, repeatMode = "off";
-    let wakeLock      = null, isRebuffering = false;
-    let blobDownloadInProgress = false;   /* true while background chunk download is in flight */
-    let _blobReadyResolve      = null;    /* resolve fn — settled by signalBlobReady() */
-
-    /* Format detection */
-    const flacOk = (() => { const p = document.createElement("audio"); return !!(p.canPlayType && (p.canPlayType("audio/flac") !== "" || p.canPlayType("audio/x-flac") !== "")); })();
-    function getBestSrc(t, f = false) { const u = flacOk && !f; return { src: u ? t.flac : t.fallback, isFlac: u }; }
-    function updateFmtBadge(f) {
-      fmtBadge.textContent = f ? "FLAC" : "AAC / MP3";
-      fmtBadge.className   = "badge badge-fmt" + (f ? " badge-flac" : "");
-      fmtBadge.setAttribute("aria-label", "Audio format: " + (f ? "Lossless FLAC" : "AAC or MP3"));
-      /* Format dot: green square = lossless, amber square = lossy */
-      const dot = document.getElementById("fmtDot");
-      if (dot) {
-        dot.classList.toggle("is-lossless", f);
-        dot.classList.toggle("is-lossy",    !f);
-        dot.title = f ? "Lossless FLAC" : "Lossy AAC / MP3";
-      }
-    }
-
-    /* BREAKBREAK → engine/wake-lock.js */
-    async function acquireWake() { if (!("wakeLock" in navigator)) return; try { wakeLock = await navigator.wakeLock.request("screen"); setWakeBadge(true); wakeLock.addEventListener("release", () => { setWakeBadge(false); if (!audio.paused) acquireWake(); }); } catch (_) { setWakeBadge(false); } }
-    async function dropWake() { if (wakeLock) { try { await wakeLock.release(); } catch (_) {} wakeLock = null; } setWakeBadge(false); }
-    function setWakeBadge(on) { wakeBadge.textContent = on ? "Wake Lock On" : "Background"; wakeBadge.classList.toggle("active", on); }
-    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && !audio.paused) acquireWake(); });
+    let currentIndex = 0, isLoaded = false;
+    let isSeeking    = false, repeatMode = "off";
+    let wakeLock     = null;
 
     /* ════════════════════════════════════════════════════════════════════════
-       BREAKBREAK → engine/audio.js — ADAPTIVE BLOB LOADER
+       BREAKBREAK → engine/wake-lock.js
     ════════════════════════════════════════════════════════════════════════ */
-    function getConn() { const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection; return { downlink: c?.downlink ?? 10, effectiveType: c?.effectiveType ?? "4g" }; }
-    function calcThr(isFlac) { const { downlink, effectiveType } = getConn(); if (effectiveType === "slow-2g" || downlink < 0.5) return null; return Math.max(0.15, Math.min(0.60, ((isFlac ? 0.9 : 0.25) / downlink) * 1.5)); }
-
-    function upgradeToFullBlob() {
-      if (!audio._fullBlobUrl) return false;
-      const t = audio.currentTime, w = !audio.paused;
-      if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
-      audio._blobUrl = audio._fullBlobUrl; delete audio._fullBlobUrl;
-      audio.src = audio._blobUrl; audio.preload = "auto"; audio.load();
-      audio.addEventListener("loadedmetadata", function s() { audio.removeEventListener("loadedmetadata", s); audio.currentTime = t; if (w) audio.play().catch(() => {}); }, { once: true });
-      return true;
-    }
-
-    /* signalBlobReady — called when the background download finishes (any path).
-       Clears the in-flight flag and settles any waiting promise in the ended handler. */
-    function signalBlobReady() {
-      blobDownloadInProgress = false;
-      if (_blobReadyResolve) { _blobReadyResolve(); _blobReadyResolve = null; }
-    }
-
-    /* waitForBlobReady — returns a Promise that resolves when signalBlobReady() is called.
-       If no download is in flight, resolves immediately. */
-    function waitForBlobReady() {
-      return new Promise(resolve => {
-        if (!blobDownloadInProgress) { resolve(); return; }
-        _blobReadyResolve = resolve;
-      });
-    }
-
-    async function loadAndPlayAsBlob(idx, ff = false) {
-      const si = Math.max(0, Math.min(idx, album.tracks.length - 1)), tr = album.tracks[si], { src, isFlac } = getBestSrc(tr, ff);
-      currentIndex = si; usedFallback = ff || !isFlac; isLoaded = true;
-      npTitle.textContent = tr.title; updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(tr);
-      const thr = calcThr(isFlac);
-      if (thr === null) { loadTrack(idx, ff); try { await waitForPrebuffer(); clearDLP(); setPlayState(false); /* ready — user taps PLAY */ } catch (e) { showErr("// Check connection"); } return; }
-      blobDownloadInProgress = true; _blobReadyResolve = null;
-      const ctrl = new AbortController(), tout = setTimeout(() => ctrl.abort(), BLOB_TIMEOUT_MS);
+    async function acquireWake() {
+      if (!("wakeLock" in navigator)) return;
       try {
-        const res = await fetch(src, { signal: ctrl.signal, cache: "default" }); clearTimeout(tout);
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const total = res.headers.get("content-length") ? parseInt(res.headers.get("content-length"), 10) : null;
-        const mime = isFlac ? "audio/flac" : "audio/mp4", reader = res.body.getReader(), chunks = []; let received = 0, started = false;
-        showDLP(0);
-        while (true) {
-          const { done, value } = await reader.read(); if (done) break;
-          chunks.push(value); received += value.length; const pct = total ? received / total : 0;
-          if (!started) {
-            showDLP(total ? Math.round(pct * 100) : null);
-            if (pct >= thr || (!total && received > 2000000)) {
-              started = true;
-              const blob = new Blob([...chunks], { type: mime }), url = URL.createObjectURL(blob);
-              if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
-              audio._blobUrl = url; audio.src = url; audio.preload = "auto"; audio.load();
-              clearDLP();
-              /* State 2 — Armed: blob ready, user taps to play */
-              playBtn.classList.add("is-armed");
-              playBtn.textContent = "PLAY";
-              playBtn.setAttribute("aria-label", "Play " + tr.title + " — ready");
-            }
-          } else if (total) { bufFill.style.background = "var(--blue)"; bufFill.style.width = Math.round(pct * 100) + "%"; }
-        }
-        const fb = new Blob(chunks, { type: mime }), fu = URL.createObjectURL(fb);
-        if (!started) {
-          if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
-          audio._blobUrl = fu; audio.src = fu; audio.preload = "auto"; audio.load();
-          clearDLP();
-          signalBlobReady(); /* download complete — full blob is primary, no upgrade needed */
-          /* State 2 — Armed */
-          playBtn.classList.add("is-armed");
-          playBtn.textContent = "PLAY";
-          playBtn.setAttribute("aria-label", "Play " + tr.title + " — ready");
-        }
-        else { audio._fullBlobUrl = fu; signalBlobReady(); setTimeout(() => { bufFill.style.background = ""; bufFill.style.width = "0%"; }, 800); }
-      } catch (err) {
-        clearTimeout(tout); clearDLP(); signalBlobReady();
-        if (!usedFallback && !ff) { await loadAndPlayAsBlob(idx, true); return; }
-        showErr("// Streaming mode"); setTimeout(() => clearErr(), 3500);
-        loadTrack(idx, false); setPlayState(false); /* ready — user taps PLAY */
-      }
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => { if (!audio.paused) acquireWake(); });
+      } catch (_) {}
+    }
+    async function dropWake() {
+      if (wakeLock) { try { await wakeLock.release(); } catch (_) {} wakeLock = null; }
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) acquireWake();
+    });
+
+    /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → engine/audio.js — STREAM + LOAD FUNCTIONS
+    ════════════════════════════════════════════════════════════════════════ */
+
+    /* loadTrack — point audio element at M4A CDN URL and begin buffering.
+       The browser handles HTTP range requests and progressive streaming.
+       canplay fires when enough is buffered to start; armButton() is called. */
+    function loadTrack(idx) {
+      const si = Math.max(0, Math.min(idx, album.tracks.length - 1));
+      const tr = album.tracks[si];
+      currentIndex = si; isLoaded = false;
+      npTitle.textContent = tr.title;
+      clearErr(); updateTrackUI(); updateMediaSession(tr);
+      audio.src = tr.src;   /* M4A */
+      audio.preload = "auto";
+      audio.load();
     }
 
-    function showDLP(pct) {
-      /* Always show "LOADING" — no percentage counter visible to listener.
-         The buffer bar silently tracks progress behind the scenes.           */
-      if (pct === 0) bufFill.style.width = "0%";
-      playBtn.classList.remove("is-loading", "is-armed");
+    /* showLoadingState — Loading phase: LOADING text, buffer bar flicker */
+    function showLoadingState() {
+      playBtn.classList.remove("is-armed");
       playBtn.classList.add("is-loading-text");
       playBtn.textContent = "LOADING";
-      playBtn.style.fontSize = "";
       playBtn.setAttribute("aria-label", "Loading audio");
-      /* Advance buffer bar silently */
-      if (pct !== null && pct > 0) bufFill.style.width = pct + "%";
+      bufFill.classList.add("loading");
       bufFill.style.background = "var(--blue)";
+    }
+
+    /* armButton — State 2: CDN buffered enough, ready for play tap */
+    function armButton() {
+      playBtn.classList.remove("is-loading", "is-loading-text");
+      playBtn.classList.add("is-armed");
+      playBtn.textContent = "PLAY";
+      playBtn.setAttribute("aria-label", "Play " + album.tracks[currentIndex].title + " — ready");
       bufFill.classList.remove("loading");
-    }
-    function clearDLP() { playBtn.classList.remove("is-loading", "is-loading-text"); playBtn.style.fontSize = ""; bufFill.style.background = ""; }
-
-    /* BREAKBREAK → engine/audio.js — STREAMING FALLBACK */
-    function waitForPrebuffer() {
-      return new Promise(resolve => {
-        const deadline = Date.now() + 6000;
-        function check() {
-          if (Date.now() > deadline) { resolve(); return; }
-          if (!audio.duration || !audio.buffered.length) { requestAnimationFrame(check); return; }
-          const b = audio.buffered.end(audio.buffered.length - 1);
-          if (b >= Math.min(MIN_PREBUFFER_SECONDS, audio.duration)) { resolve(); }
-          else { bufFill.style.width = Math.round((b / audio.duration) * 100) + "%"; bufFill.style.background = "var(--blue)"; requestAnimationFrame(check); }
-        }
-        check();
-      });
-    }
-    setInterval(() => {
-      if (USE_BLOB_LOADING) return;
-      if (audio.paused || !audio.duration || !audio.buffered.length) return;
-      const ahead = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
-      if (ahead < DANGER_SECONDS) {
-        bufFill.style.background = "var(--blue-dim)";
-      } else {
-        bufFill.style.background = "";
-      }
-    }, 2000);
-
-    /* ════════════════════════════════════════════════════════════════════════
-       BREAKBREAK → components/track-list.js
-    ════════════════════════════════════════════════════════════════════════ */
-    function renderTracks() {
-      trackList.innerHTML = "";
-      const el = document.getElementById("trackCount");
-      if (el) el.textContent = album.tracks.length + " Recording" + (album.tracks.length !== 1 ? "s" : "");
-
-      album.tracks.forEach((tr, i) => {
-        const li = document.createElement("li"), btn = document.createElement("button");
-        btn.className = "track-btn"; btn.type = "button";
-        btn.setAttribute("aria-current", "false");
-        btn.setAttribute("aria-label", "Track " + (i + 1) + ": " + tr.title + " by " + album.artist);
-        btn.innerHTML = '<span class="track-num" aria-hidden="true">' + String(i + 1).padStart(2, "0") + '</span><span class="track-info-col"><span class="track-title-text">' + tr.title + '</span><span class="track-meta-text">' + album.artist + '</span></span><span class="track-dur" aria-label="Duration: ' + tr.duration + '">' + tr.duration + '</span>';
-        btn.addEventListener("click", () => { if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i); });
-        li.appendChild(btn); trackList.appendChild(li);
-      });
-
-      /* BREAKBREAK → components/remix-uploader.js */
-      const ACCEPTED_EXTS = ["m4a","flac","wav","mp3"];
-      const ACCEPTED_MIME = ["audio/mp4","audio/flac","audio/x-flac","audio/wav","audio/x-wav","audio/mpeg"];
-      const rl = document.createElement("li");
-      rl.innerHTML = '<div class="remix-row" role="button" tabindex="0" aria-label="Submit a remix"><input class="remix-file-input" type="file" accept=".m4a,.flac,.wav,.mp3,audio/mp4,audio/flac,audio/x-flac,audio/wav,audio/mpeg" id="remixFileInput"/><div class="remix-icon-cell" aria-hidden="true"><img src="' + ICON_DARK + '" alt=""/></div><div class="remix-info"><span class="remix-title">Submit a Remix</span><span class="remix-sub">m4a · flac · wav · mp3</span></div><div class="remix-status" aria-live="polite" id="remixStatus">+ Add</div></div>';
-      trackList.appendChild(rl);
-      const toast = document.createElement("p"); toast.className = "upload-toast"; toast.setAttribute("aria-live", "polite");
-      trackList.parentElement.appendChild(toast);
-
-      document.getElementById("remixFileInput").addEventListener("change", function () {
-        const file = this.files[0]; if (!file) return;
-        const cta = document.getElementById("remixStatus");
-        const ext  = file.name.split(".").pop().toLowerCase();
-        const mime = (file.type || "").toLowerCase();
-        const extOk  = ACCEPTED_EXTS.includes(ext);
-        const mimeOk = ACCEPTED_MIME.some(m => mime.startsWith(m)) || mime === "";
-        if (!extOk || !mimeOk) { cta.textContent = "REJECTED"; toast.textContent = "// Only .m4a, .flac, .wav, and .mp3 accepted."; toast.classList.add("show"); return; }
-        cta.textContent = "✓ Received";
-        toast.textContent = "// Received: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(2) + " MB)";
-        toast.classList.add("show");
-        if (SONG_CONFIG.remixEndpoint) {
-          const fd = new FormData(); fd.append("remix", file); fd.append("song", SONG_CONFIG.slug);
-          fetch(SONG_CONFIG.remixEndpoint, { method: "POST", body: fd }).catch(err => { toast.textContent += " [Upload failed]"; console.error(err); });
-        } else {
-          console.log("[Remix] Would POST to /remixes/" + SONG_CONFIG.slug + "/" + file.name + " — set SONG_CONFIG.remixEndpoint to activate.");
-        }
-      });
-
-      if (album.tracks.length === 1) { prevBtn.style.display = "none"; nextBtn.style.display = "none"; }
+      bufFill.style.background = "";
+      bufFill.style.width = "0%";
     }
 
-    function updateTrackUI() { trackList.querySelectorAll(".track-btn").forEach((btn, i) => { const cur = i === currentIndex && isLoaded; btn.setAttribute("aria-current", cur ? "true" : "false"); btn.classList.toggle("is-playing", cur && !audio.paused); if (cur) btn.setAttribute("aria-label", "Track " + (i + 1) + ": " + album.tracks[i].title + " — " + (audio.paused ? "paused" : "now playing")); }); }
+    /* canplay — fires when the browser has enough data to start playback */
+    audio.addEventListener("canplay", () => {
+      if (!isLoaded) { isLoaded = true; armButton(); }
+    });
 
-    /* Playback controls */
-    function loadTrack(idx, f = false) { const si = Math.max(0, Math.min(idx, album.tracks.length - 1)), tr = album.tracks[si], { src, isFlac } = getBestSrc(tr, f); currentIndex = si; usedFallback = f || !isFlac; isLoaded = true; audio.src = src; audio.preload = "auto"; audio.load(); npTitle.textContent = tr.title; updateFmtBadge(isFlac); clearErr(); updateTrackUI(); updateMediaSession(tr); }
-    async function playTrack(idx = currentIndex) { loadTrack(idx, false); setLoading(true); try { await waitForPrebuffer(); clearDLP(); setPlayState(false); /* ready — user taps PLAY */ } catch (err) { clearDLP(); showErr("// Playback failed"); } }
+    /* togglePlay — the main play/pause action */
     async function togglePlay() {
-      if (!isLoaded) { if (USE_BLOB_LOADING) await loadAndPlayAsBlob(currentIndex); else await playTrack(currentIndex); return; }
+      if (!isLoaded) {
+        /* State 1: first tap — start loading, show Loading state */
+        loadTrack(currentIndex);
+        showLoadingState();
+        return;
+      }
       if (audio.paused) {
-        playBtn.classList.remove("is-armed");   /* remove armed state on play */
-        try { await audio.play(); setPlayState(true); await acquireWake(); } catch (_) { showErr("// Could not resume"); }
-      } else { audio.pause(); setPlayState(false); dropWake(); }
+        playBtn.classList.remove("is-armed");
+        try { await audio.play(); setPlayState(true); await acquireWake(); }
+        catch (_) { showErr("// Could not start — try again"); }
+      } else {
+        audio.pause(); setPlayState(false); dropWake();
+      }
     }
-    function playPrev() { if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; } const i = Math.max(0, currentIndex - 1); if (USE_BLOB_LOADING) loadAndPlayAsBlob(i); else playTrack(i); }
-    function playNext() { if (currentIndex < album.tracks.length - 1) { if (USE_BLOB_LOADING) loadAndPlayAsBlob(currentIndex + 1); else playTrack(currentIndex + 1); } else if (repeatMode === "album") { if (USE_BLOB_LOADING) loadAndPlayAsBlob(0); else playTrack(0); } else { setPlayState(false); dropWake(); } }
-    function setPlayState(on) { playBtn.classList.remove("is-loading-text", "is-armed"); playBtn.textContent = on ? "PAUSE" : "PLAY"; playBtn.style.fontSize = ""; playBtn.setAttribute("aria-label", on ? "Pause " + album.tracks[currentIndex]?.title : "Play " + album.tracks[currentIndex]?.title); playBtn.classList.remove("is-loading"); artWrap.classList.toggle("is-playing", on); liveDot.classList.toggle("active", on); setMediaPlayState(on ? "playing" : "paused"); updateTrackUI(); }
-    function setLoading(on) { if (on) { playBtn.innerHTML = ""; playBtn.classList.add("is-loading"); playBtn.setAttribute("aria-label", "Loading…"); bufFill.classList.add("loading"); } else { playBtn.classList.remove("is-loading"); bufFill.classList.remove("loading"); } }
-    function cycleRepeat() { const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"]; repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length]; const m = { off:{l:"↺ Repeat: Off",p:"false"}, song:{l:"↺ Repeat: Song",p:"true"}, album:{l:"↺ Repeat: Album",p:"true"} }; repeatBtn.textContent = m[repeatMode].l; repeatBtn.dataset.mode = repeatMode; repeatBtn.setAttribute("aria-label", m[repeatMode].l + ". Press to cycle."); repeatBtn.setAttribute("aria-pressed", m[repeatMode].p); }
+
+    function playPrev() {
+      if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; }
+      const i = Math.max(0, currentIndex - 1);
+      loadTrack(i); showLoadingState();
+    }
+    function playNext() {
+      if (currentIndex < album.tracks.length - 1) {
+        loadTrack(currentIndex + 1); showLoadingState();
+      } else if (repeatMode === "album") {
+        loadTrack(0); showLoadingState();
+      } else { setPlayState(false); dropWake(); }
+    }
+
+    function setPlayState(on) {
+      playBtn.classList.remove("is-loading-text", "is-armed", "is-loading");
+      playBtn.textContent = on ? "PAUSE" : "PLAY";
+      playBtn.setAttribute("aria-label",
+        on ? "Pause " + album.tracks[currentIndex]?.title
+           : "Play "  + album.tracks[currentIndex]?.title);
+      artWrap.classList.toggle("is-playing", on);
+      liveDot.classList.toggle("active", on);
+      setMediaPlayState(on ? "playing" : "paused");
+      updateTrackUI();
+    }
+
+    function cycleRepeat() {
+      const modes = album.tracks.length === 1 ? ["off","song"] : ["off","song","album"];
+      repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+      const m = { off:{l:"↺ Repeat: Off",p:"false"}, song:{l:"↺ Repeat: Song",p:"true"}, album:{l:"↺ Repeat: Album",p:"true"} };
+      repeatBtn.textContent = m[repeatMode].l; repeatBtn.dataset.mode = repeatMode;
+      repeatBtn.setAttribute("aria-label", m[repeatMode].l + ". Press to cycle.");
+      repeatBtn.setAttribute("aria-pressed", m[repeatMode].p);
+    }
 
     /* Audio events */
-    /* PARTIAL BLOB EXHAUSTION FIX
-       When playback begins on a partial blob and reaches its end before the
-       background download completes, the ended event fires prematurely.
-       The fix: wait for signalBlobReady(), upgrade to the full blob,
-       seek to the saved position, and resume — invisible to the listener. */
-    audio.addEventListener("ended", async () => {
-      if (upgradeToFullBlob()) return;                /* full blob already ready — seamless */
-      if (blobDownloadInProgress) {
-        const resumeAt = audio.currentTime;           /* save position at end of partial blob */
-        await waitForBlobReady();                     /* block until download signals complete */
-        if (audio._fullBlobUrl) {
-          /* Manual upgrade with forced resume from saved position */
-          if (audio._blobUrl) URL.revokeObjectURL(audio._blobUrl);
-          audio._blobUrl = audio._fullBlobUrl; delete audio._fullBlobUrl;
-          audio.src = audio._blobUrl; audio.preload = "auto"; audio.load();
-          audio.addEventListener("loadedmetadata", function s() {
-            audio.removeEventListener("loadedmetadata", s);
-            audio.currentTime = resumeAt;
-            audio.play().catch(() => {});
-            setPlayState(true);
-          }, { once: true });
-          return;
-        }
-      }
+    audio.addEventListener("ended", () => {
       if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
       playNext();
     });
-    audio.addEventListener("playing", () => { bufFill.classList.remove("loading"); setPlayState(true); });
-    audio.addEventListener("waiting", () => bufFill.classList.add("loading"));
-    audio.addEventListener("pause",   () => { artWrap.classList.remove("is-playing"); liveDot.classList.remove("active"); updateTrackUI(); });
-    audio.addEventListener("play",    () => updateTrackUI());
+    audio.addEventListener("playing", () => {
+      bufFill.classList.remove("loading"); bufFill.style.background = ""; setPlayState(true);
+    });
+    audio.addEventListener("waiting", () => {
+      bufFill.classList.add("loading"); bufFill.style.background = "var(--blue)";
+    });
+    audio.addEventListener("pause",  () => {
+      artWrap.classList.remove("is-playing"); liveDot.classList.remove("active"); updateTrackUI();
+    });
+    audio.addEventListener("play",   () => updateTrackUI());
+    audio.addEventListener("error",  () => {
+      isLoaded = false;
+      playBtn.classList.remove("is-loading-text", "is-armed", "is-loading");
+      playBtn.textContent = "PLAY";
+      showErr("// Stream unavailable — check connection");
+    });
+    /* Stall recovery: brief retry on stall (browser buffering stall, not failure) */
     let stallTimer;
     audio.addEventListener("stalled", () => {
-      if (upgradeToFullBlob()) return;
-      if (USE_BLOB_LOADING) return;
       clearTimeout(stallTimer);
-      stallTimer = setTimeout(() => {
-        if (!audio.paused) { audio.play().catch(() => {}); }
-      }, 800);
+      stallTimer = setTimeout(() => { if (!audio.paused) audio.play().catch(() => {}); }, 1200);
     });
     audio.addEventListener("progress", () => clearTimeout(stallTimer));
     audio.addEventListener("playing",  () => clearTimeout(stallTimer));
-    audio.addEventListener("error", async () => { if (USE_BLOB_LOADING) return; if (!usedFallback) { loadTrack(currentIndex, true); try { await audio.play(); setPlayState(true); } catch (_) { showErr("// Signal lost"); } } else showErr("// Playback failed"); });
 
-    /* Progress */
-    const fmt = s => !Number.isFinite(s) || s < 0 ? "0:00" : Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
-    audio.addEventListener("loadedmetadata", () => { durTimeEl.textContent = fmt(audio.duration); progBar.setAttribute("aria-valuemax", Math.floor(audio.duration)); const d = trackList.querySelectorAll(".track-dur"); if (d[currentIndex]) d[currentIndex].textContent = fmt(audio.duration); });
-    audio.addEventListener("timeupdate", () => { if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return; progBar.value = (audio.currentTime / audio.duration) * 100; progBar.setAttribute("aria-valuenow", Math.floor(audio.currentTime)); progBar.setAttribute("aria-valuetext", fmt(audio.currentTime) + " of " + fmt(audio.duration)); curTimeEl.textContent = fmt(audio.currentTime); updateMediaPosition(); });
-    audio.addEventListener("progress", () => { if (USE_BLOB_LOADING) return; if (!audio.duration || !audio.buffered.length) return; bufFill.style.width = (audio.buffered.end(audio.buffered.length - 1) / audio.duration) * 100 + "%"; });
+    /* Progress bar */
+    const fmt = s => !Number.isFinite(s) || s < 0
+      ? "0:00"
+      : Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+
+    audio.addEventListener("loadedmetadata", () => {
+      durTimeEl.textContent = fmt(audio.duration);
+      progBar.setAttribute("aria-valuemax", Math.floor(audio.duration));
+      const d = trackList.querySelectorAll(".track-dur");
+      if (d[currentIndex]) d[currentIndex].textContent = fmt(audio.duration);
+    });
+    audio.addEventListener("timeupdate", () => {
+      if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return;
+      progBar.value = (audio.currentTime / audio.duration) * 100;
+      progBar.setAttribute("aria-valuenow", Math.floor(audio.currentTime));
+      progBar.setAttribute("aria-valuetext", fmt(audio.currentTime) + " of " + fmt(audio.duration));
+      curTimeEl.textContent = fmt(audio.currentTime);
+      updateMediaPosition();
+    });
+    audio.addEventListener("progress", () => {
+      if (!audio.duration || !audio.buffered.length) return;
+      bufFill.style.width = (audio.buffered.end(audio.buffered.length - 1) / audio.duration) * 100 + "%";
+    });
     progBar.addEventListener("mousedown",  () => isSeeking = true);
     progBar.addEventListener("touchstart", () => isSeeking = true, { passive: true });
-    progBar.addEventListener("input", () => { if (audio.duration) { const t = (progBar.value / 100) * audio.duration; curTimeEl.textContent = fmt(t); progBar.setAttribute("aria-valuetext", fmt(t) + " of " + fmt(audio.duration)); } });
-    progBar.addEventListener("change", () => { if (audio.duration) audio.currentTime = (progBar.value / 100) * audio.duration; isSeeking = false; });
+    progBar.addEventListener("input", () => {
+      if (audio.duration) {
+        const t = (progBar.value / 100) * audio.duration;
+        curTimeEl.textContent = fmt(t);
+        progBar.setAttribute("aria-valuetext", fmt(t) + " of " + fmt(audio.duration));
+      }
+    });
+    progBar.addEventListener("change", () => {
+      if (audio.duration) audio.currentTime = (progBar.value / 100) * audio.duration;
+      isSeeking = false;
+    });
     progBar.addEventListener("mouseup",  () => isSeeking = false);
     progBar.addEventListener("touchend", () => isSeeking = false);
-    /* Volume slider removed from UI — system volume used instead */
 
-    /* BREAKBREAK → engine/media-session.js */
+    /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → engine/media-session.js
+    ════════════════════════════════════════════════════════════════════════ */
     function updateMediaSession(tr) {
       if (!("mediaSession" in navigator)) return;
       navigator.mediaSession.metadata = new MediaMetadata({
         title: tr.title, artist: album.artist, album: album.title,
         artwork: [{ src: album.artworkUrl, sizes: "512x512", type: "image/png" }]
       });
-      const h = { play: async () => { await togglePlay(); }, pause: () => { audio.pause(); setPlayState(false); dropWake(); }, previoustrack: playPrev, nexttrack: playNext, seekbackward: e => { audio.currentTime = Math.max(0, audio.currentTime - (e.seekOffset || 10)); }, seekforward: e => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (e.seekOffset || 10)); }, seekto: e => { if (e.fastSeek && "fastSeek" in audio) audio.fastSeek(e.seekTime); else audio.currentTime = e.seekTime; } };
+      const h = {
+        play:          async () => { await togglePlay(); },
+        pause:         () => { audio.pause(); setPlayState(false); dropWake(); },
+        previoustrack: playPrev,
+        nexttrack:     playNext,
+        seekbackward:  e => { audio.currentTime = Math.max(0, audio.currentTime - (e.seekOffset || 10)); },
+        seekforward:   e => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (e.seekOffset || 10)); },
+        seekto:        e => { if (e.fastSeek && "fastSeek" in audio) audio.fastSeek(e.seekTime); else audio.currentTime = e.seekTime; }
+      };
       for (const [a, fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(a, fn); } catch (_) {} }
     }
     function setMediaPlayState(s) { if ("mediaSession" in navigator) navigator.mediaSession.playbackState = s; }
-    function updateMediaPosition() { if (!("mediaSession" in navigator) || !Number.isFinite(audio.duration)) return; try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: audio.currentTime }); } catch (_) {} }
+    function updateMediaPosition() {
+      if (!("mediaSession" in navigator) || !Number.isFinite(audio.duration)) return;
+      try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: audio.currentTime }); } catch (_) {}
+    }
 
     /* Keyboard */
     document.addEventListener("keydown", e => {
@@ -1173,8 +1071,8 @@
         case " ": case "MediaPlayPause": e.preventDefault(); togglePlay(); break;
         case "ArrowRight": e.preventDefault(); audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10); break;
         case "ArrowLeft":  e.preventDefault(); audio.currentTime = Math.max(0, audio.currentTime - 10); break;
-        case "ArrowUp":    e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); if (volBar) volBar.value = Math.round(audio.volume * 100); break;
-        case "ArrowDown":  e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); if (volBar) volBar.value = Math.round(audio.volume * 100); break;
+        case "ArrowUp":    e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); break;
+        case "ArrowDown":  e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); break;
         case "n": case "N": case "MediaTrackNext":     playNext(); break;
         case "p": case "P": case "MediaTrackPrevious": playPrev(); break;
         case "r": case "R": cycleRepeat(); break;
@@ -1182,7 +1080,9 @@
       }
     });
 
-    /* BREAKBREAK → components/share-strip.js */
+    /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → components/share-strip.js
+    ════════════════════════════════════════════════════════════════════════ */
     function initShareStrip() {
       const btnNative = document.getElementById("btnNativeShare");
       const btnCopy   = document.getElementById("btnCopyLink");
@@ -1204,21 +1104,94 @@
       } else { btnCopy.classList.add("hidden"); }
     }
 
-    /* BREAKBREAK → components/masthead.js */
+    /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → components/masthead.js
+    ════════════════════════════════════════════════════════════════════════ */
     function initMasthead() {
       const eyebrow = document.getElementById("mastheadEyebrow");
       if (eyebrow) {
-        const albumPart = SONG_CONFIG.albumUrl
+        const albumPart  = SONG_CONFIG.albumUrl
           ? '<a href="' + SONG_CONFIG.albumUrl + '">' + SONG_CONFIG.album + '</a>'
           : '';
         const artistPart = '<a href="' + buildArtistUrl("header") + '" target="_blank" rel="noopener noreferrer" aria-label="' + SONG_CONFIG.artistLabel + ' (opens in new tab)">' + SONG_CONFIG.artist + '</a>';
-        eyebrow.innerHTML = albumPart ? albumPart + ' \u00B7 ' + artistPart : artistPart;
+        eyebrow.innerHTML = albumPart ? albumPart + ' · ' + artistPart : artistPart;
       }
     }
-
     function initFooter() {
       const link = document.getElementById("footerArtistLink");
       if (link) { link.href = buildArtistUrl("footer"); link.textContent = SONG_CONFIG.artist; link.setAttribute("aria-label", SONG_CONFIG.artistLabel + " (opens in new tab)"); }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → components/track-list.js
+    ════════════════════════════════════════════════════════════════════════ */
+    function updateTrackUI() {
+      trackList.querySelectorAll(".track-btn").forEach((btn, i) => {
+        const cur = i === currentIndex && isLoaded;
+        btn.setAttribute("aria-current", cur ? "true" : "false");
+        btn.classList.toggle("is-playing", cur && !audio.paused);
+        if (cur) btn.setAttribute("aria-label",
+          "Track " + (i + 1) + ": " + album.tracks[i].title + " — " + (audio.paused ? "paused" : "now playing"));
+      });
+    }
+
+    function renderTracks() {
+      trackList.innerHTML = "";
+      const el = document.getElementById("trackCount");
+      if (el) el.textContent = album.tracks.length + " Recording" + (album.tracks.length !== 1 ? "s" : "");
+
+      album.tracks.forEach((tr, i) => {
+        const li = document.createElement("li"), btn = document.createElement("button");
+        btn.className = "track-btn"; btn.type = "button";
+        btn.setAttribute("aria-current", "false");
+        btn.setAttribute("aria-label", "Track " + (i + 1) + ": " + tr.title + " by " + album.artist);
+        btn.innerHTML =
+          '<span class="track-num" aria-hidden="true">' + String(i + 1).padStart(2, "0") + '</span>' +
+          '<span class="track-info-col"><span class="track-title-text">' + tr.title + '</span>' +
+          '<span class="track-meta-text">' + album.artist + '</span></span>' +
+          '<span class="track-dur" aria-label="Duration: ' + tr.duration + '">' + tr.duration + '</span>';
+        btn.addEventListener("click", () => { loadTrack(i); showLoadingState(); });
+        li.appendChild(btn); trackList.appendChild(li);
+      });
+
+      /* BREAKBREAK → components/remix-uploader.js */
+      const ACCEPTED_EXTS = ["m4a","flac","wav","mp3"];
+      const ACCEPTED_MIME = ["audio/mp4","audio/flac","audio/x-flac","audio/wav","audio/x-wav","audio/mpeg"];
+      const rl = document.createElement("li");
+      rl.innerHTML =
+        '<div class="remix-row" role="button" tabindex="0" aria-label="Submit a remix">' +
+        '<input class="remix-file-input" type="file" accept=".m4a,.flac,.wav,.mp3,audio/mp4,audio/flac,audio/x-flac,audio/wav,audio/mpeg" id="remixFileInput"/>' +
+        '<div class="remix-icon-cell" aria-hidden="true"><img src="' + ICON_DARK + '" alt=""/></div>' +
+        '<div class="remix-info"><span class="remix-title">Submit a Remix</span><span class="remix-sub">m4a &middot; flac &middot; wav &middot; mp3</span></div>' +
+        '<div class="remix-status" aria-live="polite" id="remixStatus">+ Add</div></div>';
+      trackList.appendChild(rl);
+      const toast = document.createElement("p");
+      toast.className = "upload-toast"; toast.setAttribute("aria-live", "polite");
+      trackList.parentElement.appendChild(toast);
+
+      document.getElementById("remixFileInput").addEventListener("change", function () {
+        const file = this.files[0]; if (!file) return;
+        const cta  = document.getElementById("remixStatus");
+        const ext  = file.name.split(".").pop().toLowerCase();
+        const mime = (file.type || "").toLowerCase();
+        if (!ACCEPTED_EXTS.includes(ext) || (!ACCEPTED_MIME.some(m => mime.startsWith(m)) && mime !== "")) {
+          cta.textContent = "REJECTED"; toast.textContent = "// Only .m4a, .flac, .wav, and .mp3 accepted.";
+          toast.classList.add("show"); return;
+        }
+        cta.textContent = "✓ Received";
+        toast.textContent = "// Received: " + file.name + " (" + (file.size / 1024 / 1024).toFixed(2) + " MB)";
+        toast.classList.add("show");
+        if (SONG_CONFIG.remixEndpoint) {
+          const fd = new FormData(); fd.append("remix", file); fd.append("song", SONG_CONFIG.slug);
+          fetch(SONG_CONFIG.remixEndpoint, { method: "POST", body: fd }).catch(err => {
+            toast.textContent += " [Upload failed]"; console.error(err);
+          });
+        } else {
+          console.log("[Remix] Would POST to /remixes/" + SONG_CONFIG.slug + "/" + file.name);
+        }
+      });
+
+      if (album.tracks.length === 1) { prevBtn.style.display = "none"; nextBtn.style.display = "none"; }
     }
 
     function showErr(m) { errLine.textContent = m; errLine.classList.add("show"); }
@@ -1229,17 +1202,24 @@
     nextBtn.addEventListener("click",   playNext);
     repeatBtn.addEventListener("click", cycleRepeat);
 
-    /* BREAKBREAK → main.js — INIT */
+    /* ════════════════════════════════════════════════════════════════════════
+       BREAKBREAK → main.js — INIT
+    ════════════════════════════════════════════════════════════════════════ */
     function init() {
       document.getElementById("albumArtImg").src = ALBUM_ART_URL;
+      /* Set FLAC download button href */
+      const dlBtn = document.getElementById("downloadFlac");
+      if (dlBtn) dlBtn.href = album.tracks[0].flac;
+      /* Format badge — always M4A (playback format) */
+      if (fmtBadge) { fmtBadge.textContent = "M4A"; fmtBadge.className = "badge badge-fmt"; }
+      const fmtDot = document.getElementById("fmtDot");
+      if (fmtDot) { fmtDot.classList.add("is-lossy"); fmtDot.title = "AAC M4A"; }
       initMasthead();
       initFooter();
       initShareStrip();
       renderTracks();
-      if (!USE_BLOB_LOADING) { loadTrack(0); isLoaded = false; }
       updateMediaSession(album.tracks[0]);
       setPlayState(false);
-      updateFmtBadge(flacOk);
     }
 
     init();
