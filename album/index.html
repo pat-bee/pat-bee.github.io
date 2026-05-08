@@ -679,76 +679,78 @@
 
     /* ── PLAYLIST — reorder by moving these objects ─────────────────── */
     const TRACKS = [
-     {
-    slug:      "birdsowong",
-    title:     "Birdsowong",
-    audioFile: "Pat-Bee_Birdsowong",
-},
-{
-    slug:      "brobot",
-    title:     "Brobot",
-    audioFile: "Pat-Bee_Brobot",
-},
-{
-    slug:      "ctrl",
-    title:     "Ctrl",
-    audioFile: "Pat-Bee_Ctrl",
-},
-{
-    slug:      "eye2eye",
-    title:     "Eye2eye",
-    audioFile: "Pat-Bee_Eye2eye",
-},
-{
-    slug:      "ghostlives",
-    title:     "Ghostlives",
-    audioFile: "Pat-Bee_Ghostlives",
-},
-{
-    slug:      "keep-on-clickin",
-    title:     "Keep On Clickin",
-    audioFile: "Pat-Bee_Keep-On-Clickin",
-},
-{
-    slug:      "milspecter",
-    title:     "Milspecter",
-    audioFile: "Pat-Bee_Milspecter",
-},
-{
-    slug:      "mistake-appeasement",
-    title:     "Mistake Appeasement",
-    audioFile: "Pat-Bee_Mistake-Appeasement",
-},
-{
-    slug:      "nikad",
-    title:     "Nikad",
-    audioFile: "Pat-Bee_Nikad",
-},
-{
-    slug:      "opstylo",
-    title:     "Opstylo",
-    audioFile: "Pat-Bee_Opstylo",
-},
-{
-    slug:      "pfuture33",
-    title:     "PFuture33",
-    audioFile: "Pat-Bee_PFuture33",
-},
-{
-    slug:      "popmath",
-    title:     "Popmath",
-    audioFile: "Pat-Bee_Popmath",
-},
-{
-    slug:      "index_albumrelday",
-    title:     "Index Albumrelday",
-    audioFile: "Pat-Bee_Index_Albumrelday",
-},
-{
-    slug:      "sidewinder",
-    title:     "Sidewinder",
-    audioFile: "Pat-Bee_Sidewinder",
-}
+    const TRACKS = [
+  {
+    slug: "nikad",
+    title: "Nikad",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/Pat-Bee_NiKad.m4a",
+  },
+  {
+    slug: "birdsowong",
+    title: "Birdsowong",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/birdsowong.m4a",
+  },
+  {
+    slug: "popmath",
+    title: "Pop Math",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/Pat-Bee_Pop-Is-Math.m4a",
+  },
+  {
+    slug: "index_albumrelday",
+    title: "Relday",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_relday.m4a",
+  },
+  {
+    slug: "pfuture33",
+    title: "Pfuture33",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pfuture.m4a",
+  },
+  {
+    slug: "opstylo",
+    title: "Opstylo",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/Pat-Bee_OpStylo.m4a",
+  },
+  {
+    slug: "milspecter",
+    title: "Milspecter",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/milspecter.m4a",
+  },
+  {
+    slug: "ghostlives",
+    title: "Ghost Lives",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/133_GhostLives_2026mix.m4a",
+  },
+  {
+    slug: "ctrl",
+    title: "CTRL",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/R3M0T3-Ctrl_118_BPM.m4a",
+  },
+  {
+    slug: "eye2eye",
+    title: "Eye2Eye",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/eye2eye-tuff.m4a",
+  },
+  {
+    slug: "sidewinder",
+    title: "Sidewinder",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/sidewinder.m4a",
+  },
+  {
+    slug: "mistake-appeasement",
+    title: "Mistake Appeasement",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_mistake-apeasment.m4a",
+  },
+  {
+    slug: "brobot",
+    title: "Brobot",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_brobot.m4a",
+  },
+  {
+    slug: "keep-on-clickin",
+    title: "Keep on Clickin'",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/Pat-Bee_Keep-On-Clickn.m4a",
+  },
+];
       // Add more tracks below. Example:
       // {
       //   slug:      "track-slug",
@@ -766,7 +768,7 @@
         slug:      t.slug,
         title:     t.title,
         artist:    t.artist || ALBUM.artist,
-        src:       base + t.audioFile + ".m4a",
+        src:       t.m4a,
         artCandidates: [
           base + "pat-bee_" + t.slug + ".png",
           base + t.slug + ".png",
@@ -775,7 +777,7 @@
           base + "pat-bee_" + t.slug + ".jpg",
           base + t.slug + ".jpg",
         ],
-        pageUrl:   ALBUM.pageBase + t.slug + "/",
+       pageUrl: t.slug + "/",
         duration:  "—",
       };
     }
@@ -959,7 +961,10 @@
     });
 
     async function togglePlay() {
-      if (!isLoaded) { loadTrack(currentIndex, false); showLoadingState(); return; }
+      if (!isLoaded) {
+  loadTrack(currentIndex, true);
+  return;
+}
       if (audio.paused) {
         playBtn.classList.remove("is-armed");
         try {
