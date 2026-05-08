@@ -678,7 +678,7 @@
     };
 
     /* ── PLAYLIST — reorder by moving these objects ─────────────────── */
-    const TRACKS = [
+  
     const TRACKS = [
   {
     slug: "nikad",
@@ -794,7 +794,7 @@
       if (artCache[track.slug]) { callback(artCache[track.slug]); return; }
       let i = 0;
       function tryNext() {
-        if (i >= track.artCandidates.length) { callback("index-cover-folder-green.png"); return; }
+        if (i >= track.artCandidates.length) { callback(DEFAULT_COVER); return; }
         const url = track.artCandidates[i++];
         const img = new Image();
         img.onload = () => { artCache[track.slug] = url; callback(url); };
@@ -892,7 +892,7 @@
       setTimeout(() => {
         artImg.src = url;
         artImg.onload = () => artImg.classList.remove("art-fade");
-        artImg.onerror = () => { artImg.src = "album.png"; artImg.classList.remove("art-fade"); };
+        artImg.onerror = () => {   artImg.src = DEFAULT_COVER;   artImg.classList.remove("art-fade"); };
       }, 350);
     }
 
