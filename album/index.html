@@ -670,6 +670,9 @@
 
        ════════════════════════════════════════════════════════════════════ */
 
+    const DEFAULT_COVER =
+      "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png";
+
     const ALBUM = {
       title:     "index_album",
       artist:    "Pat Bɇɇ",
@@ -866,7 +869,7 @@
     const artImg    = document.getElementById("albumArtImg");
     const trackList = document.getElementById("trackList");
 
-    let currentIndex = 0, isLoaded = false, usedFallback = false;
+    let currentIndex = 0, isLoaded = false;
     let isSeeking = false, repeatMode = "off";
     let wakeLock = null;
 
@@ -899,7 +902,7 @@
     function loadTrack(idx, autoPlay) {
       const si = Math.max(0, Math.min(idx, tracks.length - 1));
       const tr = tracks[si];
-      currentIndex = si; isLoaded = false; usedFallback = false;
+      currentIndex = si; isLoaded = false;
 
       npTitle.textContent = tr.title;
       document.getElementById("artCaptionTitle").textContent = tr.title;
@@ -1035,17 +1038,11 @@
     });
     audio.addEventListener("play", () => updateTrackUI());
     audio.addEventListener("error", () => {
-      if (!usedFallback) {
-        // Try fallback: pat-bee_{slug}.m4a if audioFile was different
-        usedFallback = true;
-        const tr = tracks[currentIndex];
-        const fallback = tr.slug + "/pat-bee_" + tr.slug + ".m4a";
-        if (audio.src !== fallback) { audio.src = fallback; audio.load(); return; }
-      }
       isLoaded = false;
       playBtn.classList.remove("is-loading-text", "is-armed", "is-loading");
       playBtn.textContent = "PLAY";
-      showErr("// Signal lost — check file paths");
+      bufFill.classList.remove("loading");
+      showErr("// Audio failed to load: " + tracks[currentIndex].src);
     });
 
     let stallTimer;
