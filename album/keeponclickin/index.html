@@ -32,9 +32,11 @@
   <!--
     Nova Round provides the Keep on Clickin display character; Courier Prime remains for the player UI chrome.
   -->
-  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Nova+Round&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anta&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     :root {
+      --font-display: "Anta", system-ui, sans-serif;
+--font-body: "Courier Prime", "Courier New", monospace;
       --canvas:        #D4FCD4;
       --bg:            #D4FCD4;
       --bg-panel:      #ECFFEC;
@@ -129,7 +131,7 @@
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
-    button { font-family:'Courier Prime',monospace;color:inherit;cursor:pointer; }
+    button {   font-family: var(--font-display);   color: inherit;   cursor: pointer; }
 
     .page-shell { position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 64px; }
     .inner { width:100%;max-width:880px; }
@@ -182,13 +184,18 @@
        character. Used at large scale for maximum era authenticity.
        Mixed case preserved — the font's fade effect reads best that way. */
     .masthead-title {
-      font-family:"Anta,system-ui,sans-serif;
-      font-weight:400;font-style:normal;
-      font-size:clamp(.5rem, 8cqi, 2.5rem);
-      white-space:nowrap;overflow:hidden;text-overflow:clip;
-      line-height:1.1;padding-bottom:0.06em;
-      color:var(--red);letter-spacing:0.02em;
-    }
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(.5rem, 8cqi, 2.5rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 1.1;
+  padding-bottom: 0.06em;
+  color: var(--red);
+  letter-spacing: 0.02em;
+}
 
     .masthead-sub {
       margin-top:8px;font-family:'Courier Prime',monospace;
@@ -250,7 +257,7 @@
 
     /* Now Playing title — Nova Round again, smaller scale */
     .np-title {
-      font-family:"Nova Round",system-ui,sans-serif;font-weight:400;
+font-family: var(--font-display);
       font-size:1.35rem;line-height:1.1;color:var(--red);
       word-break:break-word;letter-spacing:0.02em;
     }
@@ -309,7 +316,7 @@
        The font here is Nova Round — the button label IS the era.  */
     .play-btn {
       min-width:136px;min-height:52px;
-      font-family:"Nova Round",system-ui,sans-serif;font-weight:400;
+font-family: var(--font-display);
       font-size:1.3rem;letter-spacing:0.04em;
       background:var(--red);color:var(--red-text);
       border:none;
@@ -365,7 +372,7 @@
     /* "Recording Log" in the era display font — faint, background */
     .playlist-header::before {
       content:"Recording Log";
-      font-family:"Nova Round",system-ui,sans-serif;font-weight:400;
+font-family: var(--font-display);
       font-size:0.78rem;color:rgba(11,27,10,0.16);letter-spacing:0.04em;
     }
 
@@ -383,7 +390,7 @@
 
     /* Track title in the era font */
     .track-title-text {
-      font-family:"Nova Round",system-ui,sans-serif;font-weight:400;
+font-family: var(--font-display);
       font-size:1.0rem;color:var(--red);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.02em;
     }
@@ -398,7 +405,7 @@
     .remix-icon-cell { display:flex;align-items:center;justify-content:center;padding:12px 0;border-right:1px dashed var(--green-border);min-width:52px; }
     .remix-icon-cell img { width:24px;height:24px;object-fit:contain;opacity:0.45;filter:sepia(0.8) hue-rotate(-15deg); }
     .remix-info { padding:11px 16px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0; }
-    .remix-title { font-family:"Nova Round",system-ui,sans-serif;font-weight:400;font-size:0.9rem;color:var(--green-bright);letter-spacing:0.02em; }
+    .remix-title { font-family: var(--font-display);font-weight:400;font-size:0.9rem;color:var(--green-bright);letter-spacing:0.02em; }
     .remix-sub { font-family:'Courier Prime',monospace;font-size:0.46rem;color:var(--ink-dim);letter-spacing:0.12em;text-transform:uppercase; }
     .remix-status { display:flex;align-items:center;padding:11px 14px;font-family:'Courier Prime',monospace;font-size:0.54rem;color:var(--green-bright);border-left:1px dashed var(--green-border);white-space:nowrap;letter-spacing:0.1em;text-transform:uppercase; }
     .upload-toast { display:none;padding:8px 20px;font-family:'Courier Prime',monospace;font-size:0.52rem;color:var(--ink-dim);letter-spacing:0.06em;background:var(--green-faint);border-top:1px solid var(--border); }
