@@ -45,6 +45,18 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet" />
+  <!-- Podcast RSS discovery -->
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="index_album — Pat Bɇɇ"
+  href="https://pat-bee.github.io/album/feed.xml"
+/>
+
+<meta
+  name="description"
+  content="Subscribe to index_album by Pat Bɇɇ as an audio feed. Each song appears as an episode."
+/>
 
   <style>
     /* ══════════════════════════════════════════════════════════════
@@ -534,6 +546,79 @@
       .track-num { min-width: 44px; }
       .playlist-header { border-left-width: 2px; }
     }
+    /* Podcast subscribe block */
+.podcast-subscribe {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px solid var(--border-mid);
+  border-left: 3px solid var(--lime);
+  background:
+    linear-gradient(90deg, var(--lime-faint), transparent 70%),
+    var(--void2);
+  text-align: left;
+}
+
+.podcast-subscribe-label {
+  font-size: 0.48rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--steel-dim);
+  margin-bottom: 8px;
+}
+
+.podcast-subscribe-title {
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lime);
+  margin-bottom: 8px;
+}
+
+.podcast-subscribe-text {
+  font-size: 0.62rem;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  color: var(--steel);
+  max-width: 70ch;
+  margin-bottom: 14px;
+}
+
+.podcast-subscribe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.podcast-subscribe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--lime-border);
+  background: var(--lime-faint);
+  color: var(--lime);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 140ms, color 140ms, background 140ms, box-shadow 140ms;
+}
+
+.podcast-subscribe-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: var(--orange-faint);
+  box-shadow: 0 0 10px var(--orange-border);
+}
+
+.podcast-subscribe-note {
+  margin-top: 10px;
+  font-size: 0.48rem;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  color: var(--steel-dim);
+}
 
     audio { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   </style>
@@ -634,11 +719,50 @@
         </button>
       </div>
 
-      <footer class="page-footer">
-        <a href="https://www.instagram.com/patbee.music/"
-           target="_blank" rel="noopener noreferrer"
-           aria-label="Pat Bɇɇ on Instagram (opens in new tab)">Pat Bɇɇ</a>
-      </footer>
+   <footer class="page-footer">
+  <section class="podcast-subscribe" aria-labelledby="podcastSubscribeTitle">
+    <p class="podcast-subscribe-label">// Audio Feed</p>
+
+    <h2 class="podcast-subscribe-title" id="podcastSubscribeTitle">
+      Subscribe to index_album
+    </h2>
+
+    <p class="podcast-subscribe-text">
+      Subscribe to this album as a podcast-style audio feed.
+      Each song appears as an episode in your podcast app.
+    </p>
+
+    <div class="podcast-subscribe-actions">
+      <a
+        class="podcast-subscribe-btn"
+        href="feed.xml"
+        type="application/rss+xml"
+        aria-label="Subscribe to index_album RSS audio feed">
+        Subscribe RSS
+      </a>
+
+      <a
+        class="podcast-subscribe-btn"
+        href="podcast://pat-bee.github.io/album/feed.xml"
+        aria-label="Open index_album feed in a podcast app">
+        Podcast App
+      </a>
+
+      <a
+        class="podcast-subscribe-btn"
+        href="https://www.instagram.com/patbee.music/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Pat Bɇɇ on Instagram opens in new tab">
+        Pat Bɇɇ
+      </a>
+    </div>
+
+    <p class="podcast-subscribe-note">
+      Feed URL: https://pat-bee.github.io/album/feed.xml
+    </p>
+  </section>
+</footer>
 
     </div>
   </main>
