@@ -62,7 +62,7 @@
       <itunes:episode>1</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_nikad.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_nikad.m4a" length="8110820" type="audio/mp4" />
     </item>
 
     <item>
@@ -83,7 +83,7 @@
       <itunes:episode>2</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_birdsowong.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_birdsowong.m4a" length="6224566" type="audio/mp4" />
     </item>
 
     <item>
@@ -104,10 +104,51 @@
       <itunes:episode>3</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pop-math.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pop-math.m4a" length="8713144" type="audio/mp4" />
     </item>
 
     <item>
+      <title>Relday</title>
+      <itunes:title>Relday</itunes:title>
+      <link>https://pat-bee.github.io/album/relday/</link>
+      <guid isPermaLink="false">pat-bee-index-album-relday</guid>
+      <description>Opstylo, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-relday-index_album-cover.jpg" alt="Opstylo cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/relday/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>Relday, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-relday-index_album-cover.jpg" />
+      <itunes:episode>6</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_relday.m4a" length="7952243" type="audio/mp4" />
+    </item>
+
+       <item>
+      <title>Pfuture33</title>
+      <itunes:title>Pfuture33</itunes:title>
+      <link>https://pat-bee.github.io/album/pfuture33/</link>
+      <guid isPermaLink="false">pat-bee-index-album-pfuture33</guid>
+      <description>Opstylo, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-pfuture33-index_album-cover.jpg" alt="pfuture33 cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/pfuture33/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>pfuture33, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-opstylo-index_album-cover.jpg" />
+      <itunes:episode>6</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pfuture33.m4a" length="7952243" type="audio/mp4" />
+    </item>
+
       <title>Opstylo</title>
       <itunes:title>Opstylo</itunes:title>
       <link>https://pat-bee.github.io/album/opstylo/</link>
@@ -125,8 +166,29 @@
       <itunes:episode>6</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_opstylo.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_opstylo.m4a" length="10201061" type="audio/mp4" />
     </item>
+
+      <title>MilSpecter</title>
+      <itunes:title>MilSpecter</itunes:title>
+      <link>https://pat-bee.github.io/album/milspecter/</link>
+      <guid isPermaLink="false">pat-bee-index-album-milspecter</guid>
+      <description>Opstylo, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-milspecter-index_album-cover.jpg" alt="milspecter cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/opstylo/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>Milspecter, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-opstylo-index_album-cover.jpg" />
+      <itunes:episode>6</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-milspecter.m4a" length="10201061" type="audio/mp4" />
+    </item>
+    
 
     <!-- Continue the same pattern for the remaining tracks. -->
 
