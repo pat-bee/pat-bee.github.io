@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss
+  version="2.0"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:podcast="https://podcastindex.org/namespace/1.0"
+>
+  <channel>
+    <title>index_album — Pat Bɇɇ</title>
+    <link>https://pat-bee.github.io/album/</link>
+    <atom:link href="https://pat-bee.github.io/album/feed.xml" rel="self" type="application/rss+xml" />
+
+    <description>index_album by Pat Bɇɇ, presented as a subscribable album feed. Each track appears as an individual audio episode.</description>
+    <language>en-us</language>
+    <copyright>Copyright 2026 Pat Bɇɇ. All rights reserved.</copyright>
+    <lastBuildDate>Sat, 09 May 2026 12:00:00 -0400</lastBuildDate>
+    <pubDate>Sat, 09 May 2026 12:00:00 -0400</pubDate>
+    <generator>Pat Bɇɇ static album feed</generator>
+
+    <image>
+      <url>https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png</url>
+      <title>index_album — Pat Bɇɇ</title>
+      <link>https://pat-bee.github.io/album/</link>
+    </image>
+
+    <itunes:title>index_album</itunes:title>
+    <itunes:author>Pat Bɇɇ</itunes:author>
+    <itunes:summary>index_album by Pat Bɇɇ, presented as a subscribable album feed. Each track appears as an individual audio episode.</itunes:summary>
+    <itunes:subtitle>Tracks arrive as episodes.</itunes:subtitle>
+    <itunes:image href="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png" />
+    <itunes:category text="Music" />
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+
+    <!-- Replace before submitting to podcast directories. -->
+    <itunes:owner>
+      <itunes:name>Pat Bɇɇ</itunes:name>
+      <itunes:email>REPLACE-WITH-YOUR-EMAIL@example.com</itunes:email>
+    </itunes:owner>
+
+    <!-- Optional Podcasting 2.0 metadata. -->
+    <podcast:locked owner="REPLACE-WITH-YOUR-EMAIL@example.com">no</podcast:locked>
+
+    <!-- EPISODES START HERE -->
+
+    <item>
+      <title>Nikad</title>
+      <itunes:title>Nikad</itunes:title>
+      <link>https://pat-bee.github.io/album/nikad/</link>
+      <guid isPermaLink="false">pat-bee-index-album-nikad</guid>
+      <description>Nikad, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Nikad, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/nikad/pat_bee-nikad-index_album-cover.jpg" alt="Nikad cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/nikad/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:00:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>Nikad, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/nikad/pat_bee-nikad-index_album-cover.jpg" />
+      <itunes:episode>1</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_nikad.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+    </item>
+
+    <item>
+      <title>Birdsowong</title>
+      <itunes:title>Birdsowong</itunes:title>
+      <link>https://pat-bee.github.io/album/birdsowong/</link>
+      <guid isPermaLink="false">pat-bee-index-album-birdsowong</guid>
+      <description>Birdsowong, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Birdsowong, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/birdsowong/pat_bee-birdsowong-index_album-cover.jpg" alt="Birdsowong cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/birdsowong/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:01:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>Birdsowong, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/birdsowong/pat_bee-birdsowong-index_album-cover.jpg" />
+      <itunes:episode>2</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_birdsowong.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+    </item>
+
+    <item>
+      <title>Pop Math</title>
+      <itunes:title>Pop Math</itunes:title>
+      <link>https://pat-bee.github.io/album/popmath/</link>
+      <guid isPermaLink="false">pat-bee-index-album-popmath</guid>
+      <description>Pop Math, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Pop Math, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/popmath/pat_bee-popmath-index_album-cover.jpg" alt="Pop Math cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/popmath/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:02:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>Pop Math, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/popmath/pat_bee-popmath-index_album-cover.jpg" />
+      <itunes:episode>3</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pop-math.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+    </item>
+
+    <item>
+      <title>Opstylo</title>
+      <itunes:title>Opstylo</itunes:title>
+      <link>https://pat-bee.github.io/album/opstylo/</link>
+      <guid isPermaLink="false">pat-bee-index-album-opstylo</guid>
+      <description>Opstylo, a track from index_album by Pat Bɇɇ.</description>
+      <content:encoded><![CDATA[
+        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-opstylo-index_album-cover.jpg" alt="Opstylo cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/opstylo/">Open the song page</a>.</p>
+      ]]></content:encoded>
+      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <itunes:author>Pat Bɇɇ</itunes:author>
+      <itunes:summary>Opstylo, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-opstylo-index_album-cover.jpg" />
+      <itunes:episode>6</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:explicit>false</itunes:explicit>
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_opstylo.m4a" length="REPLACE_WITH_BYTES" type="audio/mp4" />
+    </item>
+
+    <!-- Continue the same pattern for the remaining tracks. -->
+
+  </channel>
+</rss>
