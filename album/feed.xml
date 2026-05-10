@@ -33,16 +33,12 @@
     <itunes:explicit>false</itunes:explicit>
     <itunes:type>episodic</itunes:type>
 
-    <!-- Replace before submitting to podcast directories. -->
     <itunes:owner>
       <itunes:name>Pat Bɇɇ</itunes:name>
       <itunes:email>REPLACE-WITH-YOUR-EMAIL@example.com</itunes:email>
     </itunes:owner>
 
-    <!-- Optional Podcasting 2.0 metadata. -->
     <podcast:locked owner="REPLACE-WITH-YOUR-EMAIL@example.com">no</podcast:locked>
-
-    <!-- EPISODES START HERE -->
 
     <item>
       <title>Nikad</title>
@@ -115,40 +111,41 @@
       <description>Relday, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
         <p>Relday, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-relday-index_album-cover.jpg" alt="Opstylo cover art" /></p>
+        <p><img src="https://pat-bee.github.io/album/relday/pat_bee-relday-index_album-cover.jpg" alt="Relday cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/relday/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:03:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
       <itunes:summary>Relday, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-relday-index_album-cover.jpg" />
+      <itunes:image href="https://pat-bee.github.io/album/relday/pat_bee-relday-index_album-cover.jpg" />
       <itunes:episode>4</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_relday.m4a" length="7952243" type="audio/mp4" />
     </item>
 
-       <item>
+    <item>
       <title>Pfuture33</title>
       <itunes:title>Pfuture33</itunes:title>
       <link>https://pat-bee.github.io/album/pfuture33/</link>
       <guid isPermaLink="false">pat-bee-index-album-pfuture33</guid>
-      <description>Opstylo, a track from index_album by Pat Bɇɇ.</description>
+      <description>Pfuture33, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-pfuture33-index_album-cover.jpg" alt="pfuture33 cover art" /></p>
+        <p>Pfuture33, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/pfuture33/pat_bee-pfuture33-index_album-cover.jpg" alt="Pfuture33 cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/pfuture33/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:04:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
-      <itunes:summary>pfuture33, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-opstylo-index_album-cover.jpg" />
+      <itunes:summary>Pfuture33, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/pfuture33/pat_bee-pfuture33-index_album-cover.jpg" />
       <itunes:episode>5</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pfuture33.m4a" length="7757636" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_pfuture.m4a" length="7757636" type="audio/mp4" />
     </item>
 
+    <item>
       <title>Opstylo</title>
       <itunes:title>Opstylo</itunes:title>
       <link>https://pat-bee.github.io/album/opstylo/</link>
@@ -169,169 +166,173 @@
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_opstylo.m4a" length="10201061" type="audio/mp4" />
     </item>
 
-      <title>MilSpecter</title>
-      <itunes:title>MilSpecter</itunes:title>
+    <item>
+      <title>Milspecter</title>
+      <itunes:title>Milspecter</itunes:title>
       <link>https://pat-bee.github.io/album/milspecter/</link>
       <guid isPermaLink="false">pat-bee-index-album-milspecter</guid>
-      <description>Opstylo, a track from index_album by Pat Bɇɇ.</description>
+      <description>Milspecter, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/opstylo/pat_bee-milspecter-index_album-cover.jpg" alt="milspecter cover art" /></p>
-        <p><a href="https://pat-bee.github.io/album/opstylo/">Open the song page</a>.</p>
+        <p>Milspecter, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/milspecter/pat_bee-milspecter-index_album-cover.jpg" alt="Milspecter cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/milspecter/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:06:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
       <itunes:summary>Milspecter, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-opstylo-index_album-cover.jpg" />
+      <itunes:image href="https://pat-bee.github.io/album/milspecter/pat_bee-milspecter-index_album-cover.jpg" />
       <itunes:episode>7</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-milspecter.m4a" length="7675233" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_milspecter.m4a" length="7675233" type="audio/mp4" />
     </item>
 
-
-  <title>Ghost Lives</title>
+    <item>
+      <title>Ghost Lives</title>
       <itunes:title>Ghost Lives</itunes:title>
       <link>https://pat-bee.github.io/album/ghostlives/</link>
       <guid isPermaLink="false">pat-bee-index-album-ghostlives</guid>
-      <description>ghost lives, a track from index_album by Pat Bɇɇ.</description>
+      <description>Ghost Lives, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/ghostlives/pat_bee-ghostlives-index_album-cover.jpg" alt="ghostlives cover art" /></p>
+        <p>Ghost Lives, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/ghostlives/pat_bee-ghostlives-index_album-cover.jpg" alt="Ghost Lives cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/ghostlives/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:07:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
       <itunes:summary>Ghost Lives, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-ghostlives-index_album-cover.jpg" />
+      <itunes:image href="https://pat-bee.github.io/album/ghostlives/pat_bee-ghostlives-index_album-cover.jpg" />
       <itunes:episode>8</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_ghostlives.m4a" length="12664768" type="audio/mp4" />
     </item>
-    
-  <title>CTRL</title>
+
+    <item>
+      <title>CTRL</title>
       <itunes:title>CTRL</itunes:title>
       <link>https://pat-bee.github.io/album/ctrl/</link>
       <guid isPermaLink="false">pat-bee-index-album-ctrl</guid>
       <description>CTRL, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/ctrl/pat_bee-ctrl-index_album-cover.jpg" alt="ctrl cover art" /></p>
+        <p>CTRL, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/ctrl/pat_bee-ctrl-index_album-cover.jpg" alt="CTRL cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/ctrl/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:08:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
       <itunes:summary>CTRL, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-ctrl-index_album-cover.jpg" />
+      <itunes:image href="https://pat-bee.github.io/album/ctrl/pat_bee-ctrl-index_album-cover.jpg" />
       <itunes:episode>9</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_ctrl.m4a" length="8716600" type="audio/mp4" />
     </item>
 
-     <title>Eye 2 Eye</title>
-      <itunes:title>eye2eye</itunes:title>
+    <item>
+      <title>Eye2Eye</title>
+      <itunes:title>Eye2Eye</itunes:title>
       <link>https://pat-bee.github.io/album/eye2eye/</link>
       <guid isPermaLink="false">pat-bee-index-album-eye2eye</guid>
-      <description>Eye 2 Eye, a track from index_album by Pat Bɇɇ.</description>
+      <description>Eye2Eye, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/eye2eye/pat_bee-eye2eye-index_album-cover.jpg" alt="eye2eye cover art" /></p>
+        <p>Eye2Eye, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/eye2eye/pat_bee-eye2eye-index_album-cover.jpg" alt="Eye2Eye cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/eye2eye/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:09:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
-      <itunes:summary>eye2eye, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-eye2eye-index_album-cover.jpg" />
+      <itunes:summary>Eye2Eye, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/eye2eye/pat_bee-eye2eye-index_album-cover.jpg" />
       <itunes:episode>10</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
-      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_eye2eye.m4a" length="8883338" type="audio/mp4" />
+      <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_eye2eye-tuff.m4a" length="8883338" type="audio/mp4" />
     </item>
 
-     <title>Sidewinder</title>
-      <itunes:title>sidewinder</itunes:title>
+    <item>
+      <title>Sidewinder</title>
+      <itunes:title>Sidewinder</itunes:title>
       <link>https://pat-bee.github.io/album/sidewinder/</link>
       <guid isPermaLink="false">pat-bee-index-album-sidewinder</guid>
       <description>Sidewinder, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Opstylo, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/sidewinder/pat_bee-sidewinder-index_album-cover.jpg" alt="sidewinder cover art" /></p>
+        <p>Sidewinder, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/sidewinder/pat_bee-sidewinder-index_album-cover.jpg" alt="Sidewinder cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/sidewinder/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:10:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
-      <itunes:summary>sidewinder, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-sidewinder-index_album-cover.jpg" />
+      <itunes:summary>Sidewinder, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/sidewinder/pat_bee-sidewinder-index_album-cover.jpg" />
       <itunes:episode>11</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_sidewinder.m4a" length="9383240" type="audio/mp4" />
     </item>
 
-     <title>Mistake Apeasment</title>
-      <itunes:title>mistake-apeasment</itunes:title>
-      <link>https://pat-bee.github.io/album/mistake-apeasment/</link>
-      <guid isPermaLink="false">pat-bee-index-album-mistake-apeasment</guid>
-      <description>mistake-apeasment, a track from index_album by Pat Bɇɇ.</description>
+    <item>
+      <title>Mistake Appeasement</title>
+      <itunes:title>Mistake Appeasement</itunes:title>
+      <link>https://pat-bee.github.io/album/mistake-appeasement/</link>
+      <guid isPermaLink="false">pat-bee-index-album-mistake-appeasement</guid>
+      <description>Mistake Appeasement, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Mistake Apeasment, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/mistake-apeasment/pat_bee-mistake-apeasment-index_album-cover.jpg" alt="mistake-apeasment cover art" /></p>
-        <p><a href="https://pat-bee.github.io/album/mistake-apeasment/">Open the song page</a>.</p>
+        <p>Mistake Appeasement, a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/mistake-appeasement/pat_bee-mistake-appeasement-index_album-cover.jpg" alt="Mistake Appeasement cover art" /></p>
+        <p><a href="https://pat-bee.github.io/album/mistake-appeasement/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:11:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
-      <itunes:summary>mistake-apeasment, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-mistake-apeasment-index_album-cover.jpg" />
+      <itunes:summary>Mistake Appeasement, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/mistake-appeasement/pat_bee-mistake-appeasement-index_album-cover.jpg" />
       <itunes:episode>12</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_mistake-apeasment.m4a" length="6328497" type="audio/mp4" />
     </item>
 
-     <title>Brobot</title>
-      <itunes:title>brobot</itunes:title>
+    <item>
+      <title>Brobot</title>
+      <itunes:title>Brobot</itunes:title>
       <link>https://pat-bee.github.io/album/brobot/</link>
       <guid isPermaLink="false">pat-bee-index-album-brobot</guid>
       <description>Brobot, a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
         <p>Brobot, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/brobot/pat_bee-brobot-index_album-cover.jpg" alt="brobot cover art" /></p>
+        <p><img src="https://pat-bee.github.io/album/brobot/pat_bee-brobot-index_album-cover.jpg" alt="Brobot cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/brobot/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:12:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
-      <itunes:summary>brobot, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-brobot-index_album-cover.jpg" />
+      <itunes:summary>Brobot, a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/brobot/pat_bee-brobot-index_album-cover.jpg" />
       <itunes:episode>13</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/pat-bee_brobot.m4a" length="8796589" type="audio/mp4" />
     </item>
 
-      <title>Keep On Clickin</title>
-      <itunes:title>Keep On Clickin</itunes:title>
+    <item>
+      <title>Keep on Clickin'</title>
+      <itunes:title>Keep on Clickin'</itunes:title>
       <link>https://pat-bee.github.io/album/keeponclickin/</link>
       <guid isPermaLink="false">pat-bee-index-album-keeponclickin</guid>
-      <description>Keep On CLickin, a track from index_album by Pat Bɇɇ.</description>
+      <description>Keep on Clickin', a track from index_album by Pat Bɇɇ.</description>
       <content:encoded><![CDATA[
-        <p>Brobot, a track from <em>index_album</em> by Pat Bɇɇ.</p>
-        <p><img src="https://pat-bee.github.io/album/keeponclickin/pat_bee-keeponclickin-index_album-cover.jpg" alt="Keep on clickin cover art" /></p>
+        <p>Keep on Clickin', a track from <em>index_album</em> by Pat Bɇɇ.</p>
+        <p><img src="https://pat-bee.github.io/album/keeponclickin/pat_bee-keeponclickin-index_album-cover.jpg" alt="Keep on Clickin' cover art" /></p>
         <p><a href="https://pat-bee.github.io/album/keeponclickin/">Open the song page</a>.</p>
       ]]></content:encoded>
-      <pubDate>Sat, 09 May 2026 12:05:00 -0400</pubDate>
+      <pubDate>Sat, 09 May 2026 12:13:00 -0400</pubDate>
       <itunes:author>Pat Bɇɇ</itunes:author>
-      <itunes:summary>Keep On Clickin, a track from index_album by Pat Bɇɇ.</itunes:summary>
-      <itunes:image href="https://pat-bee.github.io/album/opstylo/pat_bee-brobot-keep-on-clickin-cover.jpg" />
+      <itunes:summary>Keep on Clickin', a track from index_album by Pat Bɇɇ.</itunes:summary>
+      <itunes:image href="https://pat-bee.github.io/album/keeponclickin/pat_bee-keeponclickin-index_album-cover.jpg" />
       <itunes:episode>14</itunes:episode>
       <itunes:episodeType>full</itunes:episodeType>
       <itunes:explicit>false</itunes:explicit>
       <enclosure url="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/Pat-Bee_Keep-On-Clickn.m4a" length="10852140" type="audio/mp4" />
     </item>
-    
-
-    <!-- Continue the same pattern for the remaining tracks. -->
 
   </channel>
 </rss>
