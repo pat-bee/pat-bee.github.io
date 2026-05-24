@@ -1,1 +1,1426 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  Night Hearts · Album Player                                           ║
+  ║  Artist:  Night Hearts                                                       ║
+  ║  Album:   Night Hearts                                                   ║
+  ║                                                                          ║
+  ║  DESIGN: Terminal / Industrial Display                                   ║
+  ║  Palette:                                                                ║
+  ║    #0A0A0A  — void ground                                               ║
+  ║    #C8FF00  — phosphor highlight (lime-yellow)                          ║
+  ║    #FF5200  — signal accent (orange)                                     ║
+  ║    #909A9E  — steel mid-tone                                             ║
+  ║                                                                          ║
+  ║  FONT: Electrolize — industrial digital display                          ║
+  ║                                                                          ║
+  ║  FILE STRUCTURE:                                                         ║
+  ║    album/index.html        ← this file                                  ║
+  ║    album/album.png         ← default album art                          ║
+  ║    album/night-hearts_index-album.zip  ← FLAC bundle download               ║
+  ║    album/{slug}/           ← one folder per song                        ║
+  ║      {slug}.m4a or night-hearts_{slug}.m4a   ← playback                     ║
+  ║      {slug}.flac or night-hearts_{slug}.flac ← download (on song page)      ║
+  ║      {slug}.png/.gif or night-hearts_{slug}.png/.gif ← cover art            ║
+  ║                                                                          ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <title>Night Hearts — Night Hearts</title>
+
+  <meta property="og:type"        content="music.album" />
+  <meta property="og:site_name"   content="Night Hearts" />
+  <meta property="og:title"       content="Night Hearts — Night Hearts" />
+  <meta property="og:description" content="Listen to Night Hearts by Night Hearts" />
+  <meta property="og:url"         content="https://night-hearts.github.io/album/" />
+  <meta property="og:image"       content="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MusicAlbum",
+  "name": "Night Hearts",
+  "url": "https://night-hearts.github.io/album/",
+  "image": "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png",
+  "byArtist": {
+    "@type": "MusicGroup",
+    "name": "Night Hearts",
+    "url": "https://www.instagram.com/nighthearts.music/"
+  },
+  "genre": [
+    "Electronic",
+    "IDM",
+    "Experimental Electronic",
+    "Independent Music"
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "PodcastSeries",
+  "name": "Night Hearts",
+  "description": "Night Hearts by Night Hearts, presented as a subscribable album feed. Each track appears as an individual audio episode.",
+  "url": "https://night-hearts.github.io/album/",
+  "image": "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png",
+  "webFeed": "https://night-hearts.github.io/album/feed.xml",
+  "inLanguage": "en-US",
+  "author": {
+    "@type": "MusicGroup",
+    "name": "Night Hearts",
+    "url": "https://www.instagram.com/nighthearts.music/"
+  }
+}
+</script>
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet" />
+  <!-- Podcast RSS discovery -->
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="Night Hearts — Night Hearts"
+  href="https://night-hearts.github.io/album/feed.xml"
+/>
+
+<meta
+  name="description"
+  content="Subscribe to Night Hearts by Night Hearts as an audio feed. Each song appears as an episode."
+/>
+
+  <style>
+    /* ══════════════════════════════════════════════════════════════
+       Night Hearts — Industrial Terminal design system
+       ──────────────────────────────────────────────────────────────
+       #0A0A0A  Void — absolute ground
+       #C8FF00  Phosphor highlight — primary active colour
+       #FF5200  Signal orange — accent, indicators, hover states
+       #909A9E  Steel — secondary text, inactive UI, borders
+       ══════════════════════════════════════════════════════════════ */
+    :root {
+      --void:          #0A0A0A;
+      --void2:         #111111;
+      --void3:         #181818;
+      --void4:         #1F1F1F;
+
+      --lime:          #C8FF00;
+      --lime-bright:   #D8FF40;
+      --lime-dim:      #8AB200;
+      --lime-faint:    rgba(200,255,0,0.07);
+      --lime-pale:     rgba(200,255,0,0.14);
+      --lime-border:   rgba(200,255,0,0.35);
+      --lime-text:     #0A0A0A;
+
+      --orange:        #FF5200;
+      --orange-bright: #FF7030;
+      --orange-dim:    #C04000;
+      --orange-faint:  rgba(255,82,0,0.08);
+      --orange-border: rgba(255,82,0,0.40);
+
+      --steel:         #909A9E;
+      --steel-dim:     #5A6268;
+      --steel-faint:   rgba(144,154,158,0.08);
+      --steel-border:  rgba(144,154,158,0.20);
+
+      --border:        rgba(144,154,158,0.16);
+      --border-mid:    rgba(144,154,158,0.28);
+      --border-strong: rgba(144,154,158,0.50);
+
+      --focus-ring:    #C8FF00;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 12px; z-index: 99999;
+      background: var(--lime); color: var(--lime-text);
+      padding: 8px 18px; font-family: 'Electrolize', sans-serif;
+      font-size: 0.8rem; letter-spacing: 0.08em;
+      text-decoration: none; transition: top 200ms;
+    }
+    .skip-link:focus { top: 0; }
+    :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+
+    html {
+      background: var(--void);
+      color: var(--steel);
+      font-family: 'Electrolize', 'Courier New', monospace;
+      min-height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--void);
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(200,255,0,0.012) 2px,
+          rgba(200,255,0,0.012) 3px
+        ),
+        var(--void);
+      position: relative; overflow-x: hidden;
+    }
+
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 30%, transparent 50%, rgba(0,0,0,0.65) 100%);
+    }
+
+    button { font-family: 'Electrolize', monospace; color: inherit; cursor: pointer; }
+
+    .page-shell {
+      position: relative; z-index: 1; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px 64px;
+    }
+    .inner { width: 100%; max-width: 900px; }
+
+    /* ── MASTHEAD ─────────────────────────────────────────────────────── */
+    .masthead {
+      position: relative;
+      padding: 22px 28px 18px 32px;
+      background: var(--void2);
+      border: 1px solid var(--border-mid);
+      border-bottom: 2px solid var(--orange);
+      border-left: 5px solid var(--lime);
+      overflow: hidden;
+    }
+    .masthead::after {
+      content: "";
+      position: absolute; top: 0; right: 0;
+      width: 3px; height: 100%;
+      background: var(--orange);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .masthead-eyebrow {
+      font-size: 0.52rem; letter-spacing: 0.36em;
+      text-transform: uppercase; color: var(--steel-dim); margin-bottom: 8px;
+    }
+    .masthead-eyebrow a {
+      color: var(--steel-dim); text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 140ms, border-color 140ms;
+    }
+    .masthead-eyebrow a:hover { color: var(--orange); border-bottom-color: var(--orange-border); }
+
+    .masthead-titles { min-width: 0; overflow: hidden; container-type: inline-size; }
+
+    .masthead-title {
+      font-family: 'Electrolize', sans-serif;
+      font-weight: 400;
+      font-size: clamp(1.8rem, 11cqi, 5.0rem);
+      white-space: nowrap; overflow: hidden; text-overflow: clip;
+      line-height: 1.05;
+      color: var(--lime);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .masthead-sub {
+      margin-top: 8px; font-size: 0.54rem; letter-spacing: 0.30em;
+      text-transform: uppercase; color: var(--steel-dim);
+    }
+
+    /* ── MAIN GRID ─────────────────────────────────────────────────────── */
+    .main-grid {
+      display: grid; grid-template-columns: minmax(200px, 320px) 1fr;
+      border: 1px solid var(--border-mid); border-top: none;
+      background: var(--void2);
+    }
+
+    .col-art { border-right: 1px solid var(--border-mid); display: flex; flex-direction: column; }
+    .col-player { padding: 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+    /* ── ALBUM ART ──────────────────────────────────────────────────────── */
+    .art-wrap {
+      position: relative; width: 100%; aspect-ratio: 1 / 1;
+      overflow: hidden; background: var(--void);
+      display: block;
+      transition: box-shadow 600ms;
+    }
+    .art-wrap.is-playing {
+      box-shadow: inset 0 0 0 2px var(--lime), 0 0 28px rgba(200,255,0,0.15);
+    }
+    .art-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      display: block; position: relative; z-index: 2;
+      transition: filter 600ms, opacity 400ms;
+    }
+    .art-wrap.is-playing img {
+      filter: brightness(1.04) saturate(0.92);
+    }
+    .art-wrap img.art-fade { opacity: 0; }
+
+    /* EQ bars */
+    .eq-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 20%;
+      display: flex; align-items: flex-end; gap: 2px; padding: 0 10%;
+      opacity: 0; transition: opacity 600ms; z-index: 5;
+    }
+    .art-wrap.is-playing .eq-overlay { opacity: 1; }
+    .eq-b { flex: 1; min-height: 2px; background: var(--lime); animation: vu-bar 0.55s ease infinite alternate; }
+    .eq-b:nth-child(odd)  { background: var(--lime); }
+    .eq-b:nth-child(even) { background: var(--orange); opacity: 0.7; }
+    .eq-b:nth-child(1){animation-delay:0.00s} .eq-b:nth-child(2){animation-delay:0.09s}
+    .eq-b:nth-child(3){animation-delay:0.18s} .eq-b:nth-child(4){animation-delay:0.05s}
+    .eq-b:nth-child(5){animation-delay:0.14s} .eq-b:nth-child(6){animation-delay:0.23s}
+    .eq-b:nth-child(7){animation-delay:0.07s} .eq-b:nth-child(8){animation-delay:0.16s}
+    @keyframes vu-bar { from { height: 4%; } to { height: 80%; } }
+
+    /* Art caption below */
+    .art-caption {
+      padding: 10px 14px; border-top: 1px solid var(--border);
+      background: var(--void2);
+    }
+    .art-caption-title {
+      font-size: 0.68rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--lime); line-height: 1.3;
+    }
+    .art-caption-sub {
+      font-size: 0.48rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--steel-dim); margin-top: 3px;
+    }
+
+    /* ── NOW PLAYING ──────────────────────────────────────────────────── */
+    .np-label {
+      font-size: 0.5rem; letter-spacing: 0.36em;
+      text-transform: uppercase; color: var(--steel-dim); margin-bottom: 4px;
+    }
+    .np-title {
+      font-size: 1.25rem; line-height: 1.1;
+      color: var(--lime); word-break: break-word;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .np-meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+
+    .live-dot {
+      display: inline-block; width: 8px; height: 8px;
+      background: transparent; border: 1px solid var(--border-mid);
+      flex-shrink: 0; transition: all 200ms;
+    }
+    .live-dot.active {
+      background: var(--orange); border-color: var(--orange);
+      box-shadow: 0 0 6px var(--orange);
+      animation: orange-blink 1.2s ease-in-out infinite;
+    }
+    @keyframes orange-blink { 0%,100%{opacity:1;box-shadow:0 0 6px var(--orange)} 50%{opacity:0.3;box-shadow:none} }
+
+    .badge {
+      font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 2px 7px; border: 1px solid var(--border); color: var(--steel-dim);
+    }
+
+    /* Download FLAC zip — small, unobtrusive */
+    .badge-download-zip {
+      border: 1px solid var(--steel-border);
+      background: transparent; color: var(--steel);
+      text-decoration: none; cursor: pointer;
+      font-size: 0.46rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 2px 8px;
+      transition: border-color 140ms, color 140ms, background 140ms;
+    }
+    .badge-download-zip:hover {
+      border-color: var(--lime-border); color: var(--lime);
+      background: var(--lime-faint);
+    }
+
+    /* Preload status indicator */
+    .preload-status {
+      font-size: 0.44rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--steel-dim); opacity: 0; transition: opacity 400ms;
+    }
+    .preload-status.show { opacity: 1; }
+    .preload-status.ready { color: var(--lime-dim); }
+
+    /* Buffer bar */
+    .buf-wrap { width: 100%; height: 2px; background: var(--steel-faint); }
+    .buf-fill { height: 100%; background: var(--steel-dim); width: 0%; transition: width 400ms; }
+    .buf-fill.loading { animation: buf-flicker 1.0s ease-in-out infinite; background: var(--orange-dim); }
+    @keyframes buf-flicker { 0%,100%{opacity:0.2} 50%{opacity:0.9} }
+
+    /* Seek bar */
+    .prog-row {
+      display: grid; grid-template-columns: 46px 1fr 46px;
+      gap: 8px; align-items: center;
+      font-size: 0.64rem;
+      color: var(--steel-dim); font-variant-numeric: tabular-nums;
+    }
+    .prog-bar {
+      appearance: none; width: 100%; height: 3px;
+      background: var(--steel-faint);
+      border: 1px solid var(--border); border-radius: 0; cursor: pointer;
+    }
+    .prog-bar::-webkit-slider-thumb {
+      appearance: none; width: 3px; height: 18px;
+      background: var(--lime); border: none; border-radius: 0; cursor: pointer;
+    }
+    .prog-bar::-moz-range-thumb {
+      width: 3px; height: 18px;
+      background: var(--lime); border: none; border-radius: 0; cursor: pointer;
+    }
+
+    /* ── CONTROLS ─────────────────────────────────────────────────────── */
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .ctrl-btn {
+      border: 1px solid var(--border-mid); background: transparent;
+      color: var(--steel); font-family: 'Electrolize', sans-serif;
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0 14px; min-height: 38px;
+      transition: border-color 120ms, color 120ms, background 120ms, transform 80ms;
+      position: relative; overflow: hidden;
+    }
+    .ctrl-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-faint); }
+    .ctrl-btn:active { transform: translate(1px,1px); }
+
+    /* Play button — lime box */
+    .play-btn {
+      min-width: 136px; min-height: 52px;
+      font-family: 'Electrolize', sans-serif;
+      font-size: 1.0rem; letter-spacing: 0.16em;
+      text-transform: uppercase;
+      background: var(--lime);
+      color: var(--lime-text);
+      border: none;
+      box-shadow: 0 0 0 1px var(--lime), 2px 2px 0 var(--lime-dim);
+    }
+    .play-btn:hover {
+      background: var(--lime-bright);
+      box-shadow: 0 0 14px var(--lime-border), 0 0 0 1px var(--lime);
+    }
+    .play-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 1px var(--lime); }
+
+    .play-btn.is-loading-text {
+      font-size: 0.78rem; letter-spacing: 0.08em;
+      background: var(--lime-faint); color: var(--lime);
+      box-shadow: 0 0 0 1px var(--lime-dim);
+      animation: loading-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes loading-pulse { 0%,100%{opacity:0.45} 50%{opacity:1} }
+
+    .play-btn.is-armed {
+      background: var(--lime);
+      color: var(--lime-text);
+      box-shadow: 0 0 0 1px var(--lime), 0 0 18px var(--lime-border), 2px 2px 0 var(--lime-dim);
+    }
+    .play-btn.is-loading { background: var(--void3); border: 1px solid var(--border-mid); cursor: wait; box-shadow: none; }
+
+    .repeat-btn { min-width: 130px; font-size: 0.6rem; }
+    .repeat-btn[data-mode="song"]  { border-color: var(--orange-border); color: var(--orange); }
+    .repeat-btn[data-mode="album"] { border-style: dashed; border-color: var(--lime-border); color: var(--lime-dim); }
+
+    .kbd-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .kbd-hint { font-size: 0.48rem; color: var(--steel-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+    kbd {
+      display: inline-block; padding: 1px 5px; border: 1px solid var(--border-mid);
+      font-size: 0.48rem; font-family: inherit; color: var(--lime); background: var(--void3);
+    }
+
+    .status-line { font-size: 0.52rem; color: var(--steel-dim); line-height: 1.6; letter-spacing: 0.04em; }
+    .err-line { font-size: 0.6rem; color: var(--orange); display: none; line-height: 1.4; border-left: 2px solid var(--orange-border); padding-left: 8px; }
+    .err-line.show { display: block; }
+
+    /* ── PLAYLIST ─────────────────────────────────────────────────────── */
+    .playlist-section {
+      border: 1px solid var(--border-mid); border-top: none; background: var(--void2);
+    }
+    .playlist-header {
+      padding: 8px 20px; border-bottom: 1px solid var(--border-mid);
+      font-size: 0.48rem;
+      letter-spacing: 0.28em; text-transform: uppercase; color: var(--steel-dim);
+      display: flex; justify-content: space-between; align-items: center;
+      border-left: 3px solid var(--orange-dim);
+    }
+    .playlist-header-label {
+      font-size: 0.62rem; color: rgba(144,154,158,0.25); letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .track-list { list-style: none; }
+
+    .track-row {
+      width: 100%; display: grid;
+      grid-template-columns: 52px 1fr auto auto;
+      align-items: stretch;
+      border-bottom: 1px solid var(--border);
+      transition: background 80ms;
+      background: transparent;
+      position: relative;
+    }
+    .track-list li:last-child .track-row { border-bottom: none; }
+    .track-row:hover { background: var(--steel-faint); }
+    .track-row[aria-current="true"] {
+      background: var(--lime-faint);
+      box-shadow: inset 3px 0 0 var(--lime);
+    }
+    .track-row[aria-current="true"].is-playing .track-num {
+      color: var(--lime);
+      animation: orange-blink 1.2s ease-in-out infinite;
+    }
+    .track-row[aria-current="true"] .track-num { color: var(--lime); }
+
+    /* Clickable area for playing — covers num + info columns */
+    .track-play-area {
+      display: contents; /* children participate in grid */
+      cursor: pointer;
+    }
+    .track-num {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 0; border-right: 1px solid var(--border);
+      font-size: 0.88rem; letter-spacing: 0.06em; color: var(--steel-dim); min-width: 52px;
+      cursor: pointer; user-select: none;
+    }
+    .track-info-col {
+      padding: 13px 16px; display: flex; flex-direction: column;
+      justify-content: center; gap: 3px; min-width: 0;
+      cursor: pointer; user-select: none;
+    }
+    .track-title-text {
+      font-size: 0.9rem; color: var(--lime);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .track-meta-text {
+      font-size: 0.48rem; color: var(--steel-dim);
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .track-dur {
+      display: flex; align-items: center; padding: 13px 14px;
+      font-size: 0.64rem; color: var(--steel-dim); border-left: 1px solid var(--border);
+      white-space: nowrap; font-variant-numeric: tabular-nums;
+      cursor: pointer;
+    }
+
+    /* Song page link button — far right */
+    .track-page-link {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 14px;
+      border-left: 1px solid var(--border);
+      color: var(--steel-dim);
+      text-decoration: none;
+      font-size: 0.48rem; letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color 140ms, background 140ms, border-color 140ms;
+      min-width: 48px;
+    }
+    .track-page-link:hover {
+      color: var(--orange);
+      background: var(--orange-faint);
+      border-left-color: var(--orange-border);
+    }
+    .track-page-link svg {
+      width: 11px; height: 11px;
+      stroke: currentColor; fill: none;
+      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* Preload indicator dot on track */
+    .track-row .preload-dot {
+      position: absolute; top: 4px; right: 52px;
+      width: 4px; height: 4px;
+      background: var(--lime-dim);
+      opacity: 0;
+      transition: opacity 400ms;
+    }
+    .track-row.preloaded .preload-dot { opacity: 0.6; }
+
+    /* Share strip */
+    .share-strip {
+      display: flex; justify-content: center; align-items: center;
+      gap: 20px; margin: 20px 0 10px;
+    }
+    .share-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px;
+      background: transparent; border: 1px solid var(--border-mid);
+      color: var(--steel-dim); cursor: pointer;
+      transition: border-color 140ms, color 140ms, background 140ms, box-shadow 140ms;
+      padding: 0; position: relative;
+    }
+    .share-btn:hover { border-color: var(--lime); color: var(--lime); background: var(--lime-faint); box-shadow: 0 0 8px var(--lime-border); }
+    .share-btn:active { transform: translate(1px,1px); }
+    .share-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .share-btn.copied { border-color: var(--lime); color: var(--lime); }
+    .share-btn.copied::after {
+      content: "Copied"; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+      font-size: 0.44rem; letter-spacing: 0.1em;
+      color: var(--lime); white-space: nowrap; pointer-events: none;
+    }
+    .share-btn.hidden { display: none; }
+
+    /* Footer */
+    .page-footer { margin-top: 10px; text-align: center; width: 100%; }
+    .page-footer a {
+      font-size: 0.6rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--steel-dim);
+      text-decoration: none; border-bottom: 1px solid var(--border);
+      padding-bottom: 2px; transition: color 140ms, border-color 140ms;
+    }
+    .page-footer a:hover { color: var(--lime); border-color: var(--lime-border); }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .page-shell { padding: 16px 12px 48px; }
+      .main-grid { grid-template-columns: 1fr; }
+      .col-art { border-right: none; border-bottom: 1px solid var(--border-mid); }
+      .col-player { padding: 16px; }
+      .kbd-row { display: none; }
+      .track-row { grid-template-columns: 44px 1fr auto auto; }
+      .track-num { min-width: 44px; }
+      .playlist-header { border-left-width: 2px; }
+    }
+    /* Podcast subscribe block */
+.podcast-subscribe {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px solid var(--border-mid);
+  border-left: 3px solid var(--lime);
+  background:
+    linear-gradient(90deg, var(--lime-faint), transparent 70%),
+    var(--void2);
+  text-align: left;
+}
+
+.podcast-subscribe-label {
+  font-size: 0.48rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--steel-dim);
+  margin-bottom: 8px;
+}
+
+.podcast-subscribe-title {
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lime);
+  margin-bottom: 8px;
+}
+
+.podcast-subscribe-text {
+  font-size: 0.62rem;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  color: var(--steel);
+  max-width: 70ch;
+  margin-bottom: 14px;
+}
+
+.podcast-subscribe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.podcast-subscribe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--lime-border);
+  background: var(--lime-faint);
+  color: var(--lime);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 140ms, color 140ms, background 140ms, box-shadow 140ms;
+}
+
+.podcast-subscribe-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: var(--orange-faint);
+  box-shadow: 0 0 10px var(--orange-border);
+}
+
+.podcast-subscribe-note {
+  margin-top: 10px;
+  font-size: 0.48rem;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  color: var(--steel-dim);
+}
+
+    audio { position: fixed; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <main class="page-shell" id="main-content">
+    <div class="inner">
+
+      <header class="masthead" role="banner">
+        <p class="masthead-eyebrow" id="mastheadEyebrow">Night Hearts</p>
+        <div class="masthead-titles">
+          <h1 class="masthead-title">Night Hearts</h1>
+        </div>
+        <p class="masthead-sub">Night Hearts &nbsp;·&nbsp; Full Album</p>
+      </header>
+
+      <div class="main-grid">
+        <div class="col-art">
+          <div class="art-wrap" id="artWrap">
+            <img id="albumArtImg" src="https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png" alt="Night Hearts by Night Hearts — cover art" />
+            
+          </div>
+          <div class="art-caption">
+            <div class="art-caption-title" id="artCaptionTitle">Night Hearts</div>
+            <div class="art-caption-sub" id="artCaptionSub">Night Hearts</div>
+          </div>
+        </div>
+
+        <div class="col-player">
+          <div aria-live="polite" aria-atomic="true">
+            <p class="np-label">Now Playing</p>
+            <p class="np-title" id="npTitle">—</p>
+            <div class="np-meta">
+              <span class="live-dot" id="liveDot" aria-hidden="true"></span>
+              <span class="badge badge-fmt" id="fmtBadge" aria-label="Audio format">M4A</span>
+              <a class="badge badge-download-zip"
+                 href="night-hearts_index-album.zip"
+                 download
+                 aria-label="Download full album FLAC archive">↓ FLAC (full album)</a>
+              <span class="preload-status" id="preloadStatus"></span>
+            </div>
+          </div>
+
+          <div class="buf-wrap" aria-hidden="true"><div class="buf-fill" id="bufFill"></div></div>
+
+          <div class="prog-row">
+            <span id="curTime" aria-label="Current time">0:00</span>
+            <input id="progBar" class="prog-bar" type="range" min="0" max="100" value="0" step="0.1"
+              aria-label="Track progress" aria-valuetext="0 seconds" />
+            <span id="durTime" aria-label="Total duration">0:00</span>
+          </div>
+
+          <div class="controls" role="group" aria-label="Playback controls">
+            <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Previous track">← Prev</button>
+            <button class="ctrl-btn play-btn" id="playBtn" type="button" aria-label="Play">PLAY</button>
+            <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Next track">Next →</button>
+            <button class="ctrl-btn repeat-btn" id="repeatBtn" type="button"
+              data-mode="off" aria-label="Repeat mode: off" aria-pressed="false">↺ Repeat: Off</button>
+          </div>
+
+          <div class="kbd-row" aria-hidden="true">
+            <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
+            <span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd> Seek 10s</span>
+            <span class="kbd-hint"><kbd>N</kbd><kbd>P</kbd> Track</span>
+            <span class="kbd-hint"><kbd>↑</kbd><kbd>↓</kbd> Vol</span>
+            <span class="kbd-hint"><kbd>M</kbd> Mute</span>
+          </div>
+
+          <p class="status-line" id="statusLine">// Signal ready. Select a track or tap Play.</p>
+          <p class="err-line" id="errLine" role="alert" aria-live="assertive"></p>
+        </div>
+      </div>
+
+      <section class="playlist-section" aria-label="Tracklist">
+        <div class="playlist-header" aria-hidden="true">
+          <span class="playlist-header-label">// Tracklist</span>
+          <span id="trackCount">0 Tracks</span>
+        </div>
+        <ol class="track-list" id="trackList" aria-label="Album tracks"></ol>
+      </section>
+
+      <div class="share-strip" id="shareStrip" aria-label="Share this page">
+        <button class="share-btn" id="btnNativeShare" aria-label="Share" title="Share">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+        </button>
+        <button class="share-btn" id="btnCopyLink" aria-label="Copy link" title="Copy link">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+        </button>
+      </div>
+
+   <footer class="page-footer">
+  <section class="podcast-subscribe" aria-labelledby="podcastSubscribeTitle">
+    <p class="podcast-subscribe-label">// Audio Feed</p>
+
+    <h2 class="podcast-subscribe-title" id="podcastSubscribeTitle">
+
+    </h2>
+
+    <p class="podcast-subscribe-text">
+      Subscribe to get Night Hearts song as episodes in your podcast app.
+    </p>
+
+    <div class="podcast-subscribe-actions">
+      <a
+        class="podcast-subscribe-btn"
+        href="feed.xml"
+        type="application/rss+xml"
+        aria-label="Subscribe to Night Hearts RSS audio feed">
+        Subscribe RSS
+      </a>
+
+      <a
+        class="podcast-subscribe-btn"
+        href="podcast://night-hearts.github.io/album/feed.xml"
+        aria-label="Open Night Hearts feed in a podcast app">
+        Podcast App
+      </a>
+
+      <a
+        class="podcast-subscribe-btn"
+        href="https://www.instagram.com/nighthearts.music/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Night Hearts on Instagram opens in new tab">
+        Instagram
+      </a>
+       <a
+        class="podcast-subscribe-btn"
+        href="https://www.instagram.com/nighthearts.music/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Night Hearts on Instagram opens in new tab">
+        Downlod Album
+      </a>
+    </div>
+
+    <p class="podcast-subscribe-note">
+      Feed URL: https://night-hearts.github.io/album/feed.xml
+    </p>
+  </section>
+</footer>
+
+    </div>
+  </main>
+
+  <audio id="audioEl" preload="metadata" playsinline x-webkit-airplay="allow"></audio>
+  <!-- Preload audio element for next track -->
+  <audio id="audioPreload" preload="auto" style="position:fixed;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;"></audio>
+
+  <script>
+    /* ════════════════════════════════════════════════════════════════════
+       ALBUM CONFIG
+       ════════════════════════════════════════════════════════════════════
+
+       To reorder songs: drag the objects in TRACKS into any order.
+       Each track needs:
+         slug        — folder name (e.g. "pfuture33")
+         title       — display name
+         artist      — artist (defaults to ALBUM.artist if omitted)
+         audioFile   — filename inside the folder (without extension)
+                       The player will try .m4a playback.
+                       Candidates tried in order for cover art:
+                         "night-hearts_{slug}.png", "{slug}.png",
+                         "night-hearts_{slug}.gif", "{slug}.gif"
+         pageUrl     — URL to the individual song page (opens in new tab)
+
+       ════════════════════════════════════════════════════════════════════ */
+
+    const DEFAULT_COVER =
+      "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/index-cover-folder-final.png";
+
+    const ALBUM = {
+      title:     "Night Hearts",
+      artist:    "Night Hearts",
+      pageBase:  "https://night-hearts.github.io/album/",
+      artistUrl: "https://www.instagram.com/nighthearts.music/",
+    };
+
+    /* ── PLAYLIST — reorder by moving these objects ─────────────────── */
+  
+    const TRACKS = [
+  {
+    slug: "nikad",
+    title: "Nikad",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_nikad.m4a",
+  },
+  {
+    slug: "birdsowong",
+    title: "Birdsowong",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_birdsowong.m4a",
+  },
+  {
+    slug: "popmath",
+    title: "Pop Math",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_pop-math.m4a",
+  },
+  {
+    slug: "relday",
+    title: "Relday",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_relday.m4a",
+  },
+  {
+    slug: "pfuture33",
+    title: "Pfuture33",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_pfuture.m4a",
+  },
+  {
+    slug: "opstylo",
+    title: "Opstylo",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_opstylo.m4a",
+  },
+  {
+    slug: "milspecter",
+    title: "Milspecter",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_milspecter.m4a",
+  },
+  {
+    slug: "ghostlives",
+    title: "Ghost Lives",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_ghostlives.m4a",
+  },
+  {
+    slug: "ctrl",
+    title: "CTRL",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_ctrl.m4a",
+  },
+  {
+    slug: "eye2eye",
+    title: "Eye2Eye",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_eye2eye-tuff.m4a",
+  },
+  {
+    slug: "sidewinder",
+    title: "Sidewinder",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_sidewinder.m4a",
+  },
+  {
+    slug: "mistake-appeasement",
+    title: "Mistake Appeasement",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_mistake-apeasment.m4a",
+  },
+  {
+    slug: "brobot",
+    title: "Brobot",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/night-hearts_brobot.m4a",
+  },
+  {
+    slug: "keeponclickin",
+    title: "Keep on Clickin'",
+    m4a: "https://pub-8ca7a487f9234c669dfad0530698bfe0.r2.dev/Night-Hearts_Keep-On-Clickn.m4a",
+  },
+
+      // Add more tracks below. Example:
+      // {
+      //   slug:      "track-slug",
+      //   title:     "Track Title",
+      //   audioFile: "Night-Hearts_TrackSlug",
+      // },
+    ];
+    /* ── END PLAYLIST ───────────────────────────────────────────────── */
+
+    /* Build full paths from slug + audioFile */
+    function buildTrack(t, idx) {
+      const base = t.slug + "/";
+      return {
+        index:     idx,
+        slug:      t.slug,
+        title:     t.title,
+        artist:    t.artist || ALBUM.artist,
+        src:       t.m4a,
+        artCandidates: [
+          base + "night-hearts_" + t.slug + ".png",
+          base + t.slug + ".png",
+          base + "night-hearts_" + t.slug + ".gif",
+          base + t.slug + ".gif",
+          base + "night-hearts_" + t.slug + ".jpg",
+          base + t.slug + ".jpg",
+        ],
+       pageUrl: t.slug + "/",
+        duration:  "—",
+      };
+    }
+
+    const tracks = TRACKS.map(buildTrack);
+
+    /* ════════════════════════════════════════════════════════════════════
+       COVER ART RESOLVER
+       Try candidates in order, fall back to album.png
+    ════════════════════════════════════════════════════════════════════ */
+    const artCache = {};
+
+    function resolveArt(track, callback) {
+      if (artCache[track.slug]) { callback(artCache[track.slug]); return; }
+      let i = 0;
+      function tryNext() {
+        if (i >= track.artCandidates.length) { callback(DEFAULT_COVER); return; }
+        const url = track.artCandidates[i++];
+        const img = new Image();
+        img.onload = () => { artCache[track.slug] = url; callback(url); };
+        img.onerror = tryNext;
+        img.src = url;
+      }
+      tryNext();
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       PRELOADER
+       When a track starts playing, begin preloading the next one.
+    ════════════════════════════════════════════════════════════════════ */
+    const audioPreload = document.getElementById("audioPreload");
+    let preloadedIdx = -1;
+
+    function preloadNext(afterIdx) {
+      const nextIdx = afterIdx + 1;
+      if (nextIdx >= tracks.length) return;
+      if (preloadedIdx === nextIdx) return; // already preloading/preloaded
+      preloadedIdx = nextIdx;
+
+      const next = tracks[nextIdx];
+      audioPreload.src = next.src;
+      audioPreload.preload = "auto";
+      audioPreload.load();
+
+      // Also resolve cover art for next track
+      resolveArt(next, () => {});
+
+      // Show status
+      audioPreload.addEventListener("canplay", function onCan() {
+        audioPreload.removeEventListener("canplay", onCan);
+        const row = trackList.querySelector('[data-track-idx="' + nextIdx + '"]');
+        if (row) row.classList.add("preloaded");
+        setPreloadStatus("Next: " + next.title + " — ready", true);
+      }, { once: true });
+
+      setPreloadStatus("Buffering: " + next.title, false);
+    }
+
+    function setPreloadStatus(msg, ready) {
+      const el = document.getElementById("preloadStatus");
+      el.textContent = msg;
+      el.classList.add("show");
+      el.classList.toggle("ready", ready);
+      if (ready) {
+        setTimeout(() => { el.classList.remove("show"); }, 3000);
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       PLAYBACK ENGINE
+    ════════════════════════════════════════════════════════════════════ */
+    const audio     = document.getElementById("audioEl");
+    const playBtn   = document.getElementById("playBtn");
+    const prevBtn   = document.getElementById("prevBtn");
+    const nextBtn   = document.getElementById("nextBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const progBar   = document.getElementById("progBar");
+    const curTimeEl = document.getElementById("curTime");
+    const durTimeEl = document.getElementById("durTime");
+    const bufFill   = document.getElementById("bufFill");
+    const npTitle   = document.getElementById("npTitle");
+    const fmtBadge  = document.getElementById("fmtBadge");
+    const liveDot   = document.getElementById("liveDot");
+    const errLine   = document.getElementById("errLine");
+    const artWrap   = document.getElementById("artWrap");
+    const artImg    = document.getElementById("albumArtImg");
+    const trackList = document.getElementById("trackList");
+
+    let currentIndex = 0, isLoaded = false;
+    let isSeeking = false, repeatMode = "off";
+    let wakeLock = null;
+
+    /* Wake lock */
+    async function acquireWake() {
+      if (!("wakeLock" in navigator)) return;
+      try {
+        wakeLock = await navigator.wakeLock.request("screen");
+        wakeLock.addEventListener("release", () => { if (!audio.paused) acquireWake(); });
+      } catch (_) {}
+    }
+    async function dropWake() {
+      if (wakeLock) { try { await wakeLock.release(); } catch (_) {} wakeLock = null; }
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) acquireWake();
+    });
+
+    /* Crossfade art */
+    function setArt(url) {
+      if (artImg.src.endsWith(url) || artImg.getAttribute("src") === url) return;
+      artImg.classList.add("art-fade");
+      setTimeout(() => {
+        artImg.src = url;
+        artImg.onload = () => artImg.classList.remove("art-fade");
+        artImg.onerror = () => {   artImg.src = DEFAULT_COVER;   artImg.classList.remove("art-fade"); };
+      }, 350);
+    }
+
+    function loadTrack(idx, autoPlay) {
+      const si = Math.max(0, Math.min(idx, tracks.length - 1));
+      const tr = tracks[si];
+      currentIndex = si; isLoaded = false;
+
+      npTitle.textContent = tr.title;
+      document.getElementById("artCaptionTitle").textContent = tr.title;
+      document.getElementById("artCaptionSub").textContent = tr.artist;
+      if (fmtBadge) { fmtBadge.textContent = "M4A"; }
+      clearErr(); updateTrackUI(); updateMediaSession(tr);
+
+      // Swap art
+      resolveArt(tr, url => setArt(url));
+
+      // If we preloaded this track, swap the audio element src from preload buffer
+      // to avoid re-fetching. Otherwise set directly.
+      if (preloadedIdx === si && audioPreload.src) {
+        // Transfer: set audio src to same URL (browser cache will serve it)
+        audio.src = audioPreload.src;
+        audioPreload.src = "";
+        preloadedIdx = -1;
+      } else {
+        audio.src = tr.src;
+      }
+      audio.preload = "auto";
+      audio.load();
+
+      if (autoPlay) {
+        showLoadingState();
+        audio.addEventListener("canplay", function onCan() {
+          audio.removeEventListener("canplay", onCan);
+          audio.play().then(() => {
+            isLoaded = true;
+            setPlayState(true);
+            acquireWake();
+            preloadNext(currentIndex);
+          }).catch(() => showErr("// Could not start playback"));
+        }, { once: true });
+      } else {
+        showLoadingState();
+      }
+    }
+
+    function showLoadingState() {
+      playBtn.classList.remove("is-armed");
+      playBtn.classList.add("is-loading-text");
+      playBtn.textContent = "LOADING";
+      playBtn.setAttribute("aria-label", "Loading audio");
+      bufFill.classList.add("loading");
+    }
+
+    function armButton() {
+      playBtn.classList.remove("is-loading", "is-loading-text");
+      playBtn.classList.add("is-armed");
+      playBtn.textContent = "PLAY";
+      playBtn.setAttribute("aria-label", "Play " + tracks[currentIndex].title + " — ready");
+      bufFill.classList.remove("loading");
+      bufFill.style.width = "0%";
+    }
+
+    audio.addEventListener("canplay", () => {
+      if (!isLoaded) { isLoaded = true; armButton(); }
+    });
+
+    async function togglePlay() {
+      if (!isLoaded) {
+  loadTrack(currentIndex, true);
+  return;
+}
+      if (audio.paused) {
+        playBtn.classList.remove("is-armed");
+        try {
+          await audio.play();
+          setPlayState(true);
+          await acquireWake();
+          preloadNext(currentIndex);
+        } catch (_) { showErr("// Could not start — try again"); }
+      } else { audio.pause(); setPlayState(false); dropWake(); }
+    }
+
+    function playPrev() {
+      if (audio.currentTime > 3 && isLoaded) { audio.currentTime = 0; return; }
+      const prev = Math.max(0, currentIndex - 1);
+      loadTrack(prev, !audio.paused || prev !== currentIndex);
+    }
+
+    function playNext() {
+      if (currentIndex < tracks.length - 1) {
+        loadTrack(currentIndex + 1, true);
+      } else if (repeatMode === "album") {
+        loadTrack(0, true);
+      } else {
+        setPlayState(false); dropWake();
+      }
+    }
+
+    function setPlayState(on) {
+      playBtn.classList.remove("is-loading-text", "is-armed", "is-loading");
+      playBtn.textContent = on ? "PAUSE" : "PLAY";
+      playBtn.setAttribute("aria-label",
+        on ? "Pause " + tracks[currentIndex]?.title
+           : "Play "  + tracks[currentIndex]?.title);
+      artWrap.classList.toggle("is-playing", on);
+      liveDot.classList.toggle("active", on);
+      setMediaPlayState(on ? "playing" : "paused");
+      updateTrackUI();
+    }
+
+    function cycleRepeat() {
+      const modes = ["off", "song", "album"];
+      repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+      const labels = {
+        off:   { l: "↺ Repeat: Off",   p: "false" },
+        song:  { l: "↺ Repeat: Song",  p: "true"  },
+        album: { l: "↺ Repeat: Album", p: "true"  },
+      };
+      repeatBtn.textContent = labels[repeatMode].l;
+      repeatBtn.dataset.mode = repeatMode;
+      repeatBtn.setAttribute("aria-label", labels[repeatMode].l + ". Press to cycle.");
+      repeatBtn.setAttribute("aria-pressed", labels[repeatMode].p);
+    }
+
+    /* Audio events */
+    audio.addEventListener("ended", () => {
+      if (repeatMode === "song") { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+      playNext();
+    });
+    audio.addEventListener("playing", () => {
+      bufFill.classList.remove("loading"); setPlayState(true);
+      preloadNext(currentIndex);
+    });
+    audio.addEventListener("waiting", () => {
+      bufFill.classList.add("loading");
+    });
+    audio.addEventListener("pause", () => {
+      artWrap.classList.remove("is-playing"); liveDot.classList.remove("active"); updateTrackUI();
+    });
+    audio.addEventListener("play", () => updateTrackUI());
+    audio.addEventListener("error", () => {
+      isLoaded = false;
+      playBtn.classList.remove("is-loading-text", "is-armed", "is-loading");
+      playBtn.textContent = "PLAY";
+      bufFill.classList.remove("loading");
+      showErr("// Audio failed to load: " + tracks[currentIndex].src);
+    });
+
+    let stallTimer;
+    audio.addEventListener("stalled", () => {
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => { if (!audio.paused) audio.play().catch(() => {}); }, 1200);
+    });
+    audio.addEventListener("progress", () => clearTimeout(stallTimer));
+    audio.addEventListener("playing",  () => clearTimeout(stallTimer));
+
+    /* Progress */
+    const fmt = s => !Number.isFinite(s) || s < 0 ? "0:00" : Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+
+    audio.addEventListener("loadedmetadata", () => {
+      durTimeEl.textContent = fmt(audio.duration);
+      progBar.setAttribute("aria-valuemax", Math.floor(audio.duration));
+      const rows = trackList.querySelectorAll(".track-row");
+      if (rows[currentIndex]) {
+        const dur = rows[currentIndex].querySelector(".track-dur");
+        if (dur) dur.textContent = fmt(audio.duration);
+      }
+    });
+    audio.addEventListener("timeupdate", () => {
+      if (isSeeking || !Number.isFinite(audio.duration) || !audio.duration) return;
+      progBar.value = (audio.currentTime / audio.duration) * 100;
+      progBar.setAttribute("aria-valuenow", Math.floor(audio.currentTime));
+      progBar.setAttribute("aria-valuetext", fmt(audio.currentTime) + " of " + fmt(audio.duration));
+      curTimeEl.textContent = fmt(audio.currentTime);
+      updateMediaPosition();
+    });
+    audio.addEventListener("progress", () => {
+      if (!audio.duration || !audio.buffered.length) return;
+      bufFill.style.width = (audio.buffered.end(audio.buffered.length - 1) / audio.duration) * 100 + "%";
+    });
+    progBar.addEventListener("mousedown",  () => isSeeking = true);
+    progBar.addEventListener("touchstart", () => isSeeking = true, { passive: true });
+    progBar.addEventListener("input", () => {
+      if (audio.duration) { const t = (progBar.value / 100) * audio.duration; curTimeEl.textContent = fmt(t); }
+    });
+    progBar.addEventListener("change", () => {
+      if (audio.duration) audio.currentTime = (progBar.value / 100) * audio.duration;
+      isSeeking = false;
+    });
+    progBar.addEventListener("mouseup",  () => isSeeking = false);
+    progBar.addEventListener("touchend", () => isSeeking = false);
+
+    /* Media Session */
+    function updateMediaSession(tr) {
+      if (!("mediaSession" in navigator)) return;
+      resolveArt(tr, artUrl => {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: tr.title, artist: tr.artist, album: ALBUM.title,
+          artwork: [{ src: artUrl, sizes: "512x512", type: "image/png" }]
+        });
+      });
+      const h = {
+        play:          async () => { await togglePlay(); },
+        pause:         () => { audio.pause(); setPlayState(false); dropWake(); },
+        previoustrack: playPrev,
+        nexttrack:     playNext,
+        seekbackward:  e => { audio.currentTime = Math.max(0, audio.currentTime - (e.seekOffset || 10)); },
+        seekforward:   e => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (e.seekOffset || 10)); },
+        seekto:        e => { if (e.fastSeek && "fastSeek" in audio) audio.fastSeek(e.seekTime); else audio.currentTime = e.seekTime; }
+      };
+      for (const [a, fn] of Object.entries(h)) { try { navigator.mediaSession.setActionHandler(a, fn); } catch (_) {} }
+    }
+    function setMediaPlayState(s) { if ("mediaSession" in navigator) navigator.mediaSession.playbackState = s; }
+    function updateMediaPosition() {
+      if (!("mediaSession" in navigator) || !Number.isFinite(audio.duration)) return;
+      try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: audio.currentTime }); } catch (_) {}
+    }
+
+    /* Keyboard */
+    document.addEventListener("keydown", e => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      switch (e.key) {
+        case " ": case "MediaPlayPause": e.preventDefault(); togglePlay(); break;
+        case "ArrowRight": e.preventDefault(); audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10); break;
+        case "ArrowLeft":  e.preventDefault(); audio.currentTime = Math.max(0, audio.currentTime - 10); break;
+        case "ArrowUp":    e.preventDefault(); audio.volume = Math.min(1, audio.volume + 0.05); break;
+        case "ArrowDown":  e.preventDefault(); audio.volume = Math.max(0, audio.volume - 0.05); break;
+        case "n": case "N": case "MediaTrackNext":     playNext(); break;
+        case "p": case "P": case "MediaTrackPrevious": playPrev(); break;
+        case "r": case "R": cycleRepeat(); break;
+        case "m": case "M": audio.muted = !audio.muted; break;
+      }
+    });
+
+    /* Share strip */
+    function initShareStrip() {
+      const btnNative = document.getElementById("btnNativeShare");
+      const btnCopy   = document.getElementById("btnCopyLink");
+      const pageUrl   = ALBUM.pageBase;
+      const shareData = { title: ALBUM.title + " — " + ALBUM.artist, text: "Listen to " + ALBUM.title + " by " + ALBUM.artist, url: pageUrl };
+      if (navigator.share) {
+        btnNative.addEventListener("click", () => { navigator.share(shareData).catch(() => {}); });
+      } else { btnNative.classList.add("hidden"); }
+      if (navigator.clipboard) {
+        btnCopy.addEventListener("click", () => {
+          navigator.clipboard.writeText(pageUrl).then(() => {
+            btnCopy.classList.add("copied");
+            setTimeout(() => btnCopy.classList.remove("copied"), 2000);
+          }).catch(() => {});
+        });
+      } else { btnCopy.classList.add("hidden"); }
+    }
+
+    /* Update track row UI states */
+    function updateTrackUI() {
+      document.querySelectorAll(".track-row").forEach((row, i) => {
+        const cur = i === currentIndex;
+        row.setAttribute("aria-current", cur ? "true" : "false");
+        row.classList.toggle("is-playing", cur && !audio.paused);
+      });
+    }
+
+    /* Render track list */
+    function renderTracks() {
+      trackList.innerHTML = "";
+      const el = document.getElementById("trackCount");
+      if (el) el.textContent = tracks.length + " Track" + (tracks.length !== 1 ? "s" : "");
+
+      tracks.forEach((tr, i) => {
+        const li = document.createElement("li");
+
+        // Track row — grid: [num] [info] [dur] [link]
+        const row = document.createElement("div");
+        row.className = "track-row";
+        row.setAttribute("role", "row");
+        row.setAttribute("aria-current", "false");
+        row.setAttribute("data-track-idx", i);
+
+        // Preload dot
+        const dot = document.createElement("span");
+        dot.className = "preload-dot";
+        dot.setAttribute("aria-hidden", "true");
+        row.appendChild(dot);
+
+        // Track number — click to play
+        const num = document.createElement("span");
+        num.className = "track-num";
+        num.textContent = String(i + 1).padStart(2, "0");
+        num.setAttribute("aria-hidden", "true");
+        num.addEventListener("click", () => { loadTrack(i, true); });
+        row.appendChild(num);
+
+        // Track info — click to play
+        const info = document.createElement("div");
+        info.className = "track-info-col";
+        info.innerHTML =
+          '<span class="track-title-text">' + tr.title + '</span>' +
+          '<span class="track-meta-text">' + tr.artist + '</span>';
+        info.addEventListener("click", () => { loadTrack(i, true); });
+        row.appendChild(info);
+
+        // Duration
+        const dur = document.createElement("span");
+        dur.className = "track-dur";
+        dur.setAttribute("aria-label", "Duration");
+        dur.textContent = tr.duration;
+        dur.addEventListener("click", () => { loadTrack(i, true); });
+        row.appendChild(dur);
+
+        // Song page link — opens in new tab, won't disrupt playback
+        const link = document.createElement("a");
+        link.className = "track-page-link";
+        link.href = tr.pageUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.setAttribute("aria-label", "Open " + tr.title + " song page (new tab)");
+        link.title = "Open song page";
+        link.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>' +
+          '<polyline points="15 3 21 3 21 9"/>' +
+          '<line x1="10" y1="14" x2="21" y2="3"/>' +
+          '</svg>';
+        row.appendChild(link);
+
+        li.appendChild(row);
+        trackList.appendChild(li);
+      });
+    }
+
+    function showErr(m) { errLine.textContent = m; errLine.classList.add("show"); }
+    function clearErr()  { errLine.textContent = ""; errLine.classList.remove("show"); }
+
+    playBtn.addEventListener("click",   togglePlay);
+    prevBtn.addEventListener("click",   playPrev);
+    nextBtn.addEventListener("click",   playNext);
+    repeatBtn.addEventListener("click", cycleRepeat);
+
+    /* Init */
+    function init() {
+      // Hide prev/next if single track
+      if (tracks.length <= 1) {
+        prevBtn.style.display = "none";
+        nextBtn.style.display = "none";
+      }
+
+      initShareStrip();
+      renderTracks();
+
+      // Load first track (no autoplay — user must initiate)
+      if (tracks.length > 0) {
+        loadTrack(0, false);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
