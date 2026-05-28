@@ -1564,25 +1564,10 @@ body::after {
 }
 
 .art-wrap {
-  width: 100%;
-  max-width: 320px;
-  aspect-ratio: 1 / 1;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  display: block;
-}
-
-.art-wrap img {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: min(70vh, 320px);
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  position: relative;
-  z-index: 2;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.95), transparent 24%),
+    linear-gradient(125deg, #050505, #2b2a28 36%, #d8d4c7 37%, #f8f4ea 51%, #151515 52%, #0b0b0b) !important;
+  border-bottom: 5px solid #ff1d12 !important;
 }
 
 .art-wrap::before {
@@ -1598,7 +1583,7 @@ body::after {
 }
 
 .art-wrap::after {
-  content: "FASHIONIFE";
+  content: "FASHION // KNIFE";
   position: absolute;
   left: 12px;
   right: 12px;
@@ -1614,16 +1599,12 @@ body::after {
   text-shadow: 1px 1px 0 #fff02a;
 }
 
-@media (max-width: 640px) {
-  .art-wrap {
-    max-width: min(100%, 70vh);
-    margin: 0 auto;
-  }
-
-  .art-wrap img {
-    max-height: 70vh;
-  }
+.art-wrap img {
+  filter: contrast(1.20) saturate(1.45) hue-rotate(18deg) brightness(1.08) !important;
+  opacity: 0.92 !important;
+  mix-blend-mode: multiply;
 }
+
 .art-caption,
 .playlist-header {
   background:
@@ -1799,7 +1780,50 @@ body::after {
   }
 }
 
-  </style>
+  
+
+/* ══════════════════════════════════════════════════════════════
+   FINAL ALBUM ART SCALING FIX
+   Keeps the 1200px source image visually constrained to the layout
+   and viewport. This block must stay near the end of the stylesheet.
+   ══════════════════════════════════════════════════════════════ */
+.col-art {
+  min-width: 0 !important;
+}
+
+.art-wrap {
+  width: 100% !important;
+  max-width: 320px !important;
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+  max-height: min(70vh, 320px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+.art-wrap img,
+#albumArtImg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 640px) {
+  .art-wrap {
+    max-width: min(100%, 70vh) !important;
+    max-height: 70vh !important;
+    margin: 0 auto !important;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -1818,13 +1842,9 @@ body::after {
 
       <div class="main-grid">
         <div class="col-art">
-          <div class="art-wrap" id="albumArtWrap">
-  <img
-    id="albumArtImg"
-    src="https://pat-bee.github.io/music/fashionknife/fashion-knife-fashionife-pnk.png"
-    alt="Fashion Knife — cover art"
-  />
-</div>
+          <div class="art-wrap" id="artWrap">
+            <img id="albumArtImg" src="https://pat-bee.github.io/music/fashionknife/fashion-knife-fashionife-pnk.png" alt="Fashion Knife — cover art" />
+          </div>
           <div class="art-caption">
             <div class="art-caption-title" id="artCaptionTitle">Fashion Knife</div>
             <div class="art-caption-sub" id="artCaptionSub">Fashion Knife</div>
