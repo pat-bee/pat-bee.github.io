@@ -1564,10 +1564,25 @@ body::after {
 }
 
 .art-wrap {
-  background:
-    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.95), transparent 24%),
-    linear-gradient(125deg, #050505, #2b2a28 36%, #d8d4c7 37%, #f8f4ea 51%, #151515 52%, #0b0b0b) !important;
-  border-bottom: 5px solid #ff1d12 !important;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: block;
+}
+
+.art-wrap img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: min(70vh, 320px);
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  position: relative;
+  z-index: 2;
 }
 
 .art-wrap::before {
@@ -1583,7 +1598,7 @@ body::after {
 }
 
 .art-wrap::after {
-  content: "FASHION // KNIFE";
+  content: "FASHIONIFE";
   position: absolute;
   left: 12px;
   right: 12px;
@@ -1599,12 +1614,16 @@ body::after {
   text-shadow: 1px 1px 0 #fff02a;
 }
 
-.art-wrap img {
-  filter: contrast(1.20) saturate(1.45) hue-rotate(18deg) brightness(1.08) !important;
-  opacity: 0.92 !important;
-  mix-blend-mode: multiply;
-}
+@media (max-width: 640px) {
+  .art-wrap {
+    max-width: min(100%, 70vh);
+    margin: 0 auto;
+  }
 
+  .art-wrap img {
+    max-height: 70vh;
+  }
+}
 .art-caption,
 .playlist-header {
   background:
@@ -1799,10 +1818,13 @@ body::after {
 
       <div class="main-grid">
         <div class="col-art">
-          <div class="xx" id="xx">
-            <img id="albumArtImg" src="https://pat-bee.github.io/music/fashionknife/fashion-knife-fashionife-pnk.png" alt="Fashion Knife — cover art" />
-            
-          </div>
+          <div class="art-wrap" id="albumArtWrap">
+  <img
+    id="albumArtImg"
+    src="https://pat-bee.github.io/music/fashionknife/fashion-knife-fashionife-pnk.png"
+    alt="Fashion Knife — cover art"
+  />
+</div>
           <div class="art-caption">
             <div class="art-caption-title" id="artCaptionTitle">Fashion Knife</div>
             <div class="art-caption-sub" id="artCaptionSub">Fashion Knife</div>
