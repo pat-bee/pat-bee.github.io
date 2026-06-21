@@ -15,8 +15,6 @@
   --accent-2: #efe2bb;
   --chip-ink: #241e10;
   --panel: #f7f6f2;
-  --placeholder: #121212;
-  --placeholder-ink: #f2f2f2;
   --shadow: 0 18px 46px rgba(17,17,17,0.12);
   --radius: 24px;
 }
@@ -74,53 +72,12 @@ h1 {
   gap: 28px;
 }
 .entry {
-  display: grid;
-  grid-template-columns: minmax(290px, 38%) 1fr;
+  display: block;
   overflow: hidden;
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--card);
   box-shadow: var(--shadow);
-}
-.media {
-  position: relative;
-  min-height: 360px;
-  background: #1a1a1a;
-  overflow: hidden;
-}
-.media img {
-  width: 100%;
-  height: 100%;
-  min-height: 360px;
-  object-fit: cover;
-  display: block;
-}
-.placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px;
-  text-align: center;
-  background: var(--placeholder);
-  color: var(--placeholder-ink);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-.type {
-  position: absolute;
-  left: 18px;
-  bottom: 18px;
-  z-index: 2;
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.95);
-  color: var(--ink);
-  font-size: 0.82rem;
-  font-weight: 850;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.24);
 }
 .content {
   padding: clamp(24px, 4vw, 40px);
@@ -176,11 +133,11 @@ h2 {
 }
 .description {
   margin: 0 0 24px;
-  max-width: 74ch;
+  max-width: 92ch;
 }
 .details {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 14px;
 }
 .detail {
@@ -212,8 +169,6 @@ footer {
 footer p { max-width: 90ch; }
 @media (max-width: 920px) {
   .page { width: min(100% - 22px, 780px); padding-top: 20px; }
-  .entry { grid-template-columns: 1fr; }
-  .media, .media img { min-height: 280px; }
   .details { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -229,8 +184,8 @@ footer p { max-width: 90ch; }
       <h1>What to watch next.</h1>
       <p class="intro">This responsive demo uses larger default text, strong contrast, generous spacing, and easy-to-scan fact blocks for people who want a cleaner, easier-reading layout. Widow’s Bay appears first, and the rest of the titles are presented in alphabetical order.</p>
       <ul class="note-list">
-        <li>If an image is not available, the card now shows a dark <strong>NO IMAGE AVAILABLE</strong> box exactly as requested.</li>
         <li>Every card includes a <strong>Click to read Wikipedia entry</strong> link.</li>
+        <li>The layout is now text-only: no images, media panels, or image placeholder rows.</li>
         <li>A few titles in your list are ambiguous without a year or creator, so those cards are clearly marked as provisional placeholders until you want to refine them.</li>
       </ul>
     </header>
@@ -238,7 +193,6 @@ footer p { max-width: 90ch; }
     <section class="grid" aria-label="Streaming entries">
       
       <article class="entry">
-        <figure class="media"><img src="https://www.apple.com/tv-pr/articles/2025/12/apple-tv-unveils-a-first-look-at-widows-bay-new-series-starring-and-executive-produced-by-emmy-award-winner-matthew-rhys/images/big-image/big-image-01/121625_Widows_Bay_Series_Announcement_Big_Image_01.jpg" alt="First-look image from Widow’s Bay showing Matthew Rhys seated in a wood-paneled office." loading="lazy" onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"><div class="placeholder" style="display:none;">NO IMAGE AVAILABLE</div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Widow’s Bay</h2>
@@ -255,7 +209,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="placeholder" style="display:none;">NO IMAGE AVAILABLE</div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Age of Disclosure</h2>
@@ -272,7 +225,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Class Action Park</h2>
@@ -289,7 +241,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Show / Episode</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>The Compound: Josh Brown - Mike Lee</h2>
@@ -306,7 +257,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Daniel</h2>
@@ -323,7 +273,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Deaf President Now!</h2>
@@ -340,7 +289,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Denmark</h2>
@@ -357,7 +305,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Foundation</h2>
@@ -374,7 +321,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><img src="https://i0.wp.com/thefutureoftheforce.com/wp-content/uploads/2025/07/Keanu-Reeves-Becomes-an-Angel-in-the-First-Trailer-for-Lionsgates-Good-Fortune.jpg?fit=1024%2C576&amp;ssl=1" alt="Promotional still for Good Fortune showing Keanu Reeves, Seth Rogen, and Aziz Ansari at a poolside gathering." loading="lazy" onerror="this.style.display='none'; this.parentElement.querySelector('.placeholder').style.display='flex';"><div class="placeholder" style="display:none;">NO IMAGE AVAILABLE</div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Good Fortune</h2>
@@ -391,7 +337,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Grey Gardens</h2>
@@ -408,7 +353,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>A House of Dynamite</h2>
@@ -425,7 +369,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Interior Chinatown</h2>
@@ -442,7 +385,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>John Candy: I Like Me</h2>
@@ -459,7 +401,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>A Man on the Inside</h2>
@@ -476,7 +417,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Mole Man</h2>
@@ -493,7 +433,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>The Nice Guys</h2>
@@ -510,7 +449,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>No Other Choice</h2>
@@ -527,7 +465,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>North of North</h2>
@@ -544,7 +481,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>One Battle After Another</h2>
@@ -561,7 +497,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Predestination</h2>
@@ -578,7 +513,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Shut Up Little Man</h2>
@@ -595,7 +529,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>The Studio</h2>
@@ -612,7 +545,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>The Thinking Game</h2>
@@ -629,7 +561,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Time Masters by René Laloux</h2>
@@ -646,7 +577,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Train to Busan</h2>
@@ -663,7 +593,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Movie</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Trainwreck: Balloon Boy Hoax</h2>
@@ -680,7 +609,6 @@ footer p { max-width: 90ch; }
         </div>
       </article>
       <article class="entry">
-        <figure class="media"><div class="0"></div><figcaption class="type">Series</figcaption></figure>
         <div class="content">
           <div class="title-row">
             <h2>Wellington Paranormal</h2>
