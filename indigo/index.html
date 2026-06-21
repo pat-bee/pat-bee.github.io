@@ -1,16 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Indigo Martha’s Menu Safety Guide</title>
-  <meta name="description" content="A deadpan safety-card style guide to ordering North Indian food at Indigo Martha’s." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Playfair+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Indigo Martha’s Menu Safety Guide</title>
+<meta content="A deadpan safety-card style guide to ordering North Indian food at Indigo Martha’s." name="description"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&amp;family=Playfair+Display:wght@700;800&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<style>
     :root {
       --indigo: #2D1B6B;
       --saffron: #F4A227;
@@ -76,8 +75,8 @@
     }
 
     h1 {
-      max-width: 10ch;
-      font-size: clamp(3rem, 10vw, 5.8rem);
+      max-width: 14ch;
+      font-size: clamp(2.45rem, 7.2vw, 4.65rem);
     }
 
     h2 {
@@ -219,6 +218,14 @@
 
     .guide-section:nth-child(even) .section-visual {
       order: 2;
+    }
+
+    .guide-section.no-visual {
+      grid-template-columns: 1fr;
+    }
+
+    .guide-section.no-visual .section-copy {
+      width: 100%;
     }
 
     .section-copy {
@@ -446,6 +453,53 @@
       line-height: 1.45;
     }
 
+
+    .trivia-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.9rem;
+      margin: clamp(1.1rem, 3vw, 1.6rem) 0;
+    }
+
+    .trivia-panel {
+      padding: 1rem;
+      color: var(--indigo);
+      border: 3px solid var(--indigo);
+      border-radius: 1.1rem;
+      background: var(--paper);
+      box-shadow: 0 10px 24px rgba(45, 27, 107, 0.10);
+    }
+
+    .trivia-panel:nth-child(2) {
+      background: rgba(244, 162, 39, 0.18);
+    }
+
+    .trivia-panel:nth-child(3) {
+      background: rgba(74, 139, 140, 0.13);
+    }
+
+    .trivia-tag {
+      display: inline-block;
+      margin-bottom: 0.45rem;
+      padding: 0.28rem 0.5rem;
+      color: var(--cream);
+      font-family: "IBM Plex Mono", "Courier New", monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      background: var(--indigo);
+    }
+
+    .trivia-panel p {
+      margin: 0;
+      font-family: "IBM Plex Mono", "Courier New", monospace;
+      font-size: 0.86rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
     .footer {
       display: grid;
       gap: 0.8rem;
@@ -457,6 +511,7 @@
       background: var(--indigo);
       box-shadow: var(--shadow);
     }
+  
 
     .trivia-card {
       padding: 0.8rem 0.9rem;
@@ -489,7 +544,161 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+.heat-scale-figure {
+  margin: 2rem 0;
+}
 
+.heat-scale {
+  background: #FAF6EE;
+  border: 3px solid #2D1B6B;
+  border-radius: 18px;
+  padding: 2rem 1.25rem 1.5rem;
+}
+
+.heat-track {
+  position: relative;
+  height: 120px;
+  border-radius: 999px;
+  border: 3px solid #2D1B6B;
+  background: linear-gradient(
+    90deg,
+    #4A8B8C 0%,
+    #A7B96F 35%,
+    #F4A227 65%,
+    #E85D3A 100%
+  );
+  box-shadow: inset 0 0 0 4px rgba(250, 246, 238, 0.55);
+}
+
+.heat-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "DM Sans", sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #FAF6EE;
+  text-shadow: 1px 1px 0 #2D1B6B;
+}
+
+.heat-label.mild {
+  left: 1rem;
+}
+
+.heat-label.spicy {
+  right: 1rem;
+}
+
+.heat-marker {
+  position: absolute;
+  bottom: -2.6rem;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 110px;
+  text-align: center;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #2D1B6B;
+}
+
+.heat-marker::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 42px;
+  margin: 0 auto 0.35rem;
+  background: #2D1B6B;
+  border-radius: 999px;
+}
+
+.heat-marker span {
+  display: inline-block;
+  background: #FAF6EE;
+  border: 2px solid #2D1B6B;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+}
+
+.heat-marker.danger span {
+  background: #E85D3A;
+  color: #FAF6EE;
+}
+
+.heat-note {
+  margin: 4rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .heat-scale {
+    padding: 1.5rem 0.85rem 1.25rem;
+  }
+
+  .heat-track {
+    height: 420px;
+    width: 82px;
+    margin: 0 auto;
+    background: linear-gradient(
+      180deg,
+      #4A8B8C 0%,
+      #A7B96F 35%,
+      #F4A227 65%,
+      #E85D3A 100%
+    );
+  }
+
+  .heat-label.mild,
+  .heat-label.spicy {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .heat-label.mild {
+    top: 0.8rem;
+  }
+
+  .heat-label.spicy {
+    top: auto;
+    bottom: 0.8rem;
+  }
+
+  .heat-marker {
+    left: 100% !important;
+    bottom: auto;
+    transform: translateY(-50%);
+    margin-left: 0.7rem;
+    text-align: left;
+  }
+
+  .heat-marker:nth-of-type(1) { top: 7%; }
+  .heat-marker:nth-of-type(2) { top: 18%; }
+  .heat-marker:nth-of-type(3) { top: 30%; }
+  .heat-marker:nth-of-type(4) { top: 43%; }
+  .heat-marker:nth-of-type(5) { top: 56%; }
+  .heat-marker:nth-of-type(6) { top: 73%; }
+  .heat-marker:nth-of-type(7) { top: 92%; }
+
+  .heat-marker::before {
+    width: 32px;
+    height: 4px;
+    margin: 0 0.35rem 0 0;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .heat-marker span {
+    vertical-align: middle;
+  }
+
+  .heat-note {
+    margin-top: 2rem;
+  }
+}
     .fill-cream { fill: var(--cream); }
     .fill-paper { fill: var(--paper); }
     .fill-indigo { fill: var(--indigo); }
@@ -592,356 +801,314 @@
   </style>
 </head>
 <body>
-  <main class="page" aria-label="Indigo Martha’s Menu Safety Guide">
-    <section class="hero" aria-labelledby="page-title">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow">Indigo Martha’s / Menu Safety Briefing</p>
-          <h1 id="page-title">How to Order Without Quiet Panic</h1>
-          <p class="hero-deck">A North Indian menu decoder for people who want dinner to be delicious, legible, and free of surprise vindaloo-based incidents.</p>
-          <div class="callout-strip" aria-label="Guide highlights">
-            <span class="pill">Paneer Identified</span>
-            <span class="pill">Naan Authorized</span>
-            <span class="pill">Raita Emergency Ready</span>
-          </div>
-        </div>
+<main aria-label="Indigo Martha’s Menu Safety Guide" class="page">
+<section aria-labelledby="page-title" class="hero">
+<div class="hero-grid">
+<div class="hero-copy">
+<p class="eyebrow">Indigo Martha’s / Menu Safety Briefing</p>
+<h1 id="page-title">How to Find Deliciousness at an Indian Restaurant!</h1>
+<p class="hero-deck">A North Indian menu decoder for people who want dinner to be delicious, legible, and free of surprise vindaloo-based incidents.</p>
 
-        <figure class="safety-card" aria-label="Two figures clutching oversized menus in quiet alarm">
-          <svg class="safety-svg" viewBox="0 0 620 520" role="img" aria-labelledby="hero-fig-title hero-fig-desc">
-            <title id="hero-fig-title">Fig. 1 — First Contact</title>
-            <desc id="hero-fig-desc">Two deadpan stick figures hold oversized menus and stare ahead in quiet alarm.</desc>
-            <rect x="16" y="16" width="588" height="488" rx="28" class="fill-paper" stroke="currentColor" stroke-width="7"/>
-            <path d="M68 94h484M68 438h484" class="svg-stroke-thin" opacity="0.35"/>
-            <text x="72" y="64" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#E85D3A">FIG. 1 — FIRST CONTACT</text>
+</div>
+<figure aria-label="Two figures clutching oversized menus in quiet alarm" class="safety-card">
+<svg aria-labelledby="hero-fig-title hero-fig-desc" class="safety-svg" role="img" viewbox="0 0 620 520">
+<title id="hero-fig-title">Fig. 1 — First Contact</title>
+<desc id="hero-fig-desc">Two deadpan stick figures hold oversized menus and stare ahead in quiet alarm.</desc>
+<rect class="fill-paper" height="488" rx="28" stroke="currentColor" stroke-width="7" width="588" x="16" y="16"></rect>
+<path class="svg-stroke-thin" d="M68 94h484M68 438h484" opacity="0.35"></path>
+<text fill="#E85D3A" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" x="72" y="64">FIG. 1 — FIRST CONTACT</text>
+<g transform="translate(102 128)">
+<circle class="fill-cream" cx="92" cy="72" r="38" stroke="currentColor" stroke-width="7"></circle>
+<path class="svg-stroke" d="M78 69h1M106 69h1"></path>
+<path class="svg-stroke-thin" d="M80 94c12-7 24-7 36 0"></path>
+<path class="svg-stroke" d="M92 112v74M52 150l-26 66M132 150l30 66M72 258l-36 84M112 258l36 84"></path>
+<rect class="fill-saffron" height="112" rx="8" stroke="currentColor" stroke-width="7" width="142" x="0" y="164"></rect>
+<path class="svg-stroke-thin" d="M26 195h90M26 222h62M26 249h82"></path>
+<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" x="31" y="151">MENU</text>
+</g>
+<g transform="translate(342 128)">
+<circle class="fill-cream" cx="92" cy="72" r="38" stroke="currentColor" stroke-width="7"></circle>
+<path class="svg-stroke" d="M78 69h1M106 69h1"></path>
+<path class="svg-stroke-thin" d="M81 95h33"></path>
+<path class="svg-stroke" d="M92 112v74M52 150l-26 66M132 150l30 66M72 258l-36 84M112 258l36 84"></path>
+<rect class="fill-teal" height="120" rx="8" stroke="currentColor" stroke-width="7" width="150" x="42" y="154"></rect>
+<path class="svg-stroke-thin" d="M70 190h90M70 218h66M70 246h78"></path>
+<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" x="75" y="145">MENU</text>
+</g>
+<path class="svg-stroke-thin stroke-coral" d="M278 192c12-24 52-24 64 0"></path>
+<path class="svg-stroke-thin stroke-coral" d="M278 236c14-10 26-10 40 0M326 236c14-10 26-10 40 0" opacity="0.75"></path>
+</svg>
+<figcaption class="fig-label">Fig. 1 — first contact: menus have been acquired. Confidence pending.</figcaption>
+</figure>
+</div>
+</section>
 
-            <g transform="translate(102 128)">
-              <circle cx="92" cy="72" r="38" class="fill-cream" stroke="currentColor" stroke-width="7"/>
-              <path d="M78 69h1M106 69h1" class="svg-stroke"/>
-              <path d="M80 94c12-7 24-7 36 0" class="svg-stroke-thin"/>
-              <path d="M92 112v74M52 150l-26 66M132 150l30 66M72 258l-36 84M112 258l36 84" class="svg-stroke"/>
-              <rect x="0" y="164" width="142" height="112" rx="8" class="fill-saffron" stroke="currentColor" stroke-width="7"/>
-              <path d="M26 195h90M26 222h62M26 249h82" class="svg-stroke-thin"/>
-              <text x="31" y="151" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" fill="#2D1B6B">MENU</text>
-            </g>
+<section aria-label="Three quick facts about Indian food in the United States" class="trivia-row">
+<article class="trivia-panel">
+<span class="trivia-tag">U.S. Fact 01</span>
+<p>Indian restaurants are only about 7% of Asian restaurants in the United States, so the menu may feel rarer than sushi, Thai, or Chinese food.</p>
+</article>
+<article class="trivia-panel">
+<span class="trivia-tag">U.S. Fact 02</span>
+<p>About 5.2 million people in the U.S. identified as Indian in 2023 — the second-largest Asian-origin group in the country.</p>
+</article>
+<article class="trivia-panel">
+<span class="trivia-tag">U.S. Fact 03</span>
+<p>American Indian restaurant menus often use familiar North Indian signposts: naan, paneer, tandoori, tikka masala, saag, and butter-style sauces.</p>
+</article>
+</section>
+<div class="section-stack">
+<section aria-labelledby="decoder-title" class="guide-section no-visual">
 
-            <g transform="translate(342 128)">
-              <circle cx="92" cy="72" r="38" class="fill-cream" stroke="currentColor" stroke-width="7"/>
-              <path d="M78 69h1M106 69h1" class="svg-stroke"/>
-              <path d="M81 95h33" class="svg-stroke-thin"/>
-              <path d="M92 112v74M52 150l-26 66M132 150l30 66M72 258l-36 84M112 258l36 84" class="svg-stroke"/>
-              <rect x="42" y="154" width="150" height="120" rx="8" class="fill-teal" stroke="currentColor" stroke-width="7"/>
-              <path d="M70 190h90M70 218h66M70 246h78" class="svg-stroke-thin"/>
-              <text x="75" y="145" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" fill="#2D1B6B">MENU</text>
-            </g>
+<div class="section-copy">
+<p class="section-kicker">Section 1</p>
+<h2 id="decoder-title">How to Read a Dish Name</h2>
+<p>The menu at Indigo Martha’s uses a consistent North Indian naming grammar. The dish name is not random. It is a small warning label, ingredient list, and comfort forecast.</p>
+<div aria-label="Naming convention decoder" class="decoder" role="table">
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="columnheader">Word</div>
+<div class="decoder-meaning" role="columnheader">What it tells you</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Paneer</div>
+<div class="decoder-meaning" role="cell">The protein: firm, fresh cheese.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Chicken / Lamb / Shrimp</div>
+<div class="decoder-meaning" role="cell">The protein: meat or seafood.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Saag</div>
+<div class="decoder-meaning" role="cell">Spinach-based sauce — earthy, creamy, green.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Tikka</div>
+<div class="decoder-meaning" role="cell">Marinated and grilled, usually before going in sauce.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Masala</div>
+<div class="decoder-meaning" role="cell">“Spiced” — a sauce of tomato, onion, and spices.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Butter / Makhani</div>
+<div class="decoder-meaning" role="cell">Cream + tomato — rich, mild, red-orange.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Korma</div>
+<div class="decoder-meaning" role="cell">Cream + nuts — often one of the mildest, almost sweet options.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Vindaloo</div>
+<div class="decoder-meaning" role="cell">Tangy, spicy — usually the warning label on U.S. restaurant menus.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Biryani</div>
+<div class="decoder-meaning" role="cell">Rice dish baked with spices and protein.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Channa</div>
+<div class="decoder-meaning" role="cell">Chickpeas.</div>
+</div>
+<div class="decoder-row" role="row">
+<div class="decoder-word" role="cell">Dal</div>
+<div class="decoder-meaning" role="cell">Lentils.</div>
+</div>
+</div>
+</div>
+</section>
+<section aria-labelledby="paneer-title" class="guide-section">
+<div class="section-visual">
+<figure>
+<svg aria-labelledby="paneer-fig-title paneer-fig-desc" class="safety-svg" role="img" viewbox="0 0 520 420">
+<title id="paneer-fig-title">Paneer Ingredient Illustration</title>
+<desc id="paneer-fig-desc">A cheerful block of paneer wears a name tag stating that it is not tofu.</desc>
+<rect class="fill-cream" height="372" rx="26" stroke="currentColor" stroke-width="7" width="472" x="24" y="24"></rect>
+<path class="svg-stroke-thin" d="M116 282h286" opacity="0.35"></path>
+<g transform="translate(142 88)">
+<path class="fill-saffron" d="M24 48 134 10l148 42-108 50Z" stroke="currentColor" stroke-width="7"></path>
+<path d="M24 48v128l150 58V102Z" fill="rgba(244,162,39,0.55)" stroke="currentColor" stroke-linejoin="round" stroke-width="7"></path>
+<path d="M174 102v132l108-64V52Z" fill="rgba(250,246,238,0.98)" stroke="currentColor" stroke-linejoin="round" stroke-width="7"></path>
+<circle class="fill-indigo" cx="92" cy="130" r="7"></circle>
+<circle class="fill-indigo" cx="132" cy="144" r="7"></circle>
+<path class="svg-stroke-thin" d="M96 172c18 15 42 15 62 0"></path>
+<rect class="fill-paper" height="58" rx="10" stroke="currentColor" stroke-width="5" width="190" x="36" y="194"></rect>
+<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" x="54" y="219">HELLO, I AM</text>
+<text fill="#E85D3A" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" x="54" y="242">NOT TOFU</text>
+</g>
+<path class="svg-stroke-thin stroke-coral" d="M96 104c-18 24-18 50 0 74M424 104c18 24 18 50 0 74"></path>
+<text fill="#4A8B8C" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" x="80" y="352">SAVORY LITTLE YUM CONFIRMED</text>
+</svg>
+</figure>
+<p class="fig-label">Fig. 3 — Paneer: not tofu, not melting, very useful.</p>
+</div>
+<div class="section-copy">
+<p class="section-kicker">Section 1.5</p>
+<h2 id="paneer-title">What Even Is Paneer?</h2>
+<div class="ingredient-card">
+<p><strong>Paneer</strong> is a mild, firm, fresh Indian cottage cheese that does not melt in these dishes. Think halloumi but gentler — kind of bouncy and gummy and <strong>delicious</strong>.</p>
+<p>It tends to absorb whatever sauce it is in, which makes it a very efficient flavor delivery cube.</p>
+<p>You already love it — kids have been asking for it and eating it for years.</p>
+</div>
+</div>
+</section>
+<figure class="safety-figure heat-scale-figure" aria-labelledby="heat-scale-title">
+  <figcaption id="heat-scale-title">
+    Fig. 3 — The Heat Scale, From Friendly Green to Procedural Red
+  </figcaption>
 
-            <path d="M278 192c12-24 52-24 64 0" class="svg-stroke-thin stroke-coral"/>
-            <path d="M278 236c14-10 26-10 40 0M326 236c14-10 26-10 40 0" class="svg-stroke-thin stroke-coral" opacity="0.75"/>
-          </svg>
-          <figcaption class="fig-label">Fig. 1 — first contact: menus have been acquired. Confidence pending.</figcaption>
-        </figure>
+  <div class="heat-scale" role="img" aria-label="Indian restaurant dishes arranged from mild to spicy">
+    <div class="heat-track">
+      <span class="heat-label mild">Mild</span>
+      <span class="heat-label spicy">Spicy</span>
+
+      <div class="heat-marker" style="left: 7%;">
+        <span>Korma</span>
       </div>
-    </section>
 
-    <div class="section-stack">
-      <section class="guide-section" aria-labelledby="decoder-title">
-       
+      <div class="heat-marker" style="left: 18%;">
+        <span>Butter Masala</span>
+      </div>
 
-        <div class="section-copy">
-          <p class="section-kicker">Section 1</p>
-          <h2 id="decoder-title">How to Read a Dish Name</h2>
-          <p>The menu at Indigo Martha’s uses a consistent North Indian naming grammar. The dish name is not random. It is a small warning label, ingredient list, and comfort forecast.</p>
+      <div class="heat-marker" style="left: 30%;">
+        <span>Saag</span>
+      </div>
 
-          <div class="decoder" role="table" aria-label="Naming convention decoder">
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="columnheader">Word</div>
-              <div class="decoder-meaning" role="columnheader">What it tells you</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Paneer</div>
-              <div class="decoder-meaning" role="cell">The protein: firm, fresh cheese.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Chicken / Lamb / Shrimp</div>
-              <div class="decoder-meaning" role="cell">The protein: meat or seafood.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Saag</div>
-              <div class="decoder-meaning" role="cell">Spinach-based sauce — earthy, creamy, green.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Tikka</div>
-              <div class="decoder-meaning" role="cell">Marinated and grilled, usually before going in sauce.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Masala</div>
-              <div class="decoder-meaning" role="cell">“Spiced” — a sauce of tomato, onion, and spices.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Butter / Makhani</div>
-              <div class="decoder-meaning" role="cell">Cream + tomato — rich, mild, red-orange.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Korma</div>
-              <div class="decoder-meaning" role="cell">Cream + nuts — mildest, almost sweet.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Vindaloo</div>
-              <div class="decoder-meaning" role="cell">Tangy, spicy — the warning label of the menu.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Biryani</div>
-              <div class="decoder-meaning" role="cell">Rice dish baked with spices and protein.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Channa</div>
-              <div class="decoder-meaning" role="cell">Chickpeas.</div>
-            </div>
-            <div class="decoder-row" role="row">
-              <div class="decoder-word" role="cell">Dal</div>
-              <div class="decoder-meaning" role="cell">Lentils.</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div class="heat-marker" style="left: 43%;">
+        <span>Tikka Masala</span>
+      </div>
 
-      <section class="guide-section" aria-labelledby="paneer-title">
-        <div class="section-visual">
-          <figure>
-            <svg class="safety-svg" viewBox="0 0 520 420" role="img" aria-labelledby="paneer-fig-title paneer-fig-desc">
-              <title id="paneer-fig-title">Paneer Ingredient Illustration</title>
-              <desc id="paneer-fig-desc">A cheerful block of paneer wears a name tag stating that it is not tofu.</desc>
-              <rect x="24" y="24" width="472" height="372" rx="26" class="fill-cream" stroke="currentColor" stroke-width="7"/>
-              <path d="M116 282h286" class="svg-stroke-thin" opacity="0.35"/>
-              <g transform="translate(142 88)">
-                <path d="M24 48 134 10l148 42-108 50Z" class="fill-saffron" stroke="currentColor" stroke-width="7"/>
-                <path d="M24 48v128l150 58V102Z" fill="rgba(244,162,39,0.55)" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/>
-                <path d="M174 102v132l108-64V52Z" fill="rgba(250,246,238,0.98)" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/>
-                <circle cx="92" cy="130" r="7" class="fill-indigo"/>
-                <circle cx="132" cy="144" r="7" class="fill-indigo"/>
-                <path d="M96 172c18 15 42 15 62 0" class="svg-stroke-thin"/>
-                <rect x="36" y="194" width="190" height="58" rx="10" class="fill-paper" stroke="currentColor" stroke-width="5"/>
-                <text x="54" y="219" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" fill="#2D1B6B">HELLO, I AM</text>
-                <text x="54" y="242" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" fill="#E85D3A">NOT TOFU</text>
-              </g>
-              <path d="M96 104c-18 24-18 50 0 74M424 104c18 24 18 50 0 74" class="svg-stroke-thin stroke-coral"/>
-              <text x="80" y="352" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#4A8B8C">SAVORY LITTLE YUM CONFIRMED</text>
-            </svg>
-          </figure>
-          <p class="fig-label">Fig. 3 — Paneer: NOT tofu, not melting, very useful.</p>
-        </div>
+      <div class="heat-marker" style="left: 56%;">
+        <span>Channa Masala</span>
+      </div>
 
-        <div class="section-copy">
-          <p class="section-kicker">Section 1.5</p>
-          <h2 id="paneer-title">What Even Is Paneer?</h2>
-          <div class="ingredient-card">
-            <p><strong>Paneer</strong> is a mild, firm, fresh Indian cottage cheese that does not melt in these dishes. Think halloumi but gentler — kind of bouncy and gummy and <strong>delicious</strong>.</p>
-            <p>It tends to absorb whatever sauce it is in, which makes it a very efficient flavor delivery cube.</p>
-            <p>You already love it — kids have been asking for it and eating it for years.</p>
-          </div>
-        </div>
-      </section>
+      <div class="heat-marker" style="left: 73%;">
+        <span>Madrasi</span>
+      </div>
 
-      <section class="guide-section" aria-labelledby="flavor-title">
-        <div class="section-visual">
-          <figure>
-            <svg class="safety-svg" viewBox="0 0 560 460" role="img" aria-labelledby="heat-fig-title heat-fig-desc">
-              <title id="heat-fig-title">Comfortable to Vindaloo Heat Trajectory</title>
-              <desc id="heat-fig-desc">One figure stands comfortably near tikka masala while another figure on the vindaloo end is literally on fire.</desc>
-              <rect x="22" y="24" width="516" height="410" rx="28" class="fill-cream" stroke="currentColor" stroke-width="7"/>
-              <path d="M82 306h396" class="svg-stroke-thin"/>
-              <path d="M82 306c78-76 142-76 206 0s126 80 190-12" class="svg-stroke-thin stroke-coral"/>
-              <text x="76" y="82" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#4A8B8C">MILD</text>
-              <text x="406" y="82" font-family="IBM Plex Mono, monospace" font-size="22" font-weight="700" fill="#E85D3A">SPICY</text>
-
-              <g transform="translate(144 178)">
-                <circle cx="42" cy="36" r="25" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <path d="M34 34h1M50 34h1" class="svg-stroke-thin"/>
-                <path d="M32 52c10 8 20 8 30 0" class="svg-stroke-thin"/>
-                <path d="M42 62v68M14 94l56-2M28 184l14-54 20 54" class="svg-stroke"/>
-                <rect x="-24" y="188" width="132" height="42" rx="10" class="fill-teal" stroke="currentColor" stroke-width="5"/>
-                <text x="-7" y="215" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" fill="#FAF6EE">TIKKA OK</text>
-              </g>
-
-              <g transform="translate(394 144)">
-                <path d="M42 208c-40-26-45-72-10-110-4 26 18 32 20 0 34 34 54 76 16 110z" class="fill-coral" stroke="currentColor" stroke-width="6"/>
-                <path d="M45 199c-18-16-20-38-4-60 10 18 30 24 22 60z" class="fill-saffron" stroke="currentColor" stroke-width="4"/>
-                <circle cx="42" cy="58" r="24" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <path d="M34 56h1M50 56h1" class="svg-stroke-thin"/>
-                <path d="M31 76h25" class="svg-stroke-thin"/>
-                <path d="M42 84v62M14 110l56 0M28 190l14-44 20 44" class="svg-stroke"/>
-                <path d="M8 30c-16 22-16 46 0 68M84 30c18 22 18 46 0 68" class="svg-stroke-thin stroke-coral"/>
-              </g>
-
-              <text x="112" y="374" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" fill="#2D1B6B">COMFORT</text>
-              <text x="346" y="374" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" fill="#2D1B6B">INCIDENT</text>
-            </svg>
-          </figure>
-          <p class="fig-label">Fig. 4 — Heat trajectory: the right side requires policy awareness.</p>
-        </div>
-
-        <div class="section-copy">
-          <p class="section-kicker">Section 3</p>
-          <h2 id="flavor-title">The Flavor Dial</h2>
-          <p>Use this as a quick map. Creamy does not always mean bland, and spicy does not always mean better. You are ordering dinner, not proving a point.</p>
-
-          <div class="flavor-map" aria-label="Spice and richness map">
-            <div class="scale-head" aria-hidden="true">
-              <span>Mild</span>
-              <span>Spicy</span>
-            </div>
-            <div class="heat-track">
-              <span class="dish-chip">Korma</span>
-              <span class="dish-chip">Butter Masala</span>
-              <span class="dish-chip">Saag</span>
-              <span class="dish-chip">Tikka Masala</span>
-              <span class="dish-chip">Channa Masala</span>
-              <span class="dish-chip">Madrasi</span>
-              <span class="dish-chip hot">Vindaloo</span>
-            </div>
-            <div class="axis-card">
-              <div class="axis-box">
-                <span class="micro-label">Creamy ↑</span>
-                Korma, Butter Masala, Saag, Malai Kofta
-              </div>
-              <div class="axis-box">
-                <span class="micro-label">Lighter ↓</span>
-                Dal Tadka, Channa Masala, Aloo Matar
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="guide-section" aria-labelledby="order-title">
-      
-
-        <div class="section-copy">
-          <p class="section-kicker">Section 4</p>
-          <h2 id="order-title">What To Order At Indigo Martha’s</h2>
-          <p>These are designed as low-drama entry points. Order a few, share everything, and let the table build confidence through repetition.</p>
-
-          <div class="pick-grid">
-            <article class="pick-card">
-              <h3>For Mom</h3>
-              <p><strong>Vegetarian, open to some heat.</strong></p>
-              <ul>
-                <li><strong>Saag Paneer</strong> — your kid’s favorite. Creamy spinach, firm cheese. A safe landmark.</li>
-                <li><strong>Paneer Butter Masala</strong> — the gentle, crowd-pleasing gateway dish.</li>
-                <li><strong>Malai Kofta</strong> — veggie dumplings in a silky cream sauce. Wildcard. Worth it.</li>
-              </ul>
-            </article>
-
-            <article class="pick-card">
-              <h3>For Dad</h3>
-              <p><strong>Meat eater, new to this.</strong></p>
-              <ul>
-                <li><strong>Butter Chicken (OG)</strong> — the international ambassador of Indian food. Creamy, mild, perfect entry point.</li>
-                <li><strong>Chicken Tikka Masala</strong> — slightly bolder than butter chicken; bell peppers add familiarity.</li>
-                <li><strong>Tandoori Chicken</strong> — straight off the clay oven, recognizable as “just good grilled chicken.”</li>
-              </ul>
-            </article>
-
-            <article class="pick-card wide">
-              <h3>Breads + Starter</h3>
-              <ul>
-                <li><strong>Plain or Garlic Naan</strong> — use it to scoop. No utensils required, but they are available, Dad.</li>
-                <li><strong>Samosa</strong> — fried, potato-filled pastry. The Indian knish. Very approachable.</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="guide-section" aria-labelledby="etiquette-title">
-        <div class="section-visual">
-          <figure>
-            <svg class="safety-svg" viewBox="0 0 560 440" role="img" aria-labelledby="naan-fig-title naan-fig-desc">
-              <title id="naan-fig-title">Correct Naan Usage Diagram</title>
-              <desc id="naan-fig-desc">A figure demonstrates tearing naan, scooping sauce, and eating without panic.</desc>
-              <rect x="22" y="24" width="516" height="392" rx="28" class="fill-cream" stroke="currentColor" stroke-width="7"/>
-              <text x="74" y="76" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" fill="#E85D3A">CORRECT NAAN USAGE</text>
-
-              <g transform="translate(78 118)">
-                <circle cx="48" cy="44" r="28" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <path d="M38 42h1M58 42h1M39 60c10 6 20 6 30 0" class="svg-stroke-thin"/>
-                <path d="M48 72v68M18 100l60-16M30 194l18-54 24 54" class="svg-stroke"/>
-                <path d="M82 82c40-30 82-18 96 18-30 36-74 38-96-18Z" class="fill-saffron" stroke="currentColor" stroke-width="6"/>
-                <path d="M101 97c18 2 36-2 54-12" class="svg-stroke-thin"/>
-                <text x="16" y="248" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" fill="#2D1B6B">1. TEAR</text>
-              </g>
-
-              <g transform="translate(254 118)">
-                <circle cx="56" cy="44" r="28" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <path d="M46 42h1M66 42h1M47 60c10 6 20 6 30 0" class="svg-stroke-thin"/>
-                <path d="M56 72v68M26 100l72 18M38 194l18-54 24 54" class="svg-stroke"/>
-                <ellipse cx="138" cy="150" rx="52" ry="24" class="fill-coral" stroke="currentColor" stroke-width="6"/>
-                <path d="M100 116c38-18 72-2 88 24" class="fill-saffron" stroke="currentColor" stroke-width="6"/>
-                <text x="20" y="248" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" fill="#2D1B6B">2. SCOOP</text>
-              </g>
-
-              <path d="M218 218h78" class="svg-stroke-thin stroke-coral"/>
-              <path d="m280 196 22 22-22 22" class="svg-stroke-thin stroke-coral"/>
-            </svg>
-          </figure>
-          <p class="fig-label">Fig. 5 — Bread has been promoted to utensil status.</p>
-        </div>
-
-        <div class="section-copy">
-          <p class="section-kicker">Section 5</p>
-          <h2 id="etiquette-title">Table Conventions</h2>
-          <p>The rules are simple. The food moves to the center. The naan becomes equipment. The raita waits nearby like a tiny dairy fire department.</p>
-
-          <div class="etiquette-grid">
-            <article class="protocol-panel">
-              <svg class="safety-svg" viewBox="0 0 260 180" aria-hidden="true">
-                <rect x="12" y="12" width="236" height="156" rx="18" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <circle cx="130" cy="86" r="40" class="fill-saffron" stroke="currentColor" stroke-width="6"/>
-                <circle cx="70" cy="86" r="19" class="fill-cream" stroke="currentColor" stroke-width="5"/>
-                <circle cx="190" cy="86" r="19" class="fill-cream" stroke="currentColor" stroke-width="5"/>
-                <path d="M78 86h102M130 46v80" class="svg-stroke-thin"/>
-              </svg>
-              <h3>Share the dishes</h3>
-              <p>Everything comes to the center. You will eat from multiple bowls. This is correct behavior.</p>
-            </article>
-
-            <article class="protocol-panel">
-              <svg class="safety-svg" viewBox="0 0 260 180" aria-hidden="true">
-                <rect x="12" y="12" width="236" height="156" rx="18" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <ellipse cx="130" cy="96" rx="72" ry="36" class="fill-teal" stroke="currentColor" stroke-width="6"/>
-                <ellipse cx="130" cy="88" rx="48" ry="18" class="fill-cream" stroke="currentColor" stroke-width="5"/>
-                <path d="M74 44c22 20 22 40 0 60M186 44c-22 20-22 40 0 60" class="svg-stroke-thin stroke-coral"/>
-                <text x="84" y="145" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" fill="#2D1B6B">COOLING</text>
-              </svg>
-              <h3>Raita is your friend</h3>
-              <p>Cool yogurt sauce. Dab it on anything that gets too spicy. Available as a side.</p>
-            </article>
-
-            <article class="protocol-panel">
-              <svg class="safety-svg" viewBox="0 0 260 180" aria-hidden="true">
-                <rect x="12" y="12" width="236" height="156" rx="18" class="fill-paper" stroke="currentColor" stroke-width="6"/>
-                <path d="M74 92c34-38 78-38 112 0-28 44-84 44-112 0Z" class="fill-saffron" stroke="currentColor" stroke-width="6"/>
-                <circle cx="76" cy="48" r="22" class="fill-cream" stroke="currentColor" stroke-width="5"/>
-                <path d="M68 47h1M84 47h1M68 64c8 4 16 4 24 0" class="svg-stroke-thin"/>
-                <path d="M76 70v44M76 92l44 0" class="svg-stroke-thin"/>
-                <path d="M156 128h48" class="svg-stroke-thin stroke-coral"/>
-                <path d="m190 112 16 16-16 16" class="svg-stroke-thin stroke-coral"/>
-              </svg>
-              <h3>Naan is a utensil</h3>
-              <p>Tear, scoop, eat. You may use a fork. No one will judge you to your face.</p>
-            </article>
-          </div>
-
-          <div class="note-card">
-            <p><strong>Emergency protocol:</strong> identify the raita bowl, apply a cooling dab, breathe normally, resume dinner.</p>
-          </div>
-        </div>
-      </section>
+      <div class="heat-marker danger" style="left: 92%;">
+        <span>Vindaloo</span>
+      </div>
     </div>
 
-    <footer class="footer">
-      <div class="trivia-card">Mango Lassi is a yogurt smoothie. It is dessert pretending to be a drink. Order one.</div>
-      <p class="footer-small">Prepared in a flat-line, 1970s airline-safety-card spirit. No actual emergency exits are located behind the chutney.</p>
-    </footer>
-  </main>
+    <p class="heat-note">
+      Restaurant spice levels vary, but this is the usual ordering logic:
+      <strong>Korma</strong> is generally the gentlest, while <strong>Vindaloo</strong>
+      is usually the heat warning label.
+    </p>
+  </div>
+</figure>
+</section>
+<section aria-labelledby="order-title" class="guide-section no-visual">
+
+<div class="section-copy">
+<p class="section-kicker">Section 4</p>
+<h2 id="order-title">What To Order At Indigo Martha’s</h2>
+<p>These are designed as low-drama entry points. Order a few, share everything, and let the table build confidence through repetition.</p>
+<div class="pick-grid">
+<article class="pick-card">
+<h3>For Mom</h3>
+<p><strong>Vegetarian, open to some heat.</strong></p>
+<ul>
+<li><strong>Saag Paneer</strong> — your kid’s favorite. Creamy spinach, firm cheese. A safe landmark.</li>
+<li><strong>Paneer Butter Masala</strong> — the gentle, crowd-pleasing gateway dish.</li>
+<li><strong>Malai Kofta</strong> — veggie dumplings in a silky cream sauce. Wildcard. Worth it.</li>
+</ul>
+</article>
+<article class="pick-card">
+<h3>For Dad</h3>
+<p><strong>Meat eater, new to this.</strong></p>
+<ul>
+<li><strong>Butter Chicken (OG)</strong> — the international ambassador of Indian food. Creamy, mild, perfect entry point.</li>
+<li><strong>Chicken Tikka Masala</strong> — slightly bolder than butter chicken; bell peppers add familiarity.</li>
+<li><strong>Tandoori Chicken</strong> — straight off the clay oven, recognizable as “just good grilled chicken.”</li>
+</ul>
+</article>
+<article class="pick-card wide">
+<h3>Breads + Starter</h3>
+<ul>
+<li><strong>Plain or Garlic Naan</strong> — use it to scoop. No utensils required, but they are available, Dad.</li>
+<li><strong>Samosa</strong> — fried, potato-filled pastry. The Indian knish. Very approachable.</li>
+</ul>
+</article>
+</div>
+</div>
+</section>
+<section aria-labelledby="etiquette-title" class="guide-section">
+<div class="section-visual">
+<figure>
+<svg aria-labelledby="naan-fig-title naan-fig-desc" class="safety-svg" role="img" viewbox="0 0 560 440">
+<title id="naan-fig-title">Correct Naan Usage Diagram</title>
+<desc id="naan-fig-desc">A figure demonstrates tearing naan, scooping sauce, and eating without panic.</desc>
+<rect class="fill-cream" height="392" rx="28" stroke="currentColor" stroke-width="7" width="516" x="22" y="24"></rect>
+<text fill="#E85D3A" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" x="74" y="76">CORRECT NAAN USAGE</text>
+<g transform="translate(78 118)">
+<circle class="fill-paper" cx="48" cy="44" r="28" stroke="currentColor" stroke-width="6"></circle>
+<path class="svg-stroke-thin" d="M38 42h1M58 42h1M39 60c10 6 20 6 30 0"></path>
+<path class="svg-stroke" d="M48 72v68M18 100l60-16M30 194l18-54 24 54"></path>
+<path class="fill-saffron" d="M82 82c40-30 82-18 96 18-30 36-74 38-96-18Z" stroke="currentColor" stroke-width="6"></path>
+<path class="svg-stroke-thin" d="M101 97c18 2 36-2 54-12"></path>
+<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" x="16" y="248">1. TEAR</text>
+</g>
+<g transform="translate(254 118)">
+<circle class="fill-paper" cx="56" cy="44" r="28" stroke="currentColor" stroke-width="6"></circle>
+<path class="svg-stroke-thin" d="M46 42h1M66 42h1M47 60c10 6 20 6 30 0"></path>
+<path class="svg-stroke" d="M56 72v68M26 100l72 18M38 194l18-54 24 54"></path>
+<ellipse class="fill-coral" cx="138" cy="150" rx="52" ry="24" stroke="currentColor" stroke-width="6"></ellipse>
+<path class="fill-saffron" d="M100 116c38-18 72-2 88 24" stroke="currentColor" stroke-width="6"></path>
+<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" x="20" y="248">2. SCOOP</text>
+</g>
+<path class="svg-stroke-thin stroke-coral" d="M218 218h78"></path>
+<path class="svg-stroke-thin stroke-coral" d="m280 196 22 22-22 22"></path>
+</svg>
+</figure>
+<p class="fig-label">Fig. 6 — Bread has been promoted to utensil status.</p>
+</div>
+<div class="section-copy">
+<p class="section-kicker">Section 5</p>
+<h2 id="etiquette-title">Table Conventions</h2>
+<p>The rules are simple. The food moves to the center. The naan becomes equipment. The raita waits nearby like a tiny dairy fire department.</p>
+<div class="etiquette-grid">
+<article class="protocol-panel">
+
+<h3>Share the dishes</h3>
+<p>Everything comes to the center. You will eat from multiple bowls. This is correct behavior.</p>
+</article>
+<article class="protocol-panel">
+
+<h3>Raita is your friend</h3>
+<p>Cool yogurt sauce. Dab it on anything that gets too spicy. Available as a side.</p>
+</article>
+<article class="protocol-panel">
+
+<h3>Naan is a utensil</h3>
+<p>Tear, scoop, eat. You may use a fork. No one will judge you to your face.</p>
+</article>
+</div>
+<div class="note-card">
+<p><strong>Emergency protocol:</strong> identify the raita bowl, apply a cooling dab, breathe normally, resume dinner.</p>
+</div>
+</div>
+</section>
+</div>
+
+<section aria-label="Three global facts about Indian food" class="trivia-row">
+<article class="trivia-panel">
+<span class="trivia-tag">Global Fact 01</span>
+<p>Indian cuisine is not one single flavor profile; it is highly regional, with major differences in grains, oils, proteins, spices, and heat.</p>
+</article>
+<article class="trivia-panel">
+<span class="trivia-tag">Global Fact 02</span>
+<p>Many Indian curries start from an onion, ginger, and garlic base, then build depth with toasted spices like cumin, coriander, turmeric, and cardamom.</p>
+</article>
+<article class="trivia-panel">
+<span class="trivia-tag">Global Fact 03</span>
+<p>Vindaloo began as a Goan dish shaped by Portuguese influence; in many U.S. restaurants, it now functions as the menu’s heat-warning siren.</p>
+</article>
+</section>
+<footer class="footer">
+<div class="trivia-card">Mango Lassi is a yogurt smoothie. It is dessert pretending to be a drink. Order one.</div>
+<p class="footer-small">Prepared in a flat-line, 1970s airline-safety-card spirit. No actual emergency exits are located behind the chutney.</p>
+</footer>
+</main>
 </body>
 </html>
