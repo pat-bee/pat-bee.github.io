@@ -798,7 +798,81 @@
         min-height: 3rem;
       }
     }
-  </style>
+  
+
+    /* Flow cleanup: only the heat-scale remains as a graphic. */
+    .hero {
+      min-height: auto;
+      padding: clamp(1.3rem, 4vw, 2.4rem);
+    }
+
+    .hero-grid {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .hero-copy {
+      max-width: 44rem;
+    }
+
+    .hero h1 {
+      max-width: 18ch;
+      font-size: clamp(2.2rem, 6.2vw, 4.05rem);
+      line-height: 1.02;
+    }
+
+    .defined-term {
+      display: inline-block;
+      padding: 0.18rem 0.42rem;
+      color: var(--cream);
+      background: var(--indigo);
+      border-radius: 999px;
+      box-shadow: 3px 3px 0 rgba(244, 162, 39, 0.55);
+    }
+
+    .decoder-word {
+      display: flex;
+      align-items: center;
+    }
+
+    .heat-scale-figure {
+      padding: clamp(1rem, 3vw, 1.55rem);
+      border: 3px solid var(--indigo);
+      border-radius: 1.7rem;
+      background: rgba(255, 253, 248, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .heat-scale-figure figcaption h2 {
+      margin-bottom: 1rem;
+    }
+
+    .heat-scale .heat-track {
+      display: block;
+      grid-template-columns: none;
+    }
+
+    .heat-scale .heat-track::before {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .hero-copy {
+        order: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .heat-scale .heat-track {
+        display: block;
+        grid-template-columns: none;
+      }
+
+      .trivia-row {
+        grid-template-columns: 1fr;
+      }
+    }
+</style>
 </head>
 <body>
 <main aria-label="Indigo Martha’s Menu Safety Guide" class="page">
@@ -808,110 +882,34 @@
 <p class="eyebrow">Indigo Martha’s / Menu Safety Briefing</p>
 <h1 id="page-title">How to Find Deliciousness at an Indian Restaurant!</h1>
 <p class="hero-deck">A North Indian menu decoder for people who want dinner to be delicious, legible, and free of surprise vindaloo-based incidents.</p>
-
 </div>
-
 </div>
+</section><section aria-label="Three quick facts about Indian food in the United States" class="trivia-row">
+<article class="trivia-panel">
+<span class="trivia-tag">U.S. Fact 01</span>
+<p>Indian restaurants are only about 7% of Asian restaurants in the United States, so the menu may feel rarer than sushi, Thai, or Chinese food.</p>
+</article>
+<article class="trivia-panel">
+<span class="trivia-tag">U.S. Fact 02</span>
+<p>About 5.2 million people in the U.S. identified as Indian in 2023 — the second-largest Asian-origin group in the country.</p>
+</article>
+<article class="trivia-panel">
+<span class="trivia-tag">U.S. Fact 03</span>
+<p>American Indian restaurant menus often use familiar North Indian signposts: naan, paneer, tandoori, tikka masala, saag, and butter-style sauces.</p>
+</article>
 </section>
 
-<section aria-label="Three global facts about Indian food" class="trivia-row">
-<article class="trivia-panel">
-<span class="trivia-tag">Global Fact 01</span>
-<p>Indian cuisine is not one single flavor profile; it is highly regional, with major differences in grains, oils, proteins, spices, and heat.</p>
-</article>
-<article class="trivia-panel">
-<span class="trivia-tag">Global Fact 02</span>
-<p>Many Indian curries start from an onion, ginger, and garlic base, then build depth with toasted spices like cumin, coriander, turmeric, and cardamom.</p>
-</article>
-<article class="trivia-panel">
-<span class="trivia-tag">Global Fact 03</span>
-<p>Vindaloo began as a Goan dish shaped by Portuguese influence; in many U.S. restaurants, it now functions as the menu’s heat-warning siren.</p>
-</article>
-</section>
 <div class="section-stack">
 <section aria-labelledby="decoder-title" class="guide-section no-visual">
-
 <div class="section-copy">
 <p class="section-kicker">Section 1</p>
 <h2 id="decoder-title">How to Read a Dish Name</h2>
 <p>The menu at Indigo Martha’s uses a consistent North Indian naming grammar. The dish name is not random. It is a small warning label, ingredient list, and comfort forecast.</p>
-<div aria-label="Naming convention decoder" class="decoder" role="table">
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="columnheader">Word</div>
-<div class="decoder-meaning" role="columnheader">What it tells you</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Paneer</div>
-<div class="decoder-meaning" role="cell">The protein: firm, fresh cheese.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Chicken / Lamb / Shrimp</div>
-<div class="decoder-meaning" role="cell">The protein: meat or seafood.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Saag</div>
-<div class="decoder-meaning" role="cell">Spinach-based sauce — earthy, creamy, green.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Tikka</div>
-<div class="decoder-meaning" role="cell">Marinated and grilled, usually before going in sauce.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Masala</div>
-<div class="decoder-meaning" role="cell">“Spiced” — a sauce of tomato, onion, and spices.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Butter / Makhani</div>
-<div class="decoder-meaning" role="cell">Cream + tomato — rich, mild, red-orange.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Korma</div>
-<div class="decoder-meaning" role="cell">Cream + nuts — often one of the mildest, almost sweet options.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Vindaloo</div>
-<div class="decoder-meaning" role="cell">Tangy, spicy — usually the warning label on U.S. restaurant menus.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Biryani</div>
-<div class="decoder-meaning" role="cell">Rice dish baked with spices and protein.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Channa</div>
-<div class="decoder-meaning" role="cell">Chickpeas.</div>
-</div>
-<div class="decoder-row" role="row">
-<div class="decoder-word" role="cell">Dal</div>
-<div class="decoder-meaning" role="cell">Lentils.</div>
-</div>
-</div>
+<div aria-label="Naming convention decoder" class="decoder" role="table"><div class="decoder-row" role="row"><div class="decoder-word" role="columnheader">Word</div><div class="decoder-meaning" role="columnheader">What it tells you</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Paneer</span></div><div class="decoder-meaning" role="cell">The protein: firm, fresh cheese.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Chicken / Lamb / Shrimp</span></div><div class="decoder-meaning" role="cell">The protein: meat or seafood.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Saag</span></div><div class="decoder-meaning" role="cell">Spinach-based sauce — earthy, creamy, green.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Tikka</span></div><div class="decoder-meaning" role="cell">Marinated and grilled, usually before going in sauce.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Masala</span></div><div class="decoder-meaning" role="cell">“Spiced” — often a sauce of tomato, onion, and spices.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Butter / Makhani</span></div><div class="decoder-meaning" role="cell">Cream + tomato — rich, mild, red-orange.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Korma</span></div><div class="decoder-meaning" role="cell">Cream + nuts — often one of the mildest, almost sweet options.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Vindaloo</span></div><div class="decoder-meaning" role="cell">Tangy, spicy — usually the warning label on U.S. restaurant menus.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Biryani</span></div><div class="decoder-meaning" role="cell">Rice dish cooked with spices and protein.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Channa</span></div><div class="decoder-meaning" role="cell">Chickpeas.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Dal</span></div><div class="decoder-meaning" role="cell">Lentils.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Curry</span></div><div class="decoder-meaning" role="cell">A broad English menu word for a saucy, spiced dish. Not one single Indian sauce.</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Beer / Bīyar / बीयर</span></div><div class="decoder-meaning" role="cell">Beer. In Hindi it is commonly a borrowed word pronounced roughly “bee-yar.”</div></div><div class="decoder-row" role="row"><div class="decoder-word" role="cell"><span class="defined-term">Swādisht / स्वादिष्ट</span></div><div class="decoder-meaning" role="cell">Delicious. Useful praise after the first bite.</div></div></div>
 </div>
 </section>
-<section aria-labelledby="paneer-title" class="guide-section">
-<div class="section-visual">
-<figure>
-<svg aria-labelledby="paneer-fig-title paneer-fig-desc" class="safety-svg" role="img" viewbox="0 0 520 420">
-<title id="paneer-fig-title">Paneer Ingredient Illustration</title>
-<desc id="paneer-fig-desc">A cheerful block of paneer wears a name tag stating that it is not tofu.</desc>
-<rect class="fill-cream" height="372" rx="26" stroke="currentColor" stroke-width="7" width="472" x="24" y="24"></rect>
-<path class="svg-stroke-thin" d="M116 282h286" opacity="0.35"></path>
-<g transform="translate(142 88)">
-<path class="fill-saffron" d="M24 48 134 10l148 42-108 50Z" stroke="currentColor" stroke-width="7"></path>
-<path d="M24 48v128l150 58V102Z" fill="rgba(244,162,39,0.55)" stroke="currentColor" stroke-linejoin="round" stroke-width="7"></path>
-<path d="M174 102v132l108-64V52Z" fill="rgba(250,246,238,0.98)" stroke="currentColor" stroke-linejoin="round" stroke-width="7"></path>
-<circle class="fill-indigo" cx="92" cy="130" r="7"></circle>
-<circle class="fill-indigo" cx="132" cy="144" r="7"></circle>
-<path class="svg-stroke-thin" d="M96 172c18 15 42 15 62 0"></path>
-<rect class="fill-paper" height="58" rx="10" stroke="currentColor" stroke-width="5" width="190" x="36" y="194"></rect>
-<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="18" font-weight="700" x="54" y="219">HELLO, I AM</text>
-<text fill="#E85D3A" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" x="54" y="242">NOT TOFU</text>
-</g>
-<path class="svg-stroke-thin stroke-coral" d="M96 104c-18 24-18 50 0 74M424 104c18 24 18 50 0 74"></path>
-<text fill="#4A8B8C" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" x="80" y="352">SAVORY LITTLE YUM CONFIRMED</text>
-</svg>
-</figure>
-<p class="fig-label">Fig. 3 — Paneer: not tofu, not melting, very useful.</p>
-</div>
+<section aria-labelledby="paneer-title" class="guide-section no-visual">
+
 <div class="section-copy">
 <p class="section-kicker">Section 1.5</p>
 <h2 id="paneer-title">What Even Is Paneer?</h2>
@@ -922,57 +920,46 @@
 </div>
 </div>
 </section>
-    <section>
-
-<figure class="safety-figure heat-scale-figure" aria-labelledby="heat-scale-title">
-  <figcaption id="heat-scale-title">
-    <h2>Fig. 3 — The Heat Scale!</h2>
-  </figcaption>
-
-  <div class="heat-scale" role="img" aria-label="Indian restaurant dishes arranged from mild to SPICY!">
-    <div class="heat-track">
-      <span class="heat-label mild">Mild</span>
-      <span class="heat-label spicy">Spicy</span>
-
-      <div class="heat-marker" style="left: 7%;">
-        <span>Korma</span>
-      </div>
-
-      <div class="heat-marker" style="left: 18%;">
-        <span>Butter Masala</span>
-      </div>
-
-      <div class="heat-marker" style="left: 30%;">
-        <span>Saag</span>
-      </div>
-
-      <div class="heat-marker" style="left: 43%;">
-        <span>Tikka Masala</span>
-      </div>
-
-      <div class="heat-marker" style="left: 56%;">
-        <span>Channa Masala</span>
-      </div>
-
-      <div class="heat-marker" style="left: 73%;">
-        <span>Madrasi</span>
-      </div>
-
-      <div class="heat-marker danger" style="left: 92%;">
-        <span>Vindaloo</span>
-      </div>
-    </div>
-
-    <p class="heat-note">
+<section>
+<figure aria-labelledby="heat-scale-title" class="safety-figure heat-scale-figure">
+<figcaption id="heat-scale-title">
+<h2>Fig. 3 — The Heat Scale!</h2>
+</figcaption>
+<div aria-label="Indian restaurant dishes arranged from mild to SPICY!" class="heat-scale" role="img">
+<div class="heat-track">
+<span class="heat-label mild">Mild</span>
+<span class="heat-label spicy">Spicy</span>
+<div class="heat-marker" style="left: 7%;">
+<span>Korma</span>
+</div>
+<div class="heat-marker" style="left: 18%;">
+<span>Butter Masala</span>
+</div>
+<div class="heat-marker" style="left: 30%;">
+<span>Saag</span>
+</div>
+<div class="heat-marker" style="left: 43%;">
+<span>Tikka Masala</span>
+</div>
+<div class="heat-marker" style="left: 56%;">
+<span>Channa Masala</span>
+</div>
+<div class="heat-marker" style="left: 73%;">
+<span>Madrasi</span>
+</div>
+<div class="heat-marker danger" style="left: 92%;">
+<span>Vindaloo</span>
+</div>
+</div>
+<p class="heat-note">
       Restaurant spice levels vary, but this is the usual ordering logic:
       <strong>Korma</strong> is generally the gentlest, while <strong>Vindaloo</strong>
       is usually the heat warning label.
     </p>
-  </div>
+</div>
 </figure>
 </section>
 <section aria-labelledby="order-title" class="guide-section no-visual">
-
 <div class="section-copy">
 <p class="section-kicker">Section 4</p>
 <h2 id="order-title">What To Order At Indigo Martha’s</h2>
@@ -1004,53 +991,22 @@
 </div>
 </div>
 </section>
-<section aria-labelledby="etiquette-title" class="guide-section">
-<div class="section-visual">
-<figure>
-<svg aria-labelledby="naan-fig-title naan-fig-desc" class="safety-svg" role="img" viewbox="0 0 560 440">
-<title id="naan-fig-title">Correct Naan Usage Diagram</title>
-<desc id="naan-fig-desc">A figure demonstrates tearing naan, scooping sauce, and eating without panic.</desc>
-<rect class="fill-cream" height="392" rx="28" stroke="currentColor" stroke-width="7" width="516" x="22" y="24"></rect>
-<text fill="#E85D3A" font-family="IBM Plex Mono, monospace" font-size="20" font-weight="700" x="74" y="76">CORRECT NAAN USAGE</text>
-<g transform="translate(78 118)">
-<circle class="fill-paper" cx="48" cy="44" r="28" stroke="currentColor" stroke-width="6"></circle>
-<path class="svg-stroke-thin" d="M38 42h1M58 42h1M39 60c10 6 20 6 30 0"></path>
-<path class="svg-stroke" d="M48 72v68M18 100l60-16M30 194l18-54 24 54"></path>
-<path class="fill-saffron" d="M82 82c40-30 82-18 96 18-30 36-74 38-96-18Z" stroke="currentColor" stroke-width="6"></path>
-<path class="svg-stroke-thin" d="M101 97c18 2 36-2 54-12"></path>
-<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" x="16" y="248">1. TEAR</text>
-</g>
-<g transform="translate(254 118)">
-<circle class="fill-paper" cx="56" cy="44" r="28" stroke="currentColor" stroke-width="6"></circle>
-<path class="svg-stroke-thin" d="M46 42h1M66 42h1M47 60c10 6 20 6 30 0"></path>
-<path class="svg-stroke" d="M56 72v68M26 100l72 18M38 194l18-54 24 54"></path>
-<ellipse class="fill-coral" cx="138" cy="150" rx="52" ry="24" stroke="currentColor" stroke-width="6"></ellipse>
-<path class="fill-saffron" d="M100 116c38-18 72-2 88 24" stroke="currentColor" stroke-width="6"></path>
-<text fill="#2D1B6B" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="700" x="20" y="248">2. SCOOP</text>
-</g>
-<path class="svg-stroke-thin stroke-coral" d="M218 218h78"></path>
-<path class="svg-stroke-thin stroke-coral" d="m280 196 22 22-22 22"></path>
-</svg>
-</figure>
-<p class="fig-label">Fig. 6 — Bread has been promoted to utensil status.</p>
-</div>
+<section aria-labelledby="etiquette-title" class="guide-section no-visual">
+
 <div class="section-copy">
 <p class="section-kicker">Section 5</p>
 <h2 id="etiquette-title">Table Conventions</h2>
 <p>The rules are simple. The food moves to the center. The naan becomes equipment. The raita waits nearby like a tiny dairy fire department.</p>
 <div class="etiquette-grid">
 <article class="protocol-panel">
-
 <h3>Share the dishes</h3>
 <p>Everything comes to the center. You will eat from multiple bowls. This is correct behavior.</p>
 </article>
 <article class="protocol-panel">
-
 <h3>Raita is your friend</h3>
 <p>Cool yogurt sauce. Dab it on anything that gets too spicy. Available as a side.</p>
 </article>
 <article class="protocol-panel">
-
 <h3>Naan is a utensil</h3>
 <p>Tear, scoop, eat. You may use a fork. No one will judge you to your face.</p>
 </article>
@@ -1062,25 +1018,22 @@
 </section>
 </div>
 
-
-
-<section aria-label="Three quick facts about Indian food in the United States" class="trivia-row">
+<section aria-label="Three global facts about Indian food" class="trivia-row">
 <article class="trivia-panel">
-<span class="trivia-tag">U.S. Fact 01</span>
-<p>Indian restaurants are only about 7% of Asian restaurants in the United States, so the menu may feel rarer than sushi, Thai, or Chinese food.</p>
+<span class="trivia-tag">Global Fact 01</span>
+<p>Indian cuisine is not one single flavor profile; it is highly regional, with major differences in grains, oils, proteins, spices, and heat.</p>
 </article>
 <article class="trivia-panel">
-<span class="trivia-tag">U.S. Fact 02</span>
-<p>About 5.2 million people in the U.S. identified as Indian in 2023 — the second-largest Asian-origin group in the country.</p>
+<span class="trivia-tag">Global Fact 02</span>
+<p>Many Indian curries start from an onion, ginger, and garlic base, then build depth with toasted spices like cumin, coriander, turmeric, and cardamom.</p>
 </article>
 <article class="trivia-panel">
-<span class="trivia-tag">U.S. Fact 03</span>
-<p>American Indian restaurant menus often use familiar North Indian signposts: naan, paneer, tandoori, tikka masala, saag, and butter-style sauces.</p>
+<span class="trivia-tag">Global Fact 03</span>
+<p>Vindaloo began as a Goan dish shaped by Portuguese influence; in many U.S. restaurants, it now functions as the menu’s heat-warning siren.</p>
 </article>
-</section>
-<footer class="footer">
+</section><footer class="footer">
 <div class="trivia-card">Mango Lassi is a yogurt smoothie. It is dessert pretending to be a drink. Order one.</div>
-<p class="footer-small">New kinds of yum await!</p>
+<p class="footer-small">Prepared in a flat-line, 1970s airline-safety-card spirit. No actual emergency exits are located behind the chutney.</p>
 </footer>
 </main>
 </body>
