@@ -1,1 +1,374 @@
-<h1>Hello Today's World,</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patrick Burritt — Resume</title>
+<script>
+(function(){
+  var root = document.documentElement;
+  function currentTheme(){
+    var h = new Date().getHours();
+    return (h >= 6 && h < 18) ? 'day' : 'night';
+  }
+  root.setAttribute('data-theme', currentTheme());
+  setInterval(function(){ root.setAttribute('data-theme', currentTheme()); }, 60000);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#ffffff;
+  --ink:#141414;
+  --ink-soft:#616161;
+  --line:#dcdcdc;
+  --name-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  --grain-blend: multiply;
+  --grain-opacity: 0.03;
+  color-scheme: light;
+}
+html[data-theme="night"]{
+  --bg:#000000;
+  --ink:#f0f0f0;
+  --ink-soft:#8f8f8f;
+  --line:#2b2b2b;
+  --name-shadow: 0 0 22px rgba(255,255,255,0.14);
+  --grain-blend: screen;
+  --grain-opacity: 0.038;
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family:'Newsreader', Georgia, serif;
+  font-weight:400;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  transition: background-color .9s ease, color .9s ease;
+  position:relative;
+}
+
+@media (prefers-reduced-motion: reduce){
+  body{ transition:none; }
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:50;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  transition: opacity .9s ease;
+}
+
+.page{
+  max-width: 760px;
+  margin:0 auto;
+  padding: clamp(72px,12vw,128px) 40px clamp(96px,14vw,160px);
+}
+
+header{
+  text-align:center;
+  margin-bottom: clamp(64px, 10vw, 100px);
+}
+
+h1.name{
+  font-size: clamp(42px, 8vw, 66px);
+  font-weight:600;
+  letter-spacing:-0.01em;
+  margin:0 0 24px;
+  text-shadow: var(--name-shadow);
+  transition: text-shadow .9s ease;
+}
+
+.contact{
+  font-size: clamp(15px,1.8vw,17px);
+  color: var(--ink-soft);
+  margin:0;
+  transition: color .9s ease;
+}
+.contact .sep{ color: var(--line); margin: 0 12px; transition: color .9s ease; }
+
+section{ margin-bottom: clamp(56px, 9vw, 88px); }
+section:last-child{ margin-bottom:0; }
+
+h2{
+  font-size: clamp(14px,1.6vw,16px);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.16em;
+  margin:0 0 30px;
+  position:relative;
+  padding-bottom:16px;
+}
+h2::after{
+  content:"";
+  position:absolute;
+  left:0; bottom:0;
+  width:22px; height:1px;
+  background: var(--ink-soft);
+  opacity:0.4;
+  transition: background-color .9s ease;
+}
+
+.summary p{
+  font-size: clamp(17px,2vw,19px);
+  line-height:1.75;
+  max-width:660px;
+  margin:0 0 22px;
+}
+.summary p:last-child{ margin-bottom:0; }
+
+.edu h3{
+  font-size:19px;
+  font-weight:600;
+  margin:0 0 6px;
+}
+.edu p{
+  font-size:17px;
+  color: var(--ink-soft);
+  font-style:italic;
+  margin:0;
+  transition: color .9s ease;
+}
+
+.entry{ margin-bottom:52px; }
+.entry:last-child{ margin-bottom:0; }
+
+.entry-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:6px 24px;
+  margin-bottom:6px;
+}
+.entry-head h3{
+  font-size:20px;
+  font-weight:600;
+  margin:0;
+}
+.dates{
+  font-family:'JetBrains Mono', monospace;
+  font-size:14px;
+  color: var(--ink-soft);
+  white-space:nowrap;
+  letter-spacing:0.01em;
+  transition: color .9s ease;
+}
+
+.org{
+  font-style:italic;
+  color: var(--ink-soft);
+  font-size:16.5px;
+  margin:0 0 16px;
+  transition: color .9s ease;
+}
+
+.lead{
+  font-size:17px;
+  line-height:1.7;
+  margin:0 0 16px;
+  max-width:640px;
+}
+
+.entry ul{
+  list-style:none;
+  margin:0; padding:0;
+}
+.entry ul li{
+  position:relative;
+  padding-left:22px;
+  font-size:17px;
+  line-height:1.7;
+  margin-bottom:14px;
+  max-width:660px;
+}
+.entry ul li:last-child{ margin-bottom:0; }
+.entry ul li::before{
+  content:"•";
+  position:absolute;
+  left:2px; top:0;
+  color: var(--ink-soft);
+}
+
+.entry p.solo{
+  font-size:17px;
+  line-height:1.7;
+  margin:0;
+  max-width:660px;
+}
+
+.skills{
+  columns:2;
+  column-gap:56px;
+  margin:0; padding:0;
+  list-style:none;
+}
+.skills li{
+  font-size:17px;
+  line-height:1.6;
+  margin-bottom:14px;
+  break-inside:avoid;
+}
+@media (max-width:560px){
+  .skills{ columns:1; }
+}
+
+.plain-list{
+  list-style:none;
+  margin:0; padding:0;
+}
+.plain-list li{
+  position:relative;
+  padding-left:20px;
+  font-size:17px;
+  line-height:1.65;
+  margin-bottom:13px;
+  max-width:660px;
+}
+.plain-list li:last-child{ margin-bottom:0; }
+.plain-list li::before{
+  content:"–";
+  position:absolute;
+  left:0; top:0;
+  color: var(--ink-soft);
+}
+
+@media (max-width:600px){
+  .page{ padding-left:24px; padding-right:24px; }
+  .entry-head{ flex-direction:column; align-items:flex-start; gap:4px; }
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1 class="name">Patrick Burritt</h1>
+    <p class="contact">Washington, DC<span class="sep">|</span>patrick.burritt@gmail.com<span class="sep">|</span>202-299-6378<span class="sep">|</span>LinkedIn<span class="sep">|</span>GitHub</p>
+  </header>
+
+  <section class="summary">
+    <h2>Summary</h2>
+    <p>Information Design leader with more than 20 years of experience helping complex organizations make information easier to find, understand, trust, and act upon. Experienced in leading digital transformation initiatives spanning enterprise websites, content strategy, analytics, accessibility, AI-enabled workflows, marketing technology, and organizational change.</p>
+    <p>Known for bridging executive leadership, technical teams, designers, marketers, and content owners to build sustainable digital systems that improve communication, governance, and decision-making. Combines strategic thinking with hands-on technical capability in web technologies, automation, analytics, and information architecture.</p>
+  </section>
+
+  <section class="edu">
+    <h2>Education</h2>
+    <h3>State University of New York at Purchase</h3>
+    <p>Bachelor of Fine Arts (Film)</p>
+  </section>
+
+  <section>
+    <h2>Experience</h2>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Senior Director of Information Design</h3>
+        <span class="dates">March 2011 – Present</span>
+      </div>
+      <p class="org">Georgetown University McDonough School of Business</p>
+      <p class="lead">Lead the strategic direction of digital information systems supporting communications, marketing, academic programs, and institutional operations across one of the nation's leading business schools.</p>
+      <ul>
+        <li>Directed multiple enterprise CMS modernization initiatives, transitioning institutional web properties from legacy platforms through Drupal and WordPress while improving governance, accessibility, editorial workflows, and long-term sustainability.</li>
+        <li>Built and expanded the school's digital function to meet growing organizational needs, establishing scalable standards for web publishing, analytics, communications, and content operations.</li>
+        <li>Designed organization-wide digital strategies integrating websites, email communications, analytics, and social platforms into a cohesive information ecosystem.</li>
+        <li>Developed analytics frameworks and executive reporting that enabled leadership to make evidence-based decisions regarding communications and digital investments.</li>
+        <li>Served as a trusted advisor on accessibility, branding, digital governance, emerging technologies, and AI adoption across multiple university initiatives.</li>
+        <li>Led cross-functional projects requiring coordination among executive leadership, faculty, marketing, IT, admissions, communications, and external vendors.</li>
+        <li>Designed workflow automations and lightweight digital tools that reduced manual effort and improved operational efficiency.</li>
+        <li>Received Georgetown University's Dean's Award for Employee Excellence and multiple Educational Advertising Awards recognizing excellence in digital strategy and web development.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Web Development Analyst</h3>
+        <span class="dates">November 2008 – March 2011</span>
+      </div>
+      <p class="org">Georgetown University McDonough School of Business</p>
+      <ul>
+        <li>Modernized internal digital communications and web publishing practices.</li>
+        <li>Helped lead migration from legacy collaboration systems to Google Workspace.</li>
+        <li>Developed web platforms and digital resources supporting faculty, staff, students, and admissions.</li>
+        <li>Supervised student employees while establishing repeatable web production standards.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Adjunct Professor</h3>
+        <span class="dates">2006 – 2008</span>
+      </div>
+      <p class="org">Corcoran College of Art + Design</p>
+      <p class="solo">Designed and taught Digital Tools and Techniques, preparing students to work across creative software ecosystems while emphasizing practical production workflows and digital communication principles.</p>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Apple Systems Administrator / Database Administrator</h3>
+        <span class="dates">2003 – 2008</span>
+      </div>
+      <p class="org">Corcoran Gallery of Art</p>
+      <p class="solo">Managed Apple enterprise infrastructure supporting more than 200 users, including systems administration, networking, database support, security, printing services, and Tier 2 technical support.</p>
+    </div>
+
+  </section>
+
+  <section>
+    <h2>Technical Skills</h2>
+    <ul class="skills">
+      <li>Information Design</li>
+      <li>Information Architecture</li>
+      <li>Digital Transformation</li>
+      <li>AI Adoption &amp; Workflow Design</li>
+      <li>Human-Centered AI</li>
+      <li>Enterprise Content Strategy</li>
+      <li>Content Governance</li>
+      <li>UX &amp; Accessibility</li>
+      <li>Analytics &amp; Measurement</li>
+      <li>Marketing Technology</li>
+      <li>CMS Strategy</li>
+      <li>Process Automation</li>
+      <li>Cross-functional Leadership</li>
+      <li>Digital Communications</li>
+      <li>Organizational Change</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Awards</h2>
+    <ul class="plain-list">
+      <li>Georgetown University Dean's Award for Employee Excellence</li>
+      <li>Multiple Educational Advertising Awards</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Professional Themes</h2>
+    <ul class="plain-list">
+      <li>Designing information systems that help people make better decisions</li>
+      <li>Applying AI to improve organizational workflows responsibly</li>
+      <li>Building accessible, scalable digital experiences</li>
+      <li>Translating complex technology into practical solutions for leadership and end users</li>
+      <li>Leading digital transformation through collaboration, governance, and thoughtful execution</li>
+    </ul>
+  </section>
+
+</div>
+</body>
+</html>
