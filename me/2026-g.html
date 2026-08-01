@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patrick Burritt — Resume (Alt Draft)</title>
+<script>
+(function(){
+  var root = document.documentElement;
+  function currentTheme(){
+    var h = new Date().getHours();
+    return (h >= 6 && h < 18) ? 'day' : 'night';
+  }
+  root.setAttribute('data-theme', currentTheme());
+  setInterval(function(){ root.setAttribute('data-theme', currentTheme()); }, 60000);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#ffffff;
+  --ink:#141414;
+  --ink-soft:#616161;
+  --line:#dcdcdc;
+  --name-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  --grain-blend: multiply;
+  --grain-opacity: 0.03;
+  color-scheme: light;
+}
+html[data-theme="night"]{
+  --bg:#000000;
+  --ink:#f0f0f0;
+  --ink-soft:#8f8f8f;
+  --line:#2b2b2b;
+  --name-shadow: 0 0 22px rgba(255,255,255,0.14);
+  --grain-blend: screen;
+  --grain-opacity: 0.038;
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family:'Newsreader', Georgia, serif;
+  font-weight:400;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  transition: background-color .9s ease, color .9s ease;
+  position:relative;
+}
+
+strong{ font-weight:600; }
+
+@media (prefers-reduced-motion: reduce){
+  body{ transition:none; }
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:50;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  transition: opacity .9s ease;
+}
+
+.page{
+  max-width: 760px;
+  margin:0 auto;
+  padding: clamp(72px,12vw,128px) 40px clamp(96px,14vw,160px);
+}
+
+header{
+  text-align:center;
+  margin-bottom: clamp(64px, 10vw, 100px);
+}
+
+h1.name{
+  font-size: clamp(42px, 8vw, 66px);
+  font-weight:600;
+  letter-spacing:-0.01em;
+  margin:0 0 24px;
+  text-shadow: var(--name-shadow);
+  transition: text-shadow .9s ease;
+}
+
+.contact{
+  font-size: clamp(15px,1.8vw,17px);
+  color: var(--ink-soft);
+  margin:0 0 8px;
+  transition: color .9s ease;
+}
+.contact:last-child{ margin-bottom:0; }
+.contact .sep{ color: var(--line); margin: 0 12px; transition: color .9s ease; }
+.contact a{
+  color:inherit;
+  text-decoration:underline;
+  text-decoration-color: var(--line);
+  text-underline-offset:3px;
+  transition: text-decoration-color .3s ease, color .9s ease;
+}
+.contact a:hover{ text-decoration-color: var(--ink-soft); }
+.contact a:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+
+section{ margin-bottom: clamp(56px, 9vw, 88px); }
+section:last-child{ margin-bottom:0; }
+
+h2{
+  font-size: clamp(14px,1.6vw,16px);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.16em;
+  margin:0 0 30px;
+  position:relative;
+  padding-bottom:16px;
+}
+h2::after{
+  content:"";
+  position:absolute;
+  left:0; bottom:0;
+  width:22px; height:1px;
+  background: var(--ink-soft);
+  opacity:0.4;
+  transition: background-color .9s ease;
+}
+
+.summary p{
+  font-size: clamp(17px,2vw,19px);
+  line-height:1.75;
+  max-width:660px;
+  margin:0;
+}
+
+.entry{ margin-bottom:52px; }
+.entry:last-child{ margin-bottom:0; }
+.entry-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:6px 24px;
+  margin-bottom:6px;
+}
+.entry-head h3{
+  font-size:20px;
+  font-weight:600;
+  margin:0;
+}
+.dates{
+  font-family:'JetBrains Mono', monospace;
+  font-size:14px;
+  color: var(--ink-soft);
+  white-space:nowrap;
+  letter-spacing:0.01em;
+  transition: color .9s ease;
+}
+.org{
+  font-style:italic;
+  color: var(--ink-soft);
+  font-size:16.5px;
+  margin:0 0 16px;
+  transition: color .9s ease;
+}
+
+.bullets{
+  list-style:none;
+  margin:0; padding:0;
+}
+.bullets li{
+  position:relative;
+  padding-left:20px;
+  font-size:17px;
+  line-height:1.7;
+  margin-bottom:14px;
+  max-width:660px;
+}
+.bullets li:last-child{ margin-bottom:0; }
+.bullets li::before{
+  content:"•";
+  position:absolute;
+  left:2px; top:0;
+  color: var(--ink-soft);
+}
+
+@media (max-width:600px){
+  .page{ padding-left:24px; padding-right:24px; }
+  .entry-head{ flex-direction:column; align-items:flex-start; gap:4px; }
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1 class="name">Patrick Burritt</h1>
+    <p class="contact">Washington, DC<span class="sep">|</span><a href="mailto:patrick.burritt@gmail.com">patrick.burritt@gmail.com</a><span class="sep">|</span><a href="tel:+12022996378">202.299.6378</a></p>
+    <p class="contact"><a href="https://linkedin.com/in/patrick-burritt/" target="_blank" rel="noopener">linkedin.com/in/patrick-burritt/</a><span class="sep">|</span><a href="https://github.com/pat-bee" target="_blank" rel="noopener">github.com/pat-bee</a></p>
+  </header>
+
+  <section class="summary">
+    <h2>Professional Summary</h2>
+    <p>Information Design Director and digital strategy leader bridging complex technical architecture with user-centric communications. Expertise in B2B algorithmic SEO, advanced data visualization, and cloud-based application development. Proven track record of scaling digital operations, leading cross-functional teams, and engineering sophisticated data systems to drive institutional growth.</p>
+  </section>
+
+  <section>
+    <h2>Professional Experience</h2>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Information Design Director</h3>
+        <span class="dates">2025 – Present</span>
+      </div>
+      <ul class="bullets">
+        <li>Architect and implement advanced B2B SEO, AEO, and GEO optimization frameworks.</li>
+        <li>Authored custom Google Apps Script functions to harvest and scale enterprise Search Console data.</li>
+        <li>Structured complex subdomain Reply Mail Management hierarchies within Salesforce.</li>
+        <li>Built dynamic telemetry and analytics dashboards utilizing Looker Studio for executive reporting.</li>
+        <li>Engineered "Librarian," a semantic search web application platform, deploying Google Cloud Run, BigQuery datasets, and the Gemini API for robust document retrieval.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Senior Director of Digital Marketing &amp; Communications</h3>
+        <span class="dates">Mar 2011 – 2025</span>
+      </div>
+      <p class="org">Georgetown University McDonough School of Business, Washington, DC</p>
+      <ul class="bullets">
+        <li>Spearheaded the growth of the MSB Digital Team, significantly enhancing the visibility of the business school through highly optimized web and social channels.</li>
+        <li>Innovated a "hub and spoke" social media strategy to streamline content distribution across departments.</li>
+        <li>Led complex CMS infrastructure projects, migrating from a proprietary system to Drupal, followed by two successful enterprise WordPress migrations.</li>
+        <li>Developed customized analytics reporting to derive actionable insights, directly guiding departmental content strategy and goal attainment.</li>
+        <li>Served as advisory expert on university-wide committees for accessibility, branding, and technology.</li>
+        <li>Recipient of the Dean's Award for Employee Excellence and multiple Educational Advertising Awards.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Web Development Analyst</h3>
+        <span class="dates">Nov 2008 – Mar 2011</span>
+      </div>
+      <p class="org">Georgetown University McDonough School of Business, Washington, DC</p>
+      <ul class="bullets">
+        <li>Enhanced internal digital communications initiatives by launching new digital platforms utilizing modern web development best practices.</li>
+        <li>Played a pivotal role in the enterprise transition from a legacy intranet environment to Google Suite.</li>
+        <li>Managed a technical student team providing web support to faculty and staff.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Apple Systems Administrator &amp; Database Administrator</h3>
+        <span class="dates">Nov 2003 – Nov 2008</span>
+      </div>
+      <p class="org">Corcoran Gallery of Art, Washington, DC</p>
+      <ul class="bullets">
+        <li>Managed Apple servers for 200+ users, encompassing email, licensing, and security infrastructure.</li>
+        <li>Administered network infrastructure, student printing services, and Tier 2 Help Desk support.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <h3>Adjunct Professor: Digital Tools and Techniques</h3>
+        <span class="dates">Sept 2006 – May 2008</span>
+      </div>
+      <p class="org">Corcoran College of Art + Design, Washington, DC</p>
+      <ul class="bullets">
+        <li>Designed and instructed a course on digital content production, digital studio skills, and application interoperability.</li>
+      </ul>
+    </div>
+
+  </section>
+
+  <section>
+    <h2>Technical Projects &amp; Hardware</h2>
+    <ul class="bullets">
+      <li><strong>Microprocessor Prototyping:</strong> Assembled custom hardware utilities using Raspberry Pi models, compiled native code to drive modular e-Paper displays, and developed custom Python telemetry scripts.</li>
+      <li><strong>Audio Engineering:</strong> Managed legacy digital audio workstations utilizing custom hardware audio mixers and legacy VST amp simulators.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Education &amp; Certifications</h2>
+    <ul class="bullets">
+      <li><strong>Project Management Professional (PMP)</strong> – In Progress (Aligning with PMBOK 8th Edition)</li>
+      <li><strong>Google Analytics &amp; Adwords Certification</strong> – Luna Metrics, Washington DC</li>
+      <li><strong>Apple System Administration Certification</strong> – Apple Computer, Reston VA</li>
+      <li><strong>BFA in Film</strong> – State University of New York at Purchase, New York, NY</li>
+    </ul>
+  </section>
+
+</div>
+</body>
+</html>
