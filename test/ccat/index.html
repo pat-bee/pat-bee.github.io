@@ -198,13 +198,15 @@ function parseCSV(csvText) {
         
         // Regex to handle commas inside quotes correctly
         const match = line.match(/(?<=^|,)(?:"([^"]*)"|([^,]*))/g);
-        if (!match || match.length < 4) return;
+        // We now expect at least 6 columns: Category, CategoryDescription, ItemName, Description, Price, Link
+        if (!match || match.length < 5) return; 
         
         const category = (match[0] || '').replace(/^"|"$/g, '').trim();
-        const name = (match[1] || '').replace(/^"|"$/g, '').trim();
-        const desc = (match[2] || '').replace(/^"|"$/g, '').trim();
-        const price = (match[3] || '').replace(/^"|"$/g, '').trim();
-        const link = (match[4] || '').replace(/^"|"$/g, '').trim();
+        const categoryDesc = (match[1] || '').replace(/^"|"$/g, '').trim(); // The new column!
+        const name = (match[2] || '').replace(/^"|"$/g, '').trim();
+        const desc = (match[3] || '').replace(/^"|"$/g, '').trim();
+        const price = (match[4] || '').replace(/^"|"$/g, '').trim();
+        const link = (match[5] || '').replace(/^"|"$/g, '').trim();
 
         if (!category || !name) return;
 
@@ -217,10 +219,15 @@ function parseCSV(csvText) {
             menuMap.set(category, {
                 category: category,
                 iconClass: iconClass,
-                description: "Updated live from inventory.",
+                // Fallback text is applied here just in case the cell is empty
+                description: categoryDesc || "Premium items available for delivery or pickup.", 
                 items: []
             });
+        } else if (categoryDesc && !menuMap.get(category).description.includes(categoryDesc)) {
+            // Safety net: if the description was left blank on the first row but filled in on a subsequent one
+            menuMap.get(category).description = categoryDesc;
         }
+        
         menuMap.get(category).items.push({ name, desc, price, link });
     });
 
