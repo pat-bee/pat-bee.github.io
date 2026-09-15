@@ -127,114 +127,131 @@
         // Set this to your published Google Sheet CSV URL when ready to go live.
         const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnZ9yBY66oMwlzyph1tC-S9_n_itMwc4AIafSuDXMPa7S4TdivY4y-jekeGqIq4sQ4B9j47y9CnmKq/pub?gid=447341126&single=true&output=csv"; 
 
-        // Static fallback data modeling the provided PDF and Screenshot
-        const staticMenuData = [
-            {
-                category: "Flower",
-                iconClass: "icon-flower",
-                description: "All indoor premium flower unless noted. Save cash by mixing and matching 1/4oz+ strains for bulk pricing. Potent, frosty, and meticulously sourced for the highest quality.",
-                items: [
-                    { name: "Lemonberry", desc: "Euphoric & bright with Tangie notes. Dabney Blue X Lemon Thai.", price: "$35/e, $60/q, 90/h, 170/oz", link: "https://www.jointcommerce.com/blog/lemonberry-strain-a-comprehensive-strain-guide" },
-                    { name: "StrawNana Sorbet", desc: "Dessert forward creamy sweet Strawberry x Banana Kush.", price: "35e, 60q, 90h, 170oz", link: "#" },
-                    { name: "Scissor Queen", desc: "Medium/large frosty buds with purple bits. Indica leaning hybrid.", price: "30e, 60q, 90h, 170oz", link: "#" },
-                    { name: "Toad Venom", desc: "Tart mint, diesel, chemical gas, skunk, citrus, pepper.", price: "30/e, 60/q, 90/h, 170/oz", link: "#" },
-                    { name: "Zebra Stripes", desc: "Chunky potent buds! Lemon cherry gelato X Animal box Bx.", price: "$35/e, $60/q, $90/h, 170/oz", link: "#" }
-                ]
-            },
-            {
-                category: "Oil Droppers",
-                iconClass: "icon-oil",
-                description: "Organic MCT oil infused with premium flower. Packaged in glass bottles with graduated droppers for precise, discreet sublingual dosing. Full spectrum benefits.",
-                items: [
-                    { name: "Lemon Haze", desc: "Available in both sizes.", price: "$22 (150-180mg) | $45 (300-380mg)", link: "#" },
-                    { name: "Blue Dream", desc: "Available in both sizes.", price: "$22 (150-180mg) | $45 (300-380mg)", link: "#" },
-                    { name: "Grapes n Cream", desc: "Available in 1oz size only.", price: "$45 (300-380mg)", link: "#" },
-                    { name: "Indica Blend", desc: "Afghani, Tahoe OG X Permanent Marker.", price: "$22 (150-180mg) | $45 (300-380mg)", link: "#" }
-                ]
-            },
-            {
-                category: "Edibles",
-                iconClass: "icon-edible",
-                description: "Handcrafted in-house. From small-batch toffee swirl ice cream to custom pre-order baked goods. Tailor your dosage and dietary preferences with our team.",
-                items: [
-                    { name: "Ice Cream", desc: "Flower-infused toffee swirl vanilla. Organic dairy, sugar, vanilla.", price: "$22 (~40mg THC / 5oz jar)", link: "#" },
-                    { name: "Caramels", desc: "Infused with premium full-spectrum flower. Sativa or Indica.", price: "3/$25, 6/$40, 12/$75 (40mg ea)", link: "#" },
-                    { name: "Tropical Fruit Gummies", desc: "Distillate-based perfect half spheres. Color/flavor from fruit.", price: "5/$20, 14/$55, 28/$100 (30mg ea)", link: "#" }
-                ]
-            },
-            {
-                category: "Mushrooms",
-                iconClass: "icon-shroom",
-                description: "Whole fruiting bodies served in reusable tins. Choose from macro or micro-doses. Great tools for motivation, focus, and exploring new perspectives. Do your research.",
-                items: [
-                    { name: "Golden Teachers", desc: "Gold & white standard.", price: "$40/e, $60/q, 110/h, 200/oz", link: "#" },
-                    { name: "Penis Envy", desc: "Gold caps, cream/white stem.", price: "$40/e, 70/q, 130/h, 220/oz", link: "#" },
-                    { name: "Casper", desc: "White & blue, potent & crispy, cute round caps.", price: "$40/e, $70/q, 130/h, 220/oz", link: "#" }
-                ]
-            }
-        ];
 
-        function renderMenu(data) {
-            const container = document.getElementById('menu-content');
-            container.innerHTML = '';
 
-            data.forEach(section => {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'section';
+// Static fallback data modeling the provided PDF and Screenshot
+const staticMenuData = [
+    {
+        category: "Flower",
+        iconClass: "icon-flower",
+        description: "All indoor premium flower unless noted. Save cash by mixing and matching 1/4oz+ strains for bulk pricing. Potent, frosty, and meticulously sourced for the highest quality.",
+        items: [
+            { name: "Lemonberry", desc: "Euphoric & bright with Tangie notes. Dabney Blue X Lemon Thai.", price: "$35/e, $60/q, 90/h, 170/oz", link: "https://www.jointcommerce.com/blog/lemonberry-strain-a-comprehensive-strain-guide" },
+            { name: "StrawNana Sorbet", desc: "Dessert forward creamy sweet Strawberry x Banana Kush.", price: "35e, 60q, 90h, 170oz", link: "#" },
+            { name: "Scissor Queen", desc: "Medium/large frosty buds with purple bits. Indica leaning hybrid.", price: "30e, 60q, 90h, 170oz", link: "#" },
+            { name: "Toad Venom", desc: "Tart mint, diesel, chemical gas, skunk, citrus, pepper.", price: "30/e, 60/q, 90/h, 170/oz", link: "#" },
+            { name: "Zebra Stripes", desc: "Chunky potent buds! Lemon cherry gelato X Animal box Bx.", price: "$35/e, $60/q, $90/h, 170/oz", link: "#" }
+        ]
+    }
+];
 
-                const headerHtml = `
-                    <div class="section-header">
-                        <svg class="section-icon ${section.iconClass}" viewBox="0 0 40 40">
-                            <path />
-                        </svg>
-                        <h2>${section.category}</h2>
-                    </div>
-                    <p class="section-desc">${section.description}</p>
-                `;
-                
-                const ul = document.createElement('ul');
-                ul.className = 'item-list';
+function renderMenu(data) {
+    const container = document.getElementById('menu-content');
+    container.innerHTML = '';
 
-                section.items.forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = 'item';
-                    
-                    const titleHtml = item.link && item.link !== "#" 
-                        ? `<a href="${item.link}" target="_blank" rel="noopener">${item.name}</a>` 
-                        : item.name;
+    data.forEach(section => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section';
 
-                    li.innerHTML = `
-                        <div class="item-title">${titleHtml}</div>
-                        <div class="item-details">${item.desc}</div>
-                        <span class="item-price">${item.price}</span>
-                    `;
-                    ul.appendChild(li);
-                });
+        const headerHtml = `
+            <div class="section-header">
+                <svg class="section-icon ${section.iconClass}" viewBox="0 0 40 40">
+                    <path />
+                </svg>
+                <h2>${section.category}</h2>
+            </div>
+            <p class="section-desc">${section.description}</p>
+        `;
+        
+        const ul = document.createElement('ul');
+        ul.className = 'item-list';
 
-                sectionDiv.innerHTML = headerHtml;
-                sectionDiv.appendChild(ul);
-                container.appendChild(sectionDiv);
+        section.items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'item';
+            
+            const titleHtml = item.link && item.link !== "#" && item.link.trim() !== ""
+                ? `<a href="${item.link}" target="_blank" rel="noopener">${item.name}</a>` 
+                : item.name;
+
+            li.innerHTML = `
+                <div class="item-title">${titleHtml}</div>
+                <div class="item-details">${item.desc}</div>
+                <span class="item-price">${item.price}</span>
+            `;
+            ul.appendChild(li);
+        });
+
+        sectionDiv.innerHTML = headerHtml;
+        sectionDiv.appendChild(ul);
+        container.appendChild(sectionDiv);
+    });
+}
+
+function parseCSV(csvText) {
+    const lines = csvText.split('\n');
+    const dataLines = lines.slice(1); // Skip header
+    const menuMap = new Map();
+    
+    dataLines.forEach(line => {
+        if (!line.trim()) return;
+        
+        // Regex to handle commas inside quotes correctly
+        const match = line.match(/(?<=^|,)(?:"([^"]*)"|([^,]*))/g);
+        if (!match || match.length < 4) return;
+        
+        const category = (match[0] || '').replace(/^"|"$/g, '').trim();
+        const name = (match[1] || '').replace(/^"|"$/g, '').trim();
+        const desc = (match[2] || '').replace(/^"|"$/g, '').trim();
+        const price = (match[3] || '').replace(/^"|"$/g, '').trim();
+        const link = (match[4] || '').replace(/^"|"$/g, '').trim();
+
+        if (!category || !name) return;
+
+        if (!menuMap.has(category)) {
+            let iconClass = 'icon-flower';
+            if (category.toLowerCase().includes('oil') || category.toLowerCase().includes('concentrate') || category.toLowerCase().includes('vape')) iconClass = 'icon-oil';
+            if (category.toLowerCase().includes('edible')) iconClass = 'icon-edible';
+            if (category.toLowerCase().includes('mushroom')) iconClass = 'icon-shroom';
+
+            menuMap.set(category, {
+                category: category,
+                iconClass: iconClass,
+                description: "Updated live from inventory.",
+                items: []
             });
         }
+        menuMap.get(category).items.push({ name, desc, price, link });
+    });
 
-        // Logic to fetch from Google Sheets or load static fallback
-        async function init() {
-            if (SPREADSHEET_CSV_URL) {
-                try {
-                    const response = await fetch(SPREADSHEET_CSV_URL);
-                    const csvText = await response.text();
-                    // Basic CSV parsing logic would go here to map to the staticMenuData structure
-                    // For now, if URL is empty, it falls back to the static data
-                } catch (error) {
-                    console.error("Error fetching sheet:", error);
-                    renderMenu(staticMenuData);
-                }
+    return Array.from(menuMap.values());
+}
+
+async function init() {
+    if (SPREADSHEET_CSV_URL && SPREADSHEET_CSV_URL !== "YOUR_PUBLISHED_CSV_URL_HERE") {
+        try {
+            const response = await fetch(SPREADSHEET_CSV_URL);
+            if (!response.ok) throw new Error("Network response was not ok: " + response.statusText);
+            
+            const csvText = await response.text();
+            const parsedData = parseCSV(csvText);
+            
+            if (parsedData.length > 0) {
+                renderMenu(parsedData);
             } else {
+                console.warn("CSV parsed successfully but no data was found. Falling back to static data.");
                 renderMenu(staticMenuData);
             }
+        } catch (error) {
+            console.error("Error fetching or parsing sheet:", error);
+            renderMenu(staticMenuData);
         }
+    } else {
+        renderMenu(staticMenuData);
+    }
+}
 
-        init();
+init();
     </script>
 </body>
 </html>
