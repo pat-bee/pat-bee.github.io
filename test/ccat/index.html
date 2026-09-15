@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canna Cat D.C. - Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --accent-color: #cccccc;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Oxygen Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 2px dashed var(--text-color);
+            padding-bottom: 20px;
+        }
+        header h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 0 10px 0;
+        }
+        header p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 60px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            fill: none;
+            stroke: var(--text-color);
+            stroke-width: 2;
+            stroke-linecap: square;
+            stroke-linejoin: miter;
+        }
+        .section-header h2 {
+            font-size: 2rem;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        .section-desc {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            margin-bottom: 25px;
+            max-width: 100%;
+        }
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .item {
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 3px solid var(--text-color);
+        }
+        .item-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .item-title a {
+            color: var(--text-color);
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+        .item-title a:hover {
+            color: var(--bg-color);
+            background-color: var(--text-color);
+        }
+        .item-details {
+            font-size: 0.95rem;
+            margin: 5px 0;
+        }
+        .item-price {
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+        /* Crust Punk inspired jagged SVGs */
+        .icon-flower path { d: path("M20 2L22 10L30 8L25 18L35 22L25 26L28 36L20 30L12 36L15 26L5 22L15 18L10 8L18 10Z"); }
+        .icon-oil path { d: path("M20 2L26 15L32 20L28 30L20 38L12 30L8 20L14 15Z M20 2L20 38"); }
+        .icon-edible path { d: path("M5 20L10 5L30 5L35 20L20 35Z M5 20L35 20"); }
+        .icon-shroom path { d: path("M20 2L35 15L30 20L10 20L5 15Z M15 20L12 38L28 38L25 20"); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Canna Cat D.C.</h1>
+            <p><a href="https://cal.com/real-fake-sally/30min">Say Hello!</a>| Delivery & Pickup</p>
+            <p>$60 minimum | Updated 9/14/26</p>
+        </header>
+
+        <div id="menu-content">
+            <!-- Data will be populated here via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Set this to your published Google Sheet CSV URL when ready to go live.
+        const SPREADSHEET_CSV_URL = ""; 
+
+        // Static fallback data modeling the provided PDF and Screenshot
+        const staticMenuData = [
+            {
+                category: "Flower",
+                iconClass: "icon-flower",
+                description: "All indoor premium flower unless noted. Save cash by mixing and matching 1/4oz+ strains for bulk pricing. Potent, frosty, and meticulously sourced for the highest quality.",
+                items: [
+                    { name: "Lemonberry", desc: "Euphoric & bright with Tangie notes. Dabney Blue X Lemon Thai.", price: "$35/e, $60/q, 90/h, 170/oz", link: "https://www.jointcommerce.com/blog/lemonberry-strain-a-comprehensive-strain-guide" },
+                    { name: "StrawNana Sorbet", desc: "Dessert forward creamy sweet Strawberry x Banana Kush.", price: "35e, 60q, 90h, 170oz", link: "#" },
+                    { name: "Scissor Queen", desc: "Medium/large frosty buds with purple bits. Indica leaning hybrid.", price: "30e, 60q, 90h, 170oz", link: "#" },
+                    { name: "Toad Venom", desc: "Tart mint, diesel, chemical gas, skunk, citrus, pepper.", price: "30/e, 60/q, 90/h, 170/oz", link: "#" },
+                    { name: "Zebra Stripes", desc: "Chunky potent buds! Lemon cherry gelato X Animal box Bx.", price: "$35/e, $60/q, $90/h, 170/oz", link: "#" }
+                ]
+            },
+            {
+                category: "Oil Droppers",
+                iconClass: "icon-oil",
+                description: "Organic MCT oil infused with premium flower. Packaged in glass bottles with graduated droppers for precise, discreet sublingual dosing. Full spectrum benefits.",
+                items: [
+                    { name: "Lemon Haze", desc: "Available in both sizes.", price: "$22 (150-180mg) | $45 (300-380mg)", link: "#" },
+                    { name: "Blue Dream", desc: "Available in both sizes.", price: "$22 (150-180mg) | $45 (300-380mg)", link: "#" },
+                    { name: "Grapes n Cream", desc: "Available in 1oz size only.", price: "$45 (300-380mg)", link: "#" },
+                    { name: "Indica Blend", desc: "Afghani, Tahoe OG X Permanent Marker.", price: "$22 (150-180mg) | $45 (300-380mg)", link: "#" }
+                ]
+            },
+            {
+                category: "Edibles",
+                iconClass: "icon-edible",
+                description: "Handcrafted in-house. From small-batch toffee swirl ice cream to custom pre-order baked goods. Tailor your dosage and dietary preferences with our team.",
+                items: [
+                    { name: "Ice Cream", desc: "Flower-infused toffee swirl vanilla. Organic dairy, sugar, vanilla.", price: "$22 (~40mg THC / 5oz jar)", link: "#" },
+                    { name: "Caramels", desc: "Infused with premium full-spectrum flower. Sativa or Indica.", price: "3/$25, 6/$40, 12/$75 (40mg ea)", link: "#" },
+                    { name: "Tropical Fruit Gummies", desc: "Distillate-based perfect half spheres. Color/flavor from fruit.", price: "5/$20, 14/$55, 28/$100 (30mg ea)", link: "#" }
+                ]
+            },
+            {
+                category: "Mushrooms",
+                iconClass: "icon-shroom",
+                description: "Whole fruiting bodies served in reusable tins. Choose from macro or micro-doses. Great tools for motivation, focus, and exploring new perspectives. Do your research.",
+                items: [
+                    { name: "Golden Teachers", desc: "Gold & white standard.", price: "$40/e, $60/q, 110/h, 200/oz", link: "#" },
+                    { name: "Penis Envy", desc: "Gold caps, cream/white stem.", price: "$40/e, 70/q, 130/h, 220/oz", link: "#" },
+                    { name: "Casper", desc: "White & blue, potent & crispy, cute round caps.", price: "$40/e, $70/q, 130/h, 220/oz", link: "#" }
+                ]
+            }
+        ];
+
+        function renderMenu(data) {
+            const container = document.getElementById('menu-content');
+            container.innerHTML = '';
+
+            data.forEach(section => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'section';
+
+                const headerHtml = `
+                    <div class="section-header">
+                        <svg class="section-icon ${section.iconClass}" viewBox="0 0 40 40">
+                            <path />
+                        </svg>
+                        <h2>${section.category}</h2>
+                    </div>
+                    <p class="section-desc">${section.description}</p>
+                `;
+                
+                const ul = document.createElement('ul');
+                ul.className = 'item-list';
+
+                section.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'item';
+                    
+                    const titleHtml = item.link && item.link !== "#" 
+                        ? `<a href="${item.link}" target="_blank" rel="noopener">${item.name}</a>` 
+                        : item.name;
+
+                    li.innerHTML = `
+                        <div class="item-title">${titleHtml}</div>
+                        <div class="item-details">${item.desc}</div>
+                        <span class="item-price">${item.price}</span>
+                    `;
+                    ul.appendChild(li);
+                });
+
+                sectionDiv.innerHTML = headerHtml;
+                sectionDiv.appendChild(ul);
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        // Logic to fetch from Google Sheets or load static fallback
+        async function init() {
+            if (SPREADSHEET_CSV_URL) {
+                try {
+                    const response = await fetch(SPREADSHEET_CSV_URL);
+                    const csvText = await response.text();
+                    // Basic CSV parsing logic would go here to map to the staticMenuData structure
+                    // For now, if URL is empty, it falls back to the static data
+                } catch (error) {
+                    console.error("Error fetching sheet:", error);
+                    renderMenu(staticMenuData);
+                }
+            } else {
+                renderMenu(staticMenuData);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
