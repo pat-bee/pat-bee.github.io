@@ -51,13 +51,14 @@
             padding-bottom: 10px;
         }
         
-        /* New Image Icon Styling */
+        /* Modern Fluid Image Icon Styling */
         .section-image-icon {
-            max-width: 225px;
-            width: 100%;       /* Ensures responsiveness */
+            /* clamp(MIN, FLUID_VALUE, MAX) caps at 100px, but dynamically shrinks on small screens */
+            width: clamp(50px, 15vw, 100px);
             height: auto;
             object-fit: contain;
-            flex-shrink: 1;    /* Prevents the image from breaking layout on very small screens */
+            /* Let clamp() do the resizing math; prevent flexbox from squishing it */
+            flex-shrink: 0; 
         }
 
         /* 
@@ -141,7 +142,7 @@
                 onmouseout="this.src='https://raw.githubusercontent.com/pat-bee/pat-bee.github.io/main/test/ccat/ccat-b.png'" 
                 ontouchstart="this.src='https://raw.githubusercontent.com/pat-bee/pat-bee.github.io/main/test/ccat/ccat-a.png'"
                 ontouchend="this.src='https://raw.githubusercontent.com/pat-bee/pat-bee.github.io/main/test/ccat/ccat-b.png'"
-                style="width: 400px; cursor: pointer;" 
+                style="width: 400px; cursor: pointer; max-width: 100%; height: auto;" 
                 alt="Interactive image"
                 />
             </div>
