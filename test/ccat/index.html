@@ -57,7 +57,6 @@
             width: clamp(50px, 15vw, 100px);
             height: auto;
             object-fit: contain;
-            /* Let clamp() do the resizing math; prevent flexbox from squishing it */
             flex-shrink: 0; 
         }
 
@@ -65,11 +64,6 @@
         =========================================================================================
         ARCHIVED SVG CSS: COMMENTED OUT FOR PRESERVATION
         =========================================================================================
-        The block below formerly governed the crust punk-inspired jagged vector icons.
-        It has been verbose-commented to hide it from the active render while preserving the 
-        code structure. If you ever wish to revert to SVGs instead of the new PNGs, simply
-        uncomment this block and restore the SVG logic in the JavaScript below.
-        
         .section-icon {
             width: 40px;
             height: 40px;
@@ -120,6 +114,12 @@
             color: var(--bg-color);
             background-color: var(--text-color);
         }
+        /* Style for the New/Low indicator dot to keep it vertically aligned nicely */
+        .status-dot {
+            font-size: 0.75em;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
         .item-details {
             font-size: 0.95rem;
             margin: 5px 0;
@@ -146,9 +146,12 @@
                 alt="Interactive image"
                 />
             </div>
-            <!-- <h1>Xanna Xat</h1> -->
             <p><strong><a href="https://cal.com/real-fake-sally/meetup" style="color: #ffffff; text-decoration: none;">Say Hello!</a></strong>| Delivery & Pickup</p>
             <p>$60 minimum | Updated 9/14/26</p>
+            <!-- Legend to explain the dots to users -->
+            <p style="font-size: 0.85rem; color: var(--accent-color); margin-top: 15px;">
+                <span style="color: #9588f5;">⬤</span> New Arrival &nbsp;&nbsp; | &nbsp;&nbsp; <span style="color: #d22e20;">⬤</span> Low Stock
+            </p>
         </header>
 
         <div id="menu-content">
@@ -157,21 +160,20 @@
     </div>
 
     <script>
-        // Set this to your published Google Sheet CSV URL when ready to go live.
         const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnZ9yBY66oMwlzyph1tC-S9_n_itMwc4AIafSuDXMPa7S4TdivY4y-jekeGqIq4sQ4B9j47y9CnmKq/pub?gid=447341126&single=true&output=csv"; 
 
-        // Static fallback data modeling the provided PDF and Screenshot
+        // Updated Static fallback data with isNew and isLow properties to demonstrate the dots
         const staticMenuData = [
             {
                 category: "Flower",
                 iconUrl: "https://pat-bee.github.io/test/ccat/bud-icon.png",
                 description: "All indoor premium flower unless noted. Save cash by mixing and matching 1/4oz+ strains for bulk pricing. Potent, frosty, and meticulously sourced for the highest quality.",
                 items: [
-                    { name: "Lemonberry", desc: "Euphoric & bright with Tangie notes. Dabney Blue X Lemon Thai.", price: "$35/e, $60/q, 90/h, 170/oz", link: "https://www.jointcommerce.com/blog/lemonberry-strain-a-comprehensive-strain-guide" },
-                    { name: "StrawNana Sorbet", desc: "Dessert forward creamy sweet Strawberry x Banana Kush.", price: "35e, 60q, 90h, 170oz", link: "#" },
-                    { name: "Scissor Queen", desc: "Medium/large frosty buds with purple bits. Indica leaning hybrid.", price: "30e, 60q, 90h, 170oz", link: "#" },
-                    { name: "Toad Venom", desc: "Tart mint, diesel, chemical gas, skunk, citrus, pepper.", price: "30/e, 60/q, 90/h, 170/oz", link: "#" },
-                    { name: "Zebra Stripes", desc: "Chunky potent buds! Lemon cherry gelato X Animal box Bx.", price: "$35/e, $60/q, $90/h, 170/oz", link: "#" }
+                    { name: "Lemonberry", desc: "Euphoric & bright with Tangie notes. Dabney Blue X Lemon Thai.", price: "$35/e, $60/q, 90/h, 170/oz", link: "https://www.jointcommerce.com/blog/lemonberry-strain-a-comprehensive-strain-guide", isNew: true, isLow: false },
+                    { name: "StrawNana Sorbet", desc: "Dessert forward creamy sweet Strawberry x Banana Kush.", price: "35e, 60q, 90h, 170oz", link: "#", isNew: false, isLow: true },
+                    { name: "Scissor Queen", desc: "Medium/large frosty buds with purple bits. Indica leaning hybrid.", price: "30e, 60q, 90h, 170oz", link: "#", isNew: true, isLow: true },
+                    { name: "Toad Venom", desc: "Tart mint, diesel, chemical gas, skunk, citrus, pepper.", price: "30/e, 60/q, 90/h, 170/oz", link: "#", isNew: false, isLow: false },
+                    { name: "Zebra Stripes", desc: "Chunky potent buds! Lemon cherry gelato X Animal box Bx.", price: "$35/e, $60/q, $90/h, 170/oz", link: "#", isNew: false, isLow: false }
                 ]
             }
         ];
@@ -184,26 +186,8 @@
                 const sectionDiv = document.createElement('div');
                 sectionDiv.className = 'section';
 
-                /*
-                ===============================================================================
-                VERBOSE ARCHIVE COMMENT: OLD SVG INJECTION CODE
-                ===============================================================================
-                The following chunk was formerly placed inside the headerHtml literal below to 
-                inject the jagged SVG vectors. It is stored here in a verbose comment for easy 
-                retrieval. 
-                
-                <svg class="section-icon ${section.iconClass}" viewBox="0 0 40 40">
-                    <path />
-                </svg>
-                
-                It has been replaced by the <img> tag calling ${section.iconUrl} to support 
-                the new responsive PNG files requested.
-                ===============================================================================
-                */
-
                 const headerHtml = `
                     <div class="section-header">
-                        <!-- Replaced SVG with new dynamic image URL -->
                         <img src="${section.iconUrl}" alt="${section.category} icon" class="section-image-icon" />
                         <h2>${section.category}</h2>
                     </div>
@@ -217,9 +201,19 @@
                     const li = document.createElement('li');
                     li.className = 'item';
                     
-                    const titleHtml = item.link && item.link !== "#" && item.link.trim() !== ""
+                    // Generate the colored dots based on the flags
+                    let indicatorDots = '';
+                    if (item.isNew) {
+                        indicatorDots += '<span class="status-dot" style="color: #9588f5;" title="New">⬤</span>';
+                    }
+                    if (item.isLow) {
+                        indicatorDots += '<span class="status-dot" style="color: #d22e20;" title="Low Stock">⬤</span>';
+                    }
+
+                    // Append the dots directly after the item name/link
+                    const titleHtml = (item.link && item.link !== "#" && item.link.trim() !== ""
                         ? `<a href="${item.link}" target="_blank" rel="noopener">${item.name}</a>` 
-                        : item.name;
+                        : item.name) + indicatorDots;
 
                     li.innerHTML = `
                         <div class="item-title">${titleHtml}</div>
@@ -237,7 +231,7 @@
 
         function parseCSV(csvText) {
             const lines = csvText.split('\n');
-            const dataLines = lines.slice(1); // Skip header
+            const dataLines = lines.slice(1); // Skip header row
             const menuMap = new Map();
             
             dataLines.forEach(line => {
@@ -245,22 +239,27 @@
                 
                 // Regex to handle commas inside quotes correctly
                 const match = line.match(/(?<=^|,)(?:"([^"]*)"|([^,]*))/g);
-                // We expect at least 6 columns: Category, CategoryDescription, ItemName, Description, Price, Link
+                
+                // Ensure we have enough columns. 
                 if (!match || match.length < 5) return; 
                 
+                // Map columns by index:
+                // 0: Category | 1: CatDescription | 2: Name | 3: Desc | 4: Price | 5: Link | 6: New | 7: Low
                 const category = (match[0] || '').replace(/^"|"$/g, '').trim();
                 const categoryDesc = (match[1] || '').replace(/^"|"$/g, '').trim(); 
                 const name = (match[2] || '').replace(/^"|"$/g, '').trim();
                 const desc = (match[3] || '').replace(/^"|"$/g, '').trim();
                 const price = (match[4] || '').replace(/^"|"$/g, '').trim();
                 const link = (match[5] || '').replace(/^"|"$/g, '').trim();
+                
+                // Check columns 7 and 8 (index 6 and 7) for an "x"
+                const newFlag = (match[6] || '').replace(/^"|"$/g, '').trim().toLowerCase();
+                const lowFlag = (match[7] || '').replace(/^"|"$/g, '').trim().toLowerCase();
 
                 if (!category || !name) return;
 
                 if (!menuMap.has(category)) {
-                    
-                    /* New logic for mapping image URLs instead of SVG classes */
-                    let iconUrl = 'https://pat-bee.github.io/test/ccat/bud-icon.png'; // Default to Flower
+                    let iconUrl = 'https://pat-bee.github.io/test/ccat/bud-icon.png';
                     const catLower = category.toLowerCase();
                     
                     if (catLower.includes('concentrate')) {
@@ -287,7 +286,15 @@
                     menuMap.get(category).description = categoryDesc;
                 }
                 
-                menuMap.get(category).items.push({ name, desc, price, link });
+                // Push the parsed isNew and isLow booleans into the array
+                menuMap.get(category).items.push({ 
+                    name, 
+                    desc, 
+                    price, 
+                    link,
+                    isNew: newFlag === 'x',
+                    isLow: lowFlag === 'x'
+                });
             });
 
             return Array.from(menuMap.values());
