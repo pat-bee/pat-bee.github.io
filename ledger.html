@@ -2654,35 +2654,23 @@ function renderLineChartAllAccounts(container, labels) {
   const textStyle = { color: fg, fontName: 'system-ui', fontSize: 10 };
 
   // This palette is intentionally limited to the second chart. If more than
-  // 20 accounts are visible, the colors repeat with a different line pattern.
+  // 20 accounts are visible, the colors repeat while every line remains solid.
   const accountChartPalette = [
     '#FF00CC', '#7FFF00', '#0066FF', '#FF6600', '#00FFFF',
     '#FF0033', '#9900FF', '#FFFF00', '#00FF99', '#FF3399',
     '#0033FF', '#FF9900', '#33FF00', '#CC00FF', '#00CCFF',
     '#FF3300', '#00FF55', '#FF0066', '#6600FF', '#CCFF00'
   ];
-  const linePatterns = [
-    [],             // solid
-    [6, 4],         // dashed
-    [1, 3],         // dotted
-    [10, 4],        // long dashed
-    [6, 3, 1, 3],   // dash-dot
-    [2, 2],         // fine dashed
-    [12, 3, 2, 3]   // long dash-dot
-  ];
   const chartColors = visibleAccounts.map((_, index) => (
     accountChartPalette[index % accountChartPalette.length]
   ));
   const series = {};
   visibleAccounts.forEach((_, index) => {
-    const seriesStyle = {
+    series[index] = {
       color: chartColors[index],
       lineWidth: 1,
       pointSize: 0
     };
-    const dashPattern = linePatterns[index % linePatterns.length];
-    if (dashPattern.length) seriesStyle.lineDashStyle = dashPattern;
-    series[index] = seriesStyle;
   });
 
   // Replace Google Charts' paginated legend with one compact, wrapping legend.
@@ -2716,13 +2704,20 @@ function renderLineChartAllAccounts(container, labels) {
   shell.append(legend, plot);
   container.appendChild(shell);
 
+  const gridColor = DARK_MODE ? '#555555' : '#dddddd';
+  const boundaryColor = DARK_MODE ? '#ffffff' : '#000000';
   const options = {
     height: Math.max(240, Math.round(window.innerHeight * 0.30)),
     backgroundColor: { fill: 'transparent' },
     chartArea: { width: '90%', height: '78%', top: 8 },
     legend: { position: 'none' },
     hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
-    vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
+    vAxis: {
+      baselineColor: boundaryColor,
+      gridlines: { color: gridColor },
+      minorGridlines: { color: 'transparent' },
+      textStyle
+    },
     colors: chartColors,
     series,
     curveType: 'function',
@@ -2731,6 +2726,40 @@ function renderLineChartAllAccounts(container, labels) {
     animation: { duration: 500, easing: 'out' }
   };
   const chart = new google.visualization.LineChart(plot);
+
+  // Google Charts does not expose dashed gridlines as an option. Once the SVG
+  // exists, dash only the light-gray value guides and add crisp top/bottom
+  // boundaries. The zero baseline remains solid through baselineColor above.
+  google.visualization.events.addListener(chart, 'ready', () => {
+    const svg = plot.querySelector('svg');
+    if (!svg) return;
+
+    svg.querySelectorAll('[stroke]').forEach(element => {
+      const stroke = (element.getAttribute('stroke') || '').toLowerCase();
+      if (stroke === gridColor.toLowerCase()) {
+        element.setAttribute('stroke-dasharray', '4 4');
+        element.setAttribute('stroke-width', '1');
+      }
+    });
+
+    const chartArea = chart.getChartLayoutInterface().getChartAreaBoundingBox();
+    const x1 = chartArea.left;
+    const x2 = chartArea.left + chartArea.width;
+    const boundaryYs = [chartArea.top, chartArea.top + chartArea.height];
+    boundaryYs.forEach(y => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y1', y);
+      line.setAttribute('y2', y);
+      line.setAttribute('stroke', boundaryColor);
+      line.setAttribute('stroke-width', '1');
+      line.setAttribute('shape-rendering', 'crispEdges');
+      line.setAttribute('pointer-events', 'none');
+      svg.appendChild(line);
+    });
+  });
+
   chart.draw(data, options);
 }
 
