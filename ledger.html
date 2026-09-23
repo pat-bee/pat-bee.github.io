@@ -233,7 +233,7 @@ header {
    ============================================ */
 .rolling-difference-shell {
   width: 100%;
-  max-width: var(--maxw);
+  max-width: 900px;
   box-sizing: border-box;
   padding: 0 16px;
   color: var(--c-fg);
@@ -983,7 +983,7 @@ footer b { font-weight: 600; }
   <h3 id="edit-chip-modal-title">Edit Entry</h3>
   <div class="modal-form-group">
     <label for="edit-chip-value">Value:</label>
-    <input type="number" id="edit-chip-value" step="0.01" placeholder="Enter value">
+    <input type="number" id="edit-chip-value" step="1" inputmode="numeric" placeholder="Enter whole number">
   </div>
   <div class="modal-form-group">
     <label for="edit-chip-date">Date:</label>
@@ -1046,7 +1046,7 @@ footer b { font-weight: 600; }
   </div>
   <div class="modal-form-group">
     <label for="edit-account-value">Current Value:</label>
-    <input type="number" id="edit-account-value" step="0.01" placeholder="Current balance">
+    <input type="number" id="edit-account-value" step="1" inputmode="numeric" placeholder="Current whole-number balance">
   </div>
   <div id="edit-account-buttons" class="modal-buttons">
     <button id="edit-account-cancel">Cancel</button>
@@ -1093,6 +1093,7 @@ footer b { font-weight: 600; }
           <option value="30d">Last 30 Days</option>
           <option value="90d" selected>Last 90 Days</option>
           <option value="1y">Last Year (12mo)</option>
+          <option value="2y">Last 2 Years (24mo)</option>
           <option value="ytd">This Calendar Year</option>
           <option value="all">All Time</option>
         </select>
@@ -1499,6 +1500,20 @@ async function processDelete(account, date, value) {
 /* ============================================
     EDIT CHIP MODAL
    ============================================ */
+function readWholeNumberInput(input, fieldLabel = 'value') {
+  const rawValue = input.value.trim();
+  const numberValue = Number(rawValue);
+
+  if (rawValue === '' || !Number.isFinite(numberValue) || !Number.isInteger(numberValue)) {
+    showToast(`Please enter ${fieldLabel} as a whole number—no decimals.`, 'error', 3500);
+    input.focus();
+    input.select();
+    return null;
+  }
+
+  return numberValue;
+}
+
 function showEditChipModal(account, date, value, readableValue) {
   if (IS_LOADING) return;
   const backdrop = document.getElementById('edit-chip-modal-backdrop');
@@ -1539,11 +1554,12 @@ async function processEditChip(originalAccount, originalDate, originalValue) {
   const valueInput = document.getElementById('edit-chip-value');
   const dateInput = document.getElementById('edit-chip-date');
 
-  const newValue = Number(valueInput.value);
+  const newValue = readWholeNumberInput(valueInput, 'the value');
   const newDateISO = dateInput.value;
 
-  if (isNaN(newValue) || newValue === 0) {
-    showToast('Please enter a valid non-zero value', 'error');
+  if (newValue === null) return;
+  if (newValue === 0) {
+    showToast('Please enter a non-zero whole number', 'error');
     return;
   }
   if (!newDateISO) {
@@ -1700,6 +1716,17 @@ async function processEditAccount(accountName) {
   const newAPR    = apr   !== '' && !isNaN(Number(apr))   ? Number(apr)   : '';
   const newValue  = value !== '' && !isNaN(Number(value)) ? Number(value) : null;
 
+  if (metaLimit !== '' && !Number.isInteger(metaLimit)) {
+    showToast('Please enter the credit limit as a whole number—no decimals.', 'error', 3500);
+    document.getElementById('edit-account-limit').focus();
+    return;
+  }
+  if (newValue !== null && !Number.isInteger(newValue)) {
+    showToast('Please enter the current value as a whole number—no decimals.', 'error', 3500);
+    document.getElementById('edit-account-value').focus();
+    return;
+  }
+
   hideEditAccountModal();
   showToast('Saving account…','info');
 
@@ -1816,12 +1843,40 @@ function processEditType(typeCode) {
 /* ============================================
     DATA FETCHING
    ============================================ */
+function trimSnapshotToRecentMonths(snapshot, monthCount) {
+  if (!snapshot || !Array.isArray(snapshot.dateAxis)) return snapshot;
+
+  snapshot.dateAxis = snapshot.dateAxis.slice(-monthCount);
+
+  Object.values(snapshot.series || {}).forEach((accountSeries) => {
+    if (Array.isArray(accountSeries.monthly)) {
+      accountSeries.monthly = accountSeries.monthly.slice(-monthCount);
+    }
+  });
+
+  Object.keys(snapshot.typeSeries || {}).forEach((typeCode) => {
+    if (Array.isArray(snapshot.typeSeries[typeCode])) {
+      snapshot.typeSeries[typeCode] = snapshot.typeSeries[typeCode].slice(-monthCount);
+    }
+  });
+
+  Object.keys(snapshot.totals || {}).forEach((totalKey) => {
+    if (Array.isArray(snapshot.totals[totalKey])) {
+      snapshot.totals[totalKey] = snapshot.totals[totalKey].slice(-monthCount);
+    }
+  });
+
+  return snapshot;
+}
+
 async function fetchSnapshot() {
   if (IS_LOADING) return;
   setLoading(true, 'Loading snapshot…');
 
   try {
-    const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${TIMEFRAME}`);
+    const requestedTimeframe = TIMEFRAME;
+    const apiTimeframe = requestedTimeframe === '2y' ? 'all' : requestedTimeframe;
+    const res = await fetch(`${API_BASE}?route=snapshot&ts=${Date.now()}&timeframe=${apiTimeframe}`);
     const text = await res.text();
     let j;
     try { j = JSON.parse(text); } catch {
@@ -1837,7 +1892,9 @@ async function fetchSnapshot() {
       return;
     }
 
-    SNAP = j;
+    SNAP = requestedTimeframe === '2y'
+      ? trimSnapshotToRecentMonths(j, 24)
+      : j;
     
     // Update score from database
     if (SNAP.score !== undefined) {
@@ -2181,6 +2238,11 @@ function renderStatusbar() {
    Requires Chart.js 4.4.1 (UMD build).
    ============================================ */
 const ROLLING_WINDOW_DAYS = 14;
+const ROLLING_WINDOW_MONTHS = 3;
+// The one-year and year-to-date API responses contain one snapshot per month.
+// Plot those snapshots directly so a moving average does not hide monthly
+// rises and falls. Longer monthly views retain the calmer three-month trend.
+const RAW_MONTHLY_TIMEFRAMES = new Set(['1y', 'ytd']);
 let ROLLING_DIFFERENCE_CHART = null;
 
 function calculateTrailingAverage(values, windowSize) {
@@ -2237,22 +2299,35 @@ function renderRollingDifferenceChart(container, labels) {
 
   destroyRollingDifferenceChart();
 
+  const monthlyTimeframes = new Set(['1y', '2y', 'ytd', 'all']);
+  const usesMonthlyData = monthlyTimeframes.has(TIMEFRAME);
+  const showsRawMonthlySnapshots = RAW_MONTHLY_TIMEFRAMES.has(TIMEFRAME);
+  const rollingWindow = usesMonthlyData ? ROLLING_WINDOW_MONTHS : ROLLING_WINDOW_DAYS;
+  const rollingUnit = usesMonthlyData ? 'month' : 'day';
+  const chartTitle = showsRawMonthlySnapshots
+    ? 'Monthly assets vs. debts — no smoothing'
+    : `${rollingWindow}-${rollingUnit} rolling difference`;
+
   const { assets, debts } = getVisibleAssetDebtTotals(labels);
-  const rollingAssets = calculateTrailingAverage(assets, ROLLING_WINDOW_DAYS);
-  const rollingDebts = calculateTrailingAverage(debts, ROLLING_WINDOW_DAYS);
+  const chartAssets = showsRawMonthlySnapshots
+    ? assets
+    : calculateTrailingAverage(assets, rollingWindow);
+  const chartDebts = showsRawMonthlySnapshots
+    ? debts
+    : calculateTrailingAverage(debts, rollingWindow);
 
   const shell = document.createElement('section');
   shell.className = 'rolling-difference-shell';
-  shell.setAttribute('aria-label', '14-day rolling difference between assets and debts');
+  shell.setAttribute('aria-label', `${chartTitle} between assets and debts`);
   shell.innerHTML = `
-    <h2 class="rolling-difference-title">14-day rolling difference</h2>
+    <h2 class="rolling-difference-title">${chartTitle}</h2>
     <div class="rolling-difference-legend" aria-hidden="true">
       <span><span class="rolling-difference-swatch rolling-difference-swatch--assets"></span>Assets higher</span>
       <span><span class="rolling-difference-swatch rolling-difference-swatch--debts"></span>Debts higher</span>
       <span>Assets solid, Debts dashed</span>
     </div>
     <div class="rolling-difference-canvas-wrap">
-      <canvas role="img" aria-label="Fourteen-day trailing averages of assets and debts; the gap is shaded by which total is higher"></canvas>
+      <canvas role="img" aria-label="${chartTitle} of assets and debts; the gap is shaded by which total is higher"></canvas>
     </div>`;
   container.appendChild(shell);
 
@@ -2269,13 +2344,14 @@ function renderRollingDifferenceChart(container, labels) {
       datasets: [
         {
           label: 'Assets',
-          data: rollingAssets,
+          data: chartAssets,
           borderColor: '#1baf7a',
           backgroundColor: '#1baf7a',
           borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 3,
-          tension: 0.3,
+          pointRadius: showsRawMonthlySnapshots ? 3 : 0,
+          pointHoverRadius: showsRawMonthlySnapshots ? 5 : 3,
+          pointHitRadius: 12,
+          tension: showsRawMonthlySnapshots ? 0 : 0.3,
           fill: {
             target: 1,
             above: 'rgba(27,175,122,0.30)',
@@ -2284,14 +2360,15 @@ function renderRollingDifferenceChart(container, labels) {
         },
         {
           label: 'Debts',
-          data: rollingDebts,
+          data: chartDebts,
           borderColor: '#e34948',
           backgroundColor: '#e34948',
           borderWidth: 2,
           borderDash: [5, 4],
-          pointRadius: 0,
-          pointHoverRadius: 3,
-          tension: 0.3
+          pointRadius: showsRawMonthlySnapshots ? 3 : 0,
+          pointHoverRadius: showsRawMonthlySnapshots ? 5 : 3,
+          pointHitRadius: 12,
+          tension: showsRawMonthlySnapshots ? 0 : 0.3
         }
       ]
     },
@@ -2741,7 +2818,7 @@ accountDetails.appendChild(metaWrap);
 
 
     const inputLine = document.createElement('div'); inputLine.className = 'input-line';
-    const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'Add value…'; inp.step = '0.01'; inp.dataset.accountName = a.name;
+    const inp = document.createElement('input'); inp.type = 'number'; inp.placeholder = 'Add whole number…'; inp.step = '1'; inp.inputMode = 'numeric'; inp.dataset.accountName = a.name;
     if (last > 0) inp.style.backgroundColor = 'var(--c-tint-pos)';
     else if (last < 0) inp.style.backgroundColor = 'var(--c-tint-neg)';
     else inp.style.backgroundColor = 'var(--c-input-bg)';
@@ -2826,11 +2903,29 @@ async function submitAll() {
 
 async function submitEntries(entries) {
   if (IS_LOADING) return;
+
+  const normalizedEntries = entries.map((entry) => ({
+    ...entry,
+    rawValue: String(entry.value).trim(),
+    value: Number(entry.value)
+  }));
+  const invalidEntry = normalizedEntries.find((entry) =>
+    entry.rawValue === '' || !Number.isFinite(entry.value) || !Number.isInteger(entry.value)
+  );
+  if (invalidEntry) {
+    showToast('Please enter whole numbers only—no decimals.', 'error', 3500);
+    invalidEntry.inputEl?.focus();
+    invalidEntry.inputEl?.select();
+    return;
+  }
+
   setLoading(true, 'Submitting…');
   entries.forEach(e => e.inputEl?.classList.add('submitting'));
 
   try {
-    const validEntries = entries.filter(e => e.account && !isNaN(e.value));
+    const validEntries = normalizedEntries
+      .filter(e => e.account)
+      .map(e => ({ account: e.account, value: e.value }));
     if (validEntries.length === 0) throw new Error('No valid entries');
 
     const body = new URLSearchParams({ payload: JSON.stringify({ entries: validEntries }) });
@@ -2911,4 +3006,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
