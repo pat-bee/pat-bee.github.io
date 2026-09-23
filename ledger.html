@@ -1,7 +1,11 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
+ <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, max-image-preview:none, max-snippet:0, max-video-preview:0">
+  <meta name="referrer" content="no-referrer">
+<meta name="tdm-reservation" content="1">
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Ledger — Accounts & Chart (v2.6)</title>
 
@@ -226,6 +230,56 @@ header {
 }
 #chart-pager {
   text-align: center;
+}
+
+/* ============================================
+   ALL-ACCOUNTS LINE CHART (SECOND CHART)
+   ============================================ */
+.all-accounts-chart-shell {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.all-accounts-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 3px 9px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2px 6px 5px;
+  color: var(--c-fg);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: var(--account-legend-font-size, 9px);
+  line-height: 1.05;
+}
+
+.all-accounts-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.all-accounts-chart-legend-swatch {
+  width: 0.72em;
+  height: 0.72em;
+  flex: 0 0 0.72em;
+  border-radius: 0;
+}
+
+.all-accounts-chart-plot {
+  width: 100%;
+  min-height: 240px;
+}
+
+@media (max-width: 600px) {
+  .all-accounts-chart-legend {
+    gap: 2px 6px;
+    padding-inline: 3px;
+  }
 }
 
 /* ============================================
@@ -2596,27 +2650,87 @@ function renderLineChartAllAccounts(container, labels) {
   }
   data.addRows(rows);
   const styles = getComputedStyle(document.documentElement);
-  const pos = styles.getPropertyValue('--c-pos').trim();
-  const neg = styles.getPropertyValue('--c-neg').trim();
   const fg = styles.getPropertyValue('--c-fg').trim();
-  const textStyle = { color: fg, fontName: 'system-ui' };
-  const chartColors = visibleAccounts.map(a => {
-    const meta = ACCOUNT_METADATA.get(a.name) || {};
-    const baseColor = meta.color || a.color;
-    if (baseColor) return normalizeHexColor(baseColor) || (a.kind === 'debt' ? neg : pos);
-    return a.kind === 'debt' ? neg : pos;
+  const textStyle = { color: fg, fontName: 'system-ui', fontSize: 10 };
+
+  // This palette is intentionally limited to the second chart. If more than
+  // 20 accounts are visible, the colors repeat with a different line pattern.
+  const accountChartPalette = [
+    '#FF00CC', '#7FFF00', '#0066FF', '#FF6600', '#00FFFF',
+    '#FF0033', '#9900FF', '#FFFF00', '#00FF99', '#FF3399',
+    '#0033FF', '#FF9900', '#33FF00', '#CC00FF', '#00CCFF',
+    '#FF3300', '#00FF55', '#FF0066', '#6600FF', '#CCFF00'
+  ];
+  const linePatterns = [
+    [],             // solid
+    [6, 4],         // dashed
+    [1, 3],         // dotted
+    [10, 4],        // long dashed
+    [6, 3, 1, 3],   // dash-dot
+    [2, 2],         // fine dashed
+    [12, 3, 2, 3]   // long dash-dot
+  ];
+  const chartColors = visibleAccounts.map((_, index) => (
+    accountChartPalette[index % accountChartPalette.length]
+  ));
+  const series = {};
+  visibleAccounts.forEach((_, index) => {
+    const seriesStyle = {
+      color: chartColors[index],
+      lineWidth: 1,
+      pointSize: 0
+    };
+    const dashPattern = linePatterns[index % linePatterns.length];
+    if (dashPattern.length) seriesStyle.lineDashStyle = dashPattern;
+    series[index] = seriesStyle;
   });
+
+  // Replace Google Charts' paginated legend with one compact, wrapping legend.
+  container.innerHTML = '';
+  const shell = document.createElement('div');
+  shell.className = 'all-accounts-chart-shell';
+  const legend = document.createElement('div');
+  legend.className = 'all-accounts-chart-legend';
+  legend.setAttribute('aria-label', 'Account chart legend');
+  const legendFontSize = Math.max(7, Math.min(10, Math.round(12 - visibleAccounts.length / 7)));
+  legend.style.setProperty('--account-legend-font-size', `${legendFontSize}px`);
+
+  visibleAccounts.forEach((account, index) => {
+    const item = document.createElement('span');
+    item.className = 'all-accounts-chart-legend-item';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'all-accounts-chart-legend-swatch';
+    swatch.style.backgroundColor = chartColors[index];
+    swatch.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.textContent = account.name;
+
+    item.append(swatch, label);
+    legend.appendChild(item);
+  });
+
+  const plot = document.createElement('div');
+  plot.className = 'all-accounts-chart-plot';
+  shell.append(legend, plot);
+  container.appendChild(shell);
+
   const options = {
-    height: Math.max(260, Math.round(window.innerHeight * 0.30)),
+    height: Math.max(240, Math.round(window.innerHeight * 0.30)),
     backgroundColor: { fill: 'transparent' },
-    chartArea: { width: '88%', height: '70%' },
-    legend: { position: 'top', alignment: 'center', textStyle },
+    chartArea: { width: '90%', height: '78%', top: 8 },
+    legend: { position: 'none' },
     hAxis: { textStyle, showTextEvery: labels.length > 30 ? Math.ceil(labels.length / 15) : 1 },
     vAxis: { baselineColor: fg, gridlines: { color: fg, opacity: 0.1 }, textStyle },
     colors: chartColors,
-    curveType: 'function', lineWidth: 8, pointSize: 0, animation: { duration: 500, easing: 'out' }
+    series,
+    curveType: 'function',
+    lineWidth: 1,
+    pointSize: 0,
+    animation: { duration: 500, easing: 'out' }
   };
-  const chart = new google.visualization.LineChart(container);
+  const chart = new google.visualization.LineChart(plot);
   chart.draw(data, options);
 }
 
