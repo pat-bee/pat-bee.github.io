@@ -443,6 +443,12 @@ hr.divider {
 .name:hover { opacity: 0.8; }
 .name:active { opacity: 0.6; }
 
+/* Account-specific inline colors are useful in daylight, but very dark saved
+   colors become unreadable against the night-mode background. */
+:root.dark-mode .name {
+  color: var(--c-fg) !important;
+}
+
 /* Wraps LIMIT + APR as a small vertical column to the right of the name */
 .account-meta {
   display: flex;
@@ -1267,8 +1273,25 @@ const TYPE_LABELS = {
   'sv': 'Savings'
 };
 
+// Shared account palette for the second and third chart views. This restores
+// the original Google-style chart colors and keeps each account consistent
+// everywhere it appears, even when a chart shows only a subset of accounts.
+const ACCOUNT_CHART_PALETTE = [
+  '#3366CC', '#DC3912', '#FF9900', '#109618', '#990099',
+  '#0099C6', '#DD4477', '#66AA00', '#B82E2E', '#316395',
+  '#994499', '#22AA99', '#AAAA11', '#6633CC', '#E67300',
+  '#8B0707', '#329262', '#5574A6', '#3B3EAC', '#B77322'
+];
+
 let ACCOUNT_METADATA = new Map();      // accountName -> { limit, color, link }
 let TYPE_META_OVERRIDES = new Map();   // typeCode -> { color }
+
+function getAccountChartColor(account) {
+  const accountName = typeof account === 'string' ? account : account?.name;
+  const accountIndex = SNAP?.accounts?.findIndex(item => item.name === accountName) ?? -1;
+  const stableIndex = accountIndex >= 0 ? accountIndex : 0;
+  return ACCOUNT_CHART_PALETTE[stableIndex % ACCOUNT_CHART_PALETTE.length];
+}
 
 /* ============================================
     FONT SWITCHER
@@ -1313,6 +1336,9 @@ function toggleDarkMode() {
   const checkbox = document.getElementById('dark-mode-checkbox');
   if (checkbox) checkbox.checked = DARK_MODE;
   updateDarkModeIcon();
+  // Google Charts draws text colors into its SVG. Redraw the active chart so
+  // axes, titles, and legends immediately adopt the new theme foreground.
+  renderChart();
   saveStateToURL();
 }
 
@@ -2653,17 +2679,7 @@ function renderLineChartAllAccounts(container, labels) {
   const fg = styles.getPropertyValue('--c-fg').trim();
   const textStyle = { color: fg, fontName: 'system-ui', fontSize: 10 };
 
-  // This palette is intentionally limited to the second chart. If more than
-  // 20 accounts are visible, the colors repeat while every line remains solid.
-  const accountChartPalette = [
-    '#FF00CC', '#7FFF00', '#0066FF', '#FF6600', '#00FFFF',
-    '#FF0033', '#9900FF', '#FFFF00', '#00FF99', '#FF3399',
-    '#0033FF', '#FF9900', '#33FF00', '#CC00FF', '#00CCFF',
-    '#FF3300', '#00FF55', '#FF0066', '#6600FF', '#CCFF00'
-  ];
-  const chartColors = visibleAccounts.map((_, index) => (
-    accountChartPalette[index % accountChartPalette.length]
-  ));
+  const chartColors = visibleAccounts.map(getAccountChartColor);
   const series = {};
   visibleAccounts.forEach((_, index) => {
     series[index] = {
@@ -2794,15 +2810,36 @@ function renderDonutCharts(container) {
   Object.entries(typeTotals).forEach(([code, total]) => { if (total !== 0) typeData.addRow([TYPE_LABELS[code] || code, Math.abs(total)]); });
   new google.visualization.PieChart(typeDiv).draw(typeData, { title: 'By Type', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
 
+  const visibleAccounts = SNAP.accounts.filter(a => !isAccountGloballyHidden(a));
+  const allAccounts = visibleAccounts.filter(a => Number(SNAP.series[a.name]?.last ?? 0) !== 0);
   const allData = new google.visualization.DataTable();
   allData.addColumn('string', 'Account'); allData.addColumn('number', 'Value');
-  SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last !== 0) allData.addRow([a.name, Math.abs(last)]); });
-  new google.visualization.PieChart(allDiv).draw(allData, { title: 'All Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
+  allAccounts.forEach(a => allData.addRow([a.name, Math.abs(Number(SNAP.series[a.name]?.last ?? 0))]));
+  new google.visualization.PieChart(allDiv).draw(allData, {
+    title: 'All Accounts',
+    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
+    pieHole: 0.6,
+    sliceVisibilityThreshold: 0,
+    colors: allAccounts.map(getAccountChartColor),
+    chartArea: { width: '80%', height: '80%' }
+  });
 
+  const debtAccounts = visibleAccounts.filter(a => Number(SNAP.series[a.name]?.last ?? 0) < 0);
   const debtData = new google.visualization.DataTable();
   debtData.addColumn('string', 'Account'); debtData.addColumn('number', 'Value');
-  SNAP.accounts.forEach(a => { if (isAccountGloballyHidden(a)) return; const last = SNAP.series[a.name]?.last ?? 0; if (last < 0) debtData.addRow([a.name, Math.abs(last)]); });
-  new google.visualization.PieChart(debtDiv).draw(debtData, { title: 'Debt Accounts', titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 }, backgroundColor: 'transparent', legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } }, pieHole: 0.6, chartArea: { width: '80%', height: '80%' } });
+  debtAccounts.forEach(a => debtData.addRow([a.name, Math.abs(Number(SNAP.series[a.name]?.last ?? 0))]));
+  new google.visualization.PieChart(debtDiv).draw(debtData, {
+    title: 'Debt Accounts',
+    titleTextStyle: { color: fg, fontName: 'system-ui', fontSize: 12 },
+    backgroundColor: 'transparent',
+    legend: { position: 'right', textStyle: { color: fg, fontName: 'system-ui', fontSize: 10 } },
+    pieHole: 0.6,
+    sliceVisibilityThreshold: 0,
+    colors: debtAccounts.map(getAccountChartColor),
+    chartArea: { width: '80%', height: '80%' }
+  });
 }
 
 function setChartSlide(index) {
