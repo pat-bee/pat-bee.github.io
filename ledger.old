@@ -9,7 +9,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Inconsolata:wght@200..900&family=Patrick+Hand&display=swap" rel="stylesheet">
+<!-- Used only by the 14-day rolling-difference chart -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
+
+      
 <style>
 /* ============================================
       CSS VARIABLES & DESIGN TOKENS
@@ -223,6 +227,69 @@ header {
 }
 #chart-pager {
   text-align: center;
+}
+/* ============================================
+   14-DAY ROLLING-DIFFERENCE CHART
+   ============================================ */
+.rolling-difference-shell {
+  width: 100%;
+  max-width: 900px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  color: var(--c-fg);
+}
+
+.rolling-difference-title {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.rolling-difference-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 8px;
+  color: var(--c-fg);
+  font-size: 13px;
+  opacity: 0.72;
+}
+
+.rolling-difference-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+}
+
+.rolling-difference-swatch--assets {
+  background: #1baf7a;
+}
+
+.rolling-difference-swatch--debts {
+  background: #e34948;
+}
+
+.rolling-difference-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: max(240px, 30vh);
+}
+
+.rolling-difference-canvas-wrap canvas {
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .rolling-difference-shell {
+    padding: 0 8px;
+  }
+
+  .rolling-difference-title {
+    font-size: 1.05rem;
+  }
 }
 
 /* ============================================
@@ -1019,13 +1086,13 @@ footer b { font-weight: 600; }
       <div class="toolbar-controls">
         <label for="timeframe">Timeframe:</label>
         <select id="timeframe">
-          <option value="3d" selected>Last 3 Days</option>
+          <option value="3d">Last 3 Days</option>
           <option value="today">Today</option>
           <option value="7d">Last 7 Days</option>
           <option value="14d">Last 14 Days</option>
           <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year (12mo)</option>
+            <option value="90d" selected>Last 90 Days</option>
+              <option value="1y">Last Year (12mo)</option>
           <option value="ytd">This Calendar Year</option>
           <option value="all">All Time</option>
         </select>
@@ -1115,7 +1182,7 @@ const SHEET_ID = '1UzOEys7DGhSVMJjoU-VfNo54qeoUjJfKlxXW2Lhcb-s';
    ============================================ */
 let SNAP = null;
 let MODE = 'totals';
-let TIMEFRAME = '3d';
+let TIMEFRAME = '90d';
 let IS_LOADING = false;
 let TOAST_TIMER = null;
 let LONG_PRESS_TIMER = null;
