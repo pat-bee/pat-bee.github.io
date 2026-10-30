@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f5f3ec"><meta name="apple-mobile-web-app-capable" content="yes"><title>Quiet Cycle · 432 Hz</title><style>
+:root{font-family: ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#243c35;background:#f5f3ec;font-synthesis:none}*{box-sizing:border-box}body{margin:0}main{max-width:460px;margin:auto;padding:32px 24px max(28px,env(safe-area-inset-bottom))}header{display:flex;justify-content:space-between;align-items:center}.brand{font-family:Georgia,serif;font-size:24px}.tag{font-size:11px;letter-spacing:1.5px;border:1px solid #c9d0c6;border-radius:20px;padding:8px 11px}h1{font-family:Georgia,serif;font-weight:400;text-align:center;font-size:36px;margin:35px 0 8px}.intro{text-align:center;color:#607168;font-size:15px;margin:0}.dial{width:256px;height:256px;position:relative;margin:28px auto 20px;display:grid;place-items:center}.dial svg{position:absolute;inset:0;transform:rotate(-90deg);width:100%;height:100%}.track{fill:none;stroke:#e0e4d9;stroke-width:3}.progress{fill:none;stroke:#5f7a63;stroke-width:3;stroke-linecap:round;stroke-dasharray:754;stroke-dashoffset:0}.center{text-align:center}.time{font-size:61px;letter-spacing:-3px;font-weight:300;font-variant-numeric:tabular-nums}.caption{text-transform:uppercase;font-size:10px;letter-spacing:2px;color:#67776b;margin-top:6px}.cycle{text-align:center;font-size:13px;color:#617267;margin-bottom:24px}.steps{display:flex;gap:8px;margin-bottom:24px}.step{flex:1;text-align:center;border:1px solid #d9dfd3;border-radius:12px;padding:13px 4px;transition:background .2s}.step.active{background:#e2e9dc;border-color:#9db096}.step strong{font-family:Georgia,serif;font-weight:400;font-size:25px}.step span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;margin-top:6px}.controls{display:flex;gap:10px}button{font:inherit;cursor:pointer;touch-action:manipulation;min-height:54px;border-radius:14px;border:1px solid #bac6b8;background:transparent;color:#243c35;font-size:16px}button:focus-visible,input:focus-visible{outline:3px solid #ad743b;outline-offset:4px}#toggle{flex:1.5;background:#2f4f40;color:#fff;border-color:#2f4f40}#restart{flex:1}button:disabled{opacity:.5;cursor:default}.sound{margin-top:26px;padding-top:22px;border-top:1px solid #d9dfd3}.soundrow{display:flex;align-items:center;justify-content:space-between;font-size:13px}#preview{min-height:44px;border:0;text-decoration:underline;text-underline-offset:4px;font-size:13px}input{width:100%;accent-color:#58765e;height:32px}.note{font-size:12px;line-height:1.6;color:#657267;margin:16px 0 0}#status{min-height:20px;font-size:13px;text-align:center;color:#536c56;margin:12px 0 0}.flash .dial{filter:drop-shadow(0 0 12px #a9bd8e)}@media(max-height:740px){main{padding-top:20px}h1{margin-top:23px}.dial{width:220px;height:220px;margin:18px auto}.cycle{margin-bottom:16px}.steps{margin-bottom:18px}.sound{margin-top:18px;padding-top:12px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.haptic-section{border-top:1px solid #d9dfd3;margin-top:24px;padding-top:18px}.haptic-section h2{font-family:Georgia,serif;font-weight:400;font-size:24px;margin:0 0 10px}.haptic-section button{width:100%;margin-top:14px}details{margin-top:18px}summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:14px}li{margin-bottom:12px}textarea{width:100%;min-height:260px;padding:12px;border:1px solid #bac6b8;border-radius:10px;background:#fffdf8;color:#243c35;font:13px/1.5 ui-monospace,monospace;resize:vertical}a{color:#2f5840}input[type=range]{min-height:44px}
+</style></head><body><main><header><div class="brand">Quiet Cycle</div><div class="tag">432 HZ</div></header><h1>A little space to pause.</h1><p class="intro">Three gentle chimes. Five minutes for you.</p><div class="dial"><svg viewBox="0 0 256 256" aria-hidden="true"><circle class="track" cx="128" cy="128" r="120"/><circle id="ring" class="progress" cx="128" cy="128" r="120"/></svg><div class="center"><div id="time" class="time">5:00</div><div class="caption">remaining</div></div></div><div id="cycle" class="cycle">25 cycles · 12 seconds each</div><div class="steps"><div class="step active"><strong>4s</strong><span>First chime</span></div><div class="step"><strong>2s</strong><span>Second chime</span></div><div class="step"><strong>6s</strong><span>Third chime</span></div></div><div class="controls"><button id="toggle">Start</button><button id="restart">Restart</button></div><p id="status" role="status">Ready when you are.</p><section class="sound" aria-label="Sound settings"><div class="soundrow"><label for="volume">Chime volume · <span id="level">40%</span></label><button id="preview">Test chimes</button></div><input id="volume" type="range" min="0" max="100" value="40"><p class="note">All three chimes are rooted in 432 Hz, with warm, bright, and rounded characters and longer, gentle decays. A single 10-second tone gently fades at the end of five minutes. The first cue includes a brief vibration on supported devices.</p><p class="note" id="support"></p><p class="note">No sound? Open this page directly in Safari, turn up media volume, and check whether audio is going to Bluetooth headphones. If needed, turn Silent Mode off, then tap Test chimes.</p><p class="note">GitHub edition · longer chimes</p><p class="note">Keep this page open. The timer pauses when you switch apps or lock your screen. In Safari, use Share → Add to Home Screen for easy access.</p></section><section class="haptic-section" aria-labelledby="haptic-heading">
+<h2 id="haptic-heading">Haptic shortcut test</h2>
+<p class="note">Experimental · one chime + one native vibration through Apple Shortcuts. This does not add automatic haptics to the timer.</p>
+<button id="haptic-test" type="button" data-audio-state="idle">Haptic shortcut test</button>
+<p class="note">Tapping this button directly plays only a chime. To request vibration, run the shortcut from Safari’s Share menu after setting it up below.</p>
+<details><summary>Set up the iPhone shortcut</summary>
+<ol class="note"><li>Open this page in Safari. Pause the timer, then tap <strong>Haptic shortcut test</strong> once to activate audio. Wait for the sound to finish.</li>
+<li>In Apple Shortcuts, create <strong>Quiet Cycle Haptic Test</strong>. In its details, enable <strong>Show in Share Sheet</strong> and accept <strong>Safari Web Pages</strong>.</li>
+<li>Add <strong>Run JavaScript on Web Page</strong>. Set its webpage input to <strong>Shortcut Input</strong>. Paste the code below into its script field.</li>
+<li>Add <strong>If</strong>: <strong>JavaScript Result</strong> <em>is</em> <strong>PLAYING</strong>. Inside that branch add <strong>Vibrate Device</strong>. Inside <strong>Otherwise</strong>, add <strong>Show Alert</strong> with <strong>JavaScript Result</strong>. End If.</li>
+<li>If Shortcuts asks, enable <strong>Allow Running Scripts</strong> in its Advanced settings and allow the shortcut to run on this page.</li>
+<li>Return to this page in Safari, then choose <strong>Share → Quiet Cycle Haptic Test</strong>.</li></ol>
+<p class="note">Expected: one warm chime followed closely by a vibration. The script confirms that audio playback started before returning PLAYING. It cannot verify that sound reached your speaker or that vibration occurred. Timing, vibration length, and Safari share-sheet behavior still need an on-device test. Keep your screen awake for this experiment.</p>
+<button id="copy-shortcut" type="button">Copy shortcut code</button>
+<p id="copy-status" class="note" role="status"></p>
+<label class="note" for="shortcut-code">JavaScript for the shortcut</label>
+<textarea id="shortcut-code" readonly spellcheck="false">// Paste into Shortcuts → Run JavaScript on Web Page.
+// Set that action&#x27;s input to Shortcut Input (a Safari Web Page).
+// Next: If JavaScript Result is PLAYING → Vibrate Device.
+// Otherwise: Show Alert with JavaScript Result.
+// This is a one-shot experiment, not an automatic five-minute haptic loop.
+(function () {
+  const button = document.getElementById(&#x27;haptic-test&#x27;);
+  if (!button) {
+    completion(&#x27;Open the GitHub version of Quiet Cycle in Safari first.&#x27;);
+    return;
+  }
+  if (button.disabled) {
+    completion(&#x27;Pause Quiet Cycle and wait for any test sound to finish.&#x27;);
+    return;
+  }
+  button.click();
+  const deadline = Date.now() + 850;
+  function check() {
+    const state = button.dataset.audioState;
+    if (state === &#x27;playing&#x27;) {
+      completion(&#x27;PLAYING&#x27;);
+    } else if (state === &#x27;failed&#x27;) {
+      completion(&#x27;Sound could not start. Tap Haptic shortcut test in Safari once, then retry from Share.&#x27;);
+    } else if (Date.now() &gt;= deadline) {
+      completion(&#x27;Audio did not confirm promptly. Tap Haptic shortcut test in Safari once, then retry from Share.&#x27;);
+    } else {
+      setTimeout(check, 25);
+    }
+  }
+  check();
+}());
+</textarea>
+<p class="note"><a href="haptic-shortcut-test.js" download>Download the shortcut JavaScript</a> · <a href="README.md">Deployment and setup guide</a></p>
+</details></section></main><script src="app.js"></script></body></html>
