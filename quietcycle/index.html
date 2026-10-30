@@ -2,10 +2,10 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f5f3ec"><meta name="apple-mobile-web-app-capable" content="yes"><title>Quiet Cycle · 432 Hz</title><style>
 :root{font-family: ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#243c35;background:#f5f3ec;font-synthesis:none}*{box-sizing:border-box}body{margin:0}main{max-width:460px;margin:auto;padding:32px 24px max(28px,env(safe-area-inset-bottom))}header{display:flex;justify-content:space-between;align-items:center}.brand{font-family:Georgia,serif;font-size:24px}.tag{font-size:11px;letter-spacing:1.5px;border:1px solid #c9d0c6;border-radius:20px;padding:8px 11px}h1{font-family:Georgia,serif;font-weight:400;text-align:center;font-size:36px;margin:35px 0 8px}.intro{text-align:center;color:#607168;font-size:15px;margin:0}.dial{width:256px;height:256px;position:relative;margin:28px auto 20px;display:grid;place-items:center}.dial svg{position:absolute;inset:0;transform:rotate(-90deg);width:100%;height:100%}.track{fill:none;stroke:#e0e4d9;stroke-width:3}.progress{fill:none;stroke:#5f7a63;stroke-width:3;stroke-linecap:round;stroke-dasharray:754;stroke-dashoffset:0}.center{text-align:center}.time{font-size:61px;letter-spacing:-3px;font-weight:300;font-variant-numeric:tabular-nums}.caption{text-transform:uppercase;font-size:10px;letter-spacing:2px;color:#67776b;margin-top:6px}.cycle{text-align:center;font-size:13px;color:#617267;margin-bottom:24px}.steps{display:flex;gap:8px;margin-bottom:24px}.step{flex:1;text-align:center;border:1px solid #d9dfd3;border-radius:12px;padding:13px 4px;transition:background .2s}.step.active{background:#e2e9dc;border-color:#9db096}.step strong{font-family:Georgia,serif;font-weight:400;font-size:25px}.step span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;margin-top:6px}.controls{display:flex;gap:10px}button{font:inherit;cursor:pointer;touch-action:manipulation;min-height:54px;border-radius:14px;border:1px solid #bac6b8;background:transparent;color:#243c35;font-size:16px}button:focus-visible,input:focus-visible{outline:3px solid #ad743b;outline-offset:4px}#toggle{flex:1.5;background:#2f4f40;color:#fff;border-color:#2f4f40}#restart{flex:1}button:disabled{opacity:.5;cursor:default}.sound{margin-top:26px;padding-top:22px;border-top:1px solid #d9dfd3}.soundrow{display:flex;align-items:center;justify-content:space-between;font-size:13px}#preview{min-height:44px;border:0;text-decoration:underline;text-underline-offset:4px;font-size:13px}input{width:100%;accent-color:#58765e;height:32px}.note{font-size:12px;line-height:1.6;color:#657267;margin:16px 0 0}#status{min-height:20px;font-size:13px;text-align:center;color:#536c56;margin:12px 0 0}.flash .dial{filter:drop-shadow(0 0 12px #a9bd8e)}@media(max-height:740px){main{padding-top:20px}h1{margin-top:23px}.dial{width:220px;height:220px;margin:18px auto}.cycle{margin-bottom:16px}.steps{margin-bottom:18px}.sound{margin-top:18px;padding-top:12px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 .haptic-section{border-top:1px solid #d9dfd3;margin-top:24px;padding-top:18px}.haptic-section h2{font-family:Georgia,serif;font-weight:400;font-size:24px;margin:0 0 10px}.haptic-section button{width:100%;margin-top:14px}details{margin-top:18px}summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:14px}li{margin-bottom:12px}textarea{width:100%;min-height:260px;padding:12px;border:1px solid #bac6b8;border-radius:10px;background:#fffdf8;color:#243c35;font:13px/1.5 ui-monospace,monospace;resize:vertical}a{color:#2f5840}input[type=range]{min-height:44px}
-</style></head><body><main><header><div class="brand">Quiet Cycle</div><div class="tag">432 HZ</div></header><h1>A little space to pause.</h1><p class="intro">Three gentle chimes. Five minutes for you.</p><div class="dial"><svg viewBox="0 0 256 256" aria-hidden="true"><circle class="track" cx="128" cy="128" r="120"/><circle id="ring" class="progress" cx="128" cy="128" r="120"/></svg><div class="center"><div id="time" class="time">5:00</div><div class="caption">remaining</div></div></div><div id="cycle" class="cycle">25 cycles · 12 seconds each</div><div class="steps"><div class="step active"><strong>4s</strong><span>First chime</span></div><div class="step"><strong>2s</strong><span>Second chime</span></div><div class="step"><strong>6s</strong><span>Third chime</span></div></div><div class="controls"><button id="toggle">Start</button><button id="restart">Restart</button></div><p id="status" role="status">Ready when you are.</p><section class="sound" aria-label="Sound settings"><div class="soundrow"><label for="volume">Chime volume · <span id="level">40%</span></label><button id="preview">Test chimes</button></div><input id="volume" type="range" min="0" max="100" value="40"><p class="note">All three chimes are rooted in 432 Hz, with warm, bright, and rounded characters and longer, gentle decays. A single 10-second tone gently fades at the end of five minutes. The first cue includes a brief vibration on supported devices.</p><p class="note" id="support"></p><p class="note">No sound? Open this page directly in Safari, turn up media volume, and check whether audio is going to Bluetooth headphones. If needed, turn Silent Mode off, then tap Test chimes.</p><p class="note">GitHub edition · longer chimes</p><p class="note">Keep this page open. The timer pauses when you switch apps or lock your screen. In Safari, use Share → Add to Home Screen for easy access.</p></section><section class="haptic-section" aria-labelledby="haptic-heading">
+</style></head><body><noscript><p style="padding:20px">Quiet Cycle needs JavaScript enabled to run its timer and sound.</p></noscript><main><header><div class="brand">Quiet Cycle</div><div class="tag">432 HZ</div></header><h1>A little space to pause.</h1><p class="intro">Three gentle chimes. Five minutes for you.</p><div class="dial"><svg viewBox="0 0 256 256" aria-hidden="true"><circle class="track" cx="128" cy="128" r="120"/><circle id="ring" class="progress" cx="128" cy="128" r="120"/></svg><div class="center"><div id="time" class="time">5:00</div><div class="caption">remaining</div></div></div><div id="cycle" class="cycle">25 cycles · 12 seconds each</div><div class="steps"><div class="step active"><strong>4s</strong><span>First chime</span></div><div class="step"><strong>2s</strong><span>Second chime</span></div><div class="step"><strong>6s</strong><span>Third chime</span></div></div><div class="controls"><button id="toggle" disabled>Start</button><button id="restart" disabled>Restart</button></div><p id="status" role="status">Loading timer… If this message stays here, reload the complete HTML file.</p><section class="sound" aria-label="Sound settings"><div class="soundrow"><label for="volume">Chime volume · <span id="level">40%</span></label><button id="preview" disabled>Test chimes</button></div><input id="volume" type="range" min="0" max="100" value="40"><p class="note">All three chimes are rooted in 432 Hz, with warm, bright, and rounded characters and longer, gentle decays. A single 10-second tone gently fades at the end of five minutes. The first cue includes a brief vibration on supported devices.</p><p class="note" id="support"></p><p class="note">No sound? Open this page directly in Safari, turn up media volume, and check whether audio is going to Bluetooth headphones. If needed, turn Silent Mode off, then tap Test chimes.</p><p class="note">GitHub edition · version 4 · self-contained</p><p class="note">Keep this page open. The timer pauses when you switch apps or lock your screen. In Safari, use Share → Add to Home Screen for easy access.</p></section><section class="haptic-section" aria-labelledby="haptic-heading">
 <h2 id="haptic-heading">Haptic shortcut test</h2>
 <p class="note">Experimental · one chime + one native vibration through Apple Shortcuts. This does not add automatic haptics to the timer.</p>
-<button id="haptic-test" type="button" data-audio-state="idle">Haptic shortcut test</button>
+<button id="haptic-test" disabled type="button" data-audio-state="idle">Haptic shortcut test</button>
 <p class="note">Tapping this button directly plays only a chime. To request vibration, run the shortcut from Safari’s Share menu after setting it up below.</p>
 <details><summary>Set up the iPhone shortcut</summary>
 <ol class="note"><li>Open this page in Safari. Pause the timer, then tap <strong>Haptic shortcut test</strong> once to activate audio. Wait for the sound to finish.</li>
@@ -50,5 +50,242 @@
   check();
 }());
 </textarea>
-<p class="note"><a href="haptic-shortcut-test.js" download>Download the shortcut JavaScript</a> · <a href="README.md">Deployment and setup guide</a></p>
-</details></section></main><script src="app.js"></script></body></html>
+<p class="note">The code above is included in this page. Use Copy shortcut code to copy it into Apple Shortcuts.</p>
+</details></section></main><script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  function reportError(message) {
+    const status = $('status');
+    if (status) status.textContent = message;
+  }
+  window.addEventListener('error', () => reportError('The timer encountered an error. Reload this page and try again.'));
+  window.addEventListener('unhandledrejection', () => reportError('An operation was interrupted. Try the button again.'));
+  try {
+    const required = ['toggle','restart','preview','volume','level','time','ring','cycle','status'];
+    if (required.some(id => !$(id))) throw new Error('Missing timer controls');
+    const RATE = 22050;
+    const SESSION = 300;
+    const END = 310;
+    const events = [];
+    for (let cycle = 0; cycle < 25; cycle++) {
+      [4, 6, 12].forEach((second, kind) => events.push({
+        time: cycle * 12 + second,
+        kind: cycle === 24 && kind === 2 ? 3 : kind
+      }));
+    }
+    const profiles = [
+      { weights: [1,.10,.025], attack: .025, decay: 2.8, duration: 1.65 },
+      { weights: [1,.46,.22], attack: .008, decay: 4, duration: 1.3 },
+      { weights: [1,.04,.34], attack: .045, decay: 2.4, duration: 1.9 },
+      { weights: [1], attack: .08, decay: .30, duration: 10 }
+    ];
+    let ctx, master, track, source, previewSource, wake;
+    let offset = 0, anchor = 0, running = false, busy = false, testing = false;
+    let completed = false, lastEvent = -1, flashTimer;
+    const hapticButton = $('haptic-test');
+    const vibrates = typeof navigator.vibrate === 'function';
+    if ($('support')) $('support').textContent = vibrates
+      ? 'This browser offers brief vibration on the first cue.'
+      : 'iPhone Safari does not provide timed web vibration. The separate Shortcuts test below is experimental.';
+
+    function toneInto(data, start, kind, rate) {
+      const p = profiles[kind];
+      for (let i = 0; i < Math.round(rate * p.duration); i++) {
+        const t = i / rate;
+        const tail = kind === 3 ? Math.pow(Math.max(0,1-t/10),.7) : Math.min(1,(p.duration-t)/.08);
+        const envelope = Math.min(1,t/p.attack) * Math.exp(-t*p.decay) * tail;
+        let sample = 0;
+        for (let h = 0; h < p.weights.length; h++) {
+          sample += p.weights[h] * Math.exp(-t*h*(kind===3?0:2)) * Math.sin(2*Math.PI*432*(h+1)*t);
+        }
+        const index = Math.round(start * rate) + i;
+        if (index < data.length) data[index] += sample * envelope * .3;
+      }
+    }
+    function elapsed() {
+      return running ? Math.min(END,offset+Math.max(0,ctx.currentTime-anchor)) : offset;
+    }
+    function render() {
+      const t = elapsed(), seconds = Math.max(0,Math.ceil(SESSION-t));
+      const phase = t % 12, index = phase < 4 ? 0 : phase < 6 ? 1 : 2;
+      $('time').textContent = Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
+      $('ring').style.strokeDashoffset = 754*Math.min(t,SESSION)/SESSION;
+      document.querySelectorAll('.step').forEach((el,i) => el.classList.toggle('active',!completed&&t<SESSION&&i===index));
+      $('cycle').textContent = completed ? '25 cycles complete'
+        : t >= SESSION ? 'Closing tone · '+Math.ceil(END-t)+'s remaining'
+        : running || offset > 0 ? 'Cycle '+Math.min(25,Math.floor(t/12)+1)+' of 25 · next chime in '+Math.ceil([4,6,12][index]-phase)+'s'
+        : '25 cycles · 12 seconds each';
+      $('toggle').textContent = running ? 'Pause' : completed ? 'Start again' : offset > 0 ? 'Resume' : 'Start';
+      $('toggle').disabled = busy;
+      $('restart').disabled = busy;
+      $('preview').disabled = running || busy || testing;
+      if (hapticButton) hapticButton.disabled = running || busy || testing;
+    }
+    function stopSources() {
+      if (source) { source.onended = null; try { source.stop(); } catch (_) {} source = null; }
+      if (previewSource) { previewSource.onended = null; try { previewSource.stop(); } catch (_) {} previewSource = null; }
+      testing = false;
+      if (hapticButton) hapticButton.dataset.audioState = 'idle';
+    }
+    function releaseWake() {
+      if (wake) { wake.release().catch(() => {}); wake = null; }
+    }
+    async function keepAwake() {
+      try {
+        if (navigator.wakeLock) {
+          const lock = await navigator.wakeLock.request('screen');
+          if (!running || document.hidden) await lock.release();
+          else wake = lock;
+        }
+      } catch (_) {}
+    }
+    function pause(message) {
+      if (!running) return;
+      offset = elapsed(); running = false;
+      stopSources(); releaseWake();
+      $('status').textContent = message || 'Paused. Take your time.';
+      render();
+    }
+    async function ensureAudio() {
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) throw new Error('Web Audio is unavailable');
+      if (!ctx || ctx.state === 'closed') {
+        ctx = new Audio(); master = ctx.createGain();
+        master.gain.value = Number($('volume').value)/100;
+        master.connect(ctx.destination);
+        ctx.onstatechange = () => {
+          if (running && ctx.state !== 'running') pause('Audio interrupted. Tap Resume to continue.');
+        };
+      }
+      // Resume during the button tap, before any asynchronous work.
+      const resume = ctx.resume();
+      const unlock = ctx.createBufferSource();
+      unlock.buffer = ctx.createBuffer(1,1,ctx.sampleRate);
+      unlock.connect(master); unlock.start();
+      let timeout;
+      try {
+        await Promise.race([resume,new Promise((_,reject) => {
+          timeout = setTimeout(() => reject(new Error('Audio start timed out')),5000);
+        })]);
+      } finally { clearTimeout(timeout); }
+      if (ctx.state !== 'running') throw new Error('Audio could not start');
+    }
+    function prepareTrack() {
+      if (!track) {
+        track = ctx.createBuffer(1,END*RATE,RATE);
+        const data = track.getChannelData(0);
+        events.forEach(event => toneInto(data,event.time,event.kind,RATE));
+      }
+    }
+    async function start(reset) {
+      if (busy) return;
+      busy = true; render();
+      try {
+        stopSources();
+        await ensureAudio(); prepareTrack();
+        if (document.hidden) throw new Error('Return to the timer');
+        if (reset || completed) { offset = 0; completed = false; lastEvent = -1; }
+        source = ctx.createBufferSource(); source.buffer = track; source.connect(master);
+        anchor = ctx.currentTime; source.start(0,offset); running = true;
+        $('status').textContent = offset >= SESSION ? 'Closing tone · slowly fading.' : 'Follow the gentle chimes.';
+        keepAwake();
+      } catch (_) {
+        running = false; stopSources();
+        $('status').textContent = 'Sound could not start. Open this page in Safari and tap Start again.';
+      } finally { busy = false; render(); }
+    }
+    async function playTest(hapticOnly) {
+      if (running || busy || testing) return;
+      stopSources(); testing = true;
+      if (hapticButton) hapticButton.dataset.audioState = 'starting';
+      render();
+      try {
+        await ensureAudio();
+        if (document.hidden || !testing) throw new Error('Test was interrupted');
+        const duration = hapticOnly ? 1.65 : 16.5;
+        const buffer = ctx.createBuffer(1,Math.ceil(RATE*duration),RATE);
+        const data = buffer.getChannelData(0);
+        if (hapticOnly) toneInto(data,0,0,RATE);
+        else [0,2,4,6.5].forEach((t,i) => toneInto(data,t,i,RATE));
+        const player = ctx.createBufferSource(); player.buffer = buffer; player.connect(master);
+        previewSource = player;
+        player.onended = () => {
+          if (previewSource !== player) return;
+          previewSource = null; testing = false;
+          if (hapticButton) hapticButton.dataset.audioState = 'idle';
+          render();
+        };
+        player.start();
+        if (hapticButton) hapticButton.dataset.audioState = 'playing';
+        $('status').textContent = hapticOnly
+          ? 'One chime playing. Vibration requires the Safari share-sheet shortcut.'
+          : 'Three longer chimes, followed by the 10-second closing tone.';
+      } catch (_) {
+        testing = false;
+        if (hapticButton) hapticButton.dataset.audioState = 'failed';
+        $('status').textContent = 'Sound could not start. Tap the test button directly in Safari first.';
+      } finally { render(); }
+    }
+    $('toggle').onclick = () => running ? pause() : start(false);
+    $('restart').onclick = () => {
+      if (busy) return;
+      if (running) pause();
+      return start(true);
+    };
+    $('volume').oninput = () => {
+      const v = Number($('volume').value);
+      $('level').textContent = v+'%';
+      if (master) master.gain.setTargetAtTime(v/100,ctx.currentTime,.03);
+    };
+    $('preview').onclick = () => playTest(false);
+    if (hapticButton) hapticButton.onclick = () => playTest(true);
+    if ($('copy-shortcut') && $('shortcut-code') && $('copy-status')) {
+      $('copy-shortcut').onclick = async () => {
+        try {
+          await navigator.clipboard.writeText($('shortcut-code').value);
+          $('copy-status').textContent = 'Copied. Paste into the shortcut’s JavaScript action.';
+        } catch (_) {
+          $('shortcut-code').focus(); $('shortcut-code').select();
+          $('copy-status').textContent = 'Select and copy the code shown below.';
+        }
+      };
+    }
+    document.addEventListener('visibilitychange',() => {
+      if (!document.hidden) return;
+      if (running) pause('Paused while away. Tap Resume to continue.');
+      else { stopSources(); render(); }
+    });
+    setInterval(() => {
+      if (running) {
+        const t = elapsed();
+        let latest = lastEvent;
+        while (latest+1 < events.length && events[latest+1].time <= t) latest++;
+        if (latest !== lastEvent) {
+          lastEvent = latest;
+          if (t-events[latest].time < .3) {
+            // A haptic failure must never interrupt the timer or its controls.
+            if (events[latest].kind === 0 && vibrates) { try { navigator.vibrate(20); } catch (_) {} }
+            document.body.classList.add('flash'); clearTimeout(flashTimer);
+            flashTimer = setTimeout(() => document.body.classList.remove('flash'),180);
+          }
+        }
+        if (t >= SESSION && t < END) $('status').textContent = 'Closing tone · slowly fading.';
+        if (t >= END) {
+          offset = END; running = false; completed = true;
+          stopSources(); releaseWake();
+          $('status').textContent = 'Session complete. A moment well spent.';
+        }
+      }
+      render();
+    },50);
+    document.documentElement.dataset.quietCycleReady = '4';
+    $('status').textContent = 'Ready when you are.';
+    render();
+  } catch (error) {
+    console.error('Quiet Cycle initialization failed',error);
+    reportError('The timer could not initialize. Replace this page with the complete Quiet Cycle HTML file and reload.');
+  }
+}());
+</script></body></html>
