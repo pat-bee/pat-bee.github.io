@@ -1,1 +1,497 @@
-<h1>Hello World</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DAILY LOG // 1966</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F4F1EA;
+      --ink: #1A1A1A;
+      --muted: #7A766E;
+      --grid-line: #1A1A1A;
+      --paper-card: #EFECE4;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Oxygen Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.03em;
+    }
+
+    .app {
+      max-width: 540px;
+      height: 100dvh;
+      margin: 0 auto;
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* TOP HEADER BAR */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding: 8px 0;
+    }
+
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button.nav-btn {
+      background: transparent;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      width: 28px;
+      height: 26px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+
+    button.nav-btn:active {
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    button.nav-btn:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
+
+    .date-display {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .date-main {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .date-sub {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--ink);
+      background: #2D5A43;
+      transition: background 0.2s;
+    }
+
+    .sync-dot.syncing {
+      background: #FF6A6A;
+    }
+
+    .sync-dot.error {
+      background: #6E473B;
+    }
+
+    /* 2x4 BEHAVIOR MATRIX */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 8px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .tile {
+      position: relative;
+      border: 1px solid var(--ink);
+      background: var(--paper-card);
+      color: var(--ink);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.06s ease, background-color 0.12s ease;
+    }
+
+    .tile:active {
+      transform: scale(0.985);
+    }
+
+    .tile-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .swatch-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid var(--ink);
+    }
+
+    .state-badge {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
+    .tile-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* STATE 1: ON */
+    .tile[data-state="1"] {
+      background-color: var(--tile-color);
+      color: var(--tile-text);
+      border-width: 1.5px;
+    }
+
+    .tile[data-state="1"] .swatch-dot {
+      background-color: var(--tile-text) !important;
+      border-color: var(--tile-text);
+    }
+
+    /* STATE 2: EXTRA-ON (ABOVE & BEYOND) */
+    .tile[data-state="2"] {
+      background-color: var(--tile-color);
+      color: var(--tile-text);
+      border: 2.5px solid var(--ink);
+      box-shadow: inset 0 0 0 2px var(--bg), inset 0 0 0 3.5px var(--ink);
+    }
+
+    .tile[data-state="2"] .swatch-dot {
+      background-color: var(--tile-text) !important;
+      border-color: var(--tile-text);
+    }
+
+    /* 30-DAY PUNCH-CARD MATRIX */
+    footer {
+      border-top: 1px solid var(--ink);
+      padding-top: 8px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(30, 1fr);
+      gap: 2px;
+      height: 54px;
+    }
+
+    .day-col {
+      display: grid;
+      grid-template-rows: repeat(8, 1fr);
+      gap: 1.5px;
+      cursor: pointer;
+      padding: 1px 0;
+    }
+
+    .day-col.selected {
+      outline: 1px solid var(--ink);
+      outline-offset: 1px;
+    }
+
+    .pip {
+      width: 100%;
+      height: 100%;
+      background: rgba(26, 26, 26, 0.08);
+    }
+
+    .pip.s2 {
+      outline: 1px solid var(--ink);
+      outline-offset: -1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="date-nav">
+        <button class="nav-btn" id="prevDay" title="Previous Day"><</button>
+        <div class="date-display" id="resetToday" title="Jump to Today">
+          <span class="date-main" id="dateLabel">2026-11-26</span>
+          <span class="date-sub" id="dayRelative">TODAY</span>
+        </div>
+        <button class="nav-btn" id="nextDay" title="Next Day">></button>
+      </div>
+      <div class="status-pill">
+        <span id="syncText">READY</span>
+        <span class="sync-dot" id="syncDot"></span>
+      </div>
+    </header>
+
+    <main class="grid" id="tileGrid"></main>
+
+    <footer>
+      <div class="history-header">
+        <span>30-DAY INDEX</span>
+        <span id="legendText">TAP TILE: OFF → ON → EXTRA</span>
+      </div>
+      <div class="matrix" id="historyMatrix"></div>
+    </footer>
+  </div>
+
+  <script>
+    const CONFIG = {
+      SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby0Agcx6NL2AUJRC4JmZmibllMZcfTWh9bFfvxBBgRkZ2zw5BOx4kG5VblymtfS9WYzHw/exec',
+      TOKEN: '1978'
+    };
+
+    const BEHAVIORS = [
+      { key: 'Meditate',   color: '#8AB8D0', text: '#1A1A1A' },
+      { key: 'Yoga',       color: '#E07A6B', text: '#1A1A1A' },
+      { key: 'Walk',       color: '#2E6B9E', text: '#F4F1EA' },
+      { key: 'Run',        color: '#FF6A6A', text: '#1A1A1A' },
+      { key: 'Resistance', color: '#1B365D', text: '#F4F1EA' },
+      { key: 'Teeth',      color: '#EAB8C2', text: '#1A1A1A' },
+      { key: 'Green',      color: '#2D5A43', text: '#F4F1EA' },
+      { key: 'Demerit',    color: '#6E473B', text: '#F4F1EA' }
+    ];
+
+    const STATE_LABELS = ['OFF', 'ON', 'EXTRA ++'];
+
+    function getLocalDateStr(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const yr = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const da = String(d.getDate()).padStart(2, '0');
+      return `${yr}-${mo}-${da}`;
+    }
+
+    let todayStr = getLocalDateStr(0);
+    let selectedDate = todayStr;
+    let store = JSON.parse(localStorage.getItem('behavior_log_cache') || '{}');
+
+    function ensureDate(dateStr) {
+      if (!store[dateStr]) {
+        store[dateStr] = {};
+        BEHAVIORS.forEach(b => store[dateStr][b.key] = 0);
+      }
+      return store[dateStr];
+    }
+
+    function saveCache() {
+      localStorage.setItem('behavior_log_cache', JSON.stringify(store));
+    }
+
+    function setSyncStatus(state, label) {
+      const dot = document.getElementById('syncDot');
+      const txt = document.getElementById('syncText');
+      dot.className = 'sync-dot' + (state ? ` ${state}` : '');
+      txt.textContent = label;
+    }
+
+    function renderHeader() {
+      todayStr = getLocalDateStr(0);
+      document.getElementById('dateLabel').textContent = selectedDate;
+      document.getElementById('nextDay').disabled = (selectedDate >= todayStr);
+
+      const d1 = new Date(selectedDate + 'T00:00:00');
+      const d2 = new Date(todayStr + 'T00:00:00');
+      const diff = Math.round((d2 - d1) / 86400000);
+      const weekday = d1.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+
+      let rel = `${weekday} // ${diff}D AGO`;
+      if (diff === 0) rel = `${weekday} // TODAY`;
+      if (diff === 1) rel = `${weekday} // YESTERDAY`;
+      document.getElementById('dayRelative').textContent = rel;
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('tileGrid');
+      const dayData = ensureDate(selectedDate);
+      grid.innerHTML = '';
+
+      BEHAVIORS.forEach(b => {
+        const val = Number(dayData[b.key]) || 0;
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.dataset.state = val;
+        tile.style.setProperty('--tile-color', b.color);
+        tile.style.setProperty('--tile-text', b.text);
+
+        tile.innerHTML = `
+          <div class="tile-top">
+            <span class="swatch-dot" style="background:${b.color}"></span>
+            <span class="state-badge">${STATE_LABELS[val]}</span>
+          </div>
+          <div class="tile-label">${b.key}</div>
+        `;
+
+        tile.addEventListener('click', () => handleTap(b.key));
+        grid.appendChild(tile);
+      });
+    }
+
+    function renderMatrix() {
+      const matrix = document.getElementById('historyMatrix');
+      matrix.innerHTML = '';
+
+      for (let i = 29; i >= 0; i--) {
+        const dStr = getLocalDateStr(-i);
+        const dayData = store[dStr] || {};
+        const col = document.createElement('div');
+        col.className = 'day-col' + (dStr === selectedDate ? ' selected' : '');
+        col.title = dStr;
+
+        BEHAVIORS.forEach(b => {
+          const val = Number(dayData[b.key]) || 0;
+          const pip = document.createElement('div');
+          pip.className = 'pip' + (val === 2 ? ' s2' : '');
+          if (val > 0) {
+            pip.style.backgroundColor = b.color;
+          }
+          col.appendChild(pip);
+        });
+
+        col.addEventListener('click', () => {
+          selectedDate = dStr;
+          renderAll();
+        });
+
+        matrix.appendChild(col);
+      }
+    }
+
+    function renderAll() {
+      renderHeader();
+      renderGrid();
+      renderMatrix();
+    }
+
+    async function handleTap(behaviorKey) {
+      const dayData = ensureDate(selectedDate);
+      const nextVal = ((Number(dayData[behaviorKey]) || 0) + 1) % 3;
+      dayData[behaviorKey] = nextVal;
+      saveCache();
+      renderAll();
+
+      if (!CONFIG.SCRIPT_URL.startsWith('http')) return;
+
+      setSyncStatus('syncing', 'SAVING');
+      try {
+        const res = await fetch(CONFIG.SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            token: CONFIG.TOKEN,
+            date: selectedDate,
+            behavior: behaviorKey,
+            value: nextVal
+          })
+        });
+        const data = await res.json();
+        if (data.status === 'saved') {
+          setSyncStatus('', 'SYNCED');
+        } else {
+          setSyncStatus('error', 'ERR');
+        }
+      } catch (err) {
+        setSyncStatus('error', 'OFFLINE');
+      }
+    }
+
+    async function fetchRemoteData() {
+      if (!CONFIG.SCRIPT_URL.startsWith('http')) return;
+      setSyncStatus('syncing', 'SYNC');
+      try {
+        const url = `${CONFIG.SCRIPT_URL}?token=${encodeURIComponent(CONFIG.TOKEN)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.rows) {
+          store = { ...store, ...data.rows };
+          saveCache();
+          renderAll();
+          setSyncStatus('', 'SYNCED');
+        }
+      } catch (err) {
+        setSyncStatus('error', 'LOCAL');
+      }
+    }
+
+    // Date navigation listeners
+    document.getElementById('prevDay').addEventListener('click', () => {
+      const d = new Date(selectedDate + 'T00:00:00');
+      d.setDate(d.getDate() - 1);
+      selectedDate = d.toISOString().slice(0, 10);
+      renderAll();
+    });
+
+    document.getElementById('nextDay').addEventListener('click', () => {
+      if (selectedDate >= getLocalDateStr(0)) return;
+      const d = new Date(selectedDate + 'T00:00:00');
+      d.setDate(d.getDate() + 1);
+      selectedDate = d.toISOString().slice(0, 10);
+      renderAll();
+    });
+
+    document.getElementById('resetToday').addEventListener('click', () => {
+      selectedDate = getLocalDateStr(0);
+      renderAll();
+    });
+
+    // Always snap back to Today when returning to the tab/home screen icon
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        selectedDate = getLocalDateStr(0);
+        renderAll();
+        fetchRemoteData();
+      }
+    });
+
+    // Boot
+    selectedDate = getLocalDateStr(0);
+    renderAll();
+    fetchRemoteData();
+  </script>
+</body>
+</html>
