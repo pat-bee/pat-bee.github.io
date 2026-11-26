@@ -16,12 +16,11 @@
       --paper-card: #EFECE4;
     }
 
-
     * {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
 
     html, body {
       margin: 0;
@@ -257,12 +256,12 @@
   <div class="app">
     <header>
       <div class="date-nav">
-        <button class="nav-btn" id="prevDay" title="Previous Day"><</button>
+        <button class="nav-btn" id="prevDay" title="Previous Day">&lt;</button>
         <div class="date-display" id="resetToday" title="Jump to Today">
           <span class="date-main" id="dateLabel">2026-11-26</span>
           <span class="date-sub" id="dayRelative">TODAY</span>
         </div>
-        <button class="nav-btn" id="nextDay" title="Next Day">></button>
+        <button class="nav-btn" id="nextDay" title="Next Day">&gt;</button>
       </div>
       <div class="status-pill">
         <span id="syncText">READY</span>
@@ -283,9 +282,8 @@
 
   <script>
     const CONFIG = {
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyDykFjIHV-amPCeMFcQpVJLhdnjbIPGNQl_roHvt0KXaQfhecy6AlLP3lzxJhJg5EORw/exec',
-};
-    
+      SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyDykFjIHV-amPCeMFcQpVJLhdnjbIPGNQl_roHvt0KXaQfhecy6AlLP3lzxJhJg5EORw/exec'
+    };
 
     const BEHAVIORS = [
       { key: 'Meditate',   color: '#8AB8D0', text: '#1A1A1A' },
@@ -300,13 +298,24 @@
 
     const STATE_LABELS = ['OFF', 'ON', 'EXTRA ++'];
 
-    function getLocalDateStr(offsetDays = 0) {
-      const d = new Date();
-      d.setDate(d.getDate() + offsetDays);
+    function formatLocalDate(d) {
       const yr = d.getFullYear();
       const mo = String(d.getMonth() + 1).padStart(2, '0');
       const da = String(d.getDate()).padStart(2, '0');
       return `${yr}-${mo}-${da}`;
+    }
+
+    function getLocalDateStr(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return formatLocalDate(d);
+    }
+
+    function shiftDateStr(dateStr, deltaDays) {
+      const [yr, mo, da] = dateStr.split('-').map(Number);
+      const d = new Date(yr, mo - 1, da);
+      d.setDate(d.getDate() + deltaDays);
+      return formatLocalDate(d);
     }
 
     let todayStr = getLocalDateStr(0);
@@ -337,8 +346,10 @@
       document.getElementById('dateLabel').textContent = selectedDate;
       document.getElementById('nextDay').disabled = (selectedDate >= todayStr);
 
-      const d1 = new Date(selectedDate + 'T00:00:00');
-      const d2 = new Date(todayStr + 'T00:00:00');
+      const [y1, m1, d1n] = selectedDate.split('-').map(Number);
+      const [y2, m2, d2n] = todayStr.split('-').map(Number);
+      const d1 = new Date(y1, m1 - 1, d1n);
+      const d2 = new Date(y2, m2 - 1, d2n);
       const diff = Math.round((d2 - d1) / 86400000);
       const weekday = d1.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
 
@@ -424,7 +435,6 @@
         const res = await fetch(CONFIG.SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify({
-            token: CONFIG.TOKEN,
             date: selectedDate,
             behavior: behaviorKey,
             value: nextVal
@@ -445,33 +455,29 @@
       if (!CONFIG.SCRIPT_URL.startsWith('http')) return;
       setSyncStatus('syncing', 'SYNC');
       try {
-        const url = `${CONFIG.SCRIPT_URL}?token=${encodeURIComponent(CONFIG.TOKEN)}`;
-        const res = await fetch(url);
+        const res = await fetch(CONFIG.SCRIPT_URL);
         const data = await res.json();
         if (data.rows) {
           store = { ...store, ...data.rows };
           saveCache();
           renderAll();
           setSyncStatus('', 'SYNCED');
+        } else {
+          setSyncStatus('error', 'ERR');
         }
       } catch (err) {
         setSyncStatus('error', 'LOCAL');
       }
     }
 
-    // Date navigation listeners
     document.getElementById('prevDay').addEventListener('click', () => {
-      const d = new Date(selectedDate + 'T00:00:00');
-      d.setDate(d.getDate() - 1);
-      selectedDate = d.toISOString().slice(0, 10);
+      selectedDate = shiftDateStr(selectedDate, -1);
       renderAll();
     });
 
     document.getElementById('nextDay').addEventListener('click', () => {
       if (selectedDate >= getLocalDateStr(0)) return;
-      const d = new Date(selectedDate + 'T00:00:00');
-      d.setDate(d.getDate() + 1);
-      selectedDate = d.toISOString().slice(0, 10);
+      selectedDate = shiftDateStr(selectedDate, 1);
       renderAll();
     });
 
@@ -480,7 +486,6 @@
       renderAll();
     });
 
-    // Always snap back to Today when returning to the tab/home screen icon
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         selectedDate = getLocalDateStr(0);
@@ -489,7 +494,6 @@
       }
     });
 
-    // Boot
     selectedDate = getLocalDateStr(0);
     renderAll();
     fetchRemoteData();
